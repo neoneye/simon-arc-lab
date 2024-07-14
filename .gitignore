@@ -1,0 +1,6 @@
+venv/
+__pycache__/
+
+data_rle.jsonl
+data_image.jsonl
+data_task.jsonl
