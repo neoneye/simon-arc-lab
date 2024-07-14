@@ -46,7 +46,7 @@ def generate_rle_string(seed, min_image_size=1, max_image_size=100):
     :return: A tuple of a randomly generated RLE string and the corresponding image
     """
 
-    image = image_create_random_advanced(seed, min_image_size, max_image_size, min_image_size, max_image_size)
+    image = image_create_random_advanced(seed, min_image_size, max_image_size, 2, 5)
 
     rle_string = serialize(image)
     
@@ -165,7 +165,7 @@ def generate_deserialize_dataset_item(seed):
         'all_neighbors_matching_center',
         'pixels_with_k_matching_neighbors',
     ]
-    instruction_weights = [10, 10, 200, 10, 10, 10, 10, 10, 10, 200, 10, 10]
+    instruction_weights = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
     instruction_id = random.Random(seed + 1001).choices(instruction_ids, weights=instruction_weights, k=1)[0]
 
     names_pixels = [
@@ -409,7 +409,7 @@ def generate_deserialize_dataset_item(seed):
     }
     return dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=400300):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=400350):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
