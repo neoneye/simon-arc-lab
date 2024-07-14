@@ -133,11 +133,10 @@ def generate_serialize_dataset_item(seed):
     input = None
     if input_format == 'pixels':
         input = ''.join(map(str, pixels))
+    elif input_format == 'json':
+        input = json.dumps(list(pixels), separators=(',', ':'))
     else:
-        if input_format == 'json':
-            input = json.dumps(list(pixels), separators=(',', ':'))
-        else:
-            input = str(len(pixels))
+        input = str(len(pixels))
 
     dict = {
         'instruction': instruction,
@@ -294,31 +293,25 @@ def generate_deserialize_dataset_item(seed):
     output = None
     if output_format == 'pixels':
         output = ''.join(map(str, pixels))
+    elif output_format == 'json':
+        output = json.dumps(list(pixels), separators=(',', ':'))
+    elif output_format == 'length':
+        output = str(len(pixels))
+    elif output_format == 'histogram':
+        image = image_create(1, len(pixels), 255)
+        image[0:len(pixels), 0] = pixels
+        output = pretty_histogram_of_image(image)
+    elif output_format == 'reverse':
+        pixels.reverse()
+        output = rle_serialize_line_inner(pixels)
+    elif output_format == 'compress':
+        pixels = list_compress(pixels)
+        output = rle_serialize_line_inner(pixels)
+    elif output_format == 'scaleup':
+        pixels = list_scaleup(pixels, scaleup_factor)
+        output = rle_serialize_line_inner(pixels)
     else:
-        if output_format == 'json':
-            output = json.dumps(list(pixels), separators=(',', ':'))
-        else:
-            if output_format == 'length':
-                output = str(len(pixels))
-            else:
-                if output_format == 'histogram':
-                    image = image_create(1, len(pixels), 255)
-                    image[0:len(pixels), 0] = pixels
-                    output = pretty_histogram_of_image(image)
-                else:
-                    if output_format == 'reverse':
-                        pixels.reverse()
-                        output = rle_serialize_line_inner(pixels)
-                    else:
-                        if output_format == 'compress':
-                            pixels = list_compress(pixels)
-                            output = rle_serialize_line_inner(pixels)
-                        else:
-                            if output_format == 'scaleup':
-                                pixels = list_scaleup(pixels, scaleup_factor)
-                                output = rle_serialize_line_inner(pixels)
-                            else:
-                                raise Exception("Unreachable code reached")
+        raise Exception("Unreachable code reached")
 
     dict = {
         'instruction': instruction,
