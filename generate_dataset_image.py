@@ -347,60 +347,49 @@ def generate_deserialize_dataset_item(seed):
     if instruction_id == 'pixels':
         rows = [''.join(map(str, row)) for row in image]
         output = ','.join(rows)
+    elif instruction_id == 'json':
+        image_list = image.tolist()
+        output = json.dumps(image_list, separators=(',', ':'))
+    elif instruction_id == 'histogram':
+        output = pretty_histogram_of_image(image)
+    elif instruction_id == 'flipx':
+        flipped_image = image[:, ::-1]
+        output_rle_string = serialize(flipped_image)
+        output = output_rle_string
+    elif instruction_id == 'flipy':
+        flipped_image = image[::-1, :]
+        output_rle_string = serialize(flipped_image)
+        output = output_rle_string
+    elif instruction_id == 'transpose':
+        transposed_image = image.transpose()
+        output_rle_string = serialize(transposed_image)
+        output = output_rle_string
+    elif instruction_id == 'rotate_cw':
+        new_image = image_rotate_cw(image)
+        output_rle_string = serialize(new_image)
+        output = output_rle_string
+    elif instruction_id == 'rotate_ccw':
+        new_image = image_rotate_ccw(image)
+        output_rle_string = serialize(new_image)
+        output = output_rle_string
+    elif instruction_id == 'rotate_180':
+        new_image = image_rotate_180(image)
+        output_rle_string = serialize(new_image)
+        output = output_rle_string
+    elif instruction_id == 'count_neighbors_with_same_color':
+        new_image = count_neighbors_with_same_color_nowrap(image)
+        output_rle_string = serialize(new_image)
+        output = output_rle_string
+    elif instruction_id == 'all_neighbors_matching_center':
+        new_image = all_neighbors_matching_center_nowrap(image)
+        output_rle_string = serialize(new_image)
+        output = output_rle_string
+    elif instruction_id == 'pixels_with_k_matching_neighbors':
+        new_image = pixels_with_k_matching_neighbors_nowrap(image, pixels_with_k_matching_neighbors_k_parameter)
+        output_rle_string = serialize(new_image)
+        output = output_rle_string
     else:
-        if instruction_id == 'json':
-            image_list = image.tolist()
-            output = json.dumps(image_list, separators=(',', ':'))
-        else:
-            if instruction_id == 'histogram':
-                output = pretty_histogram_of_image(image)
-            else:
-                if instruction_id == 'flipx':
-                    flipped_image = image[:, ::-1]
-                    output_rle_string = serialize(flipped_image)
-                    output = output_rle_string
-                else:
-                    if instruction_id == 'flipy':
-                        flipped_image = image[::-1, :]
-                        output_rle_string = serialize(flipped_image)
-                        output = output_rle_string
-                    else:
-                        if instruction_id == 'transpose':
-                            transposed_image = image.transpose()
-                            output_rle_string = serialize(transposed_image)
-                            output = output_rle_string
-                        else:
-                            if instruction_id == 'rotate_cw':
-                                new_image = image_rotate_cw(image)
-                                output_rle_string = serialize(new_image)
-                                output = output_rle_string
-                            else:
-                                if instruction_id == 'rotate_ccw':
-                                    new_image = image_rotate_ccw(image)
-                                    output_rle_string = serialize(new_image)
-                                    output = output_rle_string
-                                else:
-                                    if instruction_id == 'rotate_180':
-                                        new_image = image_rotate_180(image)
-                                        output_rle_string = serialize(new_image)
-                                        output = output_rle_string
-                                    else:
-                                        if instruction_id == 'count_neighbors_with_same_color':
-                                            new_image = count_neighbors_with_same_color_nowrap(image)
-                                            output_rle_string = serialize(new_image)
-                                            output = output_rle_string
-                                        else:
-                                            if instruction_id == 'all_neighbors_matching_center':
-                                                new_image = all_neighbors_matching_center_nowrap(image)
-                                                output_rle_string = serialize(new_image)
-                                                output = output_rle_string
-                                            else:
-                                                if instruction_id == 'pixels_with_k_matching_neighbors':
-                                                    new_image = pixels_with_k_matching_neighbors_nowrap(image, pixels_with_k_matching_neighbors_k_parameter)
-                                                    output_rle_string = serialize(new_image)
-                                                    output = output_rle_string
-                                                else:
-                                                    raise Exception("Unreachable code reached")
+        raise Exception("Unreachable code reached")
 
     dict = {
         'instruction': instruction,
