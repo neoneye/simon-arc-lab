@@ -109,6 +109,24 @@ class Histogram:
         """
         return set(self.color_count.keys()) & set(other.color_count.keys())
 
+    def color_intersection_list(self, other: 'Histogram') -> List[int]:
+        """
+        Sorted list of colors that are in both histograms.
+        """
+        color_set = self.color_intersection_set(other)
+        colors = list(color_set)
+        colors.sort()
+        return colors
+
+    def color_intersection_pretty(self, other: 'Histogram') -> str:
+        """
+        Comma separated list of unique colors in the histogram.
+        """
+        colors = self.color_intersection_list(other)
+        if len(colors) == 0:
+            return 'empty'
+        return ','.join([str(color) for color in colors])
+
     def min(self, other: 'Histogram') -> 'Histogram':
         """
         Find the minimum count of each color in both histograms.
@@ -152,7 +170,7 @@ class Histogram:
         colors = self.unique_colors()
         if len(colors) == 0:
             return 'empty'
-        return ','.join([str(color) for color in self.unique_colors()])
+        return ','.join([str(color) for color in colors])
 
     def purge_mutable(self):
         """

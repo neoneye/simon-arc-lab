@@ -224,5 +224,26 @@ class TestHistogram(unittest.TestCase):
         expected = '2,5,9'
         self.assertEqual(actual, expected)
 
+    def test_color_intersection_pretty0(self):
+        histogram0 = Histogram.empty()
+        histogram1 = Histogram.empty()
+        actual = histogram0.color_intersection_pretty(histogram1)
+        expected = 'empty'
+        self.assertEqual(actual, expected)
+
+    def test_color_intersection_pretty1(self):
+        histogram0 = Histogram({0: 8, 1: 2, 9: 1})
+        histogram1 = Histogram.empty()
+        actual = histogram0.color_intersection_pretty(histogram1)
+        expected = 'empty'
+        self.assertEqual(actual, expected)
+
+    def test_color_intersection_pretty2(self):
+        histogram0 = Histogram({0: 8, 1: 2, 9: 1})
+        histogram1 = Histogram({0: 2, 1: 8, 8: 2})
+        actual = histogram0.color_intersection_pretty(histogram1)
+        expected = '0,1'
+        self.assertEqual(actual, expected)
+
 if __name__ == '__main__':
     unittest.main()

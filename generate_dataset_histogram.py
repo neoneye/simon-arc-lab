@@ -80,8 +80,9 @@ def generate_two_histogram_dataset_item(seed):
         'min',
         'number_of_unique_colors',
         'unique_colors',
+        'intersection',
     ]
-    transformation_weights = [20, 20, 20, 20, 20, 20]
+    transformation_weights = [20, 20, 20, 20, 20, 20, 20]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
     name_format = random.Random(seed + 1005).choice(name_formats)
@@ -140,6 +141,15 @@ def generate_two_histogram_dataset_item(seed):
         f'{name_format}, unique colors',
     ]
 
+    instructions_intersection = [
+        f'{name_format}, color intersection',
+        f'intersection of colors in {name_format}',
+        f'Intersection of colors in {name_format}',
+        f'what are the shared colors between {name_format}',
+        f'{name_format}, intersecting color list',
+        f'{name_format}, intersecting colors',
+    ]
+
     instructions = None
     if transformation_id == 'add':
         instructions = instructions_add
@@ -153,6 +163,8 @@ def generate_two_histogram_dataset_item(seed):
         instructions = instructions_number_of_unique_colors
     elif transformation_id == 'unique_colors':
         instructions = instructions_unique_colors
+    elif transformation_id == 'intersection':
+        instructions = instructions_intersection
     else:
         raise Exception("Unreachable code reached")
 
@@ -178,6 +190,8 @@ def generate_two_histogram_dataset_item(seed):
     elif transformation_id == 'unique_colors':
         histogram = histogram0.add(histogram1)
         output = histogram.unique_colors_pretty()
+    elif transformation_id == 'intersection':
+        output = histogram0.color_intersection_pretty(histogram1)
     else:
         raise Exception("Unreachable code reached")
 
