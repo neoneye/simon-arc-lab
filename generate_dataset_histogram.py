@@ -78,8 +78,10 @@ def generate_two_histogram_dataset_item(seed):
         'subtract',
         'max',
         'min',
+        'number_of_unique_colors',
+        'unique_colors',
     ]
-    transformation_weights = [20, 20, 20, 20]
+    transformation_weights = [20, 20, 20, 20, 20, 20]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
     name_format = random.Random(seed + 1005).choice(name_formats)
@@ -122,6 +124,22 @@ def generate_two_histogram_dataset_item(seed):
         f'Maximum of {name_format}',
     ]
 
+    instructions_number_of_unique_colors = [
+        f'{name_format}, number of unique colors',
+        f'number of unique colors in {name_format}',
+        f'how many unique colors are there in {name_format}',
+        f'{name_format}, unique color count',
+    ]
+
+    instructions_unique_colors = [
+        f'{name_format}, unique colors',
+        f'unique colors in {name_format}',
+        f'unique colors of {name_format}',
+        f'what are the unique colors in {name_format}',
+        f'{name_format}, unique color list',
+        f'{name_format}, unique colors',
+    ]
+
     instructions = None
     if transformation_id == 'add':
         instructions = instructions_add
@@ -131,6 +149,10 @@ def generate_two_histogram_dataset_item(seed):
         instructions = instructions_min
     elif transformation_id == 'max':
         instructions = instructions_max
+    elif transformation_id == 'number_of_unique_colors':
+        instructions = instructions_number_of_unique_colors
+    elif transformation_id == 'unique_colors':
+        instructions = instructions_unique_colors
     else:
         raise Exception("Unreachable code reached")
 
@@ -150,6 +172,12 @@ def generate_two_histogram_dataset_item(seed):
         output = histogram0.max(histogram1).pretty()
     elif transformation_id == 'min':
         output = histogram0.min(histogram1).pretty()
+    elif transformation_id == 'number_of_unique_colors':
+        histogram = histogram0.add(histogram1)
+        output = str(histogram.number_of_unique_colors())
+    elif transformation_id == 'unique_colors':
+        histogram = histogram0.add(histogram1)
+        output = histogram.unique_colors_pretty()
     else:
         raise Exception("Unreachable code reached")
 
