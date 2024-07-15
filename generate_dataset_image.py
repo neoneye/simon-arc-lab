@@ -5,7 +5,6 @@
 # IDEA: is there a pixel above, below, left, right, that is the same as the center pixel. All the pixels in the 3x3 area.
 # wraparound, wrapx, wrapy, nowrap
 #
-# IDEA: number of identical neighboring pixels in the 3x3 area. Max 8 pixels can be the same as the center.
 # IDEA: number of identical neighboring pixels in the 3x3 area in diagonal corners. Max 4 pixels can be the same as the center.
 # IDEA: number of identical neighboring pixels in the 3x3 area in adjacent to center. Max 4 pixels can be the same as the center.
 # wraparound, wrapx, wrapy, nowrap
@@ -20,10 +19,6 @@
 # IDEA: transformation "rotate" the image
 #
 # IDEA: transformation "flip" the image
-#
-# IDEA: transformation "compress x" the image
-# IDEA: transformation "compress y" the image
-# IDEA: transformation "compress both" the image
 #
 # IDEA: auto detect what image format it is, and convert it to RLE format.
 #
