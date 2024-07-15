@@ -78,5 +78,33 @@ class TestHistogram(unittest.TestCase):
         expected = '0:8,1:8,8:2,9:1'
         self.assertTrue(actual, expected)
 
+    def test_color_intersection_set0(self):
+        histogram0 = Histogram({0: 8, 1: 2, 9: 1})
+        histogram1 = Histogram({0: 2, 1: 8, 8: 2})
+        actual = histogram0.color_intersection_set(histogram1)
+        expected = set([0, 1])
+        self.assertEqual(actual, expected)
+
+    def test_color_intersection_set1(self):
+        histogram0 = Histogram({1: 8, 2: 2})
+        histogram1 = Histogram({3: 2, 4: 8})
+        actual = histogram0.color_intersection_set(histogram1)
+        expected = set([])
+        self.assertEqual(actual, expected)
+
+    def test_color_intersection_set2(self):
+        histogram0 = Histogram.empty()
+        histogram1 = Histogram.empty()
+        actual = histogram0.color_intersection_set(histogram1)
+        expected = set()
+        self.assertEqual(actual, expected)
+
+    def test_min(self):
+        histogram0 = Histogram({0: 8, 1: 2, 9: 1})
+        histogram1 = Histogram({0: 2, 1: 8, 8: 2})
+        actual = histogram0.add(histogram1).pretty()
+        expected = '0:2,1:2'
+        self.assertTrue(actual, expected)
+
 if __name__ == '__main__':
     unittest.main()

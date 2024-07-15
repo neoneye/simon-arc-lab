@@ -11,6 +11,10 @@ class Histogram:
         return Histogram(self.color_count.copy())
     
     @classmethod
+    def empty(cls) -> 'Histogram':
+        return cls({})
+
+    @classmethod
     def create_with_image(cls, image) -> 'Histogram':
         hist = {}
         for y in range(image.shape[0]):
@@ -44,10 +48,40 @@ class Histogram:
         return result
 
     def max(self, other: 'Histogram') -> 'Histogram':
+        """
+        Find the maximum count of each color in both histograms.
+        if a color is not in both histograms, then it get included in the result.
+
+        :param other: the other histogram to compare with
+        :return: a new histogram with the maximum counters
+        """
         result = self.clone()
         for color, count in other.color_count.items():
             if color in result.color_count:
                 result.color_count[color] = max(result.color_count[color], count)
             else:
                 result.color_count[color] = count
+        return result
+
+    def color_intersection_set(self, other: 'Histogram') -> set:
+        """
+        find the set of colors that are in both histograms
+        """
+        return set(self.color_count.keys()) & set(other.color_count.keys())
+
+    def min(self, other: 'Histogram') -> 'Histogram':
+        """
+        Find the minimum count of each color in both histograms.
+        if a color is not in both histograms, then it doesn't get included in the result.
+
+        :param other: the other histogram to compare with
+        :return: a new histogram with the minimum counters
+        """
+        colors = self.color_intersection_set(other)
+        result = Histogram.empty()
+        for color in colors:
+            if color in self.color_count and color in other.color_count:
+                result.color_count[color] = min(self.color_count[color], other.color_count[color])
+            else:
+                raise Exception("Unreachable code reached")
         return result
