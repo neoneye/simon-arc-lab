@@ -223,3 +223,39 @@ def all_neighbors_matching_center_nowrap(image):
              all surrounding pixels have the same color as the corresponding center pixel, otherwise 0.
     """
     return pixels_with_k_matching_neighbors_nowrap(image, 8)    
+
+def compress_x(image):
+    """
+    Eliminate adjacent duplicate columns
+    """
+    if image.shape[1] == 0:
+        return image
+    # Initialize a list with the first column
+    compressed = [image[:, 0]]
+    # Iterate over the array columns starting from the second column
+    for col in range(1, image.shape[1]):
+        # Compare with the last column in the compressed list
+        if not np.array_equal(image[:, col], compressed[-1]):
+            compressed.append(image[:, col])
+    return np.array(compressed).T
+
+def compress_y(image):
+    """
+    Eliminate adjacent duplicate rows
+    """
+    if len(image) == 0:
+        return image
+    # Initialize a list with the first row
+    compressed = [image[0]]
+    # Iterate over the array starting from the second row
+    for row in image[1:]:
+        # Compare with the last row in the compressed list
+        if not np.array_equal(row, compressed[-1]):
+            compressed.append(row)
+    return np.array(compressed)
+
+def compress_xy(image):
+    """
+    Eliminate adjacent duplicate rows+columns
+    """
+    return compress_y(compress_x(image))
