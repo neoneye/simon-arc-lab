@@ -419,7 +419,7 @@ dataset = generate_dataset(
 )
 
 # Save dataset to file
-filename = 'data_image.jsonl'
+filename = 'dataset_image.jsonl'
 with open(filename, 'w') as f:
     for item in dataset:
         f.write(json.dumps(item) + '\n')

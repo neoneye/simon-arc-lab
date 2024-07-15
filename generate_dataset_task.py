@@ -337,7 +337,7 @@ dataset = generate_dataset(
 )
 
 # Save dataset to file
-filename = 'data_task.jsonl'
+filename = 'dataset_task.jsonl'
 with open(filename, 'w') as f:
     for item in dataset:
         f.write(json.dumps(item) + '\n')

@@ -1,6 +1,6 @@
 venv/
 __pycache__/
 
-data_rle.jsonl
-data_image.jsonl
-data_task.jsonl
+dataset_rle.jsonl
+dataset_image.jsonl
+dataset_task.jsonl

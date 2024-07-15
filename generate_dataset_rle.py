@@ -341,7 +341,7 @@ dataset = generate_dataset(
 )
 
 # Save dataset to file
-filename = 'data_rle.jsonl'
+filename = 'dataset_rle.jsonl'
 with open(filename, 'w') as f:
     for item in dataset:
         f.write(json.dumps(item) + '\n')
