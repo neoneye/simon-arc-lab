@@ -14,6 +14,7 @@ import random
 from simon_arc_lab.rle.serialize import serialize
 from simon_arc_lab.image_util import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
+from simon_arc_lab.histogram import *
 
 class MyTask:
     def __init__(self):
@@ -182,7 +183,8 @@ def generate_dataset_item(seed):
         count = task.count()
         image_index = random.Random(seed + 1).randint(0, count-1)
         image_id = task.input_ids()[image_index]
-        output = pretty_histogram_of_image(task.input_images[image_index])
+        histogram = Histogram.create_with_image(task.input_images[image_index])
+        output = histogram.pretty()
         instructions = [
             f"This is {dataformat_name} data. Histogram of {image_id}",
             f"This is {dataformat_name} data. Histogram of '{image_id}'",
@@ -203,7 +205,8 @@ def generate_dataset_item(seed):
         if image is None:
             output = "None"
         else:
-            output = pretty_histogram_of_image(image)
+            histogram = Histogram.create_with_image(image)
+            output = histogram.pretty()
         instructions = [
             f"This is {dataformat_name} data. Histogram of {image_id}",
             f"This is {dataformat_name} data. Histogram of '{image_id}'",

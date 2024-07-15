@@ -5,7 +5,8 @@
 import json
 import os
 import random
-from simon_arc_lab.image_util import pretty_histogram_of_image, image_create
+from simon_arc_lab.image_util import image_create
+from simon_arc_lab.histogram import *
 from simon_arc_lab.rle.deserialize import decode_rle_row_inner
 from simon_arc_lab.rle.serialize import rle_serialize_line_inner
 from simon_arc_lab.list_util import list_compress, list_scaleup
@@ -300,7 +301,8 @@ def generate_deserialize_dataset_item(seed):
     elif output_format == 'histogram':
         image = image_create(1, len(pixels), 255)
         image[0:len(pixels), 0] = pixels
-        output = pretty_histogram_of_image(image)
+        histogram = Histogram.create_with_image(image)
+        output = histogram.pretty()
     elif output_format == 'reverse':
         pixels.reverse()
         output = rle_serialize_line_inner(pixels)

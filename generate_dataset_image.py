@@ -34,6 +34,7 @@ import random
 import numpy as np
 from simon_arc_lab.rle.serialize import serialize
 from simon_arc_lab.image_util import *
+from simon_arc_lab.histogram import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 
 def generate_rle_string(seed, min_image_size=1, max_image_size=100):
@@ -351,7 +352,8 @@ def generate_deserialize_dataset_item(seed):
         image_list = image.tolist()
         output = json.dumps(image_list, separators=(',', ':'))
     elif instruction_id == 'histogram':
-        output = pretty_histogram_of_image(image)
+        histogram = Histogram.create_with_image(image)
+        output = histogram.pretty()
     elif instruction_id == 'flipx':
         flipped_image = image[:, ::-1]
         output_rle_string = serialize(flipped_image)
