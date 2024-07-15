@@ -47,7 +47,7 @@ def generate_rle_string(seed, min_image_size=1, max_image_size=100):
     :return: A tuple of a randomly generated RLE string and the corresponding image
     """
 
-    image = image_create_random_advanced(seed, 2, 5, min_image_size, max_image_size)
+    image = image_create_random_advanced(seed, min_image_size, max_image_size, min_image_size, max_image_size)
 
     rle_string = serialize(image)
     
@@ -60,7 +60,7 @@ def generate_serialize_dataset_item(seed):
     :param seed: The seed for the random number generator
     :return: A dictionary with the instruction, input, and output
     """
-    min_image_size = 10
+    min_image_size = 20
     max_image_size = 30
 
     input_formats = [
@@ -149,8 +149,8 @@ def generate_deserialize_dataset_item(seed):
     :param seed: The seed for the random number generator
     :return: A dictionary with the instruction, input, and output
     """
-    min_image_size = 20
-    max_image_size = 30
+    min_image_size = 1
+    max_image_size = 10
 
     instruction_ids = [
         'pixels', 
@@ -165,8 +165,11 @@ def generate_deserialize_dataset_item(seed):
         'count_neighbors_with_same_color',
         'all_neighbors_matching_center',
         'pixels_with_k_matching_neighbors',
+        'compress_x',
+        'compress_y',
+        'compress_xy',
     ]
-    instruction_weights = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 100]
+    instruction_weights = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 200, 200, 200]
     instruction_id = random.Random(seed + 1001).choices(instruction_ids, weights=instruction_weights, k=1)[0]
 
     names_pixels = [
@@ -314,6 +317,46 @@ def generate_deserialize_dataset_item(seed):
         f'{name_input}, identify pixels where exactly {pixels_with_k_matching_neighbors_k_parameter} neighbors have the same color as the center pixel',
     ]
 
+    instructions_compress_x = [
+        f'CompressX {name_input}',
+        f'Compress X {name_input}',
+        f'compress x {name_input}',
+        f'Compress-X {name_input}',
+        f'{name_input} Compress-X',
+        f'{name_input} compress x',
+        f'{name_input} remove duplicate adjacent columns',
+        f'remove duplicate adjacent columns from {name_input}',
+    ]
+
+    instructions_compress_y = [
+        f'CompressY {name_input}',
+        f'Compress Y {name_input}',
+        f'compress y {name_input}',
+        f'Compress-Y {name_input}',
+        f'{name_input} Compress-Y',
+        f'{name_input} compress y',
+        f'{name_input} remove duplicate adjacent rows',
+        f'remove duplicate adjacent rows from {name_input}',
+    ]
+
+    instructions_compress_xy = [
+        f'CompressXY {name_input}',
+        f'compressxy {name_input}',
+        f'Compress-XY {name_input}',
+        f'Compress XY {name_input}',
+        f'compress xy {name_input}',
+        f'compress x and compress y {name_input}',
+        f'compress x and y {name_input}',
+        f'Compress X and Y {name_input}',
+        f'{name_input} Compress-XY',
+        f'{name_input} compress xy',
+        f'{name_input} compressxy',
+        f'{name_input} remove duplicate adjacent rows and columns',
+        f'{name_input} remove duplicate adjacent columns and rows',
+        f'remove duplicate adjacent rows and columns from {name_input}',
+        f'remove duplicate adjacent columns and rows from {name_input}',
+    ]
+
     instructions = instructions_input_output
     if instruction_id == 'histogram':
         instructions = instructions_histogram
@@ -335,6 +378,12 @@ def generate_deserialize_dataset_item(seed):
         instructions = instructions_all_neighbors_matching_center
     if instruction_id == 'pixels_with_k_matching_neighbors':
         instructions = instructions_pixels_with_k_matching_neighbors
+    if instruction_id == 'compress_x':
+        instructions = instructions_compress_x
+    if instruction_id == 'compress_y':
+        instructions = instructions_compress_y
+    if instruction_id == 'compress_xy':
+        instructions = instructions_compress_xy
 
     instruction = random.Random(seed + 1005).choice(instructions)
 
@@ -390,6 +439,18 @@ def generate_deserialize_dataset_item(seed):
         new_image = pixels_with_k_matching_neighbors_nowrap(image, pixels_with_k_matching_neighbors_k_parameter)
         output_rle_string = serialize(new_image)
         output = output_rle_string
+    elif instruction_id == 'compress_x':
+        new_image = compress_x(image)
+        output_rle_string = serialize(new_image)
+        output = output_rle_string
+    elif instruction_id == 'compress_y':
+        new_image = compress_y(image)
+        output_rle_string = serialize(new_image)
+        output = output_rle_string
+    elif instruction_id == 'compress_xy':
+        new_image = compress_xy(image)
+        output_rle_string = serialize(new_image)
+        output = output_rle_string
     else:
         raise Exception("Unreachable code reached")
 
@@ -400,11 +461,11 @@ def generate_deserialize_dataset_item(seed):
     }
     return dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=400400):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=400501):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
-        if i % 30 == 0:
+        if i % 40 == 0:
             item = generate_serialize_dataset_item(seed_start + i)
         else:
             item = generate_deserialize_dataset_item(seed_start + i)
