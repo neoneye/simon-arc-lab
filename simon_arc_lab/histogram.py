@@ -3,7 +3,7 @@ from typing import Dict, List, Tuple
 class Histogram:
     def __init__(self, color_count: Dict[int, int]):
         self.color_count = color_count
-        self.purge_zeros_mutable()
+        self.purge_mutable()
 
     def clone(self) -> 'Histogram':
         """
@@ -37,7 +37,7 @@ class Histogram:
 
     def pretty(self) -> str:
         histogram = self.clone()
-        histogram.purge_zeros_mutable()
+        histogram.purge_mutable()
         color_count_list = histogram.sorted_color_count_list()
         if len(color_count_list) == 0:
             return 'empty'
@@ -50,7 +50,7 @@ class Histogram:
                 result.color_count[color] += count
             else:
                 result.color_count[color] = count
-        result.purge_zeros_mutable()
+        result.purge_mutable()
         return result
 
     def subtract_and_discard(self, other: 'Histogram') -> 'Histogram':
@@ -58,7 +58,7 @@ class Histogram:
         for color, count in other.color_count.items():
             if color in result.color_count:
                 result.color_count[color] = max(0, result.color_count[color] - count)
-        result.purge_zeros_mutable()
+        result.purge_mutable()
         return result
 
     def max(self, other: 'Histogram') -> 'Histogram':
@@ -75,7 +75,7 @@ class Histogram:
                 result.color_count[color] = max(result.color_count[color], count)
             else:
                 result.color_count[color] = count
-        result.purge_zeros_mutable()
+        result.purge_mutable()
         return result
 
     def color_intersection_set(self, other: 'Histogram') -> set:
@@ -99,15 +99,17 @@ class Histogram:
                 result.color_count[color] = min(self.color_count[color], other.color_count[color])
             else:
                 raise Exception("Unreachable code reached")
-        result.purge_zeros_mutable()
+        result.purge_mutable()
         return result
 
-    def purge_zeros_mutable(self):
+    def purge_mutable(self):
         """
-        Remove colors with zero count from the histogram
+        Remove colors where the count is less than 1.
+        It doesn't make sense having zero counters in the histogram.
+        It doesn't make sense having negative counters in the histogram.
         """
         for color in list(self.color_count.keys()):
-            if self.color_count[color] == 0:
+            if self.color_count[color] < 1:
                 del self.color_count[color]
     
     

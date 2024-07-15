@@ -4,8 +4,8 @@ from .image_util import *
 from .histogram import *
 
 class TestHistogram(unittest.TestCase):
-    def test_init_with_zero_purge_zeros(self):
-        histogram = Histogram({8: 0, 7: 7, 5: 5})
+    def test_init_with_purge(self):
+        histogram = Histogram({8: 0, 9: -1, 7: 7, 5: 5})
         actual = histogram.pretty()
         expected = '7:7,5:5'
         self.assertEqual(actual, expected)
