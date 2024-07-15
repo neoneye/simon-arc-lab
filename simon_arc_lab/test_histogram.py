@@ -71,5 +71,12 @@ class TestHistogram(unittest.TestCase):
         expected = '0:10,1:10,8:2,9:1'
         self.assertTrue(actual, expected)
 
+    def test_max(self):
+        histogram0 = Histogram({0: 8, 1: 2, 9: 1})
+        histogram1 = Histogram({0: 2, 1: 8, 8: 2})
+        actual = histogram0.add(histogram1).pretty()
+        expected = '0:8,1:8,8:2,9:1'
+        self.assertTrue(actual, expected)
+
 if __name__ == '__main__':
     unittest.main()

@@ -42,3 +42,12 @@ class Histogram:
             else:
                 result.color_count[color] = count
         return result
+
+    def max(self, other: 'Histogram') -> 'Histogram':
+        result = self.clone()
+        for color, count in other.color_count.items():
+            if color in result.color_count:
+                result.color_count[color] = max(result.color_count[color], count)
+            else:
+                result.color_count[color] = count
+        return result
