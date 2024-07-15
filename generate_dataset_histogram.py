@@ -202,7 +202,7 @@ def generate_two_histogram_dataset_item(seed):
     }
     return dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=200000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=100000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
@@ -218,7 +218,7 @@ def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=2
     return dataset
 
 dataset = generate_dataset(
-    max_num_samples=100,
+    max_num_samples=100000,
     max_byte_size=1024*1024*20,
 )
 
