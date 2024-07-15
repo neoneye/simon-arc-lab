@@ -189,5 +189,35 @@ class TestHistogram(unittest.TestCase):
         actual = Histogram(dict).number_of_unique_colors()
         self.assertEqual(actual, 10)
 
+    def test_unique_colors0(self):
+        actual = Histogram.empty().unique_colors()
+        expected = []
+        self.assertEqual(actual, expected)
+
+    def test_unique_colors1(self):
+        actual = Histogram({5:1,2:8}).unique_colors()
+        expected = [2, 5]
+        self.assertEqual(actual, expected)
+
+    def test_unique_colors_pretty0(self):
+        actual = Histogram.empty().unique_colors_pretty()
+        expected = 'empty'
+        self.assertEqual(actual, expected)
+
+    def test_unique_colors_pretty1(self):
+        actual = Histogram({9:10}).unique_colors_pretty()
+        expected = '9'
+        self.assertEqual(actual, expected)
+
+    def test_unique_colors_pretty2(self):
+        actual = Histogram({5:1,2:8}).unique_colors_pretty()
+        expected = '2,5'
+        self.assertEqual(actual, expected)
+
+    def test_unique_colors_pretty3(self):
+        actual = Histogram({9:1,2:8,5:5}).unique_colors_pretty()
+        expected = '2,5,9'
+        self.assertEqual(actual, expected)
+
 if __name__ == '__main__':
     unittest.main()

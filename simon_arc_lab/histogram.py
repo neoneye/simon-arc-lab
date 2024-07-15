@@ -127,13 +127,32 @@ class Histogram:
         result.purge_mutable()
         return result
     
-    def number_of_unique_colors(self):
+    def number_of_unique_colors(self) -> int:
         """
         Number of unique colors in the histogram.
         """
         histogram = self.clone()
         histogram.purge_mutable()
         return len(histogram.color_count)
+
+    def unique_colors(self) -> List[int]:
+        """
+        Sorted list of unique colors in the histogram.
+        """
+        histogram = self.clone()
+        histogram.purge_mutable()
+        colors = list(histogram.color_count.keys())
+        colors.sort()
+        return colors
+
+    def unique_colors_pretty(self) -> str:
+        """
+        Comma separated list of unique colors in the histogram.
+        """
+        colors = self.unique_colors()
+        if len(colors) == 0:
+            return 'empty'
+        return ','.join([str(color) for color in self.unique_colors()])
 
     def purge_mutable(self):
         """

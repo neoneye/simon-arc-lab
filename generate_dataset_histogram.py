@@ -20,8 +20,9 @@ name_formats = [
 def generate_one_histogram_dataset_item(seed):
     transformation_ids = [
         'number_of_unique_colors',
+        'unique_colors',
     ]
-    transformation_weights = [20]
+    transformation_weights = [20, 20]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
     name_format = random.Random(seed + 1005).choice(name_formats)
@@ -33,9 +34,20 @@ def generate_one_histogram_dataset_item(seed):
         f'{name_format}, unique color count',
     ]
 
+    instructions_unique_colors = [
+        f'{name_format}, unique colors',
+        f'unique colors in {name_format}',
+        f'unique colors of {name_format}',
+        f'what are the unique colors in {name_format}',
+        f'{name_format}, unique color list',
+        f'{name_format}, unique colors',
+    ]
+
     instructions = None
     if transformation_id == 'number_of_unique_colors':
         instructions = instructions_number_of_unique_colors
+    elif transformation_id == 'unique_colors':
+        instructions = instructions_unique_colors
     else:
         raise Exception("Unreachable code reached")
 
@@ -48,6 +60,8 @@ def generate_one_histogram_dataset_item(seed):
     output = None
     if transformation_id == 'number_of_unique_colors':
         output = str(histogram.number_of_unique_colors())
+    elif transformation_id == 'unique_colors':
+        output = histogram.unique_colors_pretty()
     else:
         raise Exception("Unreachable code reached")
 
