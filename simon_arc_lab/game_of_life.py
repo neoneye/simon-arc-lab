@@ -1,3 +1,7 @@
+# Variants of cellular automata
+# IDEA: high life
+# IDEA: serviettes life (persian rug)
+# IDEA: wire world
 import numpy as np
 
 def game_of_life_wrap(grid):

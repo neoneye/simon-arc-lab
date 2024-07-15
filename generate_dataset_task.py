@@ -3,6 +3,8 @@
 # IDEA: rotate cw output D
 # IDEA: flipx input E
 # IDEA: compare input E and output E
+# IDEA: intersection of input/output histograms for pair N
+# IDEA: union of input/output histograms for pair N
 # IDEA: intersection of all input histograms
 # IDEA: union of all input histograms
 # IDEA: intersection of all output histograms

@@ -1,3 +1,5 @@
+# IDEA: What are the most popular colors in the histogram?
+# IDEA: What are the least popular colors in the histogram?
 import json
 import os
 import random
