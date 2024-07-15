@@ -30,6 +30,27 @@ class TestHistogram(unittest.TestCase):
         expected = '2:8,5:1'
         self.assertEqual(actual, expected)
 
+    def test_create_random0(self):
+        actual = Histogram.create_random(0, 1, 1, 55, 55).pretty()
+        expected = '7:55'
+        self.assertEqual(actual, expected)
+
+    def test_create_random1(self):
+        actual = Histogram.create_random(1, 2, 2, 55, 55).pretty()
+        expected = '6:55,8:55'
+        self.assertEqual(actual, expected)
+
+    def test_create_random2(self):
+        actual = Histogram.create_random(1, 3, 3, 55, 55).pretty()
+        expected = '6:55,8:55,9:55'
+        self.assertEqual(actual, expected)
+
+    def test_create_random3(self):
+        for _ in range(100):
+            histogram = Histogram.create_random(1, 1, 9, 20, 55)
+            self.assertTrue(histogram.number_of_unique_colors() >= 1)
+            self.assertTrue(histogram.number_of_unique_colors() <= 10)
+
     def test_sorted_color_count_list_unambiguous(self):
         image = np.zeros((3, 2), dtype=np.uint8)
         image[0:3, 0:2] = [
@@ -152,6 +173,21 @@ class TestHistogram(unittest.TestCase):
         actual = histogram0.min(histogram1).pretty()
         expected = '0:2,1:2'
         self.assertEqual(actual, expected)
+
+    def test_number_of_unique_colors0(self):
+        actual = Histogram.empty().number_of_unique_colors()
+        self.assertEqual(actual, 0)
+
+    def test_number_of_unique_colors1(self):
+        actual = Histogram({9:1}).number_of_unique_colors()
+        self.assertEqual(actual, 1)
+
+    def test_number_of_unique_colors2(self):
+        dict = {}
+        for i in range(10):
+            dict[i] = 1
+        actual = Histogram(dict).number_of_unique_colors()
+        self.assertEqual(actual, 10)
 
 if __name__ == '__main__':
     unittest.main()

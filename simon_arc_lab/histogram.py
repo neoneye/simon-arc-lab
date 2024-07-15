@@ -1,4 +1,5 @@
 from typing import Dict, List, Tuple
+import random
 
 class Histogram:
     def __init__(self, color_count: Dict[int, int]):
@@ -25,6 +26,30 @@ class Histogram:
                     hist[color] += 1
                 else:
                     hist[color] = 1
+        return cls(hist)
+
+    @classmethod
+    def create_random(cls, seed: int, min_colors: int, max_colors: int, min_count: int, max_count: int) -> 'Histogram':
+        if min_colors > max_colors:
+            raise Exception("min_colors must be less than or equal to max_colors")
+        if min_count > max_count:
+            raise Exception("min_count must be less than or equal to max_count")
+        if min_colors < 0:
+            raise Exception("min_colors must be greater than or equal to 0")
+        if max_colors > 9:
+            raise Exception("max_colors must be less than or equal to 9")
+        if min_count < 1:
+            raise Exception("min_count must be greater than or equal to 1")
+        if max_count > 10000:
+            raise Exception("max_count must be less than or equal to 10000")
+        
+        colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        random.Random(seed).shuffle(colors)
+        hist = {}
+        number_of_colors = random.Random(seed + 1).randint(min_colors, max_colors)
+        for color_index in range(number_of_colors):
+            count = random.Random(seed + 2).randint(min_count, max_count)
+            hist[colors[color_index]] = count
         return cls(hist)
 
     def sorted_color_count_list(self) -> List[Tuple[int, int]]:
@@ -101,6 +126,14 @@ class Histogram:
                 raise Exception("Unreachable code reached")
         result.purge_mutable()
         return result
+    
+    def number_of_unique_colors(self):
+        """
+        Number of unique colors in the histogram.
+        """
+        histogram = self.clone()
+        histogram.purge_mutable()
+        return len(histogram.color_count)
 
     def purge_mutable(self):
         """
