@@ -46,6 +46,11 @@ class TestHistogram(unittest.TestCase):
         self.assertEqual(actual, expected)
 
     def test_create_random3(self):
+        actual = Histogram.create_random(1, 9, 9, 20, 30).pretty()
+        expected = '4:29,7:29,9:29,0:27,1:27,5:25,3:23,6:23,8:23'
+        self.assertEqual(actual, expected)
+
+    def test_create_random4(self):
         for _ in range(100):
             histogram = Histogram.create_random(1, 1, 9, 20, 55)
             self.assertTrue(histogram.number_of_unique_colors() >= 1)

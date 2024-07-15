@@ -48,7 +48,7 @@ class Histogram:
         hist = {}
         number_of_colors = random.Random(seed + 1).randint(min_colors, max_colors)
         for color_index in range(number_of_colors):
-            count = random.Random(seed + 2).randint(min_count, max_count)
+            count = random.Random(seed + color_index + 2).randint(min_count, max_count)
             hist[colors[color_index]] = count
         return cls(hist)
 
