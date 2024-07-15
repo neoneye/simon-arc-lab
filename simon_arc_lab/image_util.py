@@ -8,27 +8,6 @@ def image_create(width, height, color):
             image[y, x] = color
     return image
 
-def histogram_of_image(image):
-    hist = {}
-    for y in range(image.shape[0]):
-        for x in range(image.shape[1]):
-            color = image[y, x]
-            if color in hist:
-                hist[color] += 1
-            else:
-                hist[color] = 1
-    return hist
-
-def sorted_histogram_of_image(image):
-    hist = histogram_of_image(image)
-    # sort by popularity, if there is a tie, sort by color
-    items = sorted(hist.items(), key=lambda item: (-item[1], item[0]))
-    return items
-
-def pretty_histogram_of_image(image):
-    hist = sorted_histogram_of_image(image)
-    return ','.join([f'{color}:{count}' for color, count in hist])
-
 def image_create_random_with_two_colors(width, height, color1, color2, ratio, seed):
     image = image_create(width, height, color1)
 
