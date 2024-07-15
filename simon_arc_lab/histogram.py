@@ -3,6 +3,7 @@ from typing import Dict, List, Tuple
 class Histogram:
     def __init__(self, color_count: Dict[int, int]):
         self.color_count = color_count
+        self.purge_zeros_mutable()
 
     def clone(self) -> 'Histogram':
         """
@@ -45,6 +46,7 @@ class Histogram:
                 result.color_count[color] += count
             else:
                 result.color_count[color] = count
+        result.purge_zeros_mutable()
         return result
 
     def max(self, other: 'Histogram') -> 'Histogram':
@@ -61,6 +63,7 @@ class Histogram:
                 result.color_count[color] = max(result.color_count[color], count)
             else:
                 result.color_count[color] = count
+        result.purge_zeros_mutable()
         return result
 
     def color_intersection_set(self, other: 'Histogram') -> set:
@@ -84,4 +87,15 @@ class Histogram:
                 result.color_count[color] = min(self.color_count[color], other.color_count[color])
             else:
                 raise Exception("Unreachable code reached")
+        result.purge_zeros_mutable()
         return result
+
+    def purge_zeros_mutable(self):
+        """
+        Remove colors with zero count from the histogram
+        """
+        for color in list(self.color_count.keys()):
+            if self.color_count[color] == 0:
+                del self.color_count[color]
+    
+    

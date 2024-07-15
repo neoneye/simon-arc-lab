@@ -4,6 +4,12 @@ from .image_util import *
 from .histogram import *
 
 class TestHistogram(unittest.TestCase):
+    def test_init_with_zero_purge_zeros(self):
+        histogram = Histogram({8: 0, 7: 7, 5: 5})
+        actual = histogram.pretty()
+        expected = '5:5,7:7'
+        self.assertTrue(actual, expected)
+
     def test_sorted_color_count_list_unambiguous(self):
         image = np.zeros((3, 2), dtype=np.uint8)
         image[0:3, 0:2] = [
