@@ -20,7 +20,7 @@ class TestHistogram(unittest.TestCase):
         histogram = Histogram.create_with_image(image)
         actual = histogram.sorted_color_count_list()
         expected = [(9, 3), (6, 2), (5, 1)]
-        self.assertTrue(actual, expected)
+        self.assertEqual(actual, expected)
 
     def test_sorted_histogram_of_image_tie(self):
         image = np.zeros((3, 2), dtype=np.uint8)
@@ -32,7 +32,7 @@ class TestHistogram(unittest.TestCase):
         histogram = Histogram.create_with_image(image)
         actual = histogram.sorted_color_count_list()
         expected = [(5, 2), (7, 2), (9, 2)]
-        self.assertTrue(actual, expected)
+        self.assertEqual(actual, expected)
 
     def test_pretty_histogram_of_image_unambiguous(self):
         image = np.zeros((3, 2), dtype=np.uint8)
@@ -44,7 +44,7 @@ class TestHistogram(unittest.TestCase):
         histogram = Histogram.create_with_image(image)
         actual = histogram.pretty()
         expected = '9:3,6:2,5:1'
-        self.assertTrue(actual, expected)
+        self.assertEqual(actual, expected)
 
     def test_pretty_histogram_of_image_tie(self):
         image = np.zeros((3, 2), dtype=np.uint8)
@@ -56,7 +56,7 @@ class TestHistogram(unittest.TestCase):
         histogram = Histogram.create_with_image(image)
         actual = histogram.pretty()
         expected = '5:2,7:2,9:2'
-        self.assertTrue(actual, expected)
+        self.assertEqual(actual, expected)
 
     def test_pretty_histogram_of_image_tie2(self):
         image = np.zeros((3, 4), dtype=np.uint8)
@@ -68,14 +68,35 @@ class TestHistogram(unittest.TestCase):
         histogram = Histogram.create_with_image(image)
         actual = histogram.pretty()
         expected = '5:4,7:4,9:4'
-        self.assertTrue(actual, expected)
+        self.assertEqual(actual, expected)
 
     def test_add(self):
         histogram0 = Histogram({0: 8, 1: 2, 9: 1})
         histogram1 = Histogram({0: 2, 1: 8, 8: 2})
         actual = histogram0.add(histogram1).pretty()
         expected = '0:10,1:10,8:2,9:1'
-        self.assertTrue(actual, expected)
+        self.assertEqual(actual, expected)
+
+    def test_subtract_and_discard0(self):
+        histogram0 = Histogram({0: 8, 1: 2, 9: 1})
+        histogram1 = Histogram({0: 2, 1: 8, 8: 2})
+        actual = histogram0.subtract_and_discard(histogram1).pretty()
+        expected = '0:6,9:1'
+        self.assertEqual(actual, expected)
+
+    def test_subtract_and_discard1(self):
+        histogram0 = Histogram({0: 8, 1: 2, 9: 1})
+        histogram1 = Histogram.empty()
+        actual = histogram0.subtract_and_discard(histogram1).pretty()
+        expected = '0:8,1:2,9:1'
+        self.assertEqual(actual, expected)
+
+    def test_subtract_and_discard2(self):
+        histogram0 = Histogram.empty()
+        histogram1 = Histogram({0: 8, 1: 2, 9: 1})
+        actual = histogram0.subtract_and_discard(histogram1).pretty()
+        expected = ''
+        self.assertEqual(actual, expected)
 
     def test_max(self):
         histogram0 = Histogram({0: 8, 1: 2, 9: 1})
