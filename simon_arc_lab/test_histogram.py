@@ -7,8 +7,8 @@ class TestHistogram(unittest.TestCase):
     def test_init_with_zero_purge_zeros(self):
         histogram = Histogram({8: 0, 7: 7, 5: 5})
         actual = histogram.pretty()
-        expected = '5:5,7:7'
-        self.assertTrue(actual, expected)
+        expected = '7:7,5:5'
+        self.assertEqual(actual, expected)
 
     def test_sorted_color_count_list_unambiguous(self):
         image = np.zeros((3, 2), dtype=np.uint8)
@@ -101,9 +101,9 @@ class TestHistogram(unittest.TestCase):
     def test_max(self):
         histogram0 = Histogram({0: 8, 1: 2, 9: 1})
         histogram1 = Histogram({0: 2, 1: 8, 8: 2})
-        actual = histogram0.add(histogram1).pretty()
+        actual = histogram0.max(histogram1).pretty()
         expected = '0:8,1:8,8:2,9:1'
-        self.assertTrue(actual, expected)
+        self.assertEqual(actual, expected)
 
     def test_color_intersection_set0(self):
         histogram0 = Histogram({0: 8, 1: 2, 9: 1})
@@ -129,9 +129,9 @@ class TestHistogram(unittest.TestCase):
     def test_min(self):
         histogram0 = Histogram({0: 8, 1: 2, 9: 1})
         histogram1 = Histogram({0: 2, 1: 8, 8: 2})
-        actual = histogram0.add(histogram1).pretty()
+        actual = histogram0.min(histogram1).pretty()
         expected = '0:2,1:2'
-        self.assertTrue(actual, expected)
+        self.assertEqual(actual, expected)
 
 if __name__ == '__main__':
     unittest.main()
