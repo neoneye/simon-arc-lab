@@ -10,6 +10,26 @@ class TestHistogram(unittest.TestCase):
         expected = '7:7,5:5'
         self.assertEqual(actual, expected)
 
+    def test_pretty_empty0(self):
+        actual = Histogram.empty().pretty()
+        expected = 'empty'
+        self.assertEqual(actual, expected)
+
+    def test_pretty_empty1(self):
+        actual = Histogram({5:0}).pretty()
+        expected = 'empty'
+        self.assertEqual(actual, expected)
+
+    def test_pretty_nonempty0(self):
+        actual = Histogram({5:1}).pretty()
+        expected = '5:1'
+        self.assertEqual(actual, expected)
+
+    def test_pretty_nonempty1(self):
+        actual = Histogram({5:1,2:8}).pretty()
+        expected = '2:8,5:1'
+        self.assertEqual(actual, expected)
+
     def test_sorted_color_count_list_unambiguous(self):
         image = np.zeros((3, 2), dtype=np.uint8)
         image[0:3, 0:2] = [
@@ -95,7 +115,7 @@ class TestHistogram(unittest.TestCase):
         histogram0 = Histogram.empty()
         histogram1 = Histogram({0: 8, 1: 2, 9: 1})
         actual = histogram0.subtract_and_discard(histogram1).pretty()
-        expected = ''
+        expected = 'empty'
         self.assertEqual(actual, expected)
 
     def test_max(self):

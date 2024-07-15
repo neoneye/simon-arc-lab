@@ -36,7 +36,11 @@ class Histogram:
         return items
 
     def pretty(self) -> str:
-        color_count_list = self.sorted_color_count_list()
+        histogram = self.clone()
+        histogram.purge_zeros_mutable()
+        color_count_list = histogram.sorted_color_count_list()
+        if len(color_count_list) == 0:
+            return 'empty'
         return ','.join([f'{color}:{count}' for color, count in color_count_list])
 
     def add(self, other: 'Histogram') -> 'Histogram':
