@@ -23,6 +23,10 @@
 # IDEA: auto detect what image format it is, and convert it to RLE format.
 #
 # IDEA: deserialize images with "rot" prefix, then the image is to be rotated 90 degrees clockwise
+#
+# IDEA: scale the image by 2, 3, 4, 5, 6
+# IDEA: take N top/bottom rows, N left/right columns
+# IDEA: remove N top/bottom rows, N left/right columns
 import json
 import os
 import random
