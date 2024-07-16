@@ -3,5 +3,6 @@ __pycache__/
 
 dataset_rle.jsonl
 dataset_image.jsonl
+dataset_image_pair.jsonl
 dataset_histogram.jsonl
 dataset_task.jsonl
