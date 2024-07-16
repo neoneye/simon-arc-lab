@@ -1,3 +1,5 @@
+# IDEA: comparison of 2 images, are they the same, are they different
+#
 # IDEA: transformation "transpose" the image
 #
 # IDEA: with "rot" prefix, then the image is to be rotated 90 degrees clockwise

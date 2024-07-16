@@ -1,3 +1,6 @@
+# IDEA: comparison of 2 images, add histograms together
+# IDEA: comparison of 2 images, intersection of histograms
+# IDEA: comparison of 2 images, are they the same, are they different
 # IDEA: extract output A
 # IDEA: histogram of input B
 # IDEA: rotate cw output D
