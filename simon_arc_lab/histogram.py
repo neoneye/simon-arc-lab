@@ -105,13 +105,13 @@ class Histogram:
 
     def color_intersection_set(self, other: 'Histogram') -> set:
         """
-        find the set of colors that are in both histograms
+        Find the set of colors that are in both histograms. The overlap.
         """
         return set(self.color_count.keys()) & set(other.color_count.keys())
 
     def color_intersection_list(self, other: 'Histogram') -> List[int]:
         """
-        Sorted list of colors that are in both histograms.
+        Sorted list of colors that are in both histograms. The overlap.
         """
         color_set = self.color_intersection_set(other)
         colors = list(color_set)
@@ -120,7 +120,7 @@ class Histogram:
 
     def color_intersection_pretty(self, other: 'Histogram') -> str:
         """
-        Comma separated list of unique colors in the histogram.
+        Comma separated list of unique colors in the both histograms. The overlap.
         """
         colors = self.color_intersection_list(other)
         if len(colors) == 0:
@@ -171,6 +171,22 @@ class Histogram:
         if len(colors) == 0:
             return 'empty'
         return ','.join([str(color) for color in colors])
+
+    def remove_other_colors(self, other: 'Histogram') -> 'Histogram':
+        """
+        Remove colors that are in the other histogram.
+        Keep the histogram data for colors that are only present in the current histogram.
+        If the other histogram has a color that is not in the current histogram, then ignore it.
+
+        :param other: the other histogram to compare with
+        :return: a new histogram
+        """
+        colors = self.color_intersection_set(other)
+        result = self.clone()
+        for color in colors:
+            del result.color_count[color]
+        result.purge_mutable()
+        return result
 
     def purge_mutable(self):
         """

@@ -245,5 +245,26 @@ class TestHistogram(unittest.TestCase):
         expected = '0,1'
         self.assertEqual(actual, expected)
 
+    def test_remove_other_colors_no_overlap(self):
+        histogram0 = Histogram({0: 8, 1: 2, 3: 1})
+        histogram1 = Histogram({4: 2, 5: 8, 6: 2})
+        actual = histogram0.remove_other_colors(histogram1).pretty()
+        expected = '0:8,1:2,3:1'
+        self.assertEqual(actual, expected)
+
+    def test_remove_other_colors_some_overlap(self):
+        histogram0 = Histogram({0: 8, 1: 2, 9: 1})
+        histogram1 = Histogram({0: 2, 1: 8, 8: 2})
+        actual = histogram0.remove_other_colors(histogram1).pretty()
+        expected = '9:1'
+        self.assertEqual(actual, expected)
+
+    def test_remove_other_colors_full_overlap(self):
+        histogram0 = Histogram({0: 8, 1: 2, 9: 1})
+        histogram1 = Histogram({0: 2, 1: 8, 8: 2, 9: 10})
+        actual = histogram0.remove_other_colors(histogram1).pretty()
+        expected = 'empty'
+        self.assertEqual(actual, expected)
+
 if __name__ == '__main__':
     unittest.main()
