@@ -3,14 +3,14 @@ import numpy as np
 from .game_of_life import *
 
 class TestGameOfLife(unittest.TestCase):
-    def test_blinker(self):
+    def test_gameoflife_blinker(self):
         input = np.array([
             [0, 0, 0, 0, 0], 
             [0, 0, 1, 0, 0], 
             [0, 0, 1, 0, 0], 
             [0, 0, 1, 0, 0], 
             [0, 0, 0, 0, 0]], dtype=np.uint8)
-        actual = game_of_life_wrap(input)
+        actual = cellular_automata_gameoflife_wrap(input)
         expected = np.array([
             [0, 0, 0, 0, 0], 
             [0, 0, 0, 0, 0], 
@@ -19,19 +19,67 @@ class TestGameOfLife(unittest.TestCase):
             [0, 0, 0, 0, 0]], dtype=np.uint8)
         self.assertTrue(np.array_equal(actual, expected))
 
-    def test_glider(self):
+    def test_gameoflife_glider(self):
         input = np.array([
             [0, 0, 0, 0, 0], 
             [0, 0, 0, 1, 0], 
             [0, 1, 0, 1, 0], 
             [0, 0, 1, 1, 0], 
             [0, 0, 0, 0, 0]], dtype=np.uint8)
-        actual = game_of_life_wrap(input)
+        actual = cellular_automata_gameoflife_wrap(input)
         expected = np.array([
             [0, 0, 0, 0, 0], 
             [0, 0, 1, 0, 0], 
             [0, 0, 0, 1, 1], 
             [0, 0, 1, 1, 0], 
+            [0, 0, 0, 0, 0]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_gameoflife_alive6(self):
+        input = np.array([
+            [0, 0, 0, 0, 0], 
+            [0, 0, 1, 1, 0], 
+            [0, 1, 0, 1, 0], 
+            [0, 1, 1, 0, 0], 
+            [0, 0, 0, 0, 0]], dtype=np.uint8)
+        actual = cellular_automata_gameoflife_wrap(input)
+        expected = np.array([
+            [0, 0, 0, 0, 0], 
+            [0, 0, 1, 1, 0], 
+            [0, 1, 0, 1, 0], 
+            [0, 1, 1, 0, 0], 
+            [0, 0, 0, 0, 0]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_highlife_blinker(self):
+        input = np.array([
+            [0, 0, 0, 0, 0], 
+            [0, 0, 1, 0, 0], 
+            [0, 0, 1, 0, 0], 
+            [0, 0, 1, 0, 0], 
+            [0, 0, 0, 0, 0]], dtype=np.uint8)
+        actual = cellular_automata_highlife_wrap(input)
+        expected = np.array([
+            [0, 0, 0, 0, 0], 
+            [0, 0, 0, 0, 0], 
+            [0, 1, 1, 1, 0], 
+            [0, 0, 0, 0, 0], 
+            [0, 0, 0, 0, 0]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_highlife_alive6(self):
+        input = np.array([
+            [0, 0, 0, 0, 0], 
+            [0, 0, 1, 1, 0], 
+            [0, 1, 0, 1, 0], 
+            [0, 1, 1, 0, 0], 
+            [0, 0, 0, 0, 0]], dtype=np.uint8)
+        actual = cellular_automata_highlife_wrap(input)
+        expected = np.array([
+            [0, 0, 0, 0, 0], 
+            [0, 0, 1, 1, 0], 
+            [0, 1, 1, 1, 0], 
+            [0, 1, 1, 0, 0], 
             [0, 0, 0, 0, 0]], dtype=np.uint8)
         self.assertTrue(np.array_equal(actual, expected))
 

@@ -4,26 +4,56 @@
 # IDEA: wire world
 import numpy as np
 
-def game_of_life_wrap(grid):
-    new_grid = grid.copy()
-    height, width = grid.shape
+def cellular_automata_gameoflife_wrap(image):
+    """
+    Apply one step of the Game of Life to the given image.
+    https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
+    """
+    new_image = image.copy()
+    height, width = image.shape
     for i in range(height):
         for j in range(width):
             # Count the number of alive neighbors
             alive_neighbors = (
-                grid[i, (j-1)%width] + grid[i, (j+1)%width] +
-                grid[(i-1)%height, j] + grid[(i+1)%height, j] +
-                grid[(i-1)%height, (j-1)%width] + grid[(i-1)%height, (j+1)%width] +
-                grid[(i+1)%height, (j-1)%width] + grid[(i+1)%height, (j+1)%width]
+                image[i, (j-1)%width] + image[i, (j+1)%width] +
+                image[(i-1)%height, j] + image[(i+1)%height, j] +
+                image[(i-1)%height, (j-1)%width] + image[(i-1)%height, (j+1)%width] +
+                image[(i+1)%height, (j-1)%width] + image[(i+1)%height, (j+1)%width]
             )
             # Apply the rules of the Game of Life
-            if grid[i, j] == 1:
+            if image[i, j] == 1:
                 if alive_neighbors < 2 or alive_neighbors > 3:
-                    new_grid[i, j] = 0
+                    new_image[i, j] = 0
             else:
                 if alive_neighbors == 3:
-                    new_grid[i, j] = 1
-    return new_grid
+                    new_image[i, j] = 1
+    return new_image
+
+def cellular_automata_highlife_wrap(image):
+    """
+    Apply one step of the HighLife to the given image.
+    https://en.wikipedia.org/wiki/Highlife_%28cellular_automaton%29
+    https://conwaylife.com/wiki/OCA:HighLife
+    """
+    new_image = image.copy()
+    height, width = image.shape
+    for i in range(height):
+        for j in range(width):
+            # Count the number of alive neighbors
+            alive_neighbors = (
+                image[i, (j-1)%width] + image[i, (j+1)%width] +
+                image[(i-1)%height, j] + image[(i+1)%height, j] +
+                image[(i-1)%height, (j-1)%width] + image[(i-1)%height, (j+1)%width] +
+                image[(i+1)%height, (j-1)%width] + image[(i+1)%height, (j+1)%width]
+            )
+            # Apply the rules of the HighLife
+            if image[i, j] == 1:
+                if alive_neighbors < 2 or alive_neighbors > 3:
+                    new_image[i, j] = 0
+            else:
+                if alive_neighbors == 3 or alive_neighbors == 6:
+                    new_image[i, j] = 1
+    return new_image
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
@@ -41,7 +71,8 @@ if __name__ == '__main__':
 
     def animate(frame):
         global grid
-        grid = game_of_life_wrap(grid)
+        # grid = cellular_automata_gameoflife_wrap(grid)
+        grid = cellular_automata_highlife_wrap(grid)
         img.set_data(grid)
         return [img]
 
