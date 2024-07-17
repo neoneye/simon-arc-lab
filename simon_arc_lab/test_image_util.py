@@ -295,5 +295,53 @@ class TestImageUtil(unittest.TestCase):
             [7, 8, 9]], dtype=np.uint8)
         self.assertTrue(np.array_equal(actual, expected))
 
+    def test_image_translate_wrap_dxplus1(self):
+        image = np.array([
+            [1, 2, 3], 
+            [4, 5, 6], 
+            [7, 8, 9]], dtype=np.uint8)
+        actual = image_translate_wrap(image, 1, 0)
+        expected = np.array([
+            [3, 1, 2], 
+            [6, 4, 5], 
+            [9, 7, 8]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_image_translate_wrap_dxminus1(self):
+        image = np.array([
+            [1, 2, 3], 
+            [4, 5, 6], 
+            [7, 8, 9]], dtype=np.uint8)
+        actual = image_translate_wrap(image, -1, 0)
+        expected = np.array([
+            [2, 3, 1], 
+            [5, 6, 4], 
+            [8, 9, 7]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_image_translate_wrap_dyplus1(self):
+        image = np.array([
+            [1, 2, 3], 
+            [4, 5, 6], 
+            [7, 8, 9]], dtype=np.uint8)
+        actual = image_translate_wrap(image, 0, 1)
+        expected = np.array([
+            [7, 8, 9],
+            [1, 2, 3], 
+            [4, 5, 6]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_image_translate_wrap_dyminus1(self):
+        image = np.array([
+            [1, 2, 3], 
+            [4, 5, 6], 
+            [7, 8, 9]], dtype=np.uint8)
+        actual = image_translate_wrap(image, 0, -1)
+        expected = np.array([
+            [4, 5, 6], 
+            [7, 8, 9],
+            [1, 2, 3]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
 if __name__ == '__main__':
     unittest.main()

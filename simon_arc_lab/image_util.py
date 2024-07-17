@@ -259,3 +259,29 @@ def compress_xy(image):
     Eliminate adjacent duplicate rows+columns
     """
     return compress_y(compress_x(image))
+
+def image_translate_wrap(image, dx, dy):
+    """
+    Move pixels by dx, dy, wrapping around the image.
+
+    :param image: The image to process.
+    :param dx: The horizontal translation.
+    :param dy: The vertical translation.
+    :return: An image of the same size as the input image.
+    """
+    if dx == 0 and dy == 0:
+        raise ValueError("dx and dy cannot both be zero.")
+
+    height, width = image.shape
+    new_image = np.zeros((height, width), dtype=np.uint8)
+
+    for y in range(height):
+        for x in range(width):
+            new_y = (height + y + dy) % height
+            new_x = (width + x + dx) % width
+            new_image[new_y, new_x] = image[y, x]
+
+    return new_image
+
+
+
