@@ -1,3 +1,4 @@
+# IDEA: extract the image pair number N, that contains both input+output
 # IDEA: comparison of 2 images, add histograms together
 # IDEA: comparison of 2 images, intersection of histograms
 # IDEA: comparison of 2 images, are they the same, are they different

@@ -1,3 +1,4 @@
+# IDEA: currently trained with image size 1-10. Next step is to train with image size 1-20, and then 1-30.
 import json
 import os
 import random

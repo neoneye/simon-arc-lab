@@ -57,7 +57,7 @@ def generate_one_histogram_dataset_item(seed):
 
     instruction = random.Random(seed + 1006).choice(instructions)
 
-    max_color_value = 100
+    max_color_value = 200
     histogram = Histogram.create_random(seed + 1007, 1, 9, 1, max_color_value)
 
     input = histogram.pretty()
@@ -86,8 +86,10 @@ def generate_two_histogram_dataset_item(seed):
         'number_of_unique_colors',
         'unique_colors',
         'intersection',
+        'a_remove_b_colors',
+        'b_remove_a_colors',
     ]
-    transformation_weights = [20, 20, 20, 20, 20, 20, 20]
+    transformation_weights = [20, 20, 20, 20, 20, 20, 20, 40, 40]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
     name_format = random.Random(seed + 1005).choice(name_formats)
@@ -153,6 +155,46 @@ def generate_two_histogram_dataset_item(seed):
         f'what are the shared colors between {name_format}',
         f'{name_format}, intersecting color list',
         f'{name_format}, intersecting colors',
+        f'{name_format}, overlapping colors',
+        f'{name_format}, color overlap',
+    ]
+
+    instructions_a_remove_b_colors = [
+        f'{name_format}, Remove Histogram B colors from Histogram A',
+        f'{name_format}, Remove Histogram-B colors from Histogram-A',
+        f'{name_format}, remove histogram-b colors from histogram-a',
+        f'{name_format}, remove histogram b colors from histogram a',
+        f'{name_format}, Exclude Histogram B colors from Histogram A',
+        f'{name_format}, Exclude Histogram-B colors from Histogram-A',
+        f'{name_format}, exclude histogram-b colors from histogram-a',
+        f'{name_format}, exclude histogram b colors from histogram a',
+        f'{name_format}, Histogram A without colors of Histogram B',
+        f'{name_format}, Histogram-A without colors of Histogram-B',
+        f'{name_format}, histogram-a without colors of histogram-b',
+        f'{name_format}, histogram a without colors of histogram b',
+        f'{name_format}, Histogram A excluding Histogram B colors',
+        f'{name_format}, Histogram-A excluding Histogram-B colors',
+        f'{name_format}, histogram-a excluding histogram-b colors',
+        f'{name_format}, histogram a excluding histogram b colors',
+    ]
+
+    instructions_b_remove_a_colors = [
+        f'{name_format}, Remove Histogram A colors from Histogram B',
+        f'{name_format}, Remove Histogram-A colors from Histogram-B',
+        f'{name_format}, remove histogram-a colors from histogram-b',
+        f'{name_format}, remove histogram a colors from histogram b',
+        f'{name_format}, Exclude Histogram A colors from Histogram B',
+        f'{name_format}, Exclude Histogram-A colors from Histogram-B',
+        f'{name_format}, exclude histogram-a colors from histogram-b',
+        f'{name_format}, exclude histogram a colors from histogram b',
+        f'{name_format}, Histogram B without colors of Histogram A',
+        f'{name_format}, Histogram-B without colors of Histogram-a',
+        f'{name_format}, histogram-b without colors of histogram-a',
+        f'{name_format}, histogram b without colors of histogram a',
+        f'{name_format}, Histogram B excluding Histogram A colors',
+        f'{name_format}, Histogram-B excluding Histogram-a colors',
+        f'{name_format}, histogram-b excluding histogram-a colors',
+        f'{name_format}, histogram b excluding histogram A colors',
     ]
 
     instructions = None
@@ -170,6 +212,10 @@ def generate_two_histogram_dataset_item(seed):
         instructions = instructions_unique_colors
     elif transformation_id == 'intersection':
         instructions = instructions_intersection
+    elif transformation_id == 'a_remove_b_colors':
+        instructions = instructions_a_remove_b_colors
+    elif transformation_id == 'b_remove_a_colors':
+        instructions = instructions_b_remove_a_colors
     else:
         raise Exception("Unreachable code reached")
 
@@ -198,6 +244,10 @@ def generate_two_histogram_dataset_item(seed):
         output = histogram.unique_colors_pretty()
     elif transformation_id == 'intersection':
         output = histogram0.color_intersection_pretty(histogram1)
+    elif transformation_id == 'a_remove_b_colors':
+        output = histogram0.remove_other_colors(histogram1).pretty()
+    elif transformation_id == 'b_remove_a_colors':
+        output = histogram1.remove_other_colors(histogram0).pretty()
     else:
         raise Exception("Unreachable code reached")
 
@@ -208,7 +258,7 @@ def generate_two_histogram_dataset_item(seed):
     }
     return dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=300000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=400000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
