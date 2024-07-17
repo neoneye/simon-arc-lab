@@ -1,4 +1,4 @@
-# IDEA: Exercise much bigger values up to 900. Currently have been exercising the range 1-100.
+# IDEA: Exercise much bigger values up to 900. Currently have been exercising the range 1-400.
 #
 # IDEA: What are the most popular colors in the histogram?
 # IDEA: What are the least popular colors in the histogram?
@@ -57,7 +57,7 @@ def generate_one_histogram_dataset_item(seed):
 
     instruction = random.Random(seed + 1006).choice(instructions)
 
-    max_color_value = 800
+    max_color_value = 1600
     histogram = Histogram.create_random(seed + 1007, 1, 9, 1, max_color_value)
 
     input = histogram.pretty()
@@ -89,7 +89,7 @@ def generate_two_histogram_dataset_item(seed):
         'a_remove_b_colors',
         'b_remove_a_colors',
     ]
-    transformation_weights = [20, 20, 20, 20, 20, 20, 20, 40, 40]
+    transformation_weights = [20, 20, 20, 20, 20, 20, 20, 20, 20]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
     name_format = random.Random(seed + 1005).choice(name_formats)
@@ -221,7 +221,7 @@ def generate_two_histogram_dataset_item(seed):
 
     instruction = random.Random(seed + 1006).choice(instructions)
 
-    max_color_value = 200
+    max_color_value = 400
     histogram0 = Histogram.create_random(seed + 1007, 1, 9, 1, max_color_value)
     histogram1 = Histogram.create_random(seed + 1020, 1, 9, 1, max_color_value)
 
@@ -258,7 +258,7 @@ def generate_two_histogram_dataset_item(seed):
     }
     return dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=600000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=700000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
