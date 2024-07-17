@@ -135,8 +135,8 @@ def generate_dataset_item(seed):
 
     instruction = random.Random(seed + 1005).choice(instructions)
 
-    image0 = image_create_random_advanced(seed + 1006, min_image_size, max_image_size, 1, 5)
-    image1 = image_create_random_advanced(seed + 1007, min_image_size, max_image_size, 1, 5)
+    image0 = image_create_random_advanced(seed + 1006, 1, 5, min_image_size, max_image_size)
+    image1 = image_create_random_advanced(seed + 1007, 1, 5, min_image_size, max_image_size)
 
     rle_string0 = serialize(image0)
     rle_string1 = serialize(image1)
@@ -175,7 +175,7 @@ def generate_dataset_item(seed):
     }
     return dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=700000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=800000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
