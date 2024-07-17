@@ -1,8 +1,8 @@
 import unittest
 import numpy as np
-from .game_of_life import *
+from .cellular_automata import *
 
-class TestGameOfLife(unittest.TestCase):
+class TestCellularAutomata(unittest.TestCase):
     def test_gameoflife_blinker(self):
         input = np.array([
             [0, 0, 0, 0, 0], 
