@@ -1,4 +1,4 @@
-# IDEA: currently trained with image size 1-10. Next step is to train with image size 1-20, and then 1-30.
+# IDEA: currently trained with image size 1-20. Next step is to train with image size 1-30.
 import json
 import os
 import random
@@ -17,15 +17,17 @@ def generate_dataset_item(seed):
     :return: A dictionary with the instruction, input, and output
     """
     min_image_size = 1
-    max_image_size = 10
+    max_image_size = 20
 
-    instruction_ids = [
+    transformation_ids = [
         'add_histograms',
         'color_intersection',
         'number_of_intersection_colors',
+        'a_remove_b_colors',
+        'b_remove_a_colors',
     ]
-    instruction_weights = [10, 10, 10]
-    instruction_id = random.Random(seed + 1001).choices(instruction_ids, weights=instruction_weights, k=1)[0]
+    transformation_weights = [10, 10, 10, 15, 15]
+    transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
     name_formats = [
         'SIMONARCRLEIMAGEPAIR',
@@ -67,7 +69,9 @@ def generate_dataset_item(seed):
         f'{name_format}, intersection of colors of the two images',
         f'{name_format}, intersection of colors of the 2 images',
         f'{name_format}, intersection of colors of the images',
+        f'{name_format}, overlap of colors of the images',
         f'Process {name_format} and return the intersection of colors',
+        f'Process {name_format} and return the overlap of colors',
     ]
 
     instructions_number_of_intersection_colors = [
@@ -77,13 +81,55 @@ def generate_dataset_item(seed):
         f'Process {name_format} and return the number of colors in common',
     ]
 
+    instructions_a_remove_b_colors = [
+        f'{name_format}, Remove Histogram B colors from Histogram A',
+        f'{name_format}, Remove Histogram-B colors from Histogram-A',
+        f'{name_format}, remove histogram-b colors from histogram-a',
+        f'{name_format}, remove histogram b colors from histogram a',
+        f'{name_format}, Exclude Histogram B colors from Histogram A',
+        f'{name_format}, Exclude Histogram-B colors from Histogram-A',
+        f'{name_format}, exclude histogram-b colors from histogram-a',
+        f'{name_format}, exclude histogram b colors from histogram a',
+        f'{name_format}, Histogram A without colors of Histogram B',
+        f'{name_format}, Histogram-A without colors of Histogram-B',
+        f'{name_format}, histogram-a without colors of histogram-b',
+        f'{name_format}, histogram a without colors of histogram b',
+        f'{name_format}, Histogram A excluding Histogram B colors',
+        f'{name_format}, Histogram-A excluding Histogram-B colors',
+        f'{name_format}, histogram-a excluding histogram-b colors',
+        f'{name_format}, histogram a excluding histogram b colors',
+    ]
+
+    instructions_b_remove_a_colors = [
+        f'{name_format}, Remove Histogram A colors from Histogram B',
+        f'{name_format}, Remove Histogram-A colors from Histogram-B',
+        f'{name_format}, remove histogram-a colors from histogram-b',
+        f'{name_format}, remove histogram a colors from histogram b',
+        f'{name_format}, Exclude Histogram A colors from Histogram B',
+        f'{name_format}, Exclude Histogram-A colors from Histogram-B',
+        f'{name_format}, exclude histogram-a colors from histogram-b',
+        f'{name_format}, exclude histogram a colors from histogram b',
+        f'{name_format}, Histogram B without colors of Histogram A',
+        f'{name_format}, Histogram-B without colors of Histogram-a',
+        f'{name_format}, histogram-b without colors of histogram-a',
+        f'{name_format}, histogram b without colors of histogram a',
+        f'{name_format}, Histogram B excluding Histogram A colors',
+        f'{name_format}, Histogram-B excluding Histogram-a colors',
+        f'{name_format}, histogram-b excluding histogram-a colors',
+        f'{name_format}, histogram b excluding histogram A colors',
+    ]
+
     instructions = None
-    if instruction_id == 'add_histograms':
+    if transformation_id == 'add_histograms':
         instructions = instructions_add_histograms
-    elif instruction_id == 'color_intersection':
+    elif transformation_id == 'color_intersection':
         instructions = instructions_color_intersection
-    elif instruction_id == 'number_of_intersection_colors':
+    elif transformation_id == 'number_of_intersection_colors':
         instructions = instructions_number_of_intersection_colors
+    elif transformation_id == 'a_remove_b_colors':
+        instructions = instructions_a_remove_b_colors
+    elif transformation_id == 'b_remove_a_colors':
+        instructions = instructions_b_remove_a_colors
     else:
         raise Exception("Unreachable code reached")
 
@@ -98,19 +144,27 @@ def generate_dataset_item(seed):
     input = f'{rle_string0}\n{rle_string1}'
 
     output = None
-    if instruction_id == 'add_histograms':
+    if transformation_id == 'add_histograms':
         histogram0 = Histogram.create_with_image(image0)
         histogram1 = Histogram.create_with_image(image1)
         output = histogram0.add(histogram1).pretty()
-    elif instruction_id == 'color_intersection':
+    elif transformation_id == 'color_intersection':
         histogram0 = Histogram.create_with_image(image0)
         histogram1 = Histogram.create_with_image(image1)
         output = histogram0.color_intersection_pretty(histogram1)
-    elif instruction_id == 'number_of_intersection_colors':
+    elif transformation_id == 'number_of_intersection_colors':
         histogram0 = Histogram.create_with_image(image0)
         histogram1 = Histogram.create_with_image(image1)
         histogram2 = histogram0.min(histogram1)
         output = str(histogram2.number_of_unique_colors())
+    elif transformation_id == 'a_remove_b_colors':
+        histogram0 = Histogram.create_with_image(image0)
+        histogram1 = Histogram.create_with_image(image1)
+        output = histogram0.remove_other_colors(histogram1).pretty()
+    elif transformation_id == 'b_remove_a_colors':
+        histogram0 = Histogram.create_with_image(image0)
+        histogram1 = Histogram.create_with_image(image1)
+        output = histogram1.remove_other_colors(histogram0).pretty()
     else:
         raise Exception("Unreachable code reached")
 
@@ -121,7 +175,7 @@ def generate_dataset_item(seed):
     }
     return dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=500000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=600000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
