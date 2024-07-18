@@ -1,4 +1,4 @@
-# IDEA: Exercise much bigger values up to 900. Currently have been exercising the range 1-400.
+# IDEA: Exercise much bigger values up to 900. Currently have been exercising the range 1-800.
 #
 # IDEA: What are the most popular colors in the histogram?
 # IDEA: What are the least popular colors in the histogram?
