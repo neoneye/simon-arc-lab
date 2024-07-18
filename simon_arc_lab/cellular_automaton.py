@@ -3,15 +3,15 @@ import numpy as np
 
 class CARule:
     def apply_nowrap(self, image: np.array, step_count: int=1) -> np.array:
-        return self.step_once(image, wrapx=False, wrapy=False, outside_value=0, step_count=1)
+        return self.step_multi(image=image, wrapx=False, wrapy=False, outside_value=0, step_count=step_count)
 
     def apply_wrap(self, image: np.array, wrapx: bool=True, wrapy: bool=True, outside_value: int=0, step_count: int=1) -> np.array:
-        return self.step_multi(image, wrapx=wrapx, wrapy=wrapy, outside_value=outside_value, step_count=step_count)
+        return self.step_multi(image=image, wrapx=wrapx, wrapy=wrapy, outside_value=outside_value, step_count=step_count)
 
     def step_multi(self, image: np.array, wrapx: bool, wrapy: bool, outside_value: int, step_count: int) -> np.array:
         new_image = image.copy()
         for _ in range(step_count):
-            new_image = self.step_once(new_image, wrapx, wrapy, outside_value)
+            new_image = self.step_once(image=new_image, wrapx=wrapx, wrapy=wrapy, outside_value=outside_value)
         return new_image
 
     def step_once(self, image: np.array, wrapx: bool, wrapy: bool, outside_value: int) -> np.array:
