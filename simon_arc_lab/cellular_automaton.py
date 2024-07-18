@@ -1,25 +1,23 @@
 # Variants of cellular automata
-# IDEA: wire world
 import numpy as np
 
 class CARule:
-    def __init__(self):
-        pass
-
     def apply(self, image):
         new_image = image.copy()
         height, width = image.shape
         for i in range(height):
             for j in range(width):
-                # Count the number of alive neighbors
-                alive_neighbors = (
-                    image[i, (j-1)%width] + image[i, (j+1)%width] +
-                    image[(i-1)%height, j] + image[(i+1)%height, j] +
-                    image[(i-1)%height, (j-1)%width] + image[(i-1)%height, (j+1)%width] +
-                    image[(i+1)%height, (j-1)%width] + image[(i+1)%height, (j+1)%width]
-                )
+                # Traverse all 8 neighbors and determine if they are alive
+                count_exactly_one = 0
+                for dy in [-1, 0, 1]:
+                    for dx in [-1, 0, 1]:
+                        if dx == 0 and dy == 0:
+                            continue
+                        value = image[(i+dy)%height, (j+dx)%width]
+                        if value == 1:
+                            count_exactly_one += 1
                 # Apply the rules of the cellular automaton
-                new_image[i, j] = self.rule(image[i, j], alive_neighbors)
+                new_image[i, j] = self.rule(image[i, j], count_exactly_one)
         return new_image
     
     def rule(self, center: int, alive_count: int) -> int:
@@ -28,7 +26,7 @@ class CARule:
 class CARuleGameOfLife(CARule):
     def rule(self, center: int, alive_count: int) -> int:
         """
-        Apply one step of the Game of Life to the given image.
+        Apply one step of the Game of Life.
         https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
         """
         if center == 1:
@@ -42,7 +40,7 @@ class CARuleGameOfLife(CARule):
 class CARuleHighLife(CARule):
     def rule(self, center: int, alive_count: int) -> int:
         """
-        Apply one step of the HighLife to the given image.
+        Apply one step of the HighLife.
         https://en.wikipedia.org/wiki/Highlife_%28cellular_automaton%29
         https://conwaylife.com/wiki/OCA:HighLife
         """
@@ -57,13 +55,34 @@ class CARuleHighLife(CARule):
 class CARuleServiettes(CARule):
     def rule(self, center: int, alive_count: int) -> int:
         """
-        Apply one step of the Serviettes to the given image.
+        Apply one step of the Serviettes.
         https://conwaylife.com/wiki/OCA:Serviettes
         """
         if center == 0:
             if alive_count == 2 or alive_count == 3 or alive_count == 4:
                 return 1
         return 0
+
+class CARuleWireWorld(CARule):
+    def rule(self, center: int, alive_count: int) -> int:
+        """
+        https://en.wikipedia.org/wiki/Wireworld
+
+        0 = empty
+        1 = electron head
+        2 = electron tail
+        3 = conductor
+        """
+        if center == 1: # electron head
+            return 2 # electron tail
+
+        if center == 2: # electron tail
+            return 3 # conductor
+        
+        if center == 3 and (alive_count == 1 or alive_count == 2): # conductor with 1 or 2 electron heads
+            return 1 # electron head
+
+        return center
 
 def cellular_automata_gameoflife_wrap(image):
     return CARuleGameOfLife().apply(image)
@@ -73,6 +92,9 @@ def cellular_automata_highlife_wrap(image):
 
 def cellular_automata_serviettes_wrap(image):
     return CARuleServiettes().apply(image)
+
+def cellular_automata_wireworld_wrap(image):
+    return CARuleWireWorld().apply(image)
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt

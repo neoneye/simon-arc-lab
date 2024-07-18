@@ -137,5 +137,69 @@ class TestCellularAutomata(unittest.TestCase):
             [0, 0, 0, 1, 1, 0, 0, 0]], dtype=np.uint8)
         self.assertTrue(np.array_equal(actual, expected))
 
+    def test_wireworld_iteration1(self):
+        input = np.array([
+            [0, 0, 0, 0, 0, 0, 0, 0], 
+            [0, 0, 0, 3, 3, 0, 0, 0], 
+            [3, 2, 1, 3, 0, 3, 3, 0], 
+            [0, 0, 0, 3, 3, 0, 0, 0], 
+            [0, 0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        actual = cellular_automata_wireworld_wrap(input)
+        expected = np.array([
+            [0, 0, 0, 0, 0, 0, 0, 0], 
+            [0, 0, 0, 1, 3, 0, 0, 0], 
+            [3, 3, 2, 1, 0, 3, 3, 0], 
+            [0, 0, 0, 1, 3, 0, 0, 0], 
+            [0, 0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_wireworld_iteration2(self):
+        input = np.array([
+            [0, 0, 0, 0, 0, 0, 0, 0], 
+            [0, 0, 0, 1, 3, 0, 0, 0], 
+            [3, 3, 2, 1, 0, 3, 3, 0], 
+            [0, 0, 0, 1, 3, 0, 0, 0], 
+            [0, 0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        actual = cellular_automata_wireworld_wrap(input)
+        expected = np.array([
+            [0, 0, 0, 0, 0, 0, 0, 0], 
+            [0, 0, 0, 2, 1, 0, 0, 0], 
+            [3, 3, 3, 2, 0, 3, 3, 0], 
+            [0, 0, 0, 2, 1, 0, 0, 0], 
+            [0, 0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_wireworld_iteration3(self):
+        input = np.array([
+            [0, 0, 0, 0, 0, 0, 0, 0], 
+            [0, 0, 0, 2, 1, 0, 0, 0], 
+            [3, 3, 3, 2, 0, 3, 3, 0], 
+            [0, 0, 0, 2, 1, 0, 0, 0], 
+            [0, 0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        actual = cellular_automata_wireworld_wrap(input)
+        expected = np.array([
+            [0, 0, 0, 0, 0, 0, 0, 0], 
+            [0, 0, 0, 3, 2, 0, 0, 0], 
+            [3, 3, 3, 3, 0, 1, 3, 0], 
+            [0, 0, 0, 3, 2, 0, 0, 0], 
+            [0, 0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_wireworld_iteration4(self):
+        input = np.array([
+            [0, 0, 0, 0, 0, 0, 0, 0], 
+            [0, 0, 0, 3, 2, 0, 0, 0], 
+            [3, 3, 3, 3, 0, 1, 3, 0], 
+            [0, 0, 0, 3, 2, 0, 0, 0], 
+            [0, 0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        actual = cellular_automata_wireworld_wrap(input)
+        expected = np.array([
+            [0, 0, 0, 0, 0, 0, 0, 0], 
+            [0, 0, 0, 3, 3, 0, 0, 0], 
+            [3, 3, 3, 3, 0, 2, 1, 0], 
+            [0, 0, 0, 3, 3, 0, 0, 0], 
+            [0, 0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
 if __name__ == '__main__':
     unittest.main()
