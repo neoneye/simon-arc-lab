@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from .cellular_automata import *
+from .cellular_automaton import *
 
 class TestCellularAutomata(unittest.TestCase):
     def test_gameoflife_blinker(self):
