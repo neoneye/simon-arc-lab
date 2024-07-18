@@ -2,7 +2,19 @@
 import numpy as np
 
 class CARule:
-    def apply(self, image):
+    def apply_nowrap(self, image: np.array, step_count: int=1) -> np.array:
+        return self.step_once(image, wrapx=False, wrapy=False, outside_value=0, step_count=1)
+
+    def apply_wrap(self, image: np.array, wrapx: bool=True, wrapy: bool=True, outside_value: int=0, step_count: int=1) -> np.array:
+        return self.step_multi(image, wrapx=wrapx, wrapy=wrapy, outside_value=outside_value, step_count=step_count)
+
+    def step_multi(self, image: np.array, wrapx: bool, wrapy: bool, outside_value: int, step_count: int) -> np.array:
+        new_image = image.copy()
+        for _ in range(step_count):
+            new_image = self.step_once(new_image, wrapx, wrapy, outside_value)
+        return new_image
+
+    def step_once(self, image: np.array, wrapx: bool, wrapy: bool, outside_value: int) -> np.array:
         new_image = image.copy()
         height, width = image.shape
         for y in range(height):
@@ -13,7 +25,13 @@ class CARule:
                     for dx in [-1, 0, 1]:
                         if dx == 0 and dy == 0:
                             continue
-                        value = image[(y+dy)%height, (x+dx)%width]
+                        xdx = x + dx
+                        ydy = y + dy
+                        value = image[ydy % height, xdx % width]
+                        if wrapx == False and (xdx < 0 or xdx >= width):
+                            value = outside_value
+                        if wrapy == False and (ydy < 0 or ydy >= height):
+                            value = outside_value
                         if value == 1:
                             count_exactly_one += 1
                 # Apply the rules of the cellular automaton
@@ -110,22 +128,22 @@ class CARuleMaze(CARule):
         return center
 
 def cellular_automata_gameoflife_wrap(image):
-    return CARuleGameOfLife().apply(image)
+    return CARuleGameOfLife().apply_wrap(image)
 
 def cellular_automata_highlife_wrap(image):
-    return CARuleHighLife().apply(image)
+    return CARuleHighLife().apply_wrap(image)
 
 def cellular_automata_serviettes_wrap(image):
-    return CARuleServiettes().apply(image)
+    return CARuleServiettes().apply_wrap(image)
 
 def cellular_automata_wireworld_wrap(image):
-    return CARuleWireWorld().apply(image)
+    return CARuleWireWorld().apply_wrap(image)
 
 def cellular_automata_cave_wrap(image):
-    return CARuleCave().apply(image)
+    return CARuleCave().apply_wrap(image)
 
 def cellular_automata_maze_wrap(image):
-    return CARuleMaze().apply(image)
+    return CARuleMaze().apply_wrap(image)
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
