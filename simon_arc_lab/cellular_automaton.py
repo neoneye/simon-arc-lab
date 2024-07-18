@@ -1,4 +1,16 @@
-# Variants of cellular automata
+# Cellular Automaton (singular) and Cellular Automata (plural)
+# https://en.wikipedia.org/wiki/Cellular_automaton
+# 
+# Conway's Game of Life is one cellular automaton.
+# https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
+# 
+# Ideas for more cellular automata:
+# https://en.wikipedia.org/wiki/Langton%27s_ant
+# https://conwaylife.com/wiki/OCA:Maze
+# https://conwaylife.com/wiki/OCA:Life_without_death
+# https://conwaylife.com/wiki/OCA:Seeds
+# https://en.wikipedia.org/wiki/Brian's_Brain
+#
 import numpy as np
 
 class CARule:
