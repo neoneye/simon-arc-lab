@@ -127,24 +127,6 @@ class CARuleMaze(CARule):
             return 0
         return center
 
-def cellular_automata_gameoflife_wrap(image):
-    return CARuleGameOfLife().apply_wrap(image)
-
-def cellular_automata_highlife_wrap(image):
-    return CARuleHighLife().apply_wrap(image)
-
-def cellular_automata_serviettes_wrap(image):
-    return CARuleServiettes().apply_wrap(image)
-
-def cellular_automata_wireworld_wrap(image):
-    return CARuleWireWorld().apply_wrap(image)
-
-def cellular_automata_cave_wrap(image):
-    return CARuleCave().apply_wrap(image)
-
-def cellular_automata_maze_wrap(image):
-    return CARuleMaze().apply_wrap(image)
-
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     import matplotlib.animation as animation
@@ -160,17 +142,20 @@ if __name__ == '__main__':
     # grid[GRID_SIZE//2 + 1, GRID_SIZE//2] = 1
     # grid[GRID_SIZE//2 + 1, GRID_SIZE//2 + 1] = 1
 
+    ca = CARuleGameOfLife()
+    # ca = CARuleHighLife()
+    # ca = CARuleServiettes()
+    # ca = CARuleCave()
+    # ca = CARuleMaze()
+
     # Set up the figure and axis
     fig, ax = plt.subplots()
     img = ax.imshow(grid, interpolation='nearest', cmap='binary')
 
     def animate(frame):
         global grid
-        grid = cellular_automata_gameoflife_wrap(grid)
-        # grid = cellular_automata_highlife_wrap(grid)
-        # grid = cellular_automata_serviettes_wrap(grid)
-        # grid = cellular_automata_cave_wrap(grid)
-        # grid = cellular_automata_maze_wrap(grid)
+        global ca
+        grid = ca.apply_wrap(grid)
         img.set_data(grid)
         return [img]
 
