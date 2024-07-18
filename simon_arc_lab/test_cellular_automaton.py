@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 from .cellular_automaton import *
 
-class TestCellularAutomata(unittest.TestCase):
+class TestCellularAutomaton(unittest.TestCase):
     def test_gameoflife_blinker_count1(self):
         input = np.array([
             [0, 0, 0, 0, 0], 
