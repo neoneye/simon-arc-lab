@@ -5,19 +5,19 @@ class CARule:
     def apply(self, image):
         new_image = image.copy()
         height, width = image.shape
-        for i in range(height):
-            for j in range(width):
+        for y in range(height):
+            for x in range(width):
                 # Traverse all 8 neighbors and determine if they are alive
                 count_exactly_one = 0
                 for dy in [-1, 0, 1]:
                     for dx in [-1, 0, 1]:
                         if dx == 0 and dy == 0:
                             continue
-                        value = image[(i+dy)%height, (j+dx)%width]
+                        value = image[(y+dy)%height, (x+dx)%width]
                         if value == 1:
                             count_exactly_one += 1
                 # Apply the rules of the cellular automaton
-                new_image[i, j] = self.rule(image[i, j], count_exactly_one)
+                new_image[y, x] = self.rule(image[y, x], count_exactly_one)
         return new_image
     
     def rule(self, center: int, alive_count: int) -> int:
@@ -84,6 +84,19 @@ class CARuleWireWorld(CARule):
 
         return center
 
+class CARuleCave(CARule):
+    def rule(self, center: int, alive_count: int) -> int:
+        """
+        Create a cave system
+        https://www.roguebasin.com/index.php/Cellular_Automata_Method_for_Generating_Random_Cave-Like_Levels
+        http://pixelenvy.ca/wa/ca_cave.html
+        """
+        if alive_count < 4:
+            return 0
+        if alive_count > 5:
+            return 1
+        return center
+
 def cellular_automata_gameoflife_wrap(image):
     return CARuleGameOfLife().apply(image)
 
@@ -95,6 +108,9 @@ def cellular_automata_serviettes_wrap(image):
 
 def cellular_automata_wireworld_wrap(image):
     return CARuleWireWorld().apply(image)
+
+def cellular_automata_cave_wrap(image):
+    return CARuleCave().apply(image)
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
@@ -120,6 +136,7 @@ if __name__ == '__main__':
         grid = cellular_automata_gameoflife_wrap(grid)
         # grid = cellular_automata_highlife_wrap(grid)
         # grid = cellular_automata_serviettes_wrap(grid)
+        # grid = cellular_automata_cave_wrap(grid)
         img.set_data(grid)
         return [img]
 

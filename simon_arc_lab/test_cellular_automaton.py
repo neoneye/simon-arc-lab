@@ -201,5 +201,31 @@ class TestCellularAutomata(unittest.TestCase):
             [0, 0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
         self.assertTrue(np.array_equal(actual, expected))
 
+    def test_cave_iteration0(self):
+        input = np.array([
+            [1, 1, 0, 1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 0, 1, 0, 0, 0, 1, 0, 1],
+            [0, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+            [0, 1, 1, 1, 0, 0, 1, 1, 1, 1],
+            [0, 0, 1, 1, 1, 0, 0, 0, 1, 1],
+            [0, 0, 1, 1, 1, 1, 0, 1, 0, 0],
+            [0, 1, 1, 0, 0, 0, 0, 1, 1, 0],
+            [0, 0, 0, 0, 1, 0, 1, 0, 1, 1],
+            [1, 1, 1, 1, 0, 1, 1, 0, 0, 0],
+            [1, 1, 0, 1, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        actual = cellular_automata_cave_wrap(input)
+        expected = np.array([
+            [1, 1, 0, 0, 0, 0, 0, 0, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+            [1, 0, 1, 1, 0, 0, 1, 1, 1, 1],
+            [0, 0, 1, 1, 0, 0, 0, 1, 1, 1],
+            [0, 0, 1, 1, 1, 0, 0, 0, 1, 0],
+            [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
 if __name__ == '__main__':
     unittest.main()
