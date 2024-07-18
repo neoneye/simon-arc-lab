@@ -55,6 +55,28 @@ def cellular_automata_highlife_wrap(image):
                     new_image[i, j] = 1
     return new_image
 
+def cellular_automata_serviettes_wrap(image):
+    """
+    Apply one step of the Serviettes to the given image.
+    https://conwaylife.com/wiki/OCA:Serviettes
+    """
+    height, width = image.shape
+    new_image = np.zeros((height, width), dtype=np.uint8)
+    for i in range(height):
+        for j in range(width):
+            # Count the number of alive neighbors
+            alive_neighbors = (
+                image[i, (j-1)%width] + image[i, (j+1)%width] +
+                image[(i-1)%height, j] + image[(i+1)%height, j] +
+                image[(i-1)%height, (j-1)%width] + image[(i-1)%height, (j+1)%width] +
+                image[(i+1)%height, (j-1)%width] + image[(i+1)%height, (j+1)%width]
+            )
+            # Apply the rules of the Serviettes
+            if image[i, j] == 0:
+                if alive_neighbors == 2 or alive_neighbors == 3 or alive_neighbors == 4:
+                    new_image[i, j] = 1
+    return new_image
+
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     import matplotlib.animation as animation
@@ -64,6 +86,11 @@ if __name__ == '__main__':
 
     # Initialize the grid with random values (0 or 1)
     grid = np.random.choice([0, 1], size=(GRID_SIZE, GRID_SIZE))
+    # grid = np.zeros((GRID_SIZE, GRID_SIZE), dtype=np.uint8)
+    # grid[GRID_SIZE//2, GRID_SIZE//2] = 1
+    # grid[GRID_SIZE//2, GRID_SIZE//2 + 1] = 1
+    # grid[GRID_SIZE//2 + 1, GRID_SIZE//2] = 1
+    # grid[GRID_SIZE//2 + 1, GRID_SIZE//2 + 1] = 1
 
     # Set up the figure and axis
     fig, ax = plt.subplots()
@@ -71,8 +98,9 @@ if __name__ == '__main__':
 
     def animate(frame):
         global grid
-        # grid = cellular_automata_gameoflife_wrap(grid)
-        grid = cellular_automata_highlife_wrap(grid)
+        grid = cellular_automata_gameoflife_wrap(grid)
+        # grid = cellular_automata_highlife_wrap(grid)
+        # grid = cellular_automata_serviettes_wrap(grid)
         img.set_data(grid)
         return [img]
 
