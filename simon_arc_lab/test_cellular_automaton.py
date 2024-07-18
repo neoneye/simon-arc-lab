@@ -3,7 +3,7 @@ import numpy as np
 from .cellular_automaton import *
 
 class TestCellularAutomata(unittest.TestCase):
-    def test_gameoflife_blinker(self):
+    def test_gameoflife_blinker_count1(self):
         input = np.array([
             [0, 0, 0, 0, 0], 
             [0, 0, 1, 0, 0], 
@@ -16,6 +16,22 @@ class TestCellularAutomata(unittest.TestCase):
             [0, 0, 0, 0, 0], 
             [0, 1, 1, 1, 0], 
             [0, 0, 0, 0, 0], 
+            [0, 0, 0, 0, 0]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_gameoflife_blinker_count2(self):
+        input = np.array([
+            [0, 0, 0, 0, 0], 
+            [0, 0, 1, 0, 0], 
+            [0, 0, 1, 0, 0], 
+            [0, 0, 1, 0, 0], 
+            [0, 0, 0, 0, 0]], dtype=np.uint8)
+        actual = CARuleGameOfLife().apply_wrap(input, step_count=2)
+        expected = np.array([
+            [0, 0, 0, 0, 0], 
+            [0, 0, 1, 0, 0], 
+            [0, 0, 1, 0, 0], 
+            [0, 0, 1, 0, 0], 
             [0, 0, 0, 0, 0]], dtype=np.uint8)
         self.assertTrue(np.array_equal(actual, expected))
 
