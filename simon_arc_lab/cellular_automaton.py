@@ -1,81 +1,78 @@
 # Variants of cellular automata
-# IDEA: high life
-# IDEA: serviettes life (persian rug)
 # IDEA: wire world
 import numpy as np
 
+class CARule:
+    def __init__(self):
+        pass
+
+    def apply(self, image):
+        new_image = image.copy()
+        height, width = image.shape
+        for i in range(height):
+            for j in range(width):
+                # Count the number of alive neighbors
+                alive_neighbors = (
+                    image[i, (j-1)%width] + image[i, (j+1)%width] +
+                    image[(i-1)%height, j] + image[(i+1)%height, j] +
+                    image[(i-1)%height, (j-1)%width] + image[(i-1)%height, (j+1)%width] +
+                    image[(i+1)%height, (j-1)%width] + image[(i+1)%height, (j+1)%width]
+                )
+                # Apply the rules of the cellular automaton
+                new_image[i, j] = self.rule(image[i, j], alive_neighbors)
+        return new_image
+    
+    def rule(self, center: int, alive_count: int) -> int:
+        raise NotImplementedError()
+
+class CARuleGameOfLife(CARule):
+    def rule(self, center: int, alive_count: int) -> int:
+        """
+        Apply one step of the Game of Life to the given image.
+        https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
+        """
+        if center == 1:
+            if alive_count < 2 or alive_count > 3:
+                return 0
+        else:
+            if alive_count == 3:
+                return 1
+        return center
+
+class CARuleHighLife(CARule):
+    def rule(self, center: int, alive_count: int) -> int:
+        """
+        Apply one step of the HighLife to the given image.
+        https://en.wikipedia.org/wiki/Highlife_%28cellular_automaton%29
+        https://conwaylife.com/wiki/OCA:HighLife
+        """
+        if center == 1:
+            if alive_count < 2 or alive_count > 3:
+                return 0
+        else:
+            if alive_count == 3 or alive_count == 6:
+                return 1
+        return center
+
+class CARuleServiettes(CARule):
+    def rule(self, center: int, alive_count: int) -> int:
+        """
+        Apply one step of the Serviettes to the given image.
+        https://conwaylife.com/wiki/OCA:Serviettes
+        """
+        if center == 0:
+            if alive_count == 2 or alive_count == 3 or alive_count == 4:
+                return 1
+        return 0
+
 def cellular_automata_gameoflife_wrap(image):
-    """
-    Apply one step of the Game of Life to the given image.
-    https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
-    """
-    new_image = image.copy()
-    height, width = image.shape
-    for i in range(height):
-        for j in range(width):
-            # Count the number of alive neighbors
-            alive_neighbors = (
-                image[i, (j-1)%width] + image[i, (j+1)%width] +
-                image[(i-1)%height, j] + image[(i+1)%height, j] +
-                image[(i-1)%height, (j-1)%width] + image[(i-1)%height, (j+1)%width] +
-                image[(i+1)%height, (j-1)%width] + image[(i+1)%height, (j+1)%width]
-            )
-            # Apply the rules of the Game of Life
-            if image[i, j] == 1:
-                if alive_neighbors < 2 or alive_neighbors > 3:
-                    new_image[i, j] = 0
-            else:
-                if alive_neighbors == 3:
-                    new_image[i, j] = 1
-    return new_image
+    return CARuleGameOfLife().apply(image)
 
 def cellular_automata_highlife_wrap(image):
-    """
-    Apply one step of the HighLife to the given image.
-    https://en.wikipedia.org/wiki/Highlife_%28cellular_automaton%29
-    https://conwaylife.com/wiki/OCA:HighLife
-    """
-    new_image = image.copy()
-    height, width = image.shape
-    for i in range(height):
-        for j in range(width):
-            # Count the number of alive neighbors
-            alive_neighbors = (
-                image[i, (j-1)%width] + image[i, (j+1)%width] +
-                image[(i-1)%height, j] + image[(i+1)%height, j] +
-                image[(i-1)%height, (j-1)%width] + image[(i-1)%height, (j+1)%width] +
-                image[(i+1)%height, (j-1)%width] + image[(i+1)%height, (j+1)%width]
-            )
-            # Apply the rules of the HighLife
-            if image[i, j] == 1:
-                if alive_neighbors < 2 or alive_neighbors > 3:
-                    new_image[i, j] = 0
-            else:
-                if alive_neighbors == 3 or alive_neighbors == 6:
-                    new_image[i, j] = 1
-    return new_image
+    return CARuleHighLife().apply(image)
 
 def cellular_automata_serviettes_wrap(image):
-    """
-    Apply one step of the Serviettes to the given image.
-    https://conwaylife.com/wiki/OCA:Serviettes
-    """
-    height, width = image.shape
-    new_image = np.zeros((height, width), dtype=np.uint8)
-    for i in range(height):
-        for j in range(width):
-            # Count the number of alive neighbors
-            alive_neighbors = (
-                image[i, (j-1)%width] + image[i, (j+1)%width] +
-                image[(i-1)%height, j] + image[(i+1)%height, j] +
-                image[(i-1)%height, (j-1)%width] + image[(i-1)%height, (j+1)%width] +
-                image[(i+1)%height, (j-1)%width] + image[(i+1)%height, (j+1)%width]
-            )
-            # Apply the rules of the Serviettes
-            if image[i, j] == 0:
-                if alive_neighbors == 2 or alive_neighbors == 3 or alive_neighbors == 4:
-                    new_image[i, j] = 1
-    return new_image
+    return CARuleServiettes().apply(image)
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
