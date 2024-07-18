@@ -97,6 +97,18 @@ class CARuleCave(CARule):
             return 1
         return center
 
+class CARuleMaze(CARule):
+    def rule(self, center: int, alive_count: int) -> int:
+        """
+        Create a maze
+        https://conwaylife.com/wiki/OCA:Maze
+        """
+        if alive_count == 3:
+            return 1
+        if alive_count < 1 or alive_count > 5:
+            return 0
+        return center
+
 def cellular_automata_gameoflife_wrap(image):
     return CARuleGameOfLife().apply(image)
 
@@ -111,6 +123,9 @@ def cellular_automata_wireworld_wrap(image):
 
 def cellular_automata_cave_wrap(image):
     return CARuleCave().apply(image)
+
+def cellular_automata_maze_wrap(image):
+    return CARuleMaze().apply(image)
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
@@ -137,6 +152,7 @@ if __name__ == '__main__':
         # grid = cellular_automata_highlife_wrap(grid)
         # grid = cellular_automata_serviettes_wrap(grid)
         # grid = cellular_automata_cave_wrap(grid)
+        # grid = cellular_automata_maze_wrap(grid)
         img.set_data(grid)
         return [img]
 
