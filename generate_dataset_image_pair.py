@@ -19,7 +19,7 @@ def generate_dataset_item(seed):
     :return: A dictionary with the instruction, input, and output
     """
     min_image_size = 10
-    max_image_size = 30
+    max_image_size = 20
 
     transformation_ids = [
         'add_histograms',
@@ -137,8 +137,8 @@ def generate_dataset_item(seed):
 
     instruction = random.Random(seed + 1005).choice(instructions)
 
-    image0 = image_create_random_advanced(seed + 1006, 1, 15, min_image_size, max_image_size)
-    image1 = image_create_random_advanced(seed + 1007, 1, 15, min_image_size, max_image_size)
+    image0 = image_create_random_advanced(seed + 1006, 5, 15, min_image_size, max_image_size)
+    image1 = image_create_random_advanced(seed + 1007, 5, 15, min_image_size, max_image_size)
 
     rle_string0 = serialize(image0)
     rle_string1 = serialize(image1)
@@ -177,7 +177,7 @@ def generate_dataset_item(seed):
     }
     return dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1000000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1100000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
