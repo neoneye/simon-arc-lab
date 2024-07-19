@@ -57,7 +57,7 @@ def generate_one_histogram_dataset_item(seed):
 
     instruction = random.Random(seed + 1006).choice(instructions)
 
-    max_color_value = 3200
+    max_color_value = 6400
     histogram = Histogram.create_random(seed + 1007, 1, 9, 1, max_color_value)
 
     input = histogram.pretty()
@@ -221,7 +221,7 @@ def generate_two_histogram_dataset_item(seed):
 
     instruction = random.Random(seed + 1006).choice(instructions)
 
-    max_color_value = 800
+    max_color_value = 1600
     histogram0 = Histogram.create_random(seed + 1007, 1, 9, 1, max_color_value)
     histogram1 = Histogram.create_random(seed + 1020, 1, 9, 1, max_color_value)
 
@@ -258,11 +258,11 @@ def generate_two_histogram_dataset_item(seed):
     }
     return dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=800000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=900000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
-        if i % 10 == 0:
+        if i % 20 == 0:
             item = generate_one_histogram_dataset_item(seed_start + i)
         else:
             item = generate_two_histogram_dataset_item(seed_start + i)
