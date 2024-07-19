@@ -49,12 +49,19 @@ def generate_dataset_item(seed):
     ]
     algorithm_name = random.Random(seed + 1004).choice(algorithm_names)
 
+    colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    random.Random(seed + 5).shuffle(colors)
+    color0 = colors[0]
+    color1 = colors[1]
+    color2 = colors[2]
+    color3 = colors[3]
+
     instructions_gameoflife_wrap = [
-        f'{algorithm_name}, Game of Life with wrapx and wrapy',
-        f'{algorithm_name}, Game of Life with wrapxy',
-        f'{algorithm_name}, Game of Life with wrap',
-        f'{algorithm_name}, Game of Life wrap=xy',
-        f'{algorithm_name}, Game of Life wrap=both',
+        f'{algorithm_name}, Game of Life with wrapx and wrapy. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{algorithm_name}, Game of Life with wrapxy. {color0} is dead. {color1} is alive.',
+        f'{algorithm_name}, Game of Life with wrap. dead={color0} alive={color1}',
+        f'{algorithm_name}, Game of Life wrap=xy. alive={color1}. dead={color0}.',
+        f'{algorithm_name}, Game of Life wrap=both. live={color1}. dead={color0}.',
     ]
 
     instructions = None
@@ -70,8 +77,18 @@ def generate_dataset_item(seed):
 
     output = None
     if transformation_id == 'gameoflife_wrap':
-        output_image = CARuleGameOfLife().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=1)
-        output = serialize(output_image)
+        dict0 = {
+            color0: 0,
+            color1: 1,
+        }
+        input_image2 = image_replace_colors(input_image, dict0)
+        output_image = CARuleGameOfLife().apply_wrap(input_image2, wrapx=True, wrapy=True, outside_value=0, step_count=1)
+        dict1 = {
+            0: color0,
+            1: color1,
+        }
+        output_image2 = image_replace_colors(output_image, dict1)
+        output = serialize(output_image2)
     else:
         raise Exception("Unreachable code reached")
 
