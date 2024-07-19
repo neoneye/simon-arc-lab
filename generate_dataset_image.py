@@ -55,7 +55,7 @@ def generate_serialize_dataset_item(seed):
     :return: A dictionary with the instruction, input, and output
     """
     min_image_size = 15
-    max_image_size = 30
+    max_image_size = 25
 
     input_formats = [
         'pixels', 
@@ -144,7 +144,7 @@ def generate_deserialize_dataset_item(seed):
     :return: A dictionary with the instruction, input, and output
     """
     min_image_size = 15
-    max_image_size = 30
+    max_image_size = 20
 
     instruction_ids = [
         'pixels', 
@@ -163,7 +163,7 @@ def generate_deserialize_dataset_item(seed):
         'compress_y',
         'compress_xy',
     ]
-    instruction_weights = [10, 10, 200, 10, 10, 10, 10, 10, 10, 0, 0, 0, 10, 10, 10]
+    instruction_weights = [10, 10, 10, 10, 10, 10, 10, 10, 10, 0, 0, 0, 0, 0, 0]
     instruction_id = random.Random(seed + 1001).choices(instruction_ids, weights=instruction_weights, k=1)[0]
 
     names_pixels = [
@@ -455,7 +455,7 @@ def generate_deserialize_dataset_item(seed):
     }
     return dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=700000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=800000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
