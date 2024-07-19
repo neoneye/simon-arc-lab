@@ -343,5 +343,19 @@ class TestImageUtil(unittest.TestCase):
             [1, 2, 3]], dtype=np.uint8)
         self.assertTrue(np.array_equal(actual, expected))
 
+    def test_image_replace_colors1(self):
+        image = np.array([
+            [4, 4, 5, 5, 6, 6], 
+            [7, 7, 9, 9, 8, 8]], dtype=np.uint8)
+        dict = {
+            8: 9,
+            9: 8,
+        }
+        actual = image_replace_colors(image, dict)
+        expected = np.array([
+            [4, 4, 5, 5, 6, 6], 
+            [7, 7, 8, 8, 9, 9]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
 if __name__ == '__main__':
     unittest.main()

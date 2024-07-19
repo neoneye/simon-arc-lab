@@ -1,3 +1,4 @@
+from typing import Dict
 import numpy as np
 import random
 
@@ -283,5 +284,16 @@ def image_translate_wrap(image, dx, dy):
 
     return new_image
 
+def image_replace_colors(image: np.array, dict: Dict) -> np.array:
+    """
+    Replace colors in an image according to a dictionary.
 
+    :param image: The image to process.
+    :param dict: A dictionary where the keys are the colors to replace and the values are the new colors.
+    :return: An image of the same size as the input image.
+    """
+    new_image = np.copy(image)
+    for old_color, new_color in dict.items():
+        new_image[image == old_color] = new_color
+    return new_image
 
