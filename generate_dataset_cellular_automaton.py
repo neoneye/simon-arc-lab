@@ -25,8 +25,10 @@ def generate_dataset_item(seed):
         'highlife_nowrap',
         'serviettes_wrap',
         'serviettes_nowrap',
+        'cave_wrap',
+        'cave_nowrap',
     ]
-    transformation_weights = [10, 10, 10, 10, 10, 10]
+    transformation_weights = [10, 10, 10, 10, 10, 10, 10, 10]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
     algorithm_names = [
@@ -118,6 +120,24 @@ def generate_dataset_item(seed):
         f'{algorithm_name}, serviettes wrap=none. steps={step_count}. live={color1}. dead={color0}.',
     ]
 
+    instructions_cave_wrap = [
+        f'{algorithm_name}, Cave with wrapx and wrapy. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{algorithm_name}, Cave with wrapxy. steps={step_count}. {color0} is dead. {color1} is alive.',
+        f'{algorithm_name}, Cave with wrap. steps={step_count}. dead={color0} alive={color1}',
+        f'{algorithm_name}, Cave wrap=xy. steps={step_count}. alive={color1}. dead={color0}.',
+        f'{algorithm_name}, Cave wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+        f'{algorithm_name}, cave wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+    ]
+
+    instructions_cave_nowrap = [
+        f'{algorithm_name}, Cave without wrap. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{algorithm_name}, Cave with nowrap. steps={step_count}. {color0} is dead. {color1} is alive.',
+        f'{algorithm_name}, Cave with wrap=none. steps={step_count}. dead={color0} alive={color1}',
+        f'{algorithm_name}, Cave wrap=no. steps={step_count}. alive={color1}. dead={color0}.',
+        f'{algorithm_name}, Cave wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+        f'{algorithm_name}, cave wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+    ]
+
     instructions = None
     if transformation_id == 'gameoflife_wrap':
         instructions = instructions_gameoflife_wrap
@@ -131,6 +151,10 @@ def generate_dataset_item(seed):
         instructions = instructions_serviettes_wrap
     elif transformation_id == 'serviettes_nowrap':
         instructions = instructions_serviettes_nowrap
+    elif transformation_id == 'cave_wrap':
+        instructions = instructions_cave_wrap
+    elif transformation_id == 'cave_nowrap':
+        instructions = instructions_cave_nowrap
     else:
         raise Exception("Unreachable code reached")
 
@@ -173,6 +197,10 @@ def generate_dataset_item(seed):
         output_image = CARuleServiettes().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=step_count)
     elif transformation_id == 'serviettes_nowrap':
         output_image = CARuleServiettes().apply_wrap(input_image, wrapx=False, wrapy=False, outside_value=0, step_count=step_count)
+    elif transformation_id == 'cave_wrap':
+        output_image = CARuleCave().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=step_count)
+    elif transformation_id == 'cave_nowrap':
+        output_image = CARuleCave().apply_wrap(input_image, wrapx=False, wrapy=False, outside_value=0, step_count=step_count)
     else:
         raise Exception("Unreachable code reached")
     
