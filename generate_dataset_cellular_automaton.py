@@ -31,7 +31,8 @@ def generate_dataset_item(seed):
         'maze_wrap',
         'maze_nowrap',
     ]
-    transformation_weights = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    # transformation_weights = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    transformation_weights = [10, 0, 10, 0, 10, 0, 10, 0, 10, 0]
     # transformation_weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 10]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
@@ -257,7 +258,7 @@ def generate_dataset_item(seed):
     }
     return dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=200000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=300000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
