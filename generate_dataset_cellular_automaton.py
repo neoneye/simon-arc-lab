@@ -20,12 +20,11 @@ def generate_dataset_item(seed):
 
     transformation_ids = [
         'gameoflife_wrap',
-        # 'gameoflife_nowrap',
-        # 'highlife_wrap',
-        # 'highlife_nowrap',
+        'gameoflife_nowrap',
+        'highlife_wrap',
+        'highlife_nowrap',
     ]
-    # transformation_weights = [10, 10, 10, 10]
-    transformation_weights = [10]
+    transformation_weights = [0, 0, 0, 10]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
     algorithm_names = [
@@ -57,17 +56,49 @@ def generate_dataset_item(seed):
     color2 = colors[2]
     color3 = colors[3]
 
+    step_count = random.Random(seed + 1).randint(1, 2)
+
     instructions_gameoflife_wrap = [
-        f'{algorithm_name}, Game of Life with wrapx and wrapy. Dead cells have value {color0}. Alive cells have value {color1}.',
-        f'{algorithm_name}, Game of Life with wrapxy. {color0} is dead. {color1} is alive.',
-        f'{algorithm_name}, Game of Life with wrap. dead={color0} alive={color1}',
-        f'{algorithm_name}, Game of Life wrap=xy. alive={color1}. dead={color0}.',
-        f'{algorithm_name}, Game of Life wrap=both. live={color1}. dead={color0}.',
+        f'{algorithm_name}, Game of Life with wrapx and wrapy. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{algorithm_name}, Game of Life with wrapxy. steps={step_count}. {color0} is dead. {color1} is alive.',
+        f'{algorithm_name}, Game of Life with wrap. steps={step_count}. dead={color0} alive={color1}',
+        f'{algorithm_name}, Game of Life wrap=xy. steps={step_count}. alive={color1}. dead={color0}.',
+        f'{algorithm_name}, Game of Life wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+    ]
+
+    instructions_gameoflife_nowrap = [
+        f'{algorithm_name}, Game of Life without wrap. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{algorithm_name}, Game of Life with nowrap. steps={step_count}. {color0} is dead. {color1} is alive.',
+        f'{algorithm_name}, Game of Life with wrap=none. steps={step_count}. dead={color0} alive={color1}',
+        f'{algorithm_name}, Game of Life wrap=no. steps={step_count}. alive={color1}. dead={color0}.',
+        f'{algorithm_name}, Game of Life wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+    ]
+
+    instructions_highlife_wrap = [
+        f'{algorithm_name}, HighLife with wrapx and wrapy. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{algorithm_name}, HighLife with wrapxy. steps={step_count}. {color0} is dead. {color1} is alive.',
+        f'{algorithm_name}, HighLife with wrap. steps={step_count}. dead={color0} alive={color1}',
+        f'{algorithm_name}, HighLife wrap=xy. steps={step_count}. alive={color1}. dead={color0}.',
+        f'{algorithm_name}, HighLife wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+    ]
+
+    instructions_highlife_nowrap = [
+        f'{algorithm_name}, HighLife without wrap. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{algorithm_name}, HighLife with nowrap. steps={step_count}. {color0} is dead. {color1} is alive.',
+        f'{algorithm_name}, HighLife with wrap=none. steps={step_count}. dead={color0} alive={color1}',
+        f'{algorithm_name}, HighLife wrap=no. steps={step_count}. alive={color1}. dead={color0}.',
+        f'{algorithm_name}, HighLife wrap=none. steps={step_count}. live={color1}. dead={color0}.',
     ]
 
     instructions = None
     if transformation_id == 'gameoflife_wrap':
         instructions = instructions_gameoflife_wrap
+    elif transformation_id == 'gameoflife_nowrap':
+        instructions = instructions_gameoflife_nowrap
+    elif transformation_id == 'highlife_wrap':
+        instructions = instructions_highlife_wrap
+    elif transformation_id == 'highlife_nowrap':
+        instructions = instructions_highlife_nowrap
     else:
         raise Exception("Unreachable code reached")
 
@@ -76,11 +107,13 @@ def generate_dataset_item(seed):
     width = random.Random(seed + 1).randint(min_image_size, max_image_size)
     height = random.Random(seed + 2).randint(min_image_size, max_image_size)
 
-    ratios = [0.1, 0.2, 0.3, 0.4, 0.5]
+    ratios = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     ratio = random.Random(seed + 5).choice(ratios)
-    input_image = image_create_random_with_two_colors(width, height, color0, color1, ratio, seed + 6)
+    input_image = image_create_random_with_two_colors(width, height, 0, 1, ratio, seed + 6)
+    # print(input_image)
 
     mutate_input_id = random.Random(seed + 3).randint(0, 5)
+    # print(mutate_input_id)
     if mutate_input_id == 0:
         pass
     elif mutate_input_id == 1:
@@ -93,10 +126,17 @@ def generate_dataset_item(seed):
         input_image = CARuleCave().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=1)
     elif mutate_input_id == 5:
         input_image = CARuleMaze().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=1)
+    # print(input_image)
 
     output = None
     if transformation_id == 'gameoflife_wrap':
-        output_image = CARuleGameOfLife().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=1)
+        output_image = CARuleGameOfLife().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=step_count)
+    elif transformation_id == 'gameoflife_nowrap':
+        output_image = CARuleGameOfLife().apply_wrap(input_image, wrapx=False, wrapy=False, outside_value=0, step_count=step_count)
+    elif transformation_id == 'highlife_wrap':
+        output_image = CARuleHighLife().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=step_count)
+    elif transformation_id == 'highlife_nowrap':
+        output_image = CARuleHighLife().apply_wrap(input_image, wrapx=False, wrapy=False, outside_value=0, step_count=step_count)
     else:
         raise Exception("Unreachable code reached")
     
@@ -110,11 +150,13 @@ def generate_dataset_item(seed):
     input = serialize(input_image2)
     output = serialize(output_image2)
 
-    plt.imshow(input_image, cmap='gray')
-    plt.show()
-    #plt.imshow(output_image, cmap='gray')
-    #plt.show()
-
+    # print(instruction)
+    # print(input_image2)
+    # print(output_image2)
+    # plt.imshow(input_image, cmap='gray')
+    # plt.show()
+    # plt.imshow(output_image, cmap='gray')
+    # plt.show()
 
     dict = {
         'instruction': instruction,
@@ -136,7 +178,7 @@ def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1
     return dataset
 
 dataset = generate_dataset(
-    max_num_samples=6,
+    max_num_samples=60,
     max_byte_size=1024*1024*60,
 )
 
