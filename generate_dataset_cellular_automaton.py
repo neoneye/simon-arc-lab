@@ -6,6 +6,7 @@ from simon_arc_lab.rle.serialize import serialize
 from simon_arc_lab.image_util import *
 from simon_arc_lab.cellular_automaton import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
+import matplotlib.pyplot as plt
 
 def generate_dataset_item(seed):
     """
@@ -72,25 +73,48 @@ def generate_dataset_item(seed):
 
     instruction = random.Random(seed + 1005).choice(instructions)
 
-    input_image = image_create_random_advanced(seed + 1006, min_image_size, max_image_size, min_image_size, max_image_size)
-    input = serialize(input_image)
+    width = random.Random(seed + 1).randint(min_image_size, max_image_size)
+    height = random.Random(seed + 2).randint(min_image_size, max_image_size)
+
+    ratios = [0.1, 0.2, 0.3, 0.4, 0.5]
+    ratio = random.Random(seed + 5).choice(ratios)
+    input_image = image_create_random_with_two_colors(width, height, color0, color1, ratio, seed + 6)
+
+    mutate_input_id = random.Random(seed + 3).randint(0, 5)
+    if mutate_input_id == 0:
+        pass
+    elif mutate_input_id == 1:
+        input_image = CARuleGameOfLife().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=1)
+    elif mutate_input_id == 2:
+        input_image = CARuleHighLife().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=1)
+    elif mutate_input_id == 3:
+        input_image = CARuleServiettes().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=1)
+    elif mutate_input_id == 4:
+        input_image = CARuleCave().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=1)
+    elif mutate_input_id == 5:
+        input_image = CARuleMaze().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=1)
 
     output = None
     if transformation_id == 'gameoflife_wrap':
-        dict0 = {
-            color0: 0,
-            color1: 1,
-        }
-        input_image2 = image_replace_colors(input_image, dict0)
-        output_image = CARuleGameOfLife().apply_wrap(input_image2, wrapx=True, wrapy=True, outside_value=0, step_count=1)
-        dict1 = {
-            0: color0,
-            1: color1,
-        }
-        output_image2 = image_replace_colors(output_image, dict1)
-        output = serialize(output_image2)
+        output_image = CARuleGameOfLife().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=1)
     else:
         raise Exception("Unreachable code reached")
+    
+    color_mapping = {}
+    for color_index in range(len(colors)):
+        color = colors[color_index]
+        color_mapping[color_index] = color
+
+    input_image2 = image_replace_colors(input_image, color_mapping)
+    output_image2 = image_replace_colors(output_image, color_mapping)
+    input = serialize(input_image2)
+    output = serialize(output_image2)
+
+    plt.imshow(input_image, cmap='gray')
+    plt.show()
+    #plt.imshow(output_image, cmap='gray')
+    #plt.show()
+
 
     dict = {
         'instruction': instruction,
@@ -112,7 +136,7 @@ def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1
     return dataset
 
 dataset = generate_dataset(
-    max_num_samples=100,
+    max_num_samples=6,
     max_byte_size=1024*1024*60,
 )
 
