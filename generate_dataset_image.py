@@ -54,8 +54,8 @@ def generate_serialize_dataset_item(seed):
     :param seed: The seed for the random number generator
     :return: A dictionary with the instruction, input, and output
     """
-    min_image_size = 15
-    max_image_size = 25
+    min_image_size = 22
+    max_image_size = 30
 
     input_formats = [
         'pixels', 
@@ -162,8 +162,12 @@ def generate_deserialize_dataset_item(seed):
         'compress_x',
         'compress_y',
         'compress_xy',
+        'translate_x_minus1',
+        'translate_x_plus1',
+        'translate_y_minus1',
+        'translate_y_plus1',
     ]
-    instruction_weights = [10, 10, 10, 10, 10, 10, 10, 10, 10, 0, 0, 0, 0, 0, 0]
+    instruction_weights = [10, 10, 10, 10, 10, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 10, 10, 10, 10]
     instruction_id = random.Random(seed + 1001).choices(instruction_ids, weights=instruction_weights, k=1)[0]
 
     names_pixels = [
@@ -351,33 +355,81 @@ def generate_deserialize_dataset_item(seed):
         f'remove duplicate adjacent columns and rows from {name_input}',
     ]
 
-    instructions = instructions_input_output
-    if instruction_id == 'histogram':
+    instructions_translate_x_minus1 = [
+        f'Translate x minus 1, {name_input}',
+        f'Translate x-1 {name_input}',
+        f'move left by 1 pixel {name_input}',
+        f'{name_input}, translate x by -1',
+        f'{name_input}, return translated x-1',
+        f'{name_input}, move left by 1 pixel',
+    ]
+    instructions_translate_x_plus1 = [
+        f'Translate x plus 1, {name_input}',
+        f'Translate x+1 {name_input}',
+        f'move right by 1 pixel {name_input}',
+        f'{name_input}, translate x by +1',
+        f'{name_input}, return translated x+1',
+        f'{name_input}, move right by 1 pixel',
+    ]
+    instructions_translate_y_minus1 = [
+        f'Translate y minus 1, {name_input}',
+        f'Translate y-1 {name_input}',
+        f'move up by 1 pixel {name_input}',
+        f'{name_input}, translate y by -1',
+        f'{name_input}, return translated y-1',
+        f'{name_input}, move up by 1 pixel',
+    ]
+    instructions_translate_y_plus1 = [
+        f'Translate y plus 1, {name_input}',
+        f'Translate y+1 {name_input}',
+        f'move down by 1 pixel {name_input}',
+        f'{name_input}, translate y by +1',
+        f'{name_input}, return translated y+1',
+        f'{name_input}, move down by 1 pixel',
+    ]
+
+    instructions = None
+    if instruction_id == 'pixels':
+        instructions = instructions_input_output
+    elif instruction_id == 'json':
+        instructions = instructions_input_output
+    elif instruction_id == 'histogram':
         instructions = instructions_histogram
-    if instruction_id == 'flipx':
+    elif instruction_id == 'flipx':
         instructions = instructions_flipx
-    if instruction_id == 'flipy':
+    elif instruction_id == 'flipy':
         instructions = instructions_flipy
-    if instruction_id == 'transpose':
+    elif instruction_id == 'transpose':
         instructions = instructions_transpose
-    if instruction_id == 'rotate_cw':
+    elif instruction_id == 'rotate_cw':
         instructions = instructions_rotate_cw
-    if instruction_id == 'rotate_ccw':
+    elif instruction_id == 'rotate_ccw':
         instructions = instructions_rotate_ccw
-    if instruction_id == 'rotate_180':
+    elif instruction_id == 'rotate_180':
         instructions = instructions_rotate_180
-    if instruction_id == 'count_neighbors_with_same_color':
+    elif instruction_id == 'count_neighbors_with_same_color':
         instructions = instructions_count_neighbors_with_same_color
-    if instruction_id == 'all_neighbors_matching_center':
+    elif instruction_id == 'all_neighbors_matching_center':
         instructions = instructions_all_neighbors_matching_center
-    if instruction_id == 'pixels_with_k_matching_neighbors':
+    elif instruction_id == 'pixels_with_k_matching_neighbors':
         instructions = instructions_pixels_with_k_matching_neighbors
-    if instruction_id == 'compress_x':
+    elif instruction_id == 'compress_x':
         instructions = instructions_compress_x
-    if instruction_id == 'compress_y':
+    elif instruction_id == 'compress_y':
         instructions = instructions_compress_y
-    if instruction_id == 'compress_xy':
+    elif instruction_id == 'compress_xy':
         instructions = instructions_compress_xy
+    elif instruction_id == 'translate_x_minus1':
+        instructions = instructions_translate_x_minus1
+    elif instruction_id == 'translate_x_plus1':
+        instructions = instructions_translate_x_plus1
+    elif instruction_id == 'translate_y_minus1':
+        instructions = instructions_translate_y_minus1
+    elif instruction_id == 'translate_y_plus1':
+        instructions = instructions_translate_y_plus1
+    else:
+        raise Exception("Unreachable code reached")
+
 
     instruction = random.Random(seed + 1005).choice(instructions)
 
@@ -445,6 +497,22 @@ def generate_deserialize_dataset_item(seed):
         new_image = compress_xy(image)
         output_rle_string = serialize(new_image)
         output = output_rle_string
+    elif instruction_id == 'translate_x_minus1':
+        new_image = image_translate_wrap(image, -1, 0)
+        output_rle_string = serialize(new_image)
+        output = output_rle_string
+    elif instruction_id == 'translate_x_plus1':
+        new_image = image_translate_wrap(image, 1, 0)
+        output_rle_string = serialize(new_image)
+        output = output_rle_string
+    elif instruction_id == 'translate_y_minus1':
+        new_image = image_translate_wrap(image, 0, -1)
+        output_rle_string = serialize(new_image)
+        output = output_rle_string
+    elif instruction_id == 'translate_y_plus1':
+        new_image = image_translate_wrap(image, 0, 1)
+        output_rle_string = serialize(new_image)
+        output = output_rle_string
     else:
         raise Exception("Unreachable code reached")
 
@@ -455,7 +523,7 @@ def generate_deserialize_dataset_item(seed):
     }
     return dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=800000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=900000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
