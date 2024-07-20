@@ -17,7 +17,7 @@ def generate_dataset_item(seed):
     :return: A dictionary with the instruction, input, and output
     """
     min_image_size = 4
-    max_image_size = 10
+    max_image_size = 11
 
     transformation_ids = [
         'gameoflife_wrap',
@@ -61,10 +61,8 @@ def generate_dataset_item(seed):
     random.Random(seed + 5).shuffle(colors)
     color0 = colors[0]
     color1 = colors[1]
-    color2 = colors[2]
-    color3 = colors[3]
 
-    step_count = random.Random(seed + 1).randint(1, 2)
+    step_count = random.Random(seed + 1).randint(1, 1)
 
     instructions_gameoflife_wrap = [
         f'{algorithm_name}, Game of Life with wrapx and wrapy. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
@@ -259,7 +257,7 @@ def generate_dataset_item(seed):
     }
     return dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=100000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=200000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
