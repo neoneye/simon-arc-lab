@@ -23,8 +23,10 @@ def generate_dataset_item(seed):
         'gameoflife_nowrap',
         'highlife_wrap',
         'highlife_nowrap',
+        'serviettes_wrap',
+        'serviettes_nowrap',
     ]
-    transformation_weights = [0, 0, 0, 10]
+    transformation_weights = [10, 10, 10, 10, 10, 10]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
     algorithm_names = [
@@ -64,6 +66,8 @@ def generate_dataset_item(seed):
         f'{algorithm_name}, Game of Life with wrap. steps={step_count}. dead={color0} alive={color1}',
         f'{algorithm_name}, Game of Life wrap=xy. steps={step_count}. alive={color1}. dead={color0}.',
         f'{algorithm_name}, Game of Life wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+        f'{algorithm_name}, game of life wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+        f'{algorithm_name}, game-of-life wrap=both. steps={step_count}. live={color1}. dead={color0}.',
     ]
 
     instructions_gameoflife_nowrap = [
@@ -72,6 +76,8 @@ def generate_dataset_item(seed):
         f'{algorithm_name}, Game of Life with wrap=none. steps={step_count}. dead={color0} alive={color1}',
         f'{algorithm_name}, Game of Life wrap=no. steps={step_count}. alive={color1}. dead={color0}.',
         f'{algorithm_name}, Game of Life wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+        f'{algorithm_name}, game of life wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+        f'{algorithm_name}, game-of-life wrap=none. steps={step_count}. live={color1}. dead={color0}.',
     ]
 
     instructions_highlife_wrap = [
@@ -80,6 +86,8 @@ def generate_dataset_item(seed):
         f'{algorithm_name}, HighLife with wrap. steps={step_count}. dead={color0} alive={color1}',
         f'{algorithm_name}, HighLife wrap=xy. steps={step_count}. alive={color1}. dead={color0}.',
         f'{algorithm_name}, HighLife wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+        f'{algorithm_name}, highlife wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+        f'{algorithm_name}, high-life wrap=both. steps={step_count}. live={color1}. dead={color0}.',
     ]
 
     instructions_highlife_nowrap = [
@@ -88,6 +96,26 @@ def generate_dataset_item(seed):
         f'{algorithm_name}, HighLife with wrap=none. steps={step_count}. dead={color0} alive={color1}',
         f'{algorithm_name}, HighLife wrap=no. steps={step_count}. alive={color1}. dead={color0}.',
         f'{algorithm_name}, HighLife wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+        f'{algorithm_name}, highlife wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+        f'{algorithm_name}, high-life wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+    ]
+
+    instructions_serviettes_wrap = [
+        f'{algorithm_name}, Serviettes with wrapx and wrapy. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{algorithm_name}, Serviettes with wrapxy. steps={step_count}. {color0} is dead. {color1} is alive.',
+        f'{algorithm_name}, Serviettes with wrap. steps={step_count}. dead={color0} alive={color1}',
+        f'{algorithm_name}, Serviettes wrap=xy. steps={step_count}. alive={color1}. dead={color0}.',
+        f'{algorithm_name}, Serviettes wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+        f'{algorithm_name}, serviettes wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+    ]
+
+    instructions_serviettes_nowrap = [
+        f'{algorithm_name}, Serviettes without wrap. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{algorithm_name}, Serviettes with nowrap. steps={step_count}. {color0} is dead. {color1} is alive.',
+        f'{algorithm_name}, Serviettes with wrap=none. steps={step_count}. dead={color0} alive={color1}',
+        f'{algorithm_name}, Serviettes wrap=no. steps={step_count}. alive={color1}. dead={color0}.',
+        f'{algorithm_name}, Serviettes wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+        f'{algorithm_name}, serviettes wrap=none. steps={step_count}. live={color1}. dead={color0}.',
     ]
 
     instructions = None
@@ -99,6 +127,10 @@ def generate_dataset_item(seed):
         instructions = instructions_highlife_wrap
     elif transformation_id == 'highlife_nowrap':
         instructions = instructions_highlife_nowrap
+    elif transformation_id == 'serviettes_wrap':
+        instructions = instructions_serviettes_wrap
+    elif transformation_id == 'serviettes_nowrap':
+        instructions = instructions_serviettes_nowrap
     else:
         raise Exception("Unreachable code reached")
 
@@ -137,6 +169,10 @@ def generate_dataset_item(seed):
         output_image = CARuleHighLife().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=step_count)
     elif transformation_id == 'highlife_nowrap':
         output_image = CARuleHighLife().apply_wrap(input_image, wrapx=False, wrapy=False, outside_value=0, step_count=step_count)
+    elif transformation_id == 'serviettes_wrap':
+        output_image = CARuleServiettes().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=step_count)
+    elif transformation_id == 'serviettes_nowrap':
+        output_image = CARuleServiettes().apply_wrap(input_image, wrapx=False, wrapy=False, outside_value=0, step_count=step_count)
     else:
         raise Exception("Unreachable code reached")
     
