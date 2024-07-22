@@ -1,14 +1,13 @@
+# IDEA: Currently it's image sizes 1-5 that are being exercised. Extend this to bigger sizes.
 # IDEA: extract the image pair number N, that contains both input+output
-# IDEA: comparison of 2 images, add histograms together
-# IDEA: comparison of 2 images, intersection of histograms
+# IDEA: comparison of 2 images, add histograms
+# IDEA: comparison of 2 images, subtract histograms
 # IDEA: comparison of 2 images, are they the same, are they different
 # IDEA: extract output A
 # IDEA: histogram of input B
 # IDEA: rotate cw output D
 # IDEA: flipx input E
 # IDEA: compare input E and output E
-# IDEA: intersection of input/output histograms for pair N
-# IDEA: union of input/output histograms for pair N
 # IDEA: intersection of all input histograms
 # IDEA: union of all input histograms
 # IDEA: intersection of all output histograms
