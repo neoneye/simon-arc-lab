@@ -113,10 +113,10 @@ def generate_task(seed):
     count_example = random.Random(seed + 1).randint(2, 5)
     count_test = random.Random(seed + 2).randint(1, 3)
     task = MyTask()
-    min_width = 1
-    max_width = 5
-    min_height = 3
-    max_height = 8
+    min_width = 3
+    max_width = 8
+    min_height = 1
+    max_height = 5
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -473,7 +473,7 @@ def generate_dataset_item(seed):
     }
     return dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=700000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=800000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
