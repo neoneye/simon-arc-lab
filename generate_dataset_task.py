@@ -114,9 +114,9 @@ def generate_task(seed):
     count_test = random.Random(seed + 2).randint(1, 3)
     task = MyTask()
     min_width = 3
-    max_width = 10
+    max_width = 8
     min_height = 3
-    max_height = 10
+    max_height = 8
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -155,9 +155,13 @@ def generate_dataset_item(seed):
         'flipy_output_by_id',
         'pair_histogram_intersection_colors',
         'pair_histogram_union_colors',
+        'pair_histogram_add',
+        'pair_histogram_max',
+        'pair_histogram_min',
     ]
-    instruction_weights = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
-    # instruction_weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 50]
+    instruction_weights = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    # instruction_weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50]
+    # instruction_weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=instruction_weights, k=1)[0]
 
 
@@ -378,6 +382,80 @@ def generate_dataset_item(seed):
         ]
         instruction = random.Random(seed + 1006).choice(instructions)
 
+    if transformation_id == 'pair_histogram_add':
+        count = task.count()
+        pair_index = random.Random(seed + 1).randint(0, count-1)
+        pair_id = task.pair_ids()[pair_index]
+        input_image = task.input_images[pair_index]
+        output_image = task.output_images[pair_index]
+        if output_image is None:
+            output = "maybe"
+        else:
+            histogram_input = Histogram.create_with_image(input_image)
+            histogram_output = Histogram.create_with_image(output_image)
+            histogram = histogram_input.add(histogram_output)
+            unique_colors = histogram.pretty()
+            output = unique_colors
+        instructions = [
+            f'{dataformat_name}, {pair_id}, add histograms of the images',
+            f'{dataformat_name}, {pair_id}, add histograms of the two images',
+            f'{dataformat_name}, {pair_id}, add histograms of the 2 images',
+            f'{dataformat_name}, {pair_id}, add histograms',
+            f'{dataformat_name}, {pair_id}, the histograms added',
+            f'{dataformat_name}, {pair_id}, sum of histograms',
+        ]
+        instruction = random.Random(seed + 1006).choice(instructions)
+
+    if transformation_id == 'pair_histogram_max':
+        count = task.count()
+        pair_index = random.Random(seed + 1).randint(0, count-1)
+        pair_id = task.pair_ids()[pair_index]
+        input_image = task.input_images[pair_index]
+        output_image = task.output_images[pair_index]
+        if output_image is None:
+            output = "maybe"
+        else:
+            histogram_input = Histogram.create_with_image(input_image)
+            histogram_output = Histogram.create_with_image(output_image)
+            histogram = histogram_input.max(histogram_output)
+            unique_colors = histogram.pretty()
+            output = unique_colors
+        instructions = [
+            f'{dataformat_name}, {pair_id}, max histogram of the images',
+            f'{dataformat_name}, {pair_id}, max histogram of the two images',
+            f'{dataformat_name}, {pair_id}, max histogram of the 2 images',
+            f'{dataformat_name}, {pair_id}, max histograms',
+            f'{dataformat_name}, {pair_id}, the histograms max',
+            f'{dataformat_name}, {pair_id}, max of histograms',
+            f'{dataformat_name}, {pair_id}, maximum of histograms',
+        ]
+        instruction = random.Random(seed + 1006).choice(instructions)
+
+    if transformation_id == 'pair_histogram_min':
+        count = task.count()
+        pair_index = random.Random(seed + 1).randint(0, count-1)
+        pair_id = task.pair_ids()[pair_index]
+        input_image = task.input_images[pair_index]
+        output_image = task.output_images[pair_index]
+        if output_image is None:
+            output = "maybe"
+        else:
+            histogram_input = Histogram.create_with_image(input_image)
+            histogram_output = Histogram.create_with_image(output_image)
+            histogram = histogram_input.min(histogram_output)
+            unique_colors = histogram.pretty()
+            output = unique_colors
+        instructions = [
+            f'{dataformat_name}, {pair_id}, min histogram of the images',
+            f'{dataformat_name}, {pair_id}, min histogram of the two images',
+            f'{dataformat_name}, {pair_id}, min histogram of the 2 images',
+            f'{dataformat_name}, {pair_id}, min histograms',
+            f'{dataformat_name}, {pair_id}, the histograms min',
+            f'{dataformat_name}, {pair_id}, min of histograms',
+            f'{dataformat_name}, {pair_id}, minimum of histograms',
+        ]
+        instruction = random.Random(seed + 1006).choice(instructions)
+
     debug = False
     if debug:
         print("---")
@@ -395,7 +473,7 @@ def generate_dataset_item(seed):
     }
     return dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=500000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=600000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
