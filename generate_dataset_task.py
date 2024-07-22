@@ -69,6 +69,17 @@ class MyTask:
             names.append(f"Output {i} {name}")
         return names
     
+    def pair_ids(self):
+        self.assert_count()
+        names = []
+        for i in range(len(self.input_images)):
+            if i < self.count_examples:
+                name = "Example"
+            else:
+                name = "Test"
+            names.append(f"Pair {i} {name}")
+        return names
+    
     def serialize_input_image(self, i):
         self.assert_count()
         if i < 0 or i >= len(self.input_images):
@@ -134,7 +145,7 @@ def generate_dataset_item(seed):
     ]
     dataformat_name = random.Random(seed + 1004).choice(dataformat_names)
 
-    instruction_ids = [
+    transformation_ids = [
         'extract_input_by_id', 
         'extract_output_by_id', 
         'histogram_input_by_id', 
@@ -143,9 +154,12 @@ def generate_dataset_item(seed):
         'flipx_output_by_id',
         'flipy_input_by_id',
         'flipy_output_by_id',
+        'pair_histogram_intersection_colors',
+        'pair_histogram_union_colors',
     ]
-    instruction_weights = [30, 30, 50, 50, 5, 5, 5, 5]
-    instruction_id = random.Random(seed + 1001).choices(instruction_ids, weights=instruction_weights, k=1)[0]
+    instruction_weights = [10, 10, 10, 10, 10, 10, 10, 10, 50, 50]
+    # instruction_weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 50]
+    transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=instruction_weights, k=1)[0]
 
 
     task = generate_task(seed)
@@ -155,11 +169,11 @@ def generate_dataset_item(seed):
     output = None
     instruction = None
 
-    if instruction_id == 'extract_input_by_id':
+    if transformation_id == 'extract_input_by_id':
         count = task.count()
-        image_index = random.Random(seed + 1).randint(0, count-1)
-        image_id = task.input_ids()[image_index]
-        output = task.serialize_input_image(image_index)
+        pair_index = random.Random(seed + 1).randint(0, count-1)
+        image_id = task.input_ids()[pair_index]
+        output = task.serialize_input_image(pair_index)
         instructions = [
             f"This is {dataformat_name} data. Extract {image_id}",
             f"This is {dataformat_name} data. Extract '{image_id}'",
@@ -170,11 +184,11 @@ def generate_dataset_item(seed):
         ]
         instruction = random.Random(seed + 1006).choice(instructions)
 
-    if instruction_id == 'extract_output_by_id':
+    if transformation_id == 'extract_output_by_id':
         count = task.count()
-        image_index = random.Random(seed + 1).randint(0, count-1)
-        image_id = task.output_ids()[image_index]
-        output = task.serialize_output_image(image_index)
+        pair_index = random.Random(seed + 1).randint(0, count-1)
+        image_id = task.output_ids()[pair_index]
+        output = task.serialize_output_image(pair_index)
         instructions = [
             f"This is {dataformat_name} data. Extract {image_id}",
             f"This is {dataformat_name} data. Extract '{image_id}'",
@@ -185,11 +199,11 @@ def generate_dataset_item(seed):
         ]
         instruction = random.Random(seed + 1006).choice(instructions)
 
-    if instruction_id == 'histogram_input_by_id':
+    if transformation_id == 'histogram_input_by_id':
         count = task.count()
-        image_index = random.Random(seed + 1).randint(0, count-1)
-        image_id = task.input_ids()[image_index]
-        histogram = Histogram.create_with_image(task.input_images[image_index])
+        pair_index = random.Random(seed + 1).randint(0, count-1)
+        image_id = task.input_ids()[pair_index]
+        histogram = Histogram.create_with_image(task.input_images[pair_index])
         output = histogram.pretty()
         instructions = [
             f"This is {dataformat_name} data. Histogram of {image_id}",
@@ -203,11 +217,11 @@ def generate_dataset_item(seed):
         ]
         instruction = random.Random(seed + 1006).choice(instructions)
 
-    if instruction_id == 'histogram_output_by_id':
+    if transformation_id == 'histogram_output_by_id':
         count = task.count()
-        image_index = random.Random(seed + 1).randint(0, count-1)
-        image_id = task.output_ids()[image_index]
-        image = task.output_images[image_index]
+        pair_index = random.Random(seed + 1).randint(0, count-1)
+        image_id = task.output_ids()[pair_index]
+        image = task.output_images[pair_index]
         if image is None:
             output = "None"
         else:
@@ -225,11 +239,11 @@ def generate_dataset_item(seed):
         ]
         instruction = random.Random(seed + 1006).choice(instructions)
 
-    if instruction_id == 'flipx_input_by_id':
+    if transformation_id == 'flipx_input_by_id':
         count = task.count()
-        image_index = random.Random(seed + 1).randint(0, count-1)
-        image_id = task.input_ids()[image_index]
-        image = task.input_images[image_index]
+        pair_index = random.Random(seed + 1).randint(0, count-1)
+        image_id = task.input_ids()[pair_index]
+        image = task.input_images[pair_index]
         flipped_image = image[:, ::-1]
         output = serialize(flipped_image)
         instructions = [
@@ -245,11 +259,11 @@ def generate_dataset_item(seed):
         ]
         instruction = random.Random(seed + 1006).choice(instructions)
 
-    if instruction_id == 'flipx_output_by_id':
+    if transformation_id == 'flipx_output_by_id':
         count = task.count()
-        image_index = random.Random(seed + 1).randint(0, count-1)
-        image_id = task.output_ids()[image_index]
-        image = task.output_images[image_index]
+        pair_index = random.Random(seed + 1).randint(0, count-1)
+        image_id = task.output_ids()[pair_index]
+        image = task.output_images[pair_index]
         if image is None:
             output = "None"
         else:
@@ -268,11 +282,11 @@ def generate_dataset_item(seed):
         ]
         instruction = random.Random(seed + 1006).choice(instructions)
 
-    if instruction_id == 'flipy_input_by_id':
+    if transformation_id == 'flipy_input_by_id':
         count = task.count()
-        image_index = random.Random(seed + 1).randint(0, count-1)
-        image_id = task.input_ids()[image_index]
-        image = task.input_images[image_index]
+        pair_index = random.Random(seed + 1).randint(0, count-1)
+        image_id = task.input_ids()[pair_index]
+        image = task.input_images[pair_index]
         flipped_image = image[::-1, :]
         output = serialize(flipped_image)
         instructions = [
@@ -288,11 +302,11 @@ def generate_dataset_item(seed):
         ]
         instruction = random.Random(seed + 1006).choice(instructions)
 
-    if instruction_id == 'flipy_output_by_id':
+    if transformation_id == 'flipy_output_by_id':
         count = task.count()
-        image_index = random.Random(seed + 1).randint(0, count-1)
-        image_id = task.output_ids()[image_index]
-        image = task.output_images[image_index]
+        pair_index = random.Random(seed + 1).randint(0, count-1)
+        image_id = task.output_ids()[pair_index]
+        image = task.output_images[pair_index]
         if image is None:
             output = "None"
         else:
@@ -308,6 +322,60 @@ def generate_dataset_item(seed):
             f"{dataformat_name}, get {image_id} and FlipY",
             f"{dataformat_name}, process {image_id} and return flipy",
             f"{dataformat_name}, process '{image_id}' and return Flip-Y",
+        ]
+        instruction = random.Random(seed + 1006).choice(instructions)
+
+    if transformation_id == 'pair_histogram_intersection_colors':
+        count = task.count()
+        pair_index = random.Random(seed + 1).randint(0, count-1)
+        pair_id = task.pair_ids()[pair_index]
+        input_image = task.input_images[pair_index]
+        output_image = task.output_images[pair_index]
+        if output_image is None:
+            output = "maybe"
+        else:
+            histogram_input = Histogram.create_with_image(input_image)
+            histogram_output = Histogram.create_with_image(output_image)
+            output = histogram_input.color_intersection_pretty(histogram_output)
+        instructions = [
+            f'{dataformat_name}, {pair_id}, unique colors that the images have in common',
+            f'{dataformat_name}, {pair_id}, unique colors that the two images have in common',
+            f'{dataformat_name}, {pair_id}, unique colors that the 2 images have in common',
+            f'{dataformat_name}, {pair_id}, intersection of colors of the two images',
+            f'{dataformat_name}, {pair_id}, intersection of colors of the 2 images',
+            f'{dataformat_name}, {pair_id}, intersection of colors of the images',
+            f'{dataformat_name}, {pair_id}, overlap of colors of the images',
+            f'{dataformat_name}, {pair_id}, color intersection',
+            f'{dataformat_name}, {pair_id}, color overlap',
+            f'Process {dataformat_name} {pair_id}, and return the intersection of colors',
+            f'Process {dataformat_name} {pair_id}, and return the overlap of colors',
+        ]
+        instruction = random.Random(seed + 1006).choice(instructions)
+
+    if transformation_id == 'pair_histogram_union_colors':
+        count = task.count()
+        pair_index = random.Random(seed + 1).randint(0, count-1)
+        pair_id = task.pair_ids()[pair_index]
+        input_image = task.input_images[pair_index]
+        output_image = task.output_images[pair_index]
+        if output_image is None:
+            output = "maybe"
+        else:
+            histogram_input = Histogram.create_with_image(input_image)
+            histogram_output = Histogram.create_with_image(output_image)
+            histogram = histogram_input.add(histogram_output)
+            unique_colors = histogram.unique_colors_pretty()
+            output = unique_colors
+        instructions = [
+            f'{dataformat_name}, {pair_id}, unique colors that the images have in the union',
+            f'{dataformat_name}, {pair_id}, unique colors that the two images have the union',
+            f'{dataformat_name}, {pair_id}, unique colors that the 2 images have the union',
+            f'{dataformat_name}, {pair_id}, union of colors of the two images',
+            f'{dataformat_name}, {pair_id}, union of colors of the 2 images',
+            f'{dataformat_name}, {pair_id}, union of colors of the images',
+            f'{dataformat_name}, {pair_id}, union of colors of the images',
+            f'{dataformat_name}, {pair_id}, color union',
+            f'Process {dataformat_name} {pair_id}, and return the union of colors',
         ]
         instruction = random.Random(seed + 1006).choice(instructions)
 
@@ -328,7 +396,7 @@ def generate_dataset_item(seed):
     }
     return dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=300050):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=400000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
