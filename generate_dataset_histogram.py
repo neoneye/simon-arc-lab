@@ -1,3 +1,4 @@
+# IDEA: comparision of 3 or more histograms and extract: intersection, union.
 # IDEA: Exercise much bigger values. Currently have been exercising the range 1-1600.
 #
 # IDEA: What are the most popular colors in the histogram?

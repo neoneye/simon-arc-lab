@@ -113,10 +113,10 @@ def generate_task(seed):
     count_example = random.Random(seed + 1).randint(2, 5)
     count_test = random.Random(seed + 2).randint(1, 3)
     task = MyTask()
-    min_width = 1
-    max_width = 5
-    min_height = 1
-    max_height = 5
+    min_width = 3
+    max_width = 10
+    min_height = 3
+    max_height = 10
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -156,7 +156,7 @@ def generate_dataset_item(seed):
         'pair_histogram_intersection_colors',
         'pair_histogram_union_colors',
     ]
-    instruction_weights = [10, 10, 10, 10, 10, 10, 10, 10, 50, 50]
+    instruction_weights = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
     # instruction_weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 50]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=instruction_weights, k=1)[0]
 
@@ -395,7 +395,7 @@ def generate_dataset_item(seed):
     }
     return dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=400000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=500000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
