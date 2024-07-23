@@ -11,3 +11,14 @@ class TestBenchmark(unittest.TestCase):
         self.assertEqual(image_size1d_to_string(21), 'large')
         self.assertEqual(image_size1d_to_string(30), 'large')
         self.assertEqual(image_size1d_to_string(31), 'other')
+
+    def test_histogram_total_to_string(self):
+        self.assertEqual(histogram_total_to_string(0), 'a')
+        self.assertEqual(histogram_total_to_string(10), 'a')
+        self.assertEqual(histogram_total_to_string(11), 'b')
+        self.assertEqual(histogram_total_to_string(100), 'b')
+        self.assertEqual(histogram_total_to_string(101), 'c')
+        self.assertEqual(histogram_total_to_string(1000), 'c')
+        self.assertEqual(histogram_total_to_string(1001), 'd')
+        self.assertEqual(histogram_total_to_string(10000), 'd')
+        self.assertEqual(histogram_total_to_string(10001), 'other')
