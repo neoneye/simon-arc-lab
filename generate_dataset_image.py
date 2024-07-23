@@ -57,12 +57,12 @@ def generate_serialize_dataset_item(seed):
     min_image_size = 25
     max_image_size = 30
 
-    input_formats = [
+    transformation_ids = [
         'pixels', 
         'json'
     ]
-    input_format_weights = [45, 45]
-    input_format = random.Random(seed + 1001).choices(input_formats, weights=input_format_weights, k=1)[0]
+    transformation_weights = [45, 45]
+    transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
     names_pixels = [
         'Pixels',
@@ -81,11 +81,12 @@ def generate_serialize_dataset_item(seed):
     ]
 
     name_input = None
-    if input_format == 'pixels':
+    if transformation_id == 'pixels':
         name_input = random.Random(seed + 1002).choice(names_pixels)
+    elif transformation_id == 'json':
+        name_input = random.Random(seed + 1003).choice(names_json)
     else:
-        if input_format == 'json':
-            name_input = random.Random(seed + 1003).choice(names_json)
+        raise Exception("Unreachable code reached")
 
     name_outputs = [
         'SIMONARCRLEIMAGE',
@@ -120,13 +121,14 @@ def generate_serialize_dataset_item(seed):
     output = rle_string
 
     input = None
-    if input_format == 'pixels':
+    if transformation_id == 'pixels':
         rows = [''.join(map(str, row)) for row in image]
         input = ','.join(rows)
+    elif transformation_id == 'json':
+        image_list = image.tolist()
+        input = json.dumps(image_list, separators=(',', ':'))
     else:
-        if input_format == 'json':
-            image_list = image.tolist()
-            input = json.dumps(image_list, separators=(',', ':'))
+        raise Exception("Unreachable code reached")
 
     result_dict = {
         'instruction': instruction,
