@@ -159,10 +159,10 @@ def generate_dataset_item(seed):
         'pair_histogram_max',
         'pair_histogram_min',
     ]
-    instruction_weights = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
-    # instruction_weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50]
-    # instruction_weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0]
-    transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=instruction_weights, k=1)[0]
+    transformation_weights = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    # transformation_weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50]
+    # transformation_weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0]
+    transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
 
     task = generate_task(seed)
