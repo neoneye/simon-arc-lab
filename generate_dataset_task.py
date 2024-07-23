@@ -466,12 +466,12 @@ def generate_dataset_item(seed):
         print("output:")
         print(output)
 
-    dict = {
+    result_dict = {
         'instruction': instruction,
         'input': input,
         'output': output
     }
-    return dict
+    return result_dict
 
 def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=800000):
     dataset = []
