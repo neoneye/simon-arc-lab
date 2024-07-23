@@ -30,6 +30,7 @@ from simon_arc_lab.rle.serialize import serialize
 from simon_arc_lab.image_util import *
 from simon_arc_lab.histogram import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
+from simon_arc_lab.benchmark import *
 
 def generate_rle_string(seed, min_image_size=1, max_image_size=100):
     """
@@ -130,10 +131,16 @@ def generate_serialize_dataset_item(seed):
     else:
         raise Exception("Unreachable code reached")
 
+    width, height = image.shape[1], image.shape[0]
+    benchmark_width = image_size1d_to_string(width)
+    benchmark_height = image_size1d_to_string(height)
+    benchmark_id = f'dataset=image_serialize group={transformation_id} image_width={benchmark_width} image_height={benchmark_height}'
+
     result_dict = {
         'instruction': instruction,
         'input': input,
-        'output': output
+        'output': output,
+        'benchmark': benchmark_id
     }
     return result_dict
 
@@ -518,10 +525,16 @@ def generate_deserialize_dataset_item(seed):
     else:
         raise Exception("Unreachable code reached")
 
+    width, height = image.shape[1], image.shape[0]
+    benchmark_width = image_size1d_to_string(width)
+    benchmark_height = image_size1d_to_string(height)
+    benchmark_id = f'dataset=image_deserialize group={transformation_id} image_width={benchmark_width} image_height={benchmark_height}'
+
     result_dict = {
         'instruction': instruction,
         'input': rle_string,
-        'output': output
+        'output': output,
+        'benchmark': benchmark_id
     }
     return result_dict
 
