@@ -77,12 +77,12 @@ def generate_serialize_dataset_item(seed):
     max_pixel_length = 100 
     pixel_length = random.Random(seed + 1000).randint(1, max_pixel_length)
 
-    input_formats = [
+    transformation_ids = [
         'pixels', 
         'json'
     ]
-    input_format_weights = [0.5, 0.5]
-    input_format = random.Random(seed + 1001).choices(input_formats, weights=input_format_weights, k=1)[0]
+    transformation_weights = [0.5, 0.5]
+    transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
     names_pixels = [
         'Pixels',
@@ -101,11 +101,12 @@ def generate_serialize_dataset_item(seed):
     ]
 
     name_input = None
-    if input_format == 'pixels':
+    if transformation_id == 'pixels':
         name_input = random.Random(seed + 1002).choice(names_pixels)
+    elif transformation_id == 'json':
+        name_input = random.Random(seed + 1003).choice(names_json)
     else:
-        if input_format == 'json':
-            name_input = random.Random(seed + 1003).choice(names_json)
+        raise Exception("Unreachable code reached")
 
     name_outputs = [
         'SIMONARCRLEROW',
@@ -132,12 +133,12 @@ def generate_serialize_dataset_item(seed):
     rle_string, pixels = generate_rle_string_compacted(string_length=string_length, seed=seed + 1006, pixel_length=pixel_length)
 
     input = None
-    if input_format == 'pixels':
+    if transformation_id == 'pixels':
         input = ''.join(map(str, pixels))
-    elif input_format == 'json':
+    elif transformation_id == 'json':
         input = json.dumps(list(pixels), separators=(',', ':'))
     else:
-        input = str(len(pixels))
+        raise Exception("Unreachable code reached")
 
     result_dict = {
         'instruction': instruction,
