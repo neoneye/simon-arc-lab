@@ -21,4 +21,6 @@ class TestBenchmark(unittest.TestCase):
         self.assertEqual(histogram_total_to_string(1000), 'c')
         self.assertEqual(histogram_total_to_string(1001), 'd')
         self.assertEqual(histogram_total_to_string(10000), 'd')
-        self.assertEqual(histogram_total_to_string(10001), 'other')
+        self.assertEqual(histogram_total_to_string(10001), 'e')
+        self.assertEqual(histogram_total_to_string(100000), 'e')
+        self.assertEqual(histogram_total_to_string(100001), 'other')

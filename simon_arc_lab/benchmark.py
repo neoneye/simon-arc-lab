@@ -19,8 +19,8 @@ def histogram_total_to_string(total: int) -> str:
     My hypothesis is that it's exponential: 
     LLMs struggle adding bigger values.
     and it's easy to add smaller values.
-    To test this hypothesis, I will use 4 categories: a, b, c, d.
-    And if the value is bigger than 10000, then use 'other'.
+    To test this hypothesis, I will use these categories: a, b, c, d, e.
+    And if the value is bigger than 100000, then use 'other'.
 
     I might need to adjust the categories if the hypothesis is wrong.
     It depends on how skewed the measurements are.
@@ -34,4 +34,6 @@ def histogram_total_to_string(total: int) -> str:
         return 'c'
     if total <= 10000:
         return 'd'
+    if total <= 100000:
+        return 'e'
     return 'other'
