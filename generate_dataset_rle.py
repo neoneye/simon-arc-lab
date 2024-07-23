@@ -151,7 +151,7 @@ def generate_deserialize_dataset_item(seed):
     max_pixel_length = 100 
     pixel_length = random.Random(seed + 1000).randint(1, max_pixel_length)
 
-    output_formats = [
+    transformation_ids = [
         'pixels', 
         'json',
         'length',
@@ -160,9 +160,9 @@ def generate_deserialize_dataset_item(seed):
         'compress',
         'scaleup',
     ]
-    # output_format_weights = [45, 45, 10, 30, 20, 20, 20]
-    output_format_weights = [4, 5, 4, 100, 20, 20, 20]
-    output_format = random.Random(seed + 1001).choices(output_formats, weights=output_format_weights, k=1)[0]
+    # transformation_weights = [45, 45, 10, 30, 20, 20, 20]
+    transformation_weights = [4, 5, 4, 100, 20, 20, 20]
+    transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
     names_pixels = [
         'Pixels',
@@ -181,10 +181,10 @@ def generate_deserialize_dataset_item(seed):
     ]
 
     name_output = None
-    if output_format == 'pixels':
+    if transformation_id == 'pixels':
         name_output = random.Random(seed + 1002).choice(names_pixels)
     else:
-        if output_format == 'json':
+        if transformation_id == 'json':
             name_output = random.Random(seed + 1003).choice(names_json)
 
     scaleup_factor = random.Random(seed + 1004).randint(2, 5)
@@ -276,15 +276,15 @@ def generate_deserialize_dataset_item(seed):
     ]
 
     instructions = instructions_input_output
-    if output_format == 'length':
+    if transformation_id == 'length':
         instructions = instructions_length
-    if output_format == 'histogram':
+    if transformation_id == 'histogram':
         instructions = instructions_histogram
-    if output_format == 'reverse':
+    if transformation_id == 'reverse':
         instructions = instructions_reverse
-    if output_format == 'compress':
+    if transformation_id == 'compress':
         instructions = instructions_compress
-    if output_format == 'scaleup':
+    if transformation_id == 'scaleup':
         instructions = instructions_scaleup
 
     instruction = random.Random(seed + 1006).choice(instructions)
@@ -292,24 +292,24 @@ def generate_deserialize_dataset_item(seed):
     rle_string, pixels = generate_rle_string_noncompacted(string_length=string_length, seed=seed + 1007, pixel_length=pixel_length)
 
     output = None
-    if output_format == 'pixels':
+    if transformation_id == 'pixels':
         output = ''.join(map(str, pixels))
-    elif output_format == 'json':
+    elif transformation_id == 'json':
         output = json.dumps(list(pixels), separators=(',', ':'))
-    elif output_format == 'length':
+    elif transformation_id == 'length':
         output = str(len(pixels))
-    elif output_format == 'histogram':
+    elif transformation_id == 'histogram':
         image = image_create(1, len(pixels), 255)
         image[0:len(pixels), 0] = pixels
         histogram = Histogram.create_with_image(image)
         output = histogram.pretty()
-    elif output_format == 'reverse':
+    elif transformation_id == 'reverse':
         pixels.reverse()
         output = rle_serialize_line_inner(pixels)
-    elif output_format == 'compress':
+    elif transformation_id == 'compress':
         pixels = list_compress(pixels)
         output = rle_serialize_line_inner(pixels)
-    elif output_format == 'scaleup':
+    elif transformation_id == 'scaleup':
         pixels = list_scaleup(pixels, scaleup_factor)
         output = rle_serialize_line_inner(pixels)
     else:
