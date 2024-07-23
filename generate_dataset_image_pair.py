@@ -9,6 +9,7 @@ from simon_arc_lab.rle.serialize import serialize
 from simon_arc_lab.image_util import *
 from simon_arc_lab.histogram import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
+from simon_arc_lab.benchmark import *
 
 def generate_dataset_item(seed):
     """
@@ -170,10 +171,17 @@ def generate_dataset_item(seed):
     else:
         raise Exception("Unreachable code reached")
 
+    max_width = max(image0.shape[1], image1.shape[1])
+    max_height = max(image0.shape[0], image1.shape[0])
+    benchmark_width = image_size1d_to_string(max_width)
+    benchmark_height = image_size1d_to_string(max_height)
+    benchmark_id = f'dataset=image_pair group={transformation_id} image_width={benchmark_width} image_height={benchmark_height}'
+
     result_dict = {
         'instruction': instruction,
         'input': input,
-        'output': output
+        'output': output,
+        'benchmark': benchmark_id
     }
     return result_dict
 
