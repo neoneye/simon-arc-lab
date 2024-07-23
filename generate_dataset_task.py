@@ -20,6 +20,7 @@ from simon_arc_lab.rle.serialize import serialize
 from simon_arc_lab.image_util import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.histogram import *
+from simon_arc_lab.benchmark import *
 
 class MyTask:
     def __init__(self):
@@ -78,6 +79,37 @@ class MyTask:
                 name = "Test"
             names.append(f"Pair {i} {name}")
         return names
+    
+    def max_image_size(self):
+        """
+        Find (width, height) of the biggest images in the task.
+
+        Where the Output is None, the image size is not included.
+        """
+        self.assert_count()
+        width = 0
+        height = 0
+        for i in range(len(self.input_images)):
+            width = max(width, self.input_images[i].shape[1])
+            height = max(height, self.input_images[i].shape[0])
+            if self.output_images[i] is not None:
+                width = max(width, self.output_images[i].shape[1])
+                height = max(height, self.output_images[i].shape[0])
+        return (width, height)
+    
+    def total_pixel_count(self):
+        """
+        Count the total number of pixels in all images.
+
+        Where the Output is None, the pixel count is not included.
+        """
+        self.assert_count()
+        count = 0
+        for i in range(len(self.input_images)):
+            count += self.input_images[i].shape[0] * self.input_images[i].shape[1]
+            if self.output_images[i] is not None:
+                count += self.output_images[i].shape[0] * self.output_images[i].shape[1]
+        return count
     
     def serialize_input_image(self, i):
         self.assert_count()
@@ -466,10 +498,17 @@ def generate_dataset_item(seed):
         print("output:")
         print(output)
 
+    max_width, max_height = task.max_image_size()
+    benchmark_width = image_size1d_to_string(max_width)
+    benchmark_height = image_size1d_to_string(max_height)
+    benchmark_pixels = task_pixels_to_string(task.total_pixel_count())
+    benchmark_id = f'dataset=task group={transformation_id} image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
+
     result_dict = {
         'instruction': instruction,
         'input': input,
-        'output': output
+        'output': output,
+        'benchmark': benchmark_id
     }
     return result_dict
 
