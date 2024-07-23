@@ -17,8 +17,8 @@ def generate_dataset_item(seed):
     :param seed: The seed for the random number generator
     :return: A dictionary with the instruction, input, and output
     """
-    min_image_size = 4
-    max_image_size = 13
+    min_image_size = 5
+    max_image_size = 10
 
     transformation_ids = [
         'gameoflife_wrap',
@@ -32,9 +32,9 @@ def generate_dataset_item(seed):
         'maze_wrap',
         'maze_nowrap',
     ]
-    # transformation_weights = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    transformation_weights = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
     # transformation_weights = [10, 0, 10, 0, 10, 0, 10, 0, 10, 0]
-    transformation_weights = [10, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    # transformation_weights = [10, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
     algorithm_names = [
@@ -264,7 +264,7 @@ def generate_dataset_item(seed):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=400000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=500000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
