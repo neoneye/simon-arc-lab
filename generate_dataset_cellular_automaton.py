@@ -254,7 +254,7 @@ def generate_dataset_item(seed):
 
     benchmark_width = image_size1d_to_string(width)
     benchmark_height = image_size1d_to_string(height)
-    benchmark_id = f'group={transformation_id} step={step_count} width={benchmark_width} height={benchmark_height}'
+    benchmark_id = f'dataset=cellular_automata group={transformation_id} ca_step={step_count} image_width={benchmark_width} image_height={benchmark_height}'
 
     result_dict = {
         'instruction': instruction,
