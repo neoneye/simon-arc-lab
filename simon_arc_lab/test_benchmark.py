@@ -24,3 +24,16 @@ class TestBenchmark(unittest.TestCase):
         self.assertEqual(histogram_total_to_string(10001), 'e')
         self.assertEqual(histogram_total_to_string(100000), 'e')
         self.assertEqual(histogram_total_to_string(100001), 'other')
+
+    def test_task_pixels_to_string(self):
+        self.assertEqual(task_pixels_to_string(0), 'a')
+        self.assertEqual(task_pixels_to_string(500), 'a')
+        self.assertEqual(task_pixels_to_string(501), 'b')
+        self.assertEqual(task_pixels_to_string(1000), 'b')
+        self.assertEqual(task_pixels_to_string(1001), 'c')
+        self.assertEqual(task_pixels_to_string(2000), 'c')
+        self.assertEqual(task_pixels_to_string(2001), 'd')
+        self.assertEqual(task_pixels_to_string(4000), 'd')
+        self.assertEqual(task_pixels_to_string(4001), 'e')
+        self.assertEqual(task_pixels_to_string(8000), 'e')
+        self.assertEqual(task_pixels_to_string(8001), 'other')
