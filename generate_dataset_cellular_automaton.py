@@ -6,6 +6,7 @@ import numpy as np
 from simon_arc_lab.rle.serialize import serialize
 from simon_arc_lab.image_util import *
 from simon_arc_lab.cellular_automaton import *
+from simon_arc_lab.benchmark import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 import matplotlib.pyplot as plt
 
@@ -251,12 +252,17 @@ def generate_dataset_item(seed):
     # plt.imshow(output_image, cmap='gray')
     # plt.show()
 
-    dict = {
+    benchmark_width = image_size1d_to_string(width)
+    benchmark_height = image_size1d_to_string(height)
+    benchmark_id = f'group={transformation_id} step={step_count} width={benchmark_width} height={benchmark_height}'
+
+    result_dict = {
         'instruction': instruction,
         'input': input,
-        'output': output
+        'output': output,
+        'benchmark': benchmark_id,
     }
-    return dict
+    return result_dict
 
 def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=400000):
     dataset = []
