@@ -266,5 +266,17 @@ class TestHistogram(unittest.TestCase):
         expected = 'empty'
         self.assertEqual(actual, expected)
 
+    def test_sum_of_counters0(self):
+        actual = Histogram.empty().sum_of_counters()
+        self.assertEqual(actual, 0)
+
+    def test_sum_of_counters1(self):
+        actual = Histogram({9: 1}).sum_of_counters()
+        self.assertEqual(actual, 1)
+
+    def test_sum_of_counters2(self):
+        actual = Histogram({9: 1, 8: 2, 7: 3}).sum_of_counters()
+        self.assertEqual(actual, 6)
+
 if __name__ == '__main__':
     unittest.main()

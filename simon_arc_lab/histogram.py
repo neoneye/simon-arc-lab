@@ -188,6 +188,12 @@ class Histogram:
         result.purge_mutable()
         return result
 
+    def sum_of_counters(self) -> int:
+        """
+        Traverse all the colors, add up their amount.
+        """
+        return sum(self.color_count.values())
+
     def purge_mutable(self):
         """
         Remove colors where the count is less than 1.
