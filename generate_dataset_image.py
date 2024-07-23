@@ -146,7 +146,7 @@ def generate_deserialize_dataset_item(seed):
     min_image_size = 5
     max_image_size = 20
 
-    instruction_ids = [
+    transformation_ids = [
         'pixels', 
         'json',
         'histogram',
@@ -167,8 +167,8 @@ def generate_deserialize_dataset_item(seed):
         'translate_y_minus1',
         'translate_y_plus1',
     ]
-    instruction_weights = [0, 0, 10, 10, 10, 10, 10, 10, 10, 0, 10, 10, 10, 10, 10, 10, 10, 10, 10]
-    instruction_id = random.Random(seed + 1001).choices(instruction_ids, weights=instruction_weights, k=1)[0]
+    transformation_weights = [0, 0, 10, 10, 10, 10, 10, 10, 10, 0, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
     names_pixels = [
         'Pixels',
@@ -187,10 +187,10 @@ def generate_deserialize_dataset_item(seed):
     ]
 
     name_output = None
-    if instruction_id == 'pixels':
+    if transformation_id == 'pixels':
         name_output = random.Random(seed + 1002).choice(names_pixels)
     else:
-        if instruction_id == 'json':
+        if transformation_id == 'json':
             name_output = random.Random(seed + 1003).choice(names_json)
 
     name_inputs = [
@@ -389,43 +389,43 @@ def generate_deserialize_dataset_item(seed):
     ]
 
     instructions = None
-    if instruction_id == 'pixels':
+    if transformation_id == 'pixels':
         instructions = instructions_input_output
-    elif instruction_id == 'json':
+    elif transformation_id == 'json':
         instructions = instructions_input_output
-    elif instruction_id == 'histogram':
+    elif transformation_id == 'histogram':
         instructions = instructions_histogram
-    elif instruction_id == 'flipx':
+    elif transformation_id == 'flipx':
         instructions = instructions_flipx
-    elif instruction_id == 'flipy':
+    elif transformation_id == 'flipy':
         instructions = instructions_flipy
-    elif instruction_id == 'transpose':
+    elif transformation_id == 'transpose':
         instructions = instructions_transpose
-    elif instruction_id == 'rotate_cw':
+    elif transformation_id == 'rotate_cw':
         instructions = instructions_rotate_cw
-    elif instruction_id == 'rotate_ccw':
+    elif transformation_id == 'rotate_ccw':
         instructions = instructions_rotate_ccw
-    elif instruction_id == 'rotate_180':
+    elif transformation_id == 'rotate_180':
         instructions = instructions_rotate_180
-    elif instruction_id == 'count_neighbors_with_same_color':
+    elif transformation_id == 'count_neighbors_with_same_color':
         instructions = instructions_count_neighbors_with_same_color
-    elif instruction_id == 'all_neighbors_matching_center':
+    elif transformation_id == 'all_neighbors_matching_center':
         instructions = instructions_all_neighbors_matching_center
-    elif instruction_id == 'pixels_with_k_matching_neighbors':
+    elif transformation_id == 'pixels_with_k_matching_neighbors':
         instructions = instructions_pixels_with_k_matching_neighbors
-    elif instruction_id == 'compress_x':
+    elif transformation_id == 'compress_x':
         instructions = instructions_compress_x
-    elif instruction_id == 'compress_y':
+    elif transformation_id == 'compress_y':
         instructions = instructions_compress_y
-    elif instruction_id == 'compress_xy':
+    elif transformation_id == 'compress_xy':
         instructions = instructions_compress_xy
-    elif instruction_id == 'translate_x_minus1':
+    elif transformation_id == 'translate_x_minus1':
         instructions = instructions_translate_x_minus1
-    elif instruction_id == 'translate_x_plus1':
+    elif transformation_id == 'translate_x_plus1':
         instructions = instructions_translate_x_plus1
-    elif instruction_id == 'translate_y_minus1':
+    elif transformation_id == 'translate_y_minus1':
         instructions = instructions_translate_y_minus1
-    elif instruction_id == 'translate_y_plus1':
+    elif transformation_id == 'translate_y_plus1':
         instructions = instructions_translate_y_plus1
     else:
         raise Exception("Unreachable code reached")
@@ -440,76 +440,76 @@ def generate_deserialize_dataset_item(seed):
     )
 
     output = None
-    if instruction_id == 'pixels':
+    if transformation_id == 'pixels':
         rows = [''.join(map(str, row)) for row in image]
         output = ','.join(rows)
-    elif instruction_id == 'json':
+    elif transformation_id == 'json':
         image_list = image.tolist()
         output = json.dumps(image_list, separators=(',', ':'))
-    elif instruction_id == 'histogram':
+    elif transformation_id == 'histogram':
         histogram = Histogram.create_with_image(image)
         output = histogram.pretty()
-    elif instruction_id == 'flipx':
+    elif transformation_id == 'flipx':
         flipped_image = image[:, ::-1]
         output_rle_string = serialize(flipped_image)
         output = output_rle_string
-    elif instruction_id == 'flipy':
+    elif transformation_id == 'flipy':
         flipped_image = image[::-1, :]
         output_rle_string = serialize(flipped_image)
         output = output_rle_string
-    elif instruction_id == 'transpose':
+    elif transformation_id == 'transpose':
         transposed_image = image.transpose()
         output_rle_string = serialize(transposed_image)
         output = output_rle_string
-    elif instruction_id == 'rotate_cw':
+    elif transformation_id == 'rotate_cw':
         new_image = image_rotate_cw(image)
         output_rle_string = serialize(new_image)
         output = output_rle_string
-    elif instruction_id == 'rotate_ccw':
+    elif transformation_id == 'rotate_ccw':
         new_image = image_rotate_ccw(image)
         output_rle_string = serialize(new_image)
         output = output_rle_string
-    elif instruction_id == 'rotate_180':
+    elif transformation_id == 'rotate_180':
         new_image = image_rotate_180(image)
         output_rle_string = serialize(new_image)
         output = output_rle_string
-    elif instruction_id == 'count_neighbors_with_same_color':
+    elif transformation_id == 'count_neighbors_with_same_color':
         new_image = count_neighbors_with_same_color_nowrap(image)
         output_rle_string = serialize(new_image)
         output = output_rle_string
-    elif instruction_id == 'all_neighbors_matching_center':
+    elif transformation_id == 'all_neighbors_matching_center':
         new_image = all_neighbors_matching_center_nowrap(image)
         output_rle_string = serialize(new_image)
         output = output_rle_string
-    elif instruction_id == 'pixels_with_k_matching_neighbors':
+    elif transformation_id == 'pixels_with_k_matching_neighbors':
         new_image = pixels_with_k_matching_neighbors_nowrap(image, pixels_with_k_matching_neighbors_k_parameter)
         output_rle_string = serialize(new_image)
         output = output_rle_string
-    elif instruction_id == 'compress_x':
+    elif transformation_id == 'compress_x':
         new_image = compress_x(image)
         output_rle_string = serialize(new_image)
         output = output_rle_string
-    elif instruction_id == 'compress_y':
+    elif transformation_id == 'compress_y':
         new_image = compress_y(image)
         output_rle_string = serialize(new_image)
         output = output_rle_string
-    elif instruction_id == 'compress_xy':
+    elif transformation_id == 'compress_xy':
         new_image = compress_xy(image)
         output_rle_string = serialize(new_image)
         output = output_rle_string
-    elif instruction_id == 'translate_x_minus1':
+    elif transformation_id == 'translate_x_minus1':
         new_image = image_translate_wrap(image, -1, 0)
         output_rle_string = serialize(new_image)
         output = output_rle_string
-    elif instruction_id == 'translate_x_plus1':
+    elif transformation_id == 'translate_x_plus1':
         new_image = image_translate_wrap(image, 1, 0)
         output_rle_string = serialize(new_image)
         output = output_rle_string
-    elif instruction_id == 'translate_y_minus1':
+    elif transformation_id == 'translate_y_minus1':
         new_image = image_translate_wrap(image, 0, -1)
         output_rle_string = serialize(new_image)
         output = output_rle_string
-    elif instruction_id == 'translate_y_plus1':
+    elif transformation_id == 'translate_y_plus1':
         new_image = image_translate_wrap(image, 0, 1)
         output_rle_string = serialize(new_image)
         output = output_rle_string
