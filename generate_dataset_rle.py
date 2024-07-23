@@ -10,6 +10,7 @@ from simon_arc_lab.histogram import *
 from simon_arc_lab.rle.deserialize import decode_rle_row_inner
 from simon_arc_lab.rle.serialize import rle_serialize_line_inner
 from simon_arc_lab.list_util import list_compress, list_scaleup
+from simon_arc_lab.benchmark import *
 
 def generate_rle_string_compacted(string_length=10, pixel_length=50, seed=None):
     """
@@ -140,10 +141,14 @@ def generate_serialize_dataset_item(seed):
     else:
         raise Exception("Unreachable code reached")
 
+    benchmark_length = image_size1d_to_string(pixel_length)
+    benchmark_id = f'dataset=rle_serialize group={transformation_id} pixel_length={benchmark_length}'
+
     result_dict = {
         'instruction': instruction,
         'input': input,
-        'output': rle_string
+        'output': rle_string,
+        'benchmark': benchmark_id
     }
     return result_dict
 
@@ -316,10 +321,14 @@ def generate_deserialize_dataset_item(seed):
     else:
         raise Exception("Unreachable code reached")
 
+    benchmark_length = image_size1d_to_string(pixel_length)
+    benchmark_id = f'dataset=rle_deserialize group={transformation_id} pixel_length={benchmark_length}'
+
     result_dict = {
         'instruction': instruction,
         'input': rle_string,
-        'output': output
+        'output': output,
+        'benchmark': benchmark_id
     }
     return result_dict
 
