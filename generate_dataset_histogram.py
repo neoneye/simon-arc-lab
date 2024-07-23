@@ -7,6 +7,7 @@ import json
 import os
 import random
 from simon_arc_lab.histogram import *
+from simon_arc_lab.benchmark import *
 
 name_formats = [
     'SIMONARCHISTOGRAM',
@@ -71,10 +72,15 @@ def generate_one_histogram_dataset_item(seed):
     else:
         raise Exception("Unreachable code reached")
 
+    sum_of_counters = histogram.sum_of_counters()
+    benchmark_histogram_size = histogram_total_to_string(sum_of_counters)
+    benchmark_id = f'dataset=histogram_one group={transformation_id} histogram_size={benchmark_histogram_size}'
+
     result_dict = {
         'instruction': instruction,
         'input': input,
-        'output': output
+        'output': output,
+        'benchmark': benchmark_id,
     }
     return result_dict
 
@@ -252,10 +258,15 @@ def generate_two_histogram_dataset_item(seed):
     else:
         raise Exception("Unreachable code reached")
 
+    sum_of_counters = histogram0.sum_of_counters() + histogram1.sum_of_counters()
+    benchmark_histogram_size = histogram_total_to_string(sum_of_counters)
+    benchmark_id = f'dataset=histogram_two group={transformation_id} histogram_size={benchmark_histogram_size}'
+
     result_dict = {
         'instruction': instruction,
         'input': input,
-        'output': output
+        'output': output,
+        'benchmark': benchmark_id,
     }
     return result_dict
 
