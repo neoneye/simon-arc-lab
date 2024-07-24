@@ -1,5 +1,7 @@
 # IDEA: currently trained with image size 1-20. Next step is to train with image size 1-30.
 #
+# IDEA: recognize the transformation between 2 images: translate, rotate, scale, replace colors.
+#
 # IDEA: comparison of 2 images, are they the same, are they different
 import json
 import os
