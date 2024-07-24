@@ -1,5 +1,7 @@
 # IDEA: Exercise with bigger image. Currently have been exercising the range 1-10. Somewhat in the range 1-20.
 #
+# IDEA: transformation "replace colors" of the image
+#
 # IDEA: transformation "transpose" the image
 #
 # IDEA: with "rot" prefix, then the image is to be rotated 90 degrees clockwise
