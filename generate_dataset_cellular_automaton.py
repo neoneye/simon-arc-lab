@@ -10,7 +10,7 @@ from simon_arc_lab.benchmark import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 import matplotlib.pyplot as plt
 
-dataset_names = [
+DATASET_NAMES = [
     'SIMONCELLULARAUTOMATON',
     'SIMONCELLULARAUTOMATA',
     'SIMONSCELLULARAUTOMATON',
@@ -58,7 +58,7 @@ def generate_dataset_item(seed):
     # transformation_weights = [10, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
-    dataset_name = random.Random(seed + 1004).choice(dataset_names)
+    dataset_name = random.Random(seed + 1004).choice(DATASET_NAMES)
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 5).shuffle(colors)
