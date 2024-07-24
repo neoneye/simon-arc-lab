@@ -10,6 +10,27 @@ from simon_arc_lab.benchmark import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 import matplotlib.pyplot as plt
 
+dataset_names = [
+    'SIMONCELLULARAUTOMATON',
+    'SIMONCELLULARAUTOMATA',
+    'SIMONSCELLULARAUTOMATON',
+    'SIMONSCELLULARAUTOMATA',
+    'SIMONCELLULARAUTOMATA',
+    'SIMONSCELLULARAUTOMATA',
+    'Simon-Cellular-Automata',
+    'Simon-Cellular-Automaton',
+    'Simons-Cellular-Automata',
+    'Simons-Cellular-Automaton',
+    'SimonCellularAutomata',
+    'SimonCellularAutomaton',
+    'SimonsCellularAutomata',
+    'SimonsCellularAutomaton',
+    'simon-cellular-automata',
+    'simon-cellular-automaton',
+    'simons-cellular-automata',
+    'simons-cellular-automaton',
+]
+
 def generate_dataset_item(seed):
     """
     Do a transformation from one image into another image.
@@ -37,27 +58,7 @@ def generate_dataset_item(seed):
     # transformation_weights = [10, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
-    algorithm_names = [
-        'SIMONCELLULARAUTOMATON',
-        'SIMONCELLULARAUTOMATA',
-        'SIMONSCELLULARAUTOMATON',
-        'SIMONSCELLULARAUTOMATA',
-        'SIMONCELLULARAUTOMATA',
-        'SIMONSCELLULARAUTOMATA',
-        'Simon-Cellular-Automata',
-        'Simon-Cellular-Automaton',
-        'Simons-Cellular-Automata',
-        'Simons-Cellular-Automaton',
-        'SimonCellularAutomata',
-        'SimonCellularAutomaton',
-        'SimonsCellularAutomata',
-        'SimonsCellularAutomaton',
-        'simon-cellular-automata',
-        'simon-cellular-automaton',
-        'simons-cellular-automata',
-        'simons-cellular-automaton',
-    ]
-    algorithm_name = random.Random(seed + 1004).choice(algorithm_names)
+    dataset_name = random.Random(seed + 1004).choice(dataset_names)
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 5).shuffle(colors)
@@ -67,97 +68,97 @@ def generate_dataset_item(seed):
     step_count = random.Random(seed + 1).randint(1, 1)
 
     instructions_gameoflife_wrap = [
-        f'{algorithm_name}, Game of Life with wrapx and wrapy. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
-        f'{algorithm_name}, Game of Life with wrapxy. steps={step_count}. {color0} is dead. {color1} is alive.',
-        f'{algorithm_name}, Game of Life with wrap. steps={step_count}. dead={color0} alive={color1}',
-        f'{algorithm_name}, Game of Life wrap=xy. steps={step_count}. alive={color1}. dead={color0}.',
-        f'{algorithm_name}, Game of Life wrap=both. steps={step_count}. live={color1}. dead={color0}.',
-        f'{algorithm_name}, game of life wrap=both. steps={step_count}. live={color1}. dead={color0}.',
-        f'{algorithm_name}, game-of-life wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, Game of Life with wrapx and wrapy. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{dataset_name}, Game of Life with wrapxy. steps={step_count}. {color0} is dead. {color1} is alive.',
+        f'{dataset_name}, Game of Life with wrap. steps={step_count}. dead={color0} alive={color1}',
+        f'{dataset_name}, Game of Life wrap=xy. steps={step_count}. alive={color1}. dead={color0}.',
+        f'{dataset_name}, Game of Life wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, game of life wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, game-of-life wrap=both. steps={step_count}. live={color1}. dead={color0}.',
     ]
 
     instructions_gameoflife_nowrap = [
-        f'{algorithm_name}, Game of Life without wrap. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
-        f'{algorithm_name}, Game of Life with nowrap. steps={step_count}. {color0} is dead. {color1} is alive.',
-        f'{algorithm_name}, Game of Life with wrap=none. steps={step_count}. dead={color0} alive={color1}',
-        f'{algorithm_name}, Game of Life wrap=no. steps={step_count}. alive={color1}. dead={color0}.',
-        f'{algorithm_name}, Game of Life wrap=none. steps={step_count}. live={color1}. dead={color0}.',
-        f'{algorithm_name}, game of life wrap=none. steps={step_count}. live={color1}. dead={color0}.',
-        f'{algorithm_name}, game-of-life wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, Game of Life without wrap. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{dataset_name}, Game of Life with nowrap. steps={step_count}. {color0} is dead. {color1} is alive.',
+        f'{dataset_name}, Game of Life with wrap=none. steps={step_count}. dead={color0} alive={color1}',
+        f'{dataset_name}, Game of Life wrap=no. steps={step_count}. alive={color1}. dead={color0}.',
+        f'{dataset_name}, Game of Life wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, game of life wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, game-of-life wrap=none. steps={step_count}. live={color1}. dead={color0}.',
     ]
 
     instructions_highlife_wrap = [
-        f'{algorithm_name}, HighLife with wrapx and wrapy. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
-        f'{algorithm_name}, HighLife with wrapxy. steps={step_count}. {color0} is dead. {color1} is alive.',
-        f'{algorithm_name}, HighLife with wrap. steps={step_count}. dead={color0} alive={color1}',
-        f'{algorithm_name}, HighLife wrap=xy. steps={step_count}. alive={color1}. dead={color0}.',
-        f'{algorithm_name}, HighLife wrap=both. steps={step_count}. live={color1}. dead={color0}.',
-        f'{algorithm_name}, highlife wrap=both. steps={step_count}. live={color1}. dead={color0}.',
-        f'{algorithm_name}, high-life wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, HighLife with wrapx and wrapy. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{dataset_name}, HighLife with wrapxy. steps={step_count}. {color0} is dead. {color1} is alive.',
+        f'{dataset_name}, HighLife with wrap. steps={step_count}. dead={color0} alive={color1}',
+        f'{dataset_name}, HighLife wrap=xy. steps={step_count}. alive={color1}. dead={color0}.',
+        f'{dataset_name}, HighLife wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, highlife wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, high-life wrap=both. steps={step_count}. live={color1}. dead={color0}.',
     ]
 
     instructions_highlife_nowrap = [
-        f'{algorithm_name}, HighLife without wrap. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
-        f'{algorithm_name}, HighLife with nowrap. steps={step_count}. {color0} is dead. {color1} is alive.',
-        f'{algorithm_name}, HighLife with wrap=none. steps={step_count}. dead={color0} alive={color1}',
-        f'{algorithm_name}, HighLife wrap=no. steps={step_count}. alive={color1}. dead={color0}.',
-        f'{algorithm_name}, HighLife wrap=none. steps={step_count}. live={color1}. dead={color0}.',
-        f'{algorithm_name}, highlife wrap=none. steps={step_count}. live={color1}. dead={color0}.',
-        f'{algorithm_name}, high-life wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, HighLife without wrap. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{dataset_name}, HighLife with nowrap. steps={step_count}. {color0} is dead. {color1} is alive.',
+        f'{dataset_name}, HighLife with wrap=none. steps={step_count}. dead={color0} alive={color1}',
+        f'{dataset_name}, HighLife wrap=no. steps={step_count}. alive={color1}. dead={color0}.',
+        f'{dataset_name}, HighLife wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, highlife wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, high-life wrap=none. steps={step_count}. live={color1}. dead={color0}.',
     ]
 
     instructions_serviettes_wrap = [
-        f'{algorithm_name}, Serviettes with wrapx and wrapy. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
-        f'{algorithm_name}, Serviettes with wrapxy. steps={step_count}. {color0} is dead. {color1} is alive.',
-        f'{algorithm_name}, Serviettes with wrap. steps={step_count}. dead={color0} alive={color1}',
-        f'{algorithm_name}, Serviettes wrap=xy. steps={step_count}. alive={color1}. dead={color0}.',
-        f'{algorithm_name}, Serviettes wrap=both. steps={step_count}. live={color1}. dead={color0}.',
-        f'{algorithm_name}, serviettes wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, Serviettes with wrapx and wrapy. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{dataset_name}, Serviettes with wrapxy. steps={step_count}. {color0} is dead. {color1} is alive.',
+        f'{dataset_name}, Serviettes with wrap. steps={step_count}. dead={color0} alive={color1}',
+        f'{dataset_name}, Serviettes wrap=xy. steps={step_count}. alive={color1}. dead={color0}.',
+        f'{dataset_name}, Serviettes wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, serviettes wrap=both. steps={step_count}. live={color1}. dead={color0}.',
     ]
 
     instructions_serviettes_nowrap = [
-        f'{algorithm_name}, Serviettes without wrap. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
-        f'{algorithm_name}, Serviettes with nowrap. steps={step_count}. {color0} is dead. {color1} is alive.',
-        f'{algorithm_name}, Serviettes with wrap=none. steps={step_count}. dead={color0} alive={color1}',
-        f'{algorithm_name}, Serviettes wrap=no. steps={step_count}. alive={color1}. dead={color0}.',
-        f'{algorithm_name}, Serviettes wrap=none. steps={step_count}. live={color1}. dead={color0}.',
-        f'{algorithm_name}, serviettes wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, Serviettes without wrap. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{dataset_name}, Serviettes with nowrap. steps={step_count}. {color0} is dead. {color1} is alive.',
+        f'{dataset_name}, Serviettes with wrap=none. steps={step_count}. dead={color0} alive={color1}',
+        f'{dataset_name}, Serviettes wrap=no. steps={step_count}. alive={color1}. dead={color0}.',
+        f'{dataset_name}, Serviettes wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, serviettes wrap=none. steps={step_count}. live={color1}. dead={color0}.',
     ]
 
     instructions_cave_wrap = [
-        f'{algorithm_name}, Cave with wrapx and wrapy. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
-        f'{algorithm_name}, Cave with wrapxy. steps={step_count}. {color0} is dead. {color1} is alive.',
-        f'{algorithm_name}, Cave with wrap. steps={step_count}. dead={color0} alive={color1}',
-        f'{algorithm_name}, Cave wrap=xy. steps={step_count}. alive={color1}. dead={color0}.',
-        f'{algorithm_name}, Cave wrap=both. steps={step_count}. live={color1}. dead={color0}.',
-        f'{algorithm_name}, cave wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, Cave with wrapx and wrapy. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{dataset_name}, Cave with wrapxy. steps={step_count}. {color0} is dead. {color1} is alive.',
+        f'{dataset_name}, Cave with wrap. steps={step_count}. dead={color0} alive={color1}',
+        f'{dataset_name}, Cave wrap=xy. steps={step_count}. alive={color1}. dead={color0}.',
+        f'{dataset_name}, Cave wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, cave wrap=both. steps={step_count}. live={color1}. dead={color0}.',
     ]
 
     instructions_cave_nowrap = [
-        f'{algorithm_name}, Cave without wrap. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
-        f'{algorithm_name}, Cave with nowrap. steps={step_count}. {color0} is dead. {color1} is alive.',
-        f'{algorithm_name}, Cave with wrap=none. steps={step_count}. dead={color0} alive={color1}',
-        f'{algorithm_name}, Cave wrap=no. steps={step_count}. alive={color1}. dead={color0}.',
-        f'{algorithm_name}, Cave wrap=none. steps={step_count}. live={color1}. dead={color0}.',
-        f'{algorithm_name}, cave wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, Cave without wrap. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{dataset_name}, Cave with nowrap. steps={step_count}. {color0} is dead. {color1} is alive.',
+        f'{dataset_name}, Cave with wrap=none. steps={step_count}. dead={color0} alive={color1}',
+        f'{dataset_name}, Cave wrap=no. steps={step_count}. alive={color1}. dead={color0}.',
+        f'{dataset_name}, Cave wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, cave wrap=none. steps={step_count}. live={color1}. dead={color0}.',
     ]
 
     instructions_maze_wrap = [
-        f'{algorithm_name}, Maze with wrapx and wrapy. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
-        f'{algorithm_name}, Maze with wrapxy. steps={step_count}. {color0} is dead. {color1} is alive.',
-        f'{algorithm_name}, Maze with wrap. steps={step_count}. dead={color0} alive={color1}',
-        f'{algorithm_name}, Maze wrap=xy. steps={step_count}. alive={color1}. dead={color0}.',
-        f'{algorithm_name}, Maze wrap=both. steps={step_count}. live={color1}. dead={color0}.',
-        f'{algorithm_name}, maze wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, Maze with wrapx and wrapy. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{dataset_name}, Maze with wrapxy. steps={step_count}. {color0} is dead. {color1} is alive.',
+        f'{dataset_name}, Maze with wrap. steps={step_count}. dead={color0} alive={color1}',
+        f'{dataset_name}, Maze wrap=xy. steps={step_count}. alive={color1}. dead={color0}.',
+        f'{dataset_name}, Maze wrap=both. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, maze wrap=both. steps={step_count}. live={color1}. dead={color0}.',
     ]
 
     instructions_maze_nowrap = [
-        f'{algorithm_name}, Maze without wrap. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
-        f'{algorithm_name}, Maze with nowrap. steps={step_count}. {color0} is dead. {color1} is alive.',
-        f'{algorithm_name}, Maze with wrap=none. steps={step_count}. dead={color0} alive={color1}',
-        f'{algorithm_name}, Maze wrap=no. steps={step_count}. alive={color1}. dead={color0}.',
-        f'{algorithm_name}, Maze wrap=none. steps={step_count}. live={color1}. dead={color0}.',
-        f'{algorithm_name}, maze wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, Maze without wrap. Steps={step_count}. Dead cells have value {color0}. Alive cells have value {color1}.',
+        f'{dataset_name}, Maze with nowrap. steps={step_count}. {color0} is dead. {color1} is alive.',
+        f'{dataset_name}, Maze with wrap=none. steps={step_count}. dead={color0} alive={color1}',
+        f'{dataset_name}, Maze wrap=no. steps={step_count}. alive={color1}. dead={color0}.',
+        f'{dataset_name}, Maze wrap=none. steps={step_count}. live={color1}. dead={color0}.',
+        f'{dataset_name}, maze wrap=none. steps={step_count}. live={color1}. dead={color0}.',
     ]
 
     instructions = None
