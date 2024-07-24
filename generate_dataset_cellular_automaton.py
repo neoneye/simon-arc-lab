@@ -265,6 +265,147 @@ def generate_dataset_item_transform(seed):
     }
     return result_dict
 
+def generate_dataset_item_transform_recognize(seed):
+    """
+    Recognize what transformation is being done from one image into another image.
+
+    :param seed: The seed for the random number generator
+    :return: A dictionary with the instruction, input, and output
+    """
+    min_image_size = 8
+    max_image_size = 14
+
+    transformation_id = 'recognize_transformation'
+
+    dataset_name = random.Random(seed + 1004).choice(DATASET_NAMES)
+
+    colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    random.Random(seed + 5).shuffle(colors)
+    color0 = colors[0]
+    color1 = colors[1]
+
+    step_count = random.Random(seed + 1).randint(1, 1)
+
+    width = random.Random(seed + 1).randint(min_image_size, max_image_size)
+    height = random.Random(seed + 2).randint(min_image_size, max_image_size)
+
+    ratios = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    ratio = random.Random(seed + 5).choice(ratios)
+    input_image = image_create_random_with_two_colors(width, height, 0, 1, ratio, seed + 6)
+    # print(input_image)
+
+    mutate_input_id = random.Random(seed + 3).randint(0, 5)
+    # print(mutate_input_id)
+    if mutate_input_id == 0:
+        pass
+    elif mutate_input_id == 1:
+        input_image = CARuleGameOfLife().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=1)
+    elif mutate_input_id == 2:
+        input_image = CARuleHighLife().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=1)
+    elif mutate_input_id == 3:
+        input_image = CARuleServiettes().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=1)
+    elif mutate_input_id == 4:
+        input_image = CARuleCave().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=1)
+    elif mutate_input_id == 5:
+        input_image = CARuleMaze().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=1)
+    # print(input_image)
+
+
+    # output = None
+    image_name_list = []
+    if True:
+        image = CARuleGameOfLife().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=step_count)
+        image_name_list.append((image, 'gameoflife_wrap'))
+    if True:
+        image = CARuleGameOfLife().apply_wrap(input_image, wrapx=False, wrapy=False, outside_value=0, step_count=step_count)
+        image_name_list.append((image, 'gameoflife_nowrap'))
+    # elif transformation_id == 'highlife_wrap':
+    #     output_image = CARuleHighLife().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=step_count)
+    # elif transformation_id == 'highlife_nowrap':
+    #     output_image = CARuleHighLife().apply_wrap(input_image, wrapx=False, wrapy=False, outside_value=0, step_count=step_count)
+    # elif transformation_id == 'serviettes_wrap':
+    #     output_image = CARuleServiettes().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=step_count)
+    # elif transformation_id == 'serviettes_nowrap':
+    #     output_image = CARuleServiettes().apply_wrap(input_image, wrapx=False, wrapy=False, outside_value=0, step_count=step_count)
+    # elif transformation_id == 'cave_wrap':
+    #     output_image = CARuleCave().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=step_count)
+    # elif transformation_id == 'cave_nowrap':
+    #     output_image = CARuleCave().apply_wrap(input_image, wrapx=False, wrapy=False, outside_value=0, step_count=step_count)
+    # elif transformation_id == 'maze_wrap':
+    #     output_image = CARuleMaze().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=step_count)
+    # elif transformation_id == 'maze_nowrap':
+    #     output_image = CARuleMaze().apply_wrap(input_image, wrapx=False, wrapy=False, outside_value=0, step_count=step_count)
+    # else:
+    #     raise Exception("Unreachable code reached")
+    
+    random.Random(seed + 7).shuffle(image_name_list)
+
+    # extract list of the shuffled candidate names
+    name_list = []
+    for image_name_candidate in image_name_list:
+        name = image_name_candidate[1]
+        name_list.append(name)
+    #print(name_list)
+    names_with_comma = ','.join(name_list)
+
+    instructions = [
+        f'{dataset_name}, Given two images, recognize the transformation. {names_with_comma}',
+        f'{dataset_name}, Recognize the transformation. {names_with_comma}',
+        f'{dataset_name}, Recognize the transformation between input and output. {names_with_comma}',
+    ]
+
+    instruction = random.Random(seed + 1005).choice(instructions)
+
+    # Pick the output image
+    image_name_candidate = random.Random(seed + 8).choice(image_name_list)
+    output_image = image_name_candidate[0]
+
+    color_mapping = {}
+    for color_index in range(len(colors)):
+        color = colors[color_index]
+        color_mapping[color_index] = color
+
+    input_image2 = image_replace_colors(input_image, color_mapping)
+    output_image2 = image_replace_colors(output_image, color_mapping)
+    rle_string0 = serialize(input_image2)
+    rle_string1 = serialize(output_image2)
+
+    input = f'{rle_string0}\n{rle_string1}'
+
+    # print(instruction)
+    # print(input_image2)
+    # print(output_image2)
+    # plt.imshow(input_image, cmap='gray')
+    # plt.show()
+    # plt.imshow(output_image, cmap='gray')
+    # plt.show()
+
+    # loop through the image_name_candidates
+    # and check if there are other images that are identical to the output_image
+    # if identical, then include the image_name_candidate in the image_name_candidates
+    # comparison_list = []
+    # for image_name_candidate in image_name_candidates:
+    #     image = image_name_candidate[0]
+    #     name = image_name_candidate[1]
+    #     if np.array_equal(image, output_image):
+    #         image_name_candidates.append(f'{name}=1')
+    #     else:
+    #         image_name_candidates.append(f'{name}=0')
+    # output = comparison_list.join(',')
+    output = 'gameoflife_wrap=1,gameoflife_nowrap=0,highlife_wrap=0,highlife_nowrap=0'
+
+    benchmark_width = image_size1d_to_string(width)
+    benchmark_height = image_size1d_to_string(height)
+    benchmark_id = f'dataset=cellular_automaton_transform_recognize group={transformation_id} ca_step={step_count} image_width={benchmark_width} image_height={benchmark_height}'
+
+    result_dict = {
+        'instruction': instruction,
+        'input': input,
+        'output': output,
+        'benchmark': benchmark_id,
+    }
+    return result_dict
+
 def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1000000):
     dataset = []
     dataset_byte_size = 0
