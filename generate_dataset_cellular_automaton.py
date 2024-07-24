@@ -31,15 +31,15 @@ DATASET_NAMES = [
     'simons-cellular-automaton',
 ]
 
-def generate_dataset_item(seed):
+def generate_dataset_item_transform(seed):
     """
     Do a transformation from one image into another image.
 
     :param seed: The seed for the random number generator
     :return: A dictionary with the instruction, input, and output
     """
-    min_image_size = 12
-    max_image_size = 18
+    min_image_size = 14
+    max_image_size = 20
 
     transformation_ids = [
         'gameoflife_wrap',
@@ -255,7 +255,7 @@ def generate_dataset_item(seed):
 
     benchmark_width = image_size1d_to_string(width)
     benchmark_height = image_size1d_to_string(height)
-    benchmark_id = f'dataset=cellular_automata group={transformation_id} ca_step={step_count} image_width={benchmark_width} image_height={benchmark_height}'
+    benchmark_id = f'dataset=cellular_automaton_transform group={transformation_id} ca_step={step_count} image_width={benchmark_width} image_height={benchmark_height}'
 
     result_dict = {
         'instruction': instruction,
@@ -265,11 +265,11 @@ def generate_dataset_item(seed):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=900000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1000000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
-        item = generate_dataset_item(seed_start + i)
+        item = generate_dataset_item_transform(seed_start + i)
         bytes = len(json.dumps(item))
         if dataset_byte_size + bytes > max_byte_size:
             break
