@@ -154,8 +154,8 @@ def generate_deserialize_dataset_item(seed):
     :param seed: The seed for the random number generator
     :return: A dictionary with the instruction, input, and output
     """
-    min_image_size = 2
-    max_image_size = 10
+    min_image_size = 1
+    max_image_size = 5
 
     transformation_ids = [
         'pixels', 
@@ -541,7 +541,7 @@ def generate_deserialize_dataset_item(seed):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1400000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1500000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
