@@ -57,7 +57,7 @@ def generate_serialize_dataset_item(seed):
     :param seed: The seed for the random number generator
     :return: A dictionary with the instruction, input, and output
     """
-    min_image_size = 5
+    min_image_size = 1
     max_image_size = 30
 
     transformation_ids = [
@@ -154,8 +154,8 @@ def generate_deserialize_dataset_item(seed):
     :param seed: The seed for the random number generator
     :return: A dictionary with the instruction, input, and output
     """
-    min_image_size = 5
-    max_image_size = 30
+    min_image_size = 2
+    max_image_size = 10
 
     transformation_ids = [
         'pixels', 
@@ -178,7 +178,8 @@ def generate_deserialize_dataset_item(seed):
         'translate_y_minus1',
         'translate_y_plus1',
     ]
-    transformation_weights = [0, 0, 10, 10, 10, 10, 10, 10, 10, 0, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    # transformation_weights = [0, 0, 10, 10, 10, 10, 10, 10, 10, 0, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    transformation_weights = [0, 0, 0, 0, 10, 10, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
     names_pixels = [
@@ -540,7 +541,7 @@ def generate_deserialize_dataset_item(seed):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1300000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1400000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
