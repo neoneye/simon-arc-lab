@@ -272,8 +272,8 @@ def generate_dataset_item_transform_recognize(seed):
     :param seed: The seed for the random number generator
     :return: A dictionary with the instruction, input, and output
     """
-    min_image_size = 10
-    max_image_size = 14
+    min_image_size = 12
+    max_image_size = 18
 
     transformation_id = 'recognize_transformation'
 
