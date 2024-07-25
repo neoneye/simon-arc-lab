@@ -1,3 +1,5 @@
+# IDEA: Exercise with bigger image. Has been exercised in the range 1-20. Sizes bigger than 20 needs to be exercised.
+#
 # IDEA: wire world
 import json
 import os
