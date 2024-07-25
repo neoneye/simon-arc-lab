@@ -1,4 +1,5 @@
 # IDEA: Exercise with bigger image. Has been exercised in the range 1-20. Sizes bigger than 20 needs to be exercised.
+# IDEA: Exercise with number of steps = 2. Has most been exercises with step_count=1. A few exercises with step_count=2.
 #
 # IDEA: wire world
 import json
