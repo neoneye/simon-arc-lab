@@ -272,8 +272,8 @@ def generate_dataset_item_transform_recognize(seed):
     :param seed: The seed for the random number generator
     :return: A dictionary with the instruction, input, and output
     """
-    min_image_size = 8
-    max_image_size = 12
+    min_image_size = 10
+    max_image_size = 14
 
     transformation_id = 'recognize_transformation'
 
@@ -328,18 +328,18 @@ def generate_dataset_item_transform_recognize(seed):
     if True:
         image = CARuleServiettes().apply_wrap(input_image, wrapx=False, wrapy=False, outside_value=0, step_count=step_count)
         image_name_list.append((image, 'serviettes_nowrap'))
-    # if True:
-    #     image = CARuleCave().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=step_count)
-    #     image_name_list.append((image, 'cave_wrap'))
-    # if True:
-    #     image = CARuleCave().apply_wrap(input_image, wrapx=False, wrapy=False, outside_value=0, step_count=step_count)
-    #     image_name_list.append((image, 'cave_nowrap'))
-    # if True:
-    #     image = CARuleMaze().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=step_count)
-    #     image_name_list.append((image, 'maze_wrap'))
-    # if True:
-    #     image = CARuleMaze().apply_wrap(input_image, wrapx=False, wrapy=False, outside_value=0, step_count=step_count)
-    #     image_name_list.append((image, 'maze_nowrap'))
+    if True:
+        image = CARuleCave().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=step_count)
+        image_name_list.append((image, 'cave_wrap'))
+    if True:
+        image = CARuleCave().apply_wrap(input_image, wrapx=False, wrapy=False, outside_value=0, step_count=step_count)
+        image_name_list.append((image, 'cave_nowrap'))
+    if True:
+        image = CARuleMaze().apply_wrap(input_image, wrapx=True, wrapy=True, outside_value=0, step_count=step_count)
+        image_name_list.append((image, 'maze_wrap'))
+    if True:
+        image = CARuleMaze().apply_wrap(input_image, wrapx=False, wrapy=False, outside_value=0, step_count=step_count)
+        image_name_list.append((image, 'maze_nowrap'))
     
     random.Random(seed + 8).shuffle(image_name_list)
 
@@ -416,7 +416,7 @@ def generate_dataset_item_transform_recognize(seed):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1300000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1400000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
