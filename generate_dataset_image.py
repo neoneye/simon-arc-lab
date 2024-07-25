@@ -155,7 +155,7 @@ def generate_deserialize_dataset_item(seed):
     :return: A dictionary with the instruction, input, and output
     """
     min_image_size = 1
-    max_image_size = 8
+    max_image_size = 10
 
     transformation_ids = [
         'pixels', 
@@ -541,7 +541,7 @@ def generate_deserialize_dataset_item(seed):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=2000000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=2100000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
