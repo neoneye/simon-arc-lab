@@ -273,7 +273,7 @@ def generate_dataset_item_transform_recognize(seed):
     :return: A dictionary with the instruction, input, and output
     """
     min_image_size = 12
-    max_image_size = 18
+    max_image_size = 20
 
     transformation_id = 'recognize_transformation'
 
@@ -344,7 +344,7 @@ def generate_dataset_item_transform_recognize(seed):
     random.Random(seed + 8).shuffle(image_name_list)
 
     # truncate image_name_list to a few items
-    truncate_length = random.Random(seed + 9).randint(2, 4)
+    truncate_length = random.Random(seed + 9).randint(2, 5)
     image_name_list_truncated = image_name_list[:truncate_length]
 
     # extract list of the shuffled candidate names
@@ -416,7 +416,7 @@ def generate_dataset_item_transform_recognize(seed):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1500000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1600000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
