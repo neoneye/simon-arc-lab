@@ -39,6 +39,66 @@ class TestImageShape3x3Histogram(unittest.TestCase):
             [1, 2, 2, 1]], dtype=np.uint8)
         self.assertTrue(np.array_equal(actual, expected))
 
+    def test_diamond4_unique_colors(self):
+        image = np.array([
+            [1, 2, 3, 1], 
+            [4, 5, 6, 4],
+            [7, 8, 9, 7]], dtype=np.uint8)
+        actual = ImageShape3x3Histogram.number_of_unique_colors_in_diamond4(image)
+        expected = np.array([
+            [2, 3, 3, 2], 
+            [3, 4, 4, 3], 
+            [2, 3, 3, 2]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_diamond4_same_color(self):
+        image = np.array([
+            [5, 5, 5, 5], 
+            [5, 5, 5, 5], 
+            [5, 5, 5, 5]], dtype=np.uint8)
+        actual = ImageShape3x3Histogram.number_of_unique_colors_in_diamond4(image)
+        expected = np.array([
+            [1, 1, 1, 1], 
+            [1, 1, 1, 1], 
+            [1, 1, 1, 1]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_diamond4_two_colors(self):
+        image = np.array([
+            [6, 6, 5, 5], 
+            [6, 6, 5, 5], 
+            [6, 6, 5, 5]], dtype=np.uint8)
+        actual = ImageShape3x3Histogram.number_of_unique_colors_in_diamond4(image)
+        expected = np.array([
+            [1, 2, 2, 1], 
+            [1, 2, 2, 1], 
+            [1, 2, 2, 1]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_diamond4_a_diamond_of_one_color_a(self):
+        image = np.array([
+            [5, 5, 6, 5, 5], 
+            [5, 6, 6, 6, 5], 
+            [5, 5, 6, 5, 5]], dtype=np.uint8)
+        actual = ImageShape3x3Histogram.number_of_unique_colors_in_diamond4(image)
+        expected = np.array([
+            [1, 2, 2, 2, 1], 
+            [2, 2, 1, 2, 2], 
+            [1, 2, 2, 2, 1]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_diamond4_a_diamond_of_one_color_b(self):
+        image = np.array([
+            [5, 5, 6, 5, 5], 
+            [5, 6, 5, 6, 5], 
+            [5, 5, 6, 5, 5]], dtype=np.uint8)
+        actual = ImageShape3x3Histogram.number_of_unique_colors_in_diamond4(image)
+        expected = np.array([
+            [1, 2, 1, 2, 1], 
+            [2, 1, 1, 1, 2], 
+            [1, 2, 1, 2, 1]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
     def test_diamond5_unique_colors(self):
         image = np.array([
             [1, 2, 3, 1], 
