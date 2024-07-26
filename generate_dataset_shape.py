@@ -278,20 +278,19 @@ def generate_dataset_item_shape3x3_histogram(seed):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=300000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=400000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
-        # j = i % (256 + 32 + 16 + 1000) 
-        # if j <= 16:
-        #     item = generate_dataset_item_shape3x3_opposite(seed_start + i)
-        # elif j <= 32 + 16:
-        #     item = generate_dataset_item_shape2x2(seed_start + i)
-        # elif j <= 32 + 16 + 256:
-        #     item = generate_dataset_item_shape3x3_center(seed_start + i)
-        # else:
-        #     item = generate_dataset_item_shape3x3_histogram(seed_start + i)
-        item = generate_dataset_item_shape3x3_histogram(seed_start + i)
+        j = i % 4 
+        if j == 0:
+            item = generate_dataset_item_shape3x3_opposite(seed_start + i)
+        elif j == 1:
+            item = generate_dataset_item_shape2x2(seed_start + i)
+        elif j == 2:
+            item = generate_dataset_item_shape3x3_center(seed_start + i)
+        else:
+            item = generate_dataset_item_shape3x3_histogram(seed_start + i)
         bytes = len(json.dumps(item))
         if dataset_byte_size + bytes > max_byte_size:
             break
