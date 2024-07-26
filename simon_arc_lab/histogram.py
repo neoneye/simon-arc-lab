@@ -68,6 +68,13 @@ class Histogram:
             return 'empty'
         return ','.join([f'{color}:{count}' for color, count in color_count_list])
 
+    def increment(self, color: int):
+        if color in self.color_count:
+            self.color_count[color] += 1
+        else:
+            self.color_count[color] = 1
+        self.purge_mutable()
+
     def add(self, other: 'Histogram') -> 'Histogram':
         result = self.clone()
         for color, count in other.color_count.items():

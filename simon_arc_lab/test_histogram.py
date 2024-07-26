@@ -116,6 +116,21 @@ class TestHistogram(unittest.TestCase):
         expected = '5:4,7:4,9:4'
         self.assertEqual(actual, expected)
 
+    def test_increment_existing(self):
+        histogram = Histogram({0: 8, 1: 2, 5: 1})
+        histogram.increment(0)
+        self.assertEqual(histogram.pretty(), '0:9,1:2,5:1')
+
+    def test_increment_insert_a(self):
+        histogram = Histogram({0: 8, 1: 2, 5: 1})
+        histogram.increment(4)
+        self.assertEqual(histogram.pretty(), '0:8,1:2,4:1,5:1')
+
+    def test_increment_insert_b(self):
+        histogram = Histogram({0: 8, 1: 2, 5: 1})
+        histogram.increment(6)
+        self.assertEqual(histogram.pretty(), '0:8,1:2,5:1,6:1')
+
     def test_add(self):
         histogram0 = Histogram({0: 8, 1: 2, 9: 1})
         histogram1 = Histogram({0: 2, 1: 8, 8: 2})
