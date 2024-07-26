@@ -34,6 +34,19 @@ from simon_arc_lab.histogram import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.benchmark import *
 
+DATASET_NAMES = [
+    'SIMONARCRLEIMAGE',
+    'SIMONSARCRLEIMAGE',
+    'SIMONSARCIMAGE',
+    'SIMONARCIMAGE',
+    'Simon-ARC-RLE-Image',
+    'Simons-ARC-RLE-Image',
+    'Simons-ARC-Image',
+    'simons-arc-image',
+    'SimonsArcRleImage',
+    'SimonsRLEImage'
+]
+
 def generate_rle_string(seed, min_image_size=1, max_image_size=100):
     """
     Generate a RLE string of a random image.
@@ -91,24 +104,19 @@ def generate_serialize_dataset_item(seed):
     else:
         raise Exception("Unreachable code reached")
 
-    name_outputs = [
-        'SIMONARCRLEIMAGE',
-        'Simon-ARC-RLE-Image',
-        'SimonsRLEImage',
-    ]
-    name_output = random.Random(seed + 1004).choice(name_outputs)
+    dataset_name = random.Random(seed + 1004).choice(DATASET_NAMES)
 
     instructions_input_output = [
-        f'Serialize {name_input} to {name_output}',
-        f'serialize {name_input} to {name_output}',
-        f'convert {name_input} to {name_output}',
-        f'Convert {name_input} to {name_output}',
-        f'Transform {name_input} to {name_output}',
-        f'transform {name_input} to {name_output}',
-        f'Change {name_input} to {name_output}',
-        f'change {name_input} to {name_output}',
-        f'{name_input} to {name_output}',
-        f'{name_output} from {name_input}',
+        f'Serialize {name_input} to {dataset_name}',
+        f'serialize {name_input} to {dataset_name}',
+        f'convert {name_input} to {dataset_name}',
+        f'Convert {name_input} to {dataset_name}',
+        f'Transform {name_input} to {dataset_name}',
+        f'transform {name_input} to {dataset_name}',
+        f'Change {name_input} to {dataset_name}',
+        f'change {name_input} to {dataset_name}',
+        f'{name_input} to {dataset_name}',
+        f'{dataset_name} from {name_input}',
     ]
 
     instructions = instructions_input_output
@@ -205,199 +213,187 @@ def generate_deserialize_dataset_item(seed):
         if transformation_id == 'json':
             name_output = random.Random(seed + 1003).choice(names_json)
 
-    name_inputs = [
-        'SIMONARCRLEIMAGE',
-        'SIMONSARCRLEIMAGE',
-        'SIMONSARCIMAGE',
-        'SIMONARCIMAGE',
-        'Simon-ARC-RLE-Image',
-        'Simons-ARC-RLE-Image',
-        'Simons-ARC-Image',
-        'simons-arc-image',
-        'SimonsArcRleImage',
-        'SimonsRLEImage',
-    ]
-    name_input = random.Random(seed + 1004).choice(name_inputs)
+    dataset_name = random.Random(seed + 1004).choice(DATASET_NAMES)
 
     instructions_input_output = [
-        f'Deserialize {name_input} to {name_output}',
-        f'deserialize {name_input} to {name_output}',
-        f'convert {name_input} to {name_output}',
-        f'Convert {name_input} to {name_output}',
-        f'Transform {name_input} to {name_output}',
-        f'transform {name_input} to {name_output}',
-        f'Change {name_input} to {name_output}',
-        f'change {name_input} to {name_output}',
-        f'{name_input} to {name_output}',
-        f'{name_output} from {name_input}',
+        f'Deserialize {dataset_name} to {name_output}',
+        f'deserialize {dataset_name} to {name_output}',
+        f'convert {dataset_name} to {name_output}',
+        f'Convert {dataset_name} to {name_output}',
+        f'Transform {dataset_name} to {name_output}',
+        f'transform {dataset_name} to {name_output}',
+        f'Change {dataset_name} to {name_output}',
+        f'change {dataset_name} to {name_output}',
+        f'{dataset_name} to {name_output}',
+        f'{name_output} from {dataset_name}',
     ]
 
     instructions_histogram = [
-        f'Histogram of deserialized {name_input}',
-        f'histogram of deserialized {name_input}',
-        f'Histogram after deserializing {name_input}',
-        f'histogram after deserializing {name_input}',
-        f'Histogram of {name_input}',
-        f'histogram of {name_input}',
-        f'Histogram of {name_input}',
-        f'convert {name_input} and return the histogram',
-        f'Convert {name_input} and return histogram',
-        f'Process {name_input} and return the histogram',
-        f'process {name_input} and return histogram',
+        f'Histogram of deserialized {dataset_name}',
+        f'histogram of deserialized {dataset_name}',
+        f'Histogram after deserializing {dataset_name}',
+        f'histogram after deserializing {dataset_name}',
+        f'Histogram of {dataset_name}',
+        f'histogram of {dataset_name}',
+        f'Histogram of {dataset_name}',
+        f'convert {dataset_name} and return the histogram',
+        f'Convert {dataset_name} and return histogram',
+        f'Process {dataset_name} and return the histogram',
+        f'process {dataset_name} and return histogram',
     ]
 
     instructions_flipx = [
-        f'FlipX {name_input}',
-        f'Flip-X {name_input}',
-        f'flipx {name_input}',
-        f'convert {name_input} and return the flipx',
-        f'process {name_input} and return flipx',
+        f'FlipX {dataset_name}',
+        f'Flip-X {dataset_name}',
+        f'flipx {dataset_name}',
+        f'convert {dataset_name} and return the flipx',
+        f'process {dataset_name} and return flipx',
     ]
 
     instructions_flipy = [
-        f'FlipY {name_input}',
-        f'Flip-Y {name_input}',
-        f'flipy {name_input}',
-        f'convert {name_input} and return the flipy',
-        f'process {name_input} and return flipy',
+        f'FlipY {dataset_name}',
+        f'Flip-Y {dataset_name}',
+        f'flipy {dataset_name}',
+        f'convert {dataset_name} and return the flipy',
+        f'process {dataset_name} and return flipy',
     ]
 
     instructions_transpose = [
-        f'Transpose {name_input}',
-        f'transpose {name_input}',
-        f'{name_input} transposed',
-        f'Process {name_input} and return the transposed',
-        f'process {name_input} and return the transposed',
-        f'Convert {name_input} and return the transposed',
-        f'convert {name_input} and return the transposed',
+        f'Transpose {dataset_name}',
+        f'transpose {dataset_name}',
+        f'{dataset_name} transposed',
+        f'Process {dataset_name} and return the transposed',
+        f'process {dataset_name} and return the transposed',
+        f'Convert {dataset_name} and return the transposed',
+        f'convert {dataset_name} and return the transposed',
     ]
 
     instructions_rotate_cw = [
-        f'Rotate Clockwise {name_input}',
-        f'Rotate clockwise {name_input}',
-        f'Rotate clock-wise {name_input}',
-        f'Rotate cw {name_input}',
-        f'rotate CW {name_input}',
-        f'CW rotate {name_input}',
-        f'cw rotate {name_input}',
-        f'Process {name_input} and return the clockwise rotated',
-        f'process {name_input} and return the cw rotated',
+        f'Rotate Clockwise {dataset_name}',
+        f'Rotate clockwise {dataset_name}',
+        f'Rotate clock-wise {dataset_name}',
+        f'Rotate cw {dataset_name}',
+        f'rotate CW {dataset_name}',
+        f'CW rotate {dataset_name}',
+        f'cw rotate {dataset_name}',
+        f'Process {dataset_name} and return the clockwise rotated',
+        f'process {dataset_name} and return the cw rotated',
     ]
 
     instructions_rotate_ccw = [
-        f'Rotate CounterClockwise {name_input}',
-        f'Rotate counterclockwise {name_input}',
-        f'Rotate counter-clock-wise {name_input}',
-        f'Rotate ccw {name_input}',
-        f'rotate CCW {name_input}',
-        f'CCW rotate {name_input}',
-        f'ccw rotate {name_input}',
-        f'Process {name_input} and return the counter clock wise rotated',
-        f'process {name_input} and return the ccw rotated',
+        f'Rotate CounterClockwise {dataset_name}',
+        f'Rotate counterclockwise {dataset_name}',
+        f'Rotate counter-clock-wise {dataset_name}',
+        f'Rotate ccw {dataset_name}',
+        f'rotate CCW {dataset_name}',
+        f'CCW rotate {dataset_name}',
+        f'ccw rotate {dataset_name}',
+        f'Process {dataset_name} and return the counter clock wise rotated',
+        f'process {dataset_name} and return the ccw rotated',
     ]
 
     instructions_rotate_180 = [
-        f'Rotate 180 {name_input}',
-        f'rotate 180 {name_input}',
-        f'Half rotate {name_input}',
-        f'Half a rotation of {name_input}',
-        f'{name_input} rotated halfway',
-        f'{name_input} rotated by 180 degrees',
+        f'Rotate 180 {dataset_name}',
+        f'rotate 180 {dataset_name}',
+        f'Half rotate {dataset_name}',
+        f'Half a rotation of {dataset_name}',
+        f'{dataset_name} rotated halfway',
+        f'{dataset_name} rotated by 180 degrees',
     ]
 
     instructions_count_neighbors_with_same_color = [
-        f'With {name_input}, 3x3 count neighbors with same color as center',
-        f'With {name_input}, Number of neighbors with same color as center',
-        f'{name_input}, 3x3 area, how many neighbors have the same color as center',
-        f'{name_input}, 3x3 area, count neighbors with same color as center',
+        f'With {dataset_name}, 3x3 count neighbors with same color as center',
+        f'With {dataset_name}, Number of neighbors with same color as center',
+        f'{dataset_name}, 3x3 area, how many neighbors have the same color as center',
+        f'{dataset_name}, 3x3 area, count neighbors with same color as center',
     ]
 
     instructions_all_neighbors_matching_center = [
-        f'With {name_input}, all pixels inside 3x3 have same color as center',
-        f'With {name_input}, 3x3 area, where all pixels have same color as center',
-        f'{name_input}, 3x3 area, locations where all neighbors have the same color as center',
-        f'{name_input}, 3x3 area, positions where all neighbors have the same color as center',
+        f'With {dataset_name}, all pixels inside 3x3 have same color as center',
+        f'With {dataset_name}, 3x3 area, where all pixels have same color as center',
+        f'{dataset_name}, 3x3 area, locations where all neighbors have the same color as center',
+        f'{dataset_name}, 3x3 area, positions where all neighbors have the same color as center',
     ]
 
     pixels_with_k_matching_neighbors_k_parameter = random.Random(seed + 1005).randint(1, 8)
     instructions_pixels_with_k_matching_neighbors = [
-        f'With {name_input}, where {pixels_with_k_matching_neighbors_k_parameter} neighbors have the same color as the center pixel',
-        f'{name_input}, where {pixels_with_k_matching_neighbors_k_parameter} neighbors have the same color as the center pixel',
-        f'{name_input}, where {pixels_with_k_matching_neighbors_k_parameter} of the 3x3 neighbors have the same color as the center pixel',
-        f'{name_input}, identify pixels where exactly {pixels_with_k_matching_neighbors_k_parameter} neighbors have the same color as the center pixel',
+        f'With {dataset_name}, where {pixels_with_k_matching_neighbors_k_parameter} neighbors have the same color as the center pixel',
+        f'{dataset_name}, where {pixels_with_k_matching_neighbors_k_parameter} neighbors have the same color as the center pixel',
+        f'{dataset_name}, where {pixels_with_k_matching_neighbors_k_parameter} of the 3x3 neighbors have the same color as the center pixel',
+        f'{dataset_name}, identify pixels where exactly {pixels_with_k_matching_neighbors_k_parameter} neighbors have the same color as the center pixel',
     ]
 
     instructions_compress_x = [
-        f'CompressX {name_input}',
-        f'Compress X {name_input}',
-        f'compress x {name_input}',
-        f'Compress-X {name_input}',
-        f'{name_input} Compress-X',
-        f'{name_input} compress x',
-        f'{name_input} remove duplicate adjacent columns',
-        f'remove duplicate adjacent columns from {name_input}',
+        f'CompressX {dataset_name}',
+        f'Compress X {dataset_name}',
+        f'compress x {dataset_name}',
+        f'Compress-X {dataset_name}',
+        f'{dataset_name} Compress-X',
+        f'{dataset_name} compress x',
+        f'{dataset_name} remove duplicate adjacent columns',
+        f'remove duplicate adjacent columns from {dataset_name}',
     ]
 
     instructions_compress_y = [
-        f'CompressY {name_input}',
-        f'Compress Y {name_input}',
-        f'compress y {name_input}',
-        f'Compress-Y {name_input}',
-        f'{name_input} Compress-Y',
-        f'{name_input} compress y',
-        f'{name_input} remove duplicate adjacent rows',
-        f'remove duplicate adjacent rows from {name_input}',
+        f'CompressY {dataset_name}',
+        f'Compress Y {dataset_name}',
+        f'compress y {dataset_name}',
+        f'Compress-Y {dataset_name}',
+        f'{dataset_name} Compress-Y',
+        f'{dataset_name} compress y',
+        f'{dataset_name} remove duplicate adjacent rows',
+        f'remove duplicate adjacent rows from {dataset_name}',
     ]
 
     instructions_compress_xy = [
-        f'CompressXY {name_input}',
-        f'compressxy {name_input}',
-        f'Compress-XY {name_input}',
-        f'Compress XY {name_input}',
-        f'compress xy {name_input}',
-        f'compress x and compress y {name_input}',
-        f'compress x and y {name_input}',
-        f'Compress X and Y {name_input}',
-        f'{name_input} Compress-XY',
-        f'{name_input} compress xy',
-        f'{name_input} compressxy',
-        f'{name_input} remove duplicate adjacent rows and columns',
-        f'{name_input} remove duplicate adjacent columns and rows',
-        f'remove duplicate adjacent rows and columns from {name_input}',
-        f'remove duplicate adjacent columns and rows from {name_input}',
+        f'CompressXY {dataset_name}',
+        f'compressxy {dataset_name}',
+        f'Compress-XY {dataset_name}',
+        f'Compress XY {dataset_name}',
+        f'compress xy {dataset_name}',
+        f'compress x and compress y {dataset_name}',
+        f'compress x and y {dataset_name}',
+        f'Compress X and Y {dataset_name}',
+        f'{dataset_name} Compress-XY',
+        f'{dataset_name} compress xy',
+        f'{dataset_name} compressxy',
+        f'{dataset_name} remove duplicate adjacent rows and columns',
+        f'{dataset_name} remove duplicate adjacent columns and rows',
+        f'remove duplicate adjacent rows and columns from {dataset_name}',
+        f'remove duplicate adjacent columns and rows from {dataset_name}',
     ]
 
     instructions_translate_x_minus1 = [
-        f'Translate x minus 1, {name_input}',
-        f'Translate x-1 {name_input}',
-        f'move left by 1 pixel {name_input}',
-        f'{name_input}, translate x by -1',
-        f'{name_input}, return translated x-1',
-        f'{name_input}, move left by 1 pixel',
+        f'Translate x minus 1, {dataset_name}',
+        f'Translate x-1 {dataset_name}',
+        f'move left by 1 pixel {dataset_name}',
+        f'{dataset_name}, translate x by -1',
+        f'{dataset_name}, return translated x-1',
+        f'{dataset_name}, move left by 1 pixel',
     ]
     instructions_translate_x_plus1 = [
-        f'Translate x plus 1, {name_input}',
-        f'Translate x+1 {name_input}',
-        f'move right by 1 pixel {name_input}',
-        f'{name_input}, translate x by +1',
-        f'{name_input}, return translated x+1',
-        f'{name_input}, move right by 1 pixel',
+        f'Translate x plus 1, {dataset_name}',
+        f'Translate x+1 {dataset_name}',
+        f'move right by 1 pixel {dataset_name}',
+        f'{dataset_name}, translate x by +1',
+        f'{dataset_name}, return translated x+1',
+        f'{dataset_name}, move right by 1 pixel',
     ]
     instructions_translate_y_minus1 = [
-        f'Translate y minus 1, {name_input}',
-        f'Translate y-1 {name_input}',
-        f'move up by 1 pixel {name_input}',
-        f'{name_input}, translate y by -1',
-        f'{name_input}, return translated y-1',
-        f'{name_input}, move up by 1 pixel',
+        f'Translate y minus 1, {dataset_name}',
+        f'Translate y-1 {dataset_name}',
+        f'move up by 1 pixel {dataset_name}',
+        f'{dataset_name}, translate y by -1',
+        f'{dataset_name}, return translated y-1',
+        f'{dataset_name}, move up by 1 pixel',
     ]
     instructions_translate_y_plus1 = [
-        f'Translate y plus 1, {name_input}',
-        f'Translate y+1 {name_input}',
-        f'move down by 1 pixel {name_input}',
-        f'{name_input}, translate y by +1',
-        f'{name_input}, return translated y+1',
-        f'{name_input}, move down by 1 pixel',
+        f'Translate y plus 1, {dataset_name}',
+        f'Translate y+1 {dataset_name}',
+        f'move down by 1 pixel {dataset_name}',
+        f'{dataset_name}, translate y by +1',
+        f'{dataset_name}, return translated y+1',
+        f'{dataset_name}, move down by 1 pixel',
     ]
 
     instructions = None
