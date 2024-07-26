@@ -1,6 +1,6 @@
 import numpy as np
 
-class ImageShape3x3:
+class ImageShape3x3Center:
     TOP_LEFT = 1
     TOP = 2
     TOP_RIGHT = 4

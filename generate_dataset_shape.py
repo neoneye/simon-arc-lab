@@ -6,7 +6,7 @@ from simon_arc_lab.rle.serialize import serialize
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.benchmark import *
 from simon_arc_lab.image_shape2x2 import *
-from simon_arc_lab.image_shape3x3 import *
+from simon_arc_lab.image_shape3x3_center import *
 import matplotlib.pyplot as plt
 
 DATASET_NAMES = [
@@ -111,7 +111,7 @@ def generate_dataset_item_shape3x3(seed):
 
     input_image = image_create_random_advanced(seed + 5, min_image_size, max_image_size, min_image_size, max_image_size)
 
-    shape_image = ImageShape3x3.apply(input_image)
+    shape_image = ImageShape3x3Center.apply(input_image)
 
     # Places where the pixel contains the `shape_bit`, then set the pixel to 1, else set to 0.
     shape_mask = 1 << shape_bit
