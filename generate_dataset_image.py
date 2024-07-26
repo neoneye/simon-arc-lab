@@ -1,5 +1,7 @@
 # IDEA: Exercise with bigger image. Currently have been exercising the range 1-10. Somewhat in the range 1-20.
 #
+# IDEA: Exercise rotate with bigger image. Currently have been exercising the range 1-14. And needs training in the range 15-30.
+#
 # IDEA: transformation "replace colors" of the image
 #
 # IDEA: transformation "transpose" the image
