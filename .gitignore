@@ -7,3 +7,4 @@ dataset_image_pair.jsonl
 dataset_histogram.jsonl
 dataset_task.jsonl
 dataset_cellular_automaton.jsonl
+dataset_shape.jsonl

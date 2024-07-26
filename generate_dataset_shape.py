@@ -45,9 +45,9 @@ def generate_dataset_item_shape2x2(seed):
     shape_bit = random.Random(seed + 3).randint(0, 5)
 
     instructions = [
-        f'{dataset_name} identify places where shape2x2 is {shape_bit}',
-        f'{dataset_name} detect shape2x2 {shape_bit}',
-        f'{dataset_name} find shape2x2 {shape_bit}',
+        f'{dataset_name} identify places where shape2x2 contains bit {shape_bit}',
+        f'{dataset_name} detect shape2x2 bit {shape_bit}',
+        f'{dataset_name} find shape2x2 bit {shape_bit}',
     ]
 
     instruction = random.Random(seed + 4).choice(instructions)
@@ -56,12 +56,12 @@ def generate_dataset_item_shape2x2(seed):
 
     shape_image = ImageShape2x2.apply(input_image)
 
-    # Places where the pixel is equal to `shape_id`, then set the pixel to 1, else set to 0.
+    # Places where the pixel contains the `shape_bit`, then set the pixel to 1, else set to 0.
     shape_mask = 1 << shape_bit
     output_image = np.where(shape_image & shape_mask > 0, 1, 0)
 
-    if True:
-        print(f"---\ninput: {input_image}\nshape: {shape_image}\nshape_id: {shape_bit}\noutput: {output_image}")
+    if False:
+        print(f"---\ninput: {input_image}\nshape: {shape_image}\nshape_mask: {shape_mask} (bit {shape_bit})\noutput: {output_image}")
         plt.imshow(input_image, cmap='gray')
         plt.show()
         plt.imshow(shape_image, cmap='gray')
