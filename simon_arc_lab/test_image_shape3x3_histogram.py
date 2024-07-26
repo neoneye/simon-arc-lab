@@ -39,6 +39,54 @@ class TestImageShape3x3Histogram(unittest.TestCase):
             [1, 2, 2, 1]], dtype=np.uint8)
         self.assertTrue(np.array_equal(actual, expected))
 
+    def test_aroundcenter_unique_colors(self):
+        image = np.array([
+            [1, 2, 3, 1], 
+            [4, 5, 6, 4],
+            [7, 8, 9, 7]], dtype=np.uint8)
+        actual = ImageShape3x3Histogram.number_of_unique_colors_around_center(image)
+        expected = np.array([
+            [3, 5, 5, 3], 
+            [5, 8, 8, 5], 
+            [3, 5, 5, 3]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_aroundcenter_same_color(self):
+        image = np.array([
+            [5, 5, 5, 5], 
+            [5, 5, 5, 5], 
+            [5, 5, 5, 5]], dtype=np.uint8)
+        actual = ImageShape3x3Histogram.number_of_unique_colors_around_center(image)
+        expected = np.array([
+            [1, 1, 1, 1], 
+            [1, 1, 1, 1], 
+            [1, 1, 1, 1]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_aroundcenter_two_colors(self):
+        image = np.array([
+            [6, 6, 5, 5], 
+            [6, 6, 5, 5], 
+            [6, 6, 5, 5]], dtype=np.uint8)
+        actual = ImageShape3x3Histogram.number_of_unique_colors_around_center(image)
+        expected = np.array([
+            [1, 2, 2, 1], 
+            [1, 2, 2, 1], 
+            [1, 2, 2, 1]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_aroundcenter_one_pixel(self):
+        image = np.array([
+            [6, 6, 6, 6], 
+            [6, 9, 6, 6], 
+            [6, 6, 6, 6]], dtype=np.uint8)
+        actual = ImageShape3x3Histogram.number_of_unique_colors_around_center(image)
+        expected = np.array([
+            [2, 2, 2, 1], 
+            [2, 1, 2, 1], 
+            [2, 2, 2, 1]], dtype=np.uint8)
+        self.assertTrue(np.array_equal(actual, expected))
+
     def test_diamond4_unique_colors(self):
         image = np.array([
             [1, 2, 3, 1], 
