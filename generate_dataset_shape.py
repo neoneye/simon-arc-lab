@@ -42,28 +42,29 @@ def generate_dataset_item_shape2x2(seed):
 
     dataset_name = random.Random(seed + 2).choice(DATASET_NAMES)
 
-    shape_id = random.Random(seed + 3).randint(0, 63)
+    shape_bit = random.Random(seed + 3).randint(0, 5)
 
     instructions = [
-        f'{dataset_name} identify places where shape2x2 is {shape_id}',
-        f'{dataset_name} detect shape2x2 {shape_id}',
-        f'{dataset_name} find shape2x2 {shape_id}',
+        f'{dataset_name} identify places where shape2x2 is {shape_bit}',
+        f'{dataset_name} detect shape2x2 {shape_bit}',
+        f'{dataset_name} find shape2x2 {shape_bit}',
     ]
 
     instruction = random.Random(seed + 4).choice(instructions)
 
     input_image = image_create_random_advanced(seed + 5, min_image_size, max_image_size, min_image_size, max_image_size)
 
-    image_shape = ImageShape2x2.apply(input_image)
+    shape_image = ImageShape2x2.apply(input_image)
 
     # Places where the pixel is equal to `shape_id`, then set the pixel to 1, else set to 0.
-    output_image = np.where(image_shape == shape_id, 1, 0)
+    shape_mask = 1 << shape_bit
+    output_image = np.where(shape_image & shape_mask > 0, 1, 0)
 
     if True:
-        print(f"---\ninput: {input_image}\nshape: {image_shape}\nshape_id: {shape_id}\noutput: {output_image}")
+        print(f"---\ninput: {input_image}\nshape: {shape_image}\nshape_id: {shape_bit}\noutput: {output_image}")
         plt.imshow(input_image, cmap='gray')
         plt.show()
-        plt.imshow(image_shape, cmap='gray')
+        plt.imshow(shape_image, cmap='gray')
         plt.show()
         plt.imshow(output_image, cmap='gray')
         plt.show()
