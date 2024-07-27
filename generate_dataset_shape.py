@@ -212,14 +212,31 @@ def generate_dataset_item_shape3x3_histogram(seed):
     max_image_size = 30
 
     transformation_ids = [
+        'shape3x3_histogram_all9',
+        'shape3x3_histogram_around_center',
         'shape3x3_histogram_corners',
         'shape3x3_histogram_diamond4',
+        'shape3x3_histogram_diamond5',
     ]
-    transformation_weights = [10, 10]
+    transformation_weights = [10, 10, 10, 10, 10]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
 
     dataset_name = random.Random(seed + 2).choice(DATASET_NAMES)
+
+    instructions_all9 = [
+        f'{dataset_name} number of unique colors inside shape3x3histogramall9',
+        f'{dataset_name} unique color count in shape3x3histogramall9',
+        f'{dataset_name} shape3x3histogramall9 number of unique colors',
+        f'{dataset_name} shape3x3 histogram all9 number of unique colors',
+    ]
+
+    instructions_around_center = [
+        f'{dataset_name} number of unique colors inside shape3x3histogramaroundcenter',
+        f'{dataset_name} unique color count in shape3x3histogramaroundcenter',
+        f'{dataset_name} shape3x3histogramaroundcenter number of unique colors',
+        f'{dataset_name} shape3x3 histogram around center, number of unique colors',
+    ]
 
     instructions_corners = [
         f'{dataset_name} number of unique colors inside shape3x3histogramcorners',
@@ -235,11 +252,24 @@ def generate_dataset_item_shape3x3_histogram(seed):
         f'{dataset_name} shape3x3 histogram diamond4 number of unique colors',
     ]
 
+    instructions_diamond5 = [
+        f'{dataset_name} number of unique colors inside shape3x3histogramdiamond5',
+        f'{dataset_name} unique color count in shape3x3histogramdiamond5',
+        f'{dataset_name} shape3x3histogramdiamond5 number of unique colors',
+        f'{dataset_name} shape3x3 histogram diamond5 number of unique colors',
+    ]
+
     instructions = None
-    if transformation_id == 'shape3x3_histogram_corners':
+    if transformation_id == 'shape3x3_histogram_all9':
+        instructions = instructions_all9
+    elif transformation_id == 'shape3x3_histogram_around_center':
+        instructions = instructions_around_center
+    elif transformation_id == 'shape3x3_histogram_corners':
         instructions = instructions_corners
     elif transformation_id == 'shape3x3_histogram_diamond4':
         instructions = instructions_diamond4
+    elif transformation_id == 'shape3x3_histogram_diamond5':
+        instructions = instructions_diamond5
     else:
         raise Exception("Unreachable code reached")
 
@@ -248,10 +278,16 @@ def generate_dataset_item_shape3x3_histogram(seed):
     input_image = image_create_random_advanced(seed + 5, min_image_size, max_image_size, min_image_size, max_image_size)
 
     output_image = None
-    if transformation_id == 'shape3x3_histogram_corners':
+    if transformation_id == 'shape3x3_histogram_all9':
+        output_image = ImageShape3x3Histogram.number_of_unique_colors_all9(input_image)
+    elif transformation_id == 'shape3x3_histogram_around_center':
+        output_image = ImageShape3x3Histogram.number_of_unique_colors_around_center(input_image)
+    elif transformation_id == 'shape3x3_histogram_corners':
         output_image = ImageShape3x3Histogram.number_of_unique_colors_in_corners(input_image)
     elif transformation_id == 'shape3x3_histogram_diamond4':
         output_image = ImageShape3x3Histogram.number_of_unique_colors_in_diamond4(input_image)
+    elif transformation_id == 'shape3x3_histogram_diamond5':
+        output_image = ImageShape3x3Histogram.number_of_unique_colors_in_diamond5(input_image)
     else:
         raise Exception("Unreachable code reached")
 
@@ -278,7 +314,7 @@ def generate_dataset_item_shape3x3_histogram(seed):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=400000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=500000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
