@@ -551,7 +551,7 @@ def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=2
     dataset_byte_size = 0
     for i in range(max_num_samples):
         # if i % 100 == 0:
-        #     item = generate_serialize_dataset_item(seed_start, i)
+        #     item = generate_serialize_dataset_item(seed_start + i)
         # else:
         #     item = generate_deserialize_dataset_item(seed_start, i)
         item = generate_deserialize_dataset_item(seed_start, i)
