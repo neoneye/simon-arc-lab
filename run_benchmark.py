@@ -55,10 +55,10 @@ class Runner:
                 self.counters_incorrect[benchmark_id] = 1
 
     def print_summary(self):
-        print("Correct counts:")
+        print(f"Correct sum: {sum(self.counters_correct.values())}")
         for key in sorted(self.counters_correct):
             print(f"{key}: {self.counters_correct[key]}")
-        print("\nIncorrect counts:")
+        print(f"\nIncorrect sum: {sum(self.counters_incorrect.values())}")
         for key in sorted(self.counters_incorrect):
             print(f"{key}: {self.counters_incorrect[key]}")
         print('-' * 80)
