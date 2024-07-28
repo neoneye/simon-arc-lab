@@ -16,9 +16,20 @@ class Runner:
         benchmark_id = dataset_item['benchmark']
         
         input_string = f"{instruction}\n{input_data}"
-        input_ids = self.tokenizer(input_string, return_tensors='pt').input_ids
+        input_ids = self.tokenizer(
+            input_string, 
+            return_tensors='pt',
+            max_length=256,
+            padding='max_length',
+            truncation=True
+        ).input_ids
         
-        outputs = self.model.generate(input_ids)
+        outputs = self.model.generate(
+            input_ids,
+            max_length=128,
+            num_beams=5,
+            early_stopping=True
+        )
         generated_output = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         
         is_correct = generated_output == expected_output
@@ -53,7 +64,7 @@ class Runner:
         print('-' * 80)
 
     def run(self, dataset):
-        chunk_size = 25
+        chunk_size = 10
         for index, dataset_item in enumerate(tqdm(dataset, desc="Processing entries"), start=1):
             self.process_dataset_item(dataset_item)
             if index > 0 and index % chunk_size == 0:
