@@ -189,7 +189,7 @@ def generate_deserialize_dataset_item(seed):
         'translate_y_plus1',
     ]
     # transformation_weights = [0, 0, 10, 10, 10, 10, 10, 10, 10, 0, 10, 10, 10, 10, 10, 10, 10, 10, 10]
-    transformation_weights = [0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    transformation_weights = [0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
     names_pixels = [
@@ -539,7 +539,7 @@ def generate_deserialize_dataset_item(seed):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=2500000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=2600000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
