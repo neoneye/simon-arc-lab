@@ -75,10 +75,10 @@ class Runner:
         self.print_summary()
 
 # Load dataset
-with open('dataset_shape.jsonl', 'r') as f:
+with open('dataset_image.jsonl', 'r') as f:
     dataset = [json.loads(line) for line in f]
 
-model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model80'
+model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model86'
 
 # Initialize runner
 runner = Runner(model_directory)
