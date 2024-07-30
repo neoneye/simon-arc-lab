@@ -176,6 +176,8 @@ def generate_deserialize_dataset_item(seed_start, item_index):
         min_image_size=min_image_size, 
         max_image_size=max_image_size
     )
+    image_height = image.shape[0]
+    image_width = image.shape[1]
 
     transformation_ids = [
         'pixels', 
@@ -197,9 +199,12 @@ def generate_deserialize_dataset_item(seed_start, item_index):
         'translate_x_plus1',
         'translate_y_minus1',
         'translate_y_plus1',
+        'get_row_as_list',
+        'get_column_as_list',
     ]
-    # transformation_weights = [0, 0, 10, 10, 10, 10, 10, 10, 10, 0, 10, 10, 10, 10, 10, 10, 10, 10, 10]
-    transformation_weights = [0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    # transformation_weights = [0, 0, 10, 10, 10, 10, 10, 10, 10, 0, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    # transformation_weights = [0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    transformation_weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10]
     # transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
     transformation_id = 'rotate_cw'
     if item_index % 2 == 0:
@@ -411,6 +416,38 @@ def generate_deserialize_dataset_item(seed_start, item_index):
         f'{dataset_name}, move down by 1 pixel',
     ]
 
+    get_row_y_as_list_y_parameter = random.Random(seed + 1006).randint(0, image_height - 1)
+    instructions_get_row_as_list = [
+        f'Get pixels from row {get_row_y_as_list_y_parameter}, {dataset_name}',
+        f'Get digits from row {get_row_y_as_list_y_parameter}, {dataset_name}',
+        f'Get symbols from row {get_row_y_as_list_y_parameter}, {dataset_name}',
+        f'Get row {get_row_y_as_list_y_parameter} as pixels, {dataset_name}',
+        f'Get row {get_row_y_as_list_y_parameter} as digits, {dataset_name}',
+        f'Get row {get_row_y_as_list_y_parameter} as symbols, {dataset_name}',
+        f'{dataset_name}, Get pixels from row {get_row_y_as_list_y_parameter}',
+        f'{dataset_name}, Get digits from row {get_row_y_as_list_y_parameter}',
+        f'{dataset_name}, Get symbols from row {get_row_y_as_list_y_parameter}',
+        f'{dataset_name}, Get row {get_row_y_as_list_y_parameter} as pixels',
+        f'{dataset_name}, Get row {get_row_y_as_list_y_parameter} as digits',
+        f'{dataset_name}, Get row {get_row_y_as_list_y_parameter} as symbols',
+    ]
+
+    get_column_x_as_list_x_parameter = random.Random(seed + 1007).randint(0, image_width - 1)
+    instructions_get_column_as_list = [
+        f'Get pixels from column {get_column_x_as_list_x_parameter}, {dataset_name}',
+        f'Get digits from column {get_column_x_as_list_x_parameter}, {dataset_name}',
+        f'Get symbols from column {get_column_x_as_list_x_parameter}, {dataset_name}',
+        f'Get column {get_column_x_as_list_x_parameter} as pixels, {dataset_name}',
+        f'Get column {get_column_x_as_list_x_parameter} as digits, {dataset_name}',
+        f'Get column {get_column_x_as_list_x_parameter} as symbols, {dataset_name}',
+        f'{dataset_name}, Get pixels from column {get_column_x_as_list_x_parameter}',
+        f'{dataset_name}, Get digits from column {get_column_x_as_list_x_parameter}',
+        f'{dataset_name}, Get symbols from column {get_column_x_as_list_x_parameter}',
+        f'{dataset_name}, Get column {get_column_x_as_list_x_parameter} as pixels',
+        f'{dataset_name}, Get column {get_column_x_as_list_x_parameter} as digits',
+        f'{dataset_name}, Get column {get_column_x_as_list_x_parameter} as symbols',
+    ]
+
     instructions = None
     if transformation_id == 'pixels':
         instructions = instructions_input_output
@@ -450,6 +487,10 @@ def generate_deserialize_dataset_item(seed_start, item_index):
         instructions = instructions_translate_y_minus1
     elif transformation_id == 'translate_y_plus1':
         instructions = instructions_translate_y_plus1
+    elif transformation_id == 'get_row_as_list':
+        instructions = instructions_get_row_as_list
+    elif transformation_id == 'get_column_as_list':
+        instructions = instructions_get_column_as_list
     else:
         raise Exception("Unreachable code reached")
 
@@ -530,6 +571,12 @@ def generate_deserialize_dataset_item(seed_start, item_index):
         new_image = image_translate_wrap(image, 0, 1)
         output_rle_string = serialize(new_image)
         output = output_rle_string
+    elif transformation_id == 'get_row_as_list':
+        pixel_list = image_get_row_as_list(image, get_row_y_as_list_y_parameter)
+        output = ''.join(map(str, pixel_list))
+    elif transformation_id == 'get_column_as_list':
+        pixel_list = image_get_column_as_list(image, get_column_x_as_list_x_parameter)
+        output = ''.join(map(str, pixel_list))
     else:
         raise Exception("Unreachable code reached")
 
