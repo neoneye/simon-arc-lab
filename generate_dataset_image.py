@@ -75,12 +75,14 @@ def generate_serialize_dataset_item(seed):
     min_image_size = 1
     max_image_size = 30
 
+    random.seed(seed)
+
     transformation_ids = [
         'pixels', 
         'json'
     ]
     transformation_weights = [45, 45]
-    transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
+    transformation_id = random.choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
     names_pixels = [
         'Pixels',
@@ -100,13 +102,13 @@ def generate_serialize_dataset_item(seed):
 
     name_input = None
     if transformation_id == 'pixels':
-        name_input = random.Random(seed + 1002).choice(names_pixels)
+        name_input = random.choice(names_pixels)
     elif transformation_id == 'json':
-        name_input = random.Random(seed + 1003).choice(names_json)
+        name_input = random.choice(names_json)
     else:
         raise Exception("Unreachable code reached")
 
-    dataset_name = random.Random(seed + 1004).choice(DATASET_NAMES)
+    dataset_name = random.choice(DATASET_NAMES)
 
     instructions_input_output = [
         f'Serialize {name_input} to {dataset_name}',
@@ -123,7 +125,7 @@ def generate_serialize_dataset_item(seed):
 
     instructions = instructions_input_output
 
-    instruction = random.Random(seed + 1005).choice(instructions)
+    instruction = random.choice(instructions)
 
     rle_string, image = generate_rle_string(
         seed=seed + 1006, 
@@ -168,6 +170,7 @@ def generate_deserialize_dataset_item(seed_start, item_index):
     max_image_size = 21
 
     seed = seed_start + item_index
+    random.seed(seed)
 
     # image_seed = seed + 1006 
     image_seed = seed_start + (item_index // 2)  # Use the same image for rotate_cw and rotate_ccw
@@ -205,10 +208,10 @@ def generate_deserialize_dataset_item(seed_start, item_index):
     # transformation_weights = [0, 0, 10, 10, 10, 10, 10, 10, 10, 0, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
     # transformation_weights = [0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     transformation_weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10]
-    # transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
-    transformation_id = 'rotate_cw'
-    if item_index % 2 == 0:
-        transformation_id = 'rotate_ccw'
+    transformation_id = random.choices(transformation_ids, weights=transformation_weights, k=1)[0]
+    # transformation_id = 'rotate_cw'
+    # if item_index % 2 == 0:
+    #     transformation_id = 'rotate_ccw'
 
     names_pixels = [
         'Pixels',
@@ -228,12 +231,12 @@ def generate_deserialize_dataset_item(seed_start, item_index):
 
     name_output = None
     if transformation_id == 'pixels':
-        name_output = random.Random(seed + 1002).choice(names_pixels)
+        name_output = random.choice(names_pixels)
     else:
         if transformation_id == 'json':
-            name_output = random.Random(seed + 1003).choice(names_json)
+            name_output = random.choice(names_json)
 
-    dataset_name = random.Random(seed + 1004).choice(DATASET_NAMES)
+    dataset_name = random.choice(DATASET_NAMES)
 
     instructions_input_output = [
         f'Deserialize {dataset_name} to {name_output}',
@@ -335,7 +338,7 @@ def generate_deserialize_dataset_item(seed_start, item_index):
         f'{dataset_name}, 3x3 area, positions where all neighbors have the same color as center',
     ]
 
-    pixels_with_k_matching_neighbors_k_parameter = random.Random(seed + 1005).randint(1, 8)
+    pixels_with_k_matching_neighbors_k_parameter = random.randint(1, 8)
     instructions_pixels_with_k_matching_neighbors = [
         f'With {dataset_name}, where {pixels_with_k_matching_neighbors_k_parameter} neighbors have the same color as the center pixel',
         f'{dataset_name}, where {pixels_with_k_matching_neighbors_k_parameter} neighbors have the same color as the center pixel',
@@ -416,7 +419,7 @@ def generate_deserialize_dataset_item(seed_start, item_index):
         f'{dataset_name}, move down by 1 pixel',
     ]
 
-    get_row_y_as_list_y_parameter = random.Random(seed + 1006).randint(0, image_height - 1)
+    get_row_y_as_list_y_parameter = random.randint(0, image_height - 1)
     instructions_get_row_as_list = [
         f'Get pixels from row {get_row_y_as_list_y_parameter}, {dataset_name}',
         f'Get digits from row {get_row_y_as_list_y_parameter}, {dataset_name}',
@@ -432,7 +435,7 @@ def generate_deserialize_dataset_item(seed_start, item_index):
         f'{dataset_name}, Get row {get_row_y_as_list_y_parameter} as symbols',
     ]
 
-    get_column_x_as_list_x_parameter = random.Random(seed + 1007).randint(0, image_width - 1)
+    get_column_x_as_list_x_parameter = random.randint(0, image_width - 1)
     instructions_get_column_as_list = [
         f'Get pixels from column {get_column_x_as_list_x_parameter}, {dataset_name}',
         f'Get digits from column {get_column_x_as_list_x_parameter}, {dataset_name}',
@@ -495,7 +498,7 @@ def generate_deserialize_dataset_item(seed_start, item_index):
         raise Exception("Unreachable code reached")
 
 
-    instruction = random.Random(seed + 1005).choice(instructions)
+    instruction = random.choice(instructions)
 
     output = None
     if transformation_id == 'pixels':
@@ -593,7 +596,7 @@ def generate_deserialize_dataset_item(seed_start, item_index):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=3900000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=4000000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
