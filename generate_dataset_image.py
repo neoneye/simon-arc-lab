@@ -169,7 +169,7 @@ def generate_deserialize_dataset_item(seed_start, item_index):
     :return: A dictionary with the instruction, input, and output
     """
     min_image_size = 1
-    max_image_size = 21
+    max_image_size = 5
 
     seed = seed_start + item_index
     random.seed(seed)
@@ -598,7 +598,7 @@ def generate_deserialize_dataset_item(seed_start, item_index):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=4000000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=4100000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
