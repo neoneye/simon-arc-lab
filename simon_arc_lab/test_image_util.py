@@ -372,5 +372,37 @@ class TestImageUtil(unittest.TestCase):
             [1, 3, 2]], dtype=np.uint8)
         self.assertTrue(np.array_equal(actual, expected))
 
+    def test_image_get_row_as_list(self):
+        image = np.array([
+            [1, 2], 
+            [3, 4], 
+            [5, 6], 
+            [7, 8]], dtype=np.uint8)
+
+        with self.assertRaises(ValueError):
+            image_get_row_as_list(image, -1)
+        with self.assertRaises(ValueError):
+            image_get_row_as_list(image, 4)
+
+        self.assertEqual(image_get_row_as_list(image, 0), [1, 2])
+        self.assertEqual(image_get_row_as_list(image, 1), [3, 4])
+        self.assertEqual(image_get_row_as_list(image, 2), [5, 6])
+        self.assertEqual(image_get_row_as_list(image, 3), [7, 8])
+
+    def test_image_get_column_as_list(self):
+        image = np.array([
+            [1, 2, 3, 4], 
+            [5, 6, 7, 8]], dtype=np.uint8)
+
+        with self.assertRaises(ValueError):
+            image_get_column_as_list(image, -1)
+        with self.assertRaises(ValueError):
+            image_get_column_as_list(image, 4)
+
+        self.assertEqual(image_get_column_as_list(image, 0), [1, 5])
+        self.assertEqual(image_get_column_as_list(image, 1), [2, 6])
+        self.assertEqual(image_get_column_as_list(image, 2), [3, 7])
+        self.assertEqual(image_get_column_as_list(image, 3), [4, 8])
+
 if __name__ == '__main__':
     unittest.main()

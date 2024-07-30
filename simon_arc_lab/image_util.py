@@ -299,3 +299,29 @@ def image_replace_colors(image: np.array, color_mapping: Dict[int, int]) -> np.a
         new_image[mask] = new_color
         
     return new_image
+
+def image_get_row_as_list(image: np.array, row_index: int) -> list[int]:
+    """
+    Get a row from an image.
+
+    :param image: The image to process.
+    :param row_index: The index of the row to get.
+    :return: The row as a list.
+    """
+    height = image.shape[0]
+    if row_index < 0 or row_index >= height:
+        raise ValueError(f"Row index {row_index} is out of bounds for image with height {height}")
+    return list(image[row_index])
+
+def image_get_column_as_list(image: np.array, column_index: int) -> list[int]:
+    """
+    Get a column from an image.
+
+    :param image: The image to process.
+    :param column_index: The index of the column to get.
+    :return: The column as a list.
+    """
+    width = image.shape[1]
+    if column_index < 0 or column_index >= width:
+        raise ValueError(f"Column index {column_index} is out of bounds for image with width {width}")
+    return list(image[:, column_index])
