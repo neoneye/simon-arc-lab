@@ -169,6 +169,14 @@ def generate_deserialize_dataset_item(seed_start, item_index):
 
     seed = seed_start + item_index
 
+    # image_seed = seed + 1006 
+    image_seed = seed_start + (item_index // 2)  # Use the same image for rotate_cw and rotate_ccw
+    rle_string, image = generate_rle_string(
+        seed=image_seed, 
+        min_image_size=min_image_size, 
+        max_image_size=max_image_size
+    )
+
     transformation_ids = [
         'pixels', 
         'json',
@@ -447,14 +455,6 @@ def generate_deserialize_dataset_item(seed_start, item_index):
 
 
     instruction = random.Random(seed + 1005).choice(instructions)
-
-    # image_seed = seed + 1006 
-    image_seed = seed_start + (item_index // 2)  # Use the same image for rotate_cw and rotate_ccw
-    rle_string, image = generate_rle_string(
-        seed=image_seed, 
-        min_image_size=min_image_size, 
-        max_image_size=max_image_size
-    )
 
     output = None
     if transformation_id == 'pixels':
