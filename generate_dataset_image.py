@@ -34,6 +34,7 @@ import random
 import numpy as np
 from simon_arc_lab.rle.serialize import serialize
 from simon_arc_lab.image_util import *
+from simon_arc_lab.image_compress import *
 from simon_arc_lab.histogram import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.benchmark import *
@@ -552,15 +553,15 @@ def generate_deserialize_dataset_item(seed_start, item_index):
         output_rle_string = serialize(new_image)
         output = output_rle_string
     elif transformation_id == 'compress_x':
-        new_image = compress_x(image)
+        new_image = image_compress_x(image)
         output_rle_string = serialize(new_image)
         output = output_rle_string
     elif transformation_id == 'compress_y':
-        new_image = compress_y(image)
+        new_image = image_compress_y(image)
         output_rle_string = serialize(new_image)
         output = output_rle_string
     elif transformation_id == 'compress_xy':
-        new_image = compress_xy(image)
+        new_image = image_compress_xy(image)
         output_rle_string = serialize(new_image)
         output = output_rle_string
     elif transformation_id == 'translate_x_minus1':
