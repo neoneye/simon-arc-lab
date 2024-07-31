@@ -21,6 +21,7 @@ from simon_arc_lab.image_util import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.histogram import *
 from simon_arc_lab.benchmark import *
+from simon_arc_lab.task import *
 from simon_arc_lab.task_formatter import *
 
 def generate_task(seed):
