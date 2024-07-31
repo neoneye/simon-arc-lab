@@ -5,58 +5,43 @@ from .image_util import *
 class TestImageUtil(unittest.TestCase):
     def test_image_create(self):
         actual = image_create(2, 3, 4)
-
-        expected = np.zeros((3, 2), dtype=np.uint8)
-        expected[0:3, 0:2] = [
-            [4, 4],
-            [4, 4],
-            [4, 4]]
-
+        expected = np.array([
+            [4, 4], 
+            [4, 4], 
+            [4, 4]], dtype=np.uint8)
         self.assertTrue(np.array_equal(actual, expected))
 
     def test_rotate_cw(self):
-        input = np.zeros((3, 2), dtype=np.uint8)
-        input[0:3, 0:2] = [
+        input = np.array([
             [3, 6],
             [2, 5],
-            [1, 4]]
-
-        expected = np.zeros((2, 3), dtype=np.uint8)
-        expected[0:2, 0:3] = [
+            [1, 4]], dtype=np.uint8)
+        expected = np.array([
             [1, 2, 3],
-            [4, 5, 6]]
-
+            [4, 5, 6]], dtype=np.uint8)
         actual = image_rotate_cw(input)
         self.assertTrue(np.array_equal(actual, expected))
 
     def test_rotate_ccw(self):
-        input = np.zeros((3, 2), dtype=np.uint8)
-        input[0:3, 0:2] = [
+        input = np.array([
             [4, 1],
             [5, 2],
-            [6, 3]]
-
-        expected = np.zeros((2, 3), dtype=np.uint8)
-        expected[0:2, 0:3] = [
+            [6, 3]], dtype=np.uint8)
+        expected = np.array([
             [1, 2, 3],
-            [4, 5, 6]]
-
+            [4, 5, 6]], dtype=np.uint8)
         actual = image_rotate_ccw(input)
         self.assertTrue(np.array_equal(actual, expected))
 
     def test_rotate_180(self):
-        input = np.zeros((3, 2), dtype=np.uint8)
-        input[0:3, 0:2] = [
+        input = np.array([
             [4, 1],
             [5, 2],
-            [6, 3]]
-
-        expected = np.zeros((3, 2), dtype=np.uint8)
-        expected[0:3, 0:2] = [
+            [6, 3]], dtype=np.uint8)
+        expected = np.array([
             [3, 6],
             [2, 5],
-            [1, 4]]
-
+            [1, 4]], dtype=np.uint8)
         actual = image_rotate_180(input)
         self.assertTrue(np.array_equal(actual, expected))
 
