@@ -601,7 +601,7 @@ def generate_deserialize_dataset_item(seed_start, item_index):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=5100000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=5200000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
