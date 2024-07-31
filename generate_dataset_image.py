@@ -35,6 +35,7 @@ import numpy as np
 from simon_arc_lab.rle.serialize import serialize
 from simon_arc_lab.image_util import *
 from simon_arc_lab.image_compress import *
+from simon_arc_lab.image_count3x3 import *
 from simon_arc_lab.histogram import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.benchmark import *
