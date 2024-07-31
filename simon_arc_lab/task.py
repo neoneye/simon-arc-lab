@@ -1,5 +1,6 @@
 import numpy as np
 import json
+from typing import Optional
 
 class Task:
     def __init__(self):
@@ -8,7 +9,7 @@ class Task:
         self.count_examples = 0
         self.count_tests = 0
 
-    def append_pair(self, input_image: np.array, output_image: np.array, is_example: bool):
+    def append_pair(self, input_image: np.array, output_image: Optional[np.array], is_example: bool):
         self.assert_count()
         if is_example and self.count_tests > 0:
             raise ValueError("Example must be added before test")
