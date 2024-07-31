@@ -22,7 +22,7 @@ from simon_arc_lab.image_create_random_advanced import image_create_random_advan
 from simon_arc_lab.histogram import *
 from simon_arc_lab.benchmark import *
 
-class MyTask:
+class TaskFormatter:
     def __init__(self):
         self.input_images = []
         self.output_images = []
@@ -144,7 +144,7 @@ class MyTask:
 def generate_task(seed):
     count_example = random.Random(seed + 1).randint(2, 5)
     count_test = random.Random(seed + 2).randint(1, 3)
-    task = MyTask()
+    task = TaskFormatter()
     min_width = 1
     max_width = 10
     min_height = 1
