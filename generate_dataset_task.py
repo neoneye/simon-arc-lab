@@ -26,7 +26,7 @@ from simon_arc_lab.task_formatter import *
 def generate_task(seed):
     count_example = random.Random(seed + 1).randint(2, 5)
     count_test = random.Random(seed + 2).randint(1, 3)
-    task = TaskFormatter()
+    task = Task()
     min_width = 1
     max_width = 10
     min_height = 1
@@ -81,7 +81,8 @@ def generate_dataset_item(seed):
 
     task = generate_task(seed + 1002)
 
-    input = task.to_string()
+    task_formatter = TaskFormatterRLE(task)
+    input = task_formatter.to_string()
 
     output = None
     instruction = None
@@ -89,8 +90,8 @@ def generate_dataset_item(seed):
     if transformation_id == 'extract_input_by_id':
         count = task.count()
         pair_index = random.Random(seed + 1).randint(0, count-1)
-        image_id = task.input_ids()[pair_index]
-        output = task.serialize_input_image(pair_index)
+        image_id = task_formatter.input_ids()[pair_index]
+        output = task_formatter.serialize_input_image(pair_index)
         instructions = [
             f"This is {dataformat_name} data. Extract {image_id}",
             f"This is {dataformat_name} data. Extract '{image_id}'",
@@ -104,8 +105,8 @@ def generate_dataset_item(seed):
     if transformation_id == 'extract_output_by_id':
         count = task.count()
         pair_index = random.Random(seed + 1).randint(0, count-1)
-        image_id = task.output_ids()[pair_index]
-        output = task.serialize_output_image(pair_index)
+        image_id = task_formatter.output_ids()[pair_index]
+        output = task_formatter.serialize_output_image(pair_index)
         instructions = [
             f"This is {dataformat_name} data. Extract {image_id}",
             f"This is {dataformat_name} data. Extract '{image_id}'",
@@ -119,7 +120,7 @@ def generate_dataset_item(seed):
     if transformation_id == 'histogram_input_by_id':
         count = task.count()
         pair_index = random.Random(seed + 1).randint(0, count-1)
-        image_id = task.input_ids()[pair_index]
+        image_id = task_formatter.input_ids()[pair_index]
         histogram = Histogram.create_with_image(task.input_images[pair_index])
         output = histogram.pretty()
         instructions = [
@@ -137,7 +138,7 @@ def generate_dataset_item(seed):
     if transformation_id == 'histogram_output_by_id':
         count = task.count()
         pair_index = random.Random(seed + 1).randint(0, count-1)
-        image_id = task.output_ids()[pair_index]
+        image_id = task_formatter.output_ids()[pair_index]
         image = task.output_images[pair_index]
         if image is None:
             output = "None"
@@ -159,7 +160,7 @@ def generate_dataset_item(seed):
     if transformation_id == 'flipx_input_by_id':
         count = task.count()
         pair_index = random.Random(seed + 1).randint(0, count-1)
-        image_id = task.input_ids()[pair_index]
+        image_id = task_formatter.input_ids()[pair_index]
         image = task.input_images[pair_index]
         flipped_image = image[:, ::-1]
         output = serialize(flipped_image)
@@ -179,7 +180,7 @@ def generate_dataset_item(seed):
     if transformation_id == 'flipx_output_by_id':
         count = task.count()
         pair_index = random.Random(seed + 1).randint(0, count-1)
-        image_id = task.output_ids()[pair_index]
+        image_id = task_formatter.output_ids()[pair_index]
         image = task.output_images[pair_index]
         if image is None:
             output = "None"
@@ -202,7 +203,7 @@ def generate_dataset_item(seed):
     if transformation_id == 'flipy_input_by_id':
         count = task.count()
         pair_index = random.Random(seed + 1).randint(0, count-1)
-        image_id = task.input_ids()[pair_index]
+        image_id = task_formatter.input_ids()[pair_index]
         image = task.input_images[pair_index]
         flipped_image = image[::-1, :]
         output = serialize(flipped_image)
@@ -222,7 +223,7 @@ def generate_dataset_item(seed):
     if transformation_id == 'flipy_output_by_id':
         count = task.count()
         pair_index = random.Random(seed + 1).randint(0, count-1)
-        image_id = task.output_ids()[pair_index]
+        image_id = task_formatter.output_ids()[pair_index]
         image = task.output_images[pair_index]
         if image is None:
             output = "None"
@@ -245,7 +246,7 @@ def generate_dataset_item(seed):
     if transformation_id == 'pair_histogram_intersection_colors':
         count = task.count()
         pair_index = random.Random(seed + 1).randint(0, count-1)
-        pair_id = task.pair_ids()[pair_index]
+        pair_id = task_formatter.pair_ids()[pair_index]
         input_image = task.input_images[pair_index]
         output_image = task.output_images[pair_index]
         if output_image is None:
@@ -272,7 +273,7 @@ def generate_dataset_item(seed):
     if transformation_id == 'pair_histogram_union_colors':
         count = task.count()
         pair_index = random.Random(seed + 1).randint(0, count-1)
-        pair_id = task.pair_ids()[pair_index]
+        pair_id = task_formatter.pair_ids()[pair_index]
         input_image = task.input_images[pair_index]
         output_image = task.output_images[pair_index]
         if output_image is None:
@@ -299,7 +300,7 @@ def generate_dataset_item(seed):
     if transformation_id == 'pair_histogram_add':
         count = task.count()
         pair_index = random.Random(seed + 1).randint(0, count-1)
-        pair_id = task.pair_ids()[pair_index]
+        pair_id = task_formatter.pair_ids()[pair_index]
         input_image = task.input_images[pair_index]
         output_image = task.output_images[pair_index]
         if output_image is None:
@@ -323,7 +324,7 @@ def generate_dataset_item(seed):
     if transformation_id == 'pair_histogram_max':
         count = task.count()
         pair_index = random.Random(seed + 1).randint(0, count-1)
-        pair_id = task.pair_ids()[pair_index]
+        pair_id = task_formatter.pair_ids()[pair_index]
         input_image = task.input_images[pair_index]
         output_image = task.output_images[pair_index]
         if output_image is None:
@@ -348,7 +349,7 @@ def generate_dataset_item(seed):
     if transformation_id == 'pair_histogram_min':
         count = task.count()
         pair_index = random.Random(seed + 1).randint(0, count-1)
-        pair_id = task.pair_ids()[pair_index]
+        pair_id = task_formatter.pair_ids()[pair_index]
         input_image = task.input_images[pair_index]
         output_image = task.output_images[pair_index]
         if output_image is None:
