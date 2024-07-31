@@ -99,3 +99,7 @@ class Task:
         """
         with open(path, 'w') as file:
             file.write(self.to_arcagi1_json(compact))
+
+    def show(self):
+        from .task_show import task_show
+        task_show(self, answer=True)
