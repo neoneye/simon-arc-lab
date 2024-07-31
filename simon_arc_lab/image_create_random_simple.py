@@ -1,7 +1,7 @@
 import random
 from .image_util import *
 
-def image_create_random_with_two_colors(width, height, color1, color2, ratio, seed):
+def image_create_random_with_two_colors(width: int, height: int, color1: int, color2: int, ratio: float, seed: int) -> np.array:
     image = image_create(width, height, color1)
 
     positions = []
@@ -18,7 +18,7 @@ def image_create_random_with_two_colors(width, height, color1, color2, ratio, se
         image[y, x] = color2
     return image
 
-def image_create_random_with_three_colors(width, height, color0, color1, color2, weight0, weight1, weight2, seed):
+def image_create_random_with_three_colors(width: int, height: int, color0: int, color1: int, color2: int, weight0: int, weight1: int, weight2: int, seed: int) -> np.array:
     image = image_create(width, height, color0)
 
     positions = [(y, x) for y in range(height) for x in range(width)]
@@ -39,7 +39,7 @@ def image_create_random_with_three_colors(width, height, color0, color1, color2,
 
     return image
 
-def image_create_random_with_four_colors(width, height, color0, color1, color2, color3, weight0, weight1, weight2, weight3, seed):
+def image_create_random_with_four_colors(width: int, height: int, color0: int, color1: int, color2: int, color3: int, weight0: int, weight1: int, weight2: int, weight3: int, seed: int) -> np.array:
     image = image_create(width, height, color0)
 
     positions = [(y, x) for y in range(height) for x in range(width)]

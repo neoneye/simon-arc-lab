@@ -2,23 +2,23 @@ from typing import Dict
 import numpy as np
 import random
 
-def image_create(width, height, color):
+def image_create(width: int, height: int, color: int) -> np.array:
     image = np.zeros((height, width), dtype=np.uint8)
     for y in range(height):
         for x in range(width):
             image[y, x] = color
     return image
 
-def image_rotate_cw(image):
+def image_rotate_cw(image: np.array) -> np.array:
     return np.rot90(image, k=-1)
 
-def image_rotate_ccw(image):
+def image_rotate_ccw(image: np.array) -> np.array:
     return np.rot90(image)
 
-def image_rotate_180(image):
+def image_rotate_180(image: np.array) -> np.array:
     return np.rot90(image, k=2)
 
-def bresenham_line(image, x0, y0, x1, y1, color):
+def bresenham_line(image: np.array, x0: int, y0: int, x1: int, y1: int, color: int) -> np.array:
     """
     Draw a line on an image using Bresenham's line algorithm.
 
@@ -61,7 +61,7 @@ def bresenham_line(image, x0, y0, x1, y1, color):
 
     return new_image
 
-def count_same_color_as_center_with_one_neighbor_nowrap(image, dx, dy):
+def count_same_color_as_center_with_one_neighbor_nowrap(image: np.array, dx: int, dy: int) -> np.array:
     """
     Is the center pixel the same color as the pixel at dx, dy?
 
@@ -92,7 +92,7 @@ def count_same_color_as_center_with_one_neighbor_nowrap(image, dx, dy):
     
     return result_image
 
-def count_neighbors_with_same_color_nowrap(image):
+def count_neighbors_with_same_color_nowrap(image: np.array) -> np.array:
     """
     Counts the number of neighboring pixels with the same color as the center pixel.
     
@@ -125,7 +125,7 @@ def count_neighbors_with_same_color_nowrap(image):
     
     return count_matrix
 
-def pixels_with_k_matching_neighbors_nowrap(image, k):
+def pixels_with_k_matching_neighbors_nowrap(image: np.array, k: int) -> np.array:
     """
     Identifies pixels where exactly k neighbors have the same color as the center pixel.
     
@@ -148,7 +148,7 @@ def pixels_with_k_matching_neighbors_nowrap(image, k):
 
     return result_image
 
-def all_neighbors_matching_center_nowrap(image):
+def all_neighbors_matching_center_nowrap(image: np.array) -> np.array:
     """
     Checks if the center pixel has the same color as all 8 surrounding pixels.
     
@@ -161,7 +161,7 @@ def all_neighbors_matching_center_nowrap(image):
     """
     return pixels_with_k_matching_neighbors_nowrap(image, 8)    
 
-def compress_x(image):
+def compress_x(image: np.array) -> np.array:
     """
     Eliminate adjacent duplicate columns
     """
@@ -176,7 +176,7 @@ def compress_x(image):
             compressed.append(image[:, col])
     return np.array(compressed).T
 
-def compress_y(image):
+def compress_y(image: np.array) -> np.array:
     """
     Eliminate adjacent duplicate rows
     """
@@ -191,13 +191,13 @@ def compress_y(image):
             compressed.append(row)
     return np.array(compressed)
 
-def compress_xy(image):
+def compress_xy(image: np.array) -> np.array:
     """
     Eliminate adjacent duplicate rows+columns
     """
     return compress_y(compress_x(image))
 
-def image_translate_wrap(image, dx, dy):
+def image_translate_wrap(image: np.array, dx: int, dy: int) -> np.array:
     """
     Move pixels by dx, dy, wrapping around the image.
 
