@@ -123,7 +123,7 @@ class TaskFormatter:
             s += self.serialize_output_image(i)
         return s
 
-    def to_json(self) -> str:
+    def to_arcagi1_dict(self) -> dict:
         array_train = []
         array_test = []
         for i in range(self.count()):
@@ -140,4 +140,16 @@ class TaskFormatter:
             'train': array_train,
             'test': array_test,
         }
-        return json.dumps(dict)
+        return dict
+
+    def to_arcagi1_json(self, compact: bool = False) -> str:
+        """
+        Convert the task to a JSON string in the ARC-AGI version1 file format.
+        
+        compact: If True, the JSON string will be compact without spaces.
+        """
+        dict = self.to_arcagi1_dict()
+        if compact:
+            return json.dumps(dict, separators=(',', ':'))
+        else:
+            return json.dumps(dict)
