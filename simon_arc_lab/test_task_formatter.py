@@ -3,6 +3,14 @@ import numpy as np
 from .task_formatter import *
 
 class TestTaskFormatter(unittest.TestCase):
+    def test_append_pair_raise_exception(self):
+        task = TaskFormatter()
+        image = np.array([[0]], dtype=np.uint8)
+        task.append_pair(image, image, True)
+        task.append_pair(image, image, False)
+        with self.assertRaises(ValueError):
+            task.append_pair(image, image, True)
+
     def test_to_string_1example_1test(self):
         task = TaskFormatter()
         input0 = np.array([[0, 0], [0, 0]], dtype=np.uint8)

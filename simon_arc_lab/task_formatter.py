@@ -1,4 +1,5 @@
 from .rle.serialize import serialize
+import numpy as np
 import json
 
 class TaskFormatter:
@@ -8,8 +9,10 @@ class TaskFormatter:
         self.count_examples = 0
         self.count_tests = 0
 
-    def append_pair(self, input_image, output_image, is_example):
+    def append_pair(self, input_image: np.array, output_image: np.array, is_example: bool):
         self.assert_count()
+        if is_example and self.count_tests > 0:
+            raise ValueError("Example must be added before test")
         self.input_images.append(input_image)
         self.output_images.append(output_image)
         if is_example:
@@ -18,7 +21,7 @@ class TaskFormatter:
             self.count_tests += 1
         self.assert_count()
 
-    def count(self):
+    def count(self) -> int:
         self.assert_count()
         return len(self.input_images)
 
@@ -26,7 +29,7 @@ class TaskFormatter:
         assert len(self.input_images) == len(self.output_images)
         assert self.count_examples + self.count_tests == len(self.input_images)
 
-    def input_ids(self):
+    def input_ids(self) -> list[str]:
         self.assert_count()
         names = []
         for i in range(len(self.input_images)):
@@ -37,7 +40,7 @@ class TaskFormatter:
             names.append(f"Input {i} {name}")
         return names
 
-    def output_ids(self):
+    def output_ids(self) -> list[str]:
         self.assert_count()
         names = []
         for i in range(len(self.input_images)):
@@ -48,7 +51,7 @@ class TaskFormatter:
             names.append(f"Output {i} {name}")
         return names
     
-    def pair_ids(self):
+    def pair_ids(self) -> list[str]:
         self.assert_count()
         names = []
         for i in range(len(self.input_images)):
@@ -59,7 +62,7 @@ class TaskFormatter:
             names.append(f"Pair {i} {name}")
         return names
     
-    def max_image_size(self):
+    def max_image_size(self) -> tuple[int, int]:
         """
         Find (width, height) of the biggest images in the task.
 
