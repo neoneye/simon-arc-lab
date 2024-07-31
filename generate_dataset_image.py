@@ -174,9 +174,9 @@ def generate_deserialize_dataset_item(seed_start, item_index):
     seed = seed_start + item_index
     random.seed(seed)
 
-    # image_seed = seed + 1006 
+    image_seed = seed + 1006 
     # image_seed = seed_start + (item_index // 2)  # Use the same image for rotate_cw and rotate_ccw
-    image_seed = seed_start + (item_index // 3)  # Use the same image for rotate_cw and rotate_ccw and get_column_as_list
+    # image_seed = seed_start + (item_index // 3)  # Use the same image for rotate_cw and rotate_ccw and get_column_as_list
     rle_string, image = generate_rle_string(
         seed=image_seed, 
         min_image_size=min_image_size, 
@@ -601,7 +601,7 @@ def generate_deserialize_dataset_item(seed_start, item_index):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=5400000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=5500000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
