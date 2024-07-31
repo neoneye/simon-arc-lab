@@ -1,6 +1,7 @@
 import random
 from .image_util import *
 from .image_create_random_simple import *
+from .image_bresenham_line import *
 
 def image_create_random_advanced(seed, min_width, max_width, min_height, max_height):
     """
@@ -54,7 +55,7 @@ def image_create_random_advanced(seed, min_width, max_width, min_height, max_hei
         y0 = random.Random(seed + 9 + i).randint(0, height - 1)
         y1 = random.Random(seed + 10 + i).randint(0, height - 1)
         color = random.Random(seed + 11 + i).choice(colors)
-        image = bresenham_line(image, x0, y0, x1, y1, color)
+        image = image_bresenham_line(image, x0, y0, x1, y1, color)
 
     return image
 

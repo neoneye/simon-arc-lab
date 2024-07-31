@@ -60,40 +60,6 @@ class TestImageUtil(unittest.TestCase):
         actual = image_rotate_180(input)
         self.assertTrue(np.array_equal(actual, expected))
 
-    def test_bresenham_line_diagonal(self):
-        image = np.zeros((3, 3), dtype=np.uint8)
-        actual = bresenham_line(image, 0, 0, 2, 2, 1)
-
-        expected = np.zeros((3, 3), dtype=np.uint8)
-        expected[0, 0] = 1
-        expected[1, 1] = 1
-        expected[2, 2] = 1
-
-        self.assertTrue(np.array_equal(actual, expected))
-
-    def test_bresenham_line_horizontal(self):
-        image = np.zeros((3, 4), dtype=np.uint8)
-        actual = bresenham_line(image, 0, 0, 3, 0, 1)
-
-        expected = np.zeros((3, 4), dtype=np.uint8)
-        expected[0, 0] = 1
-        expected[0, 1] = 1
-        expected[0, 2] = 1
-        expected[0, 3] = 1
-
-        self.assertTrue(np.array_equal(actual, expected))
-
-    def test_bresenham_line_horizontal(self):
-        image = np.zeros((3, 4), dtype=np.uint8)
-        actual = bresenham_line(image, 1, 0, 1, 2, 1)
-
-        expected = np.zeros((3, 4), dtype=np.uint8)
-        expected[0, 1] = 1
-        expected[1, 1] = 1
-        expected[2, 1] = 1
-
-        self.assertTrue(np.array_equal(actual, expected))
-
     def test_count_same_color_as_center_with_one_neighbor_nowrap_1(self):
         image = np.array([[1, 5, 3], [4, 5, 6], [7, 8, 9]], dtype=np.uint8)
         actual = count_same_color_as_center_with_one_neighbor_nowrap(image, 0, -1)
