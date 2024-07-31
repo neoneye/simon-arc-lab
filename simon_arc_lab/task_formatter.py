@@ -1,4 +1,5 @@
 from .rle.serialize import serialize
+import json
 
 class TaskFormatter:
     def __init__(self):
@@ -75,7 +76,7 @@ class TaskFormatter:
                 height = max(height, self.output_images[i].shape[0])
         return (width, height)
     
-    def total_pixel_count(self):
+    def total_pixel_count(self) -> int:
         """
         Count the total number of pixels in all images.
 
@@ -89,13 +90,13 @@ class TaskFormatter:
                 count += self.output_images[i].shape[0] * self.output_images[i].shape[1]
         return count
     
-    def serialize_input_image(self, i):
+    def serialize_input_image(self, i: int) -> str:
         self.assert_count()
         if i < 0 or i >= len(self.input_images):
             raise ValueError("Invalid index")
         return serialize(self.input_images[i])
     
-    def serialize_output_image(self, i):
+    def serialize_output_image(self, i: int) -> str:
         self.assert_count()
         if i < 0 or i >= len(self.output_images):
             raise ValueError("Invalid index")
@@ -105,7 +106,7 @@ class TaskFormatter:
         else:
             return serialize(output_image)
 
-    def to_string(self):
+    def to_string(self) -> str:
         self.assert_count()
         input_ids = self.input_ids()
         output_ids = self.output_ids()
@@ -118,3 +119,22 @@ class TaskFormatter:
             s += output_ids[i] + "\n"
             s += self.serialize_output_image(i)
         return s
+
+    def to_json(self) -> str:
+        array_train = []
+        array_test = []
+        for i in range(self.count()):
+            dict = {
+                'input': self.input_images[i].tolist(),
+                'output': self.output_images[i].tolist(),
+            }
+            if i < self.count_examples:
+                array_train.append(dict)
+            else:
+                array_test.append(dict)
+
+        dict = {
+            'train': array_train,
+            'test': array_test,
+        }
+        return json.dumps(dict)

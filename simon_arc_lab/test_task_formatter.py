@@ -35,3 +35,18 @@ class TestTaskFormatter(unittest.TestCase):
         actual = task.to_string()
         expected = "Input 0 Example\n1 1 0\nOutput 0 Example\n1 1 1\nInput 1 Example\n1 1 2\nOutput 1 Example\n1 1 3\nInput 2 Example\n1 1 4\nOutput 2 Example\n1 1 5\nInput 3 Test\n1 1 6\nOutput 3 Test\nNone\nInput 4 Test\n1 1 7\nOutput 4 Test\nNone"
         self.assertEqual(actual, expected)
+
+    def test_to_json(self):
+        task = TaskFormatter()
+        input0 = np.array([[0, 0], [0, 0]], dtype=np.uint8)
+        output0 = np.array([[1, 1], [1, 1]], dtype=np.uint8)
+        input1 = np.array([[2, 2], [2, 2]], dtype=np.uint8)
+        output1 = np.array([[3, 3], [3, 3]], dtype=np.uint8)
+        input2 = np.array([[4, 4], [4, 4]], dtype=np.uint8)
+        output2 = np.array([[5, 5], [5, 5]], dtype=np.uint8)
+        task.append_pair(input0, output0, True)
+        task.append_pair(input1, output1, True)
+        task.append_pair(input2, output2, False)
+        actual = task.to_json()
+        expected = '{"train": [{"input": [[0, 0], [0, 0]], "output": [[1, 1], [1, 1]]}, {"input": [[2, 2], [2, 2]], "output": [[3, 3], [3, 3]]}], "test": [{"input": [[4, 4], [4, 4]], "output": [[5, 5], [5, 5]]}]}'
+        self.assertEqual(actual, expected)
