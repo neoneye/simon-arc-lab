@@ -90,3 +90,12 @@ class Task:
             return json.dumps(dict, separators=(',', ':'))
         else:
             return json.dumps(dict)
+
+    def save_arcagi1_json(self, path: str, compact: bool = False):
+        """
+        Save the task to a JSON file in the ARC-AGI version1 file format.
+        
+        compact: If True, the JSON string will be compact without spaces.
+        """
+        with open(path, 'w') as file:
+            file.write(self.to_arcagi1_json(compact))
