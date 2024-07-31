@@ -184,8 +184,8 @@ def generate_deserialize_dataset_item(seed_start, item_index):
         min_image_size=min_image_size, 
         max_image_size=max_image_size
     )
-    image_height = image.shape[0]
-    image_width = image.shape[1]
+    image_height, image_width = image.shape
+    # print(f"image_height: {image_height}, image_width: {image_width}")
 
     transformation_ids = [
         'pixels', 
@@ -210,9 +210,10 @@ def generate_deserialize_dataset_item(seed_start, item_index):
         'get_row_as_list',
         'get_column_as_list',
     ]
-    transformation_weights = [0, 0, 10, 10, 10, 10, 10, 10, 10, 0, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    # transformation_weights = [0, 0, 10, 10, 10, 10, 10, 10, 10, 0, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
     # transformation_weights = [0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     # transformation_weights = [0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10]
+    transformation_weights = [0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10]
     transformation_id = random.choices(transformation_ids, weights=transformation_weights, k=1)[0]
     # transformation_id = 'rotate_cw'
     # if item_index % 3 == 0:
@@ -603,7 +604,7 @@ def generate_deserialize_dataset_item(seed_start, item_index):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=5600000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=5700000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
