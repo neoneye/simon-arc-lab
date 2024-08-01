@@ -96,10 +96,13 @@ class Task:
         array_train = []
         array_test = []
         for i in range(self.count()):
-            dict = {
-                'input': self.input_images[i].tolist(),
-                'output': self.output_images[i].tolist(),
-            }
+            input_image = self.input_images[i]
+            output_image = self.output_images[i]
+            dict = {}
+            if input_image is not None:
+                dict['input'] = input_image.tolist()
+            if output_image is not None:
+                dict['output'] = output_image.tolist()
             if i < self.count_examples:
                 array_train.append(dict)
             else:

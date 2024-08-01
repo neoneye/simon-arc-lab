@@ -34,6 +34,18 @@ class TestTask(unittest.TestCase):
         expected = '{"train":[{"input":[[0]],"output":[[0]]}],"test":[{"input":[[0]],"output":[[0]]}]}'
         self.assertEqual(actual, expected)
 
+    def test_task_clone_without_test_output(self):
+        task = Task()
+        image = np.array([[0]], dtype=np.uint8)
+        task.append_pair(image, image, True)
+        task.append_pair(image, None, False)
+        new_task = task.clone()
+        # The new task is unaffected by changing the original image
+        image[0][0] = 255
+        actual = new_task.to_arcagi1_json(compact=True)
+        expected = '{"train":[{"input":[[0]],"output":[[0]]}],"test":[{"input":[[0]]}]}'
+        self.assertEqual(actual, expected)
+
     def test_to_arcagi1_json_compactfalse(self):
         task = Task()
         input0 = np.array([[0, 0], [0, 0]], dtype=np.uint8)
@@ -62,6 +74,29 @@ class TestTask(unittest.TestCase):
         task.append_pair(input2, output2, False)
         actual = task.to_arcagi1_json(compact=True)
         expected = '{"train":[{"input":[[0,0],[0,0]],"output":[[1,1],[1,1]]},{"input":[[2,2],[2,2]],"output":[[3,3],[3,3]]}],"test":[{"input":[[4,4],[4,4]],"output":[[5,5],[5,5]]}]}'
+        self.assertEqual(actual, expected)
+
+    def test_to_arcagi1_json_where_input_images_are_none(self):
+        task = Task()
+        image = np.array([[0]], dtype=np.uint8)
+        task.append_pair(image, image, True)
+        task.append_pair(image, image, True)
+        task.append_pair(image, image, False)
+        task.input_images[0] = None
+        task.input_images[1] = None
+        task.input_images[2] = None
+        actual = task.to_arcagi1_json(compact=True)
+        expected = '{"train":[{"output":[[0]]},{"output":[[0]]}],"test":[{"output":[[0]]}]}'
+        self.assertEqual(actual, expected)
+
+    def test_to_arcagi1_json_where_output_images_are_none(self):
+        task = Task()
+        image = np.array([[0]], dtype=np.uint8)
+        task.append_pair(image, None, True)
+        task.append_pair(image, None, True)
+        task.append_pair(image, None, False)
+        actual = task.to_arcagi1_json(compact=True)
+        expected = '{"train":[{"input":[[0]]},{"input":[[0]]}],"test":[{"input":[[0]]}]}'
         self.assertEqual(actual, expected)
 
     def test_get_image(self):
