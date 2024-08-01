@@ -13,6 +13,7 @@ from simon_arc_lab.image_util import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.task import *
 from simon_arc_lab.task_formatter_rle_verbose import *
+from simon_arc_lab.task_formatter_rle_compact import *
 from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.benchmark import *
 
@@ -65,7 +66,8 @@ def generate_dataset_item_for_output_row(seed: int, task: Task, test_index: int,
 
     instruction = f"{dataset_name}, test {test_index}, predict row {test_output_y} from the output image"
 
-    task_formatter = TaskFormatterRLEVerbose(task)
+    # task_formatter = TaskFormatterRLEVerbose(task)
+    task_formatter = TaskFormatterRLECompact(task)
     input = task_formatter.to_string()
     # print(input)
 
