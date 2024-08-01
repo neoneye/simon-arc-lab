@@ -137,7 +137,11 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
         (1, 0, 'translate_xplus1'), 
         (-1, 0, 'translate_xminus1'),
         (0, 1, 'translate_yplus1'), 
-        (0, -1, 'translate_yminus1') 
+        (0, -1, 'translate_yminus1'),
+        (1, -1, 'translate_xplus1yminus1'), 
+        (-1, -1, 'translate_xminus1minus1'),
+        (1, 1, 'translate_xplus1yplus1'), 
+        (-1, 1, 'translate_xminus1plus1'),
     ]
 
     all_dataset_items = []
@@ -151,7 +155,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     return all_dataset_items
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=400000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=500000):
     dataset = []
     dataset_byte_size = 0
     stop = False
