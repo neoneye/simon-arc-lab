@@ -28,13 +28,14 @@ DATASET_NAMES = [
 ]
 
 def generate_task(seed: int, dx: int, dy: int, percent_noise: float) -> Task:
-    count_example = random.Random(seed + 1).randint(2, 5)
-    count_test = random.Random(seed + 2).randint(2, 3)
+    count_example = random.Random(seed + 1).randint(2, 3)
+    # count_test = random.Random(seed + 2).randint(1, 3)
+    count_test = 1
     task = Task()
     min_width = 1
-    max_width = 10
+    max_width = 4
     min_height = 1
-    max_height = 10
+    max_height = 4
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -66,8 +67,7 @@ def generate_dataset_item_for_output_row(seed: int, task: Task, test_index: int,
 
     task_formatter = TaskFormatterRLE(task)
     input = task_formatter.to_string()
-    # TODO: hide test outputs
-    print(input)
+    # print(input)
 
     output = ''.join(map(str, pixel_list))
 
@@ -99,21 +99,25 @@ def generate_dataset_item_list(seed):
     task = generate_task(seed + 1, dx, dy, percent_noise)
     # task.show()
 
+    task_without_test_output = task.clone()
+    for test_index in range(task.count_tests):
+        task_without_test_output.output_images[task.count_examples + test_index] = None
+
     dataset_items = []
     for test_index in range(task.count_tests):
-        input_image = task.test_input(test_index)
+        # input_image = task.test_input(test_index)
         output_image = task.test_output(test_index)
-        print(f"Test {test_index}")
-        print(input_image)
-        print(output_image)
+        # print(f"Test {test_index}")
+        # print(input_image)
+        # print(output_image)
 
         output_height = output_image.shape[0]
         for output_y in range(output_height):
             pixels = image_get_row_as_list(output_image, output_y)
-            print(pixels)
+            # print(pixels)
 
-            dataset_item = generate_dataset_item_for_output_row(seed, task, test_index, output_y, pixels, transformation_id)
-            print(dataset_item)
+            dataset_item = generate_dataset_item_for_output_row(seed, task_without_test_output, test_index, output_y, pixels, transformation_id)
+            # print(dataset_item)
             dataset_items.append(dataset_item)
 
     return dataset_items
