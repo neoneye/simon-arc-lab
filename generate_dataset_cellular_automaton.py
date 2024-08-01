@@ -7,6 +7,7 @@ import os
 import random
 import numpy as np
 from simon_arc_lab.rle.serialize import serialize
+from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.image_util import *
 from simon_arc_lab.cellular_automaton import *
 from simon_arc_lab.benchmark import *
