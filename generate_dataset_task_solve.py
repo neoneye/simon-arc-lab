@@ -64,10 +64,14 @@ def demo_generate_task():
 def generate_dataset_item_for_output_row(seed: int, task: Task, test_index: int, test_output_y: int, pixel_list: list[int], transformation_id: str) -> dict:
     dataset_name = random.choice(DATASET_NAMES)
 
-    instruction = f"{dataset_name}, test {test_index}, predict row {test_output_y} from the output image"
-
     # task_formatter = TaskFormatterRLEVerbose(task)
     task_formatter = TaskFormatterRLECompact(task)
+
+    output_ids = task_formatter.output_ids()
+    test_output_id = output_ids[task.count_examples + test_index]
+
+    instruction = f"{dataset_name}, {test_output_id}, predict row {test_output_y}"
+
     input = task_formatter.to_string()
     # print(input)
 
@@ -87,19 +91,8 @@ def generate_dataset_item_for_output_row(seed: int, task: Task, test_index: int,
     }
     return result_dict
 
-def generate_dataset_item_list(seed):
+def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     random.seed(seed)
-
-    directions = [
-        (0, 1, 'translate_yplus1'), 
-        (0, -1, 'translate_yminus1'), 
-        (1, 0, 'translate_xplus1'), 
-        (-1, 0, 'translate_xminus1')
-    ]
-    dx, dy, transformation_id = random.choice(directions)
-    percent_noise = 0.0
-    task = generate_task(seed + 1, dx, dy, percent_noise)
-    # task.show()
 
     task_without_test_output = task.clone()
     for test_index in range(task.count_tests):
@@ -118,14 +111,34 @@ def generate_dataset_item_list(seed):
             pixels = image_get_row_as_list(output_image, output_y)
             # print(pixels)
 
-            dataset_item = generate_dataset_item_for_output_row(seed, task_without_test_output, test_index, output_y, pixels, transformation_id)
+            dataset_item = generate_dataset_item_for_output_row(seed + output_y, task_without_test_output, test_index, output_y, pixels, transformation_id)
             # print(dataset_item)
             dataset_items.append(dataset_item)
 
     return dataset_items
 
-#generate_dataset_item_batch(0)
-#exit()
+def generate_dataset_item_list(seed: int) -> list[dict]:
+    random.seed(seed)
+
+    seed_task = seed
+
+    directions = [
+        (1, 0, 'translate_xplus1'), 
+        (-1, 0, 'translate_xminus1'),
+        (0, 1, 'translate_yplus1'), 
+        (0, -1, 'translate_yminus1') 
+    ]
+
+    all_dataset_items = []
+    for direction in directions:
+        dx, dy, transformation_id = direction
+        percent_noise = 0.0
+        task = generate_task(seed_task, dx, dy, percent_noise)
+        # task.show()
+        dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
+        all_dataset_items.extend(dataset_items)
+
+    return all_dataset_items
 
 def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=100000):
     dataset = []
