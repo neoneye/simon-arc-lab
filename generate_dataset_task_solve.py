@@ -62,6 +62,7 @@ def demo_generate_task():
         task.show()
 
 def generate_dataset_item_for_output_row(seed: int, task: Task, test_index: int, test_output_y: int, pixel_list: list[int], transformation_id: str) -> dict:
+    random.seed(seed)
     dataset_name = random.choice(DATASET_NAMES)
 
     # task_formatter = TaskFormatterRLEVerbose(task)
@@ -70,7 +71,17 @@ def generate_dataset_item_for_output_row(seed: int, task: Task, test_index: int,
     output_ids = task_formatter.output_ids()
     test_output_id = output_ids[task.count_examples + test_index]
 
-    instruction = f"{dataset_name}, {test_output_id}, predict row {test_output_y}"
+    instructions = [
+        f"{dataset_name}, {test_output_id}, predict row {test_output_y}",
+        f"{dataset_name} '{test_output_id}' predict row {test_output_y}",
+        f"{dataset_name} '{test_output_id}' predict the row {test_output_y}",
+        f"{dataset_name}, '{test_output_id}', predict the row {test_output_y}",
+        f"{dataset_name}, '{test_output_id}', predict y={test_output_y}",
+        f"{dataset_name} {test_output_id} predict y={test_output_y}",
+        f"{dataset_name} predict y={test_output_y} for {test_output_id}",
+        f"{dataset_name} predict row {test_output_y} for {test_output_id}",
+    ]
+    instruction = random.choice(instructions)
 
     input = task_formatter.to_string()
     # print(input)
