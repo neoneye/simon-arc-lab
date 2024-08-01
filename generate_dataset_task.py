@@ -22,7 +22,7 @@ from simon_arc_lab.image_create_random_advanced import image_create_random_advan
 from simon_arc_lab.histogram import *
 from simon_arc_lab.benchmark import *
 from simon_arc_lab.task import *
-from simon_arc_lab.task_formatter import *
+from simon_arc_lab.task_formatter_rle_verbose import *
 
 def generate_task(seed):
     count_example = random.Random(seed + 1).randint(2, 5)
@@ -82,7 +82,7 @@ def generate_dataset_item(seed):
 
     task = generate_task(seed + 1002)
 
-    task_formatter = TaskFormatterRLE(task)
+    task_formatter = TaskFormatterRLEVerbose(task)
     input = task_formatter.to_string()
 
     output = None

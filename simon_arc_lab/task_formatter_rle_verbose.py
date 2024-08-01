@@ -1,7 +1,7 @@
 from .rle.serialize import serialize
 from .task import Task
 
-class TaskFormatterRLE:
+class TaskFormatterRLEVerbose:
     def __init__(self, task: Task):
         self.task = task
     

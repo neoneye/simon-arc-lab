@@ -1,24 +1,24 @@
 import unittest
 import numpy as np
 from .task import *
-from .task_formatter import *
+from .task_formatter_rle_verbose import *
 
-class TestTaskFormatter(unittest.TestCase):
+class TestTaskFormatterRLEVerbose(unittest.TestCase):
     def test_input_ids(self):
         task = self.task_with_3examples_2tests()
-        actual = TaskFormatterRLE(task).input_ids()
+        actual = TaskFormatterRLEVerbose(task).input_ids()
         expected = ["Input 0 Example", "Input 1 Example", "Input 2 Example", "Input 3 Test", "Input 4 Test"]
         self.assertEqual(actual, expected)
 
     def test_output_ids(self):
         task = self.task_with_3examples_2tests()
-        actual = TaskFormatterRLE(task).output_ids()
+        actual = TaskFormatterRLEVerbose(task).output_ids()
         expected = ["Output 0 Example", "Output 1 Example", "Output 2 Example", "Output 3 Test", "Output 4 Test"]
         self.assertEqual(actual, expected)
 
     def test_pair_ids(self):
         task = self.task_with_3examples_2tests()
-        actual = TaskFormatterRLE(task).pair_ids()
+        actual = TaskFormatterRLEVerbose(task).pair_ids()
         expected = ["Pair 0 Example", "Pair 1 Example", "Pair 2 Example", "Pair 3 Test", "Pair 4 Test"]
         self.assertEqual(actual, expected)
 
@@ -30,13 +30,13 @@ class TestTaskFormatter(unittest.TestCase):
         output1 = None
         task.append_pair(input0, output0, True)
         task.append_pair(input1, output1, False)
-        actual = TaskFormatterRLE(task).to_string()
+        actual = TaskFormatterRLEVerbose(task).to_string()
         expected = "Input 0 Example\n2 2 0,\nOutput 0 Example\n2 2 1,\nInput 1 Test\n2 2 2,\nOutput 1 Test\nNone"
         self.assertEqual(actual, expected)
 
     def test_to_string_3examples_2tests(self):
         task = self.task_with_3examples_2tests()
-        actual = TaskFormatterRLE(task).to_string()
+        actual = TaskFormatterRLEVerbose(task).to_string()
         expected = "Input 0 Example\n1 1 0\nOutput 0 Example\n1 1 1\nInput 1 Example\n1 1 2\nOutput 1 Example\n1 1 3\nInput 2 Example\n1 1 4\nOutput 2 Example\n1 1 5\nInput 3 Test\n1 1 6\nOutput 3 Test\nNone\nInput 4 Test\n1 1 7\nOutput 4 Test\nNone"
         self.assertEqual(actual, expected)
 
