@@ -18,14 +18,14 @@ from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.benchmark import *
 
 DATASET_NAMES = [
-    'SIMONARCTASKTRANSLATE',
-    'SIMONSARCTASKTRANSLATE',
-    'SIMONTASKTRANSLATE',
-    'SIMONSTASKTRANSLATE',
-    'Simon-Task-Translate',
-    'Simons-Task-Translate',
-    'simon-task-translate',
-    'simons-task-translate'
+    'SIMONARCSOLVETRANSLATE',
+    'SIMONSARCSOLVETRANSLATE',
+    'SIMONSOLVETRANSLATE',
+    'SIMONSSOLVETRANSLATE',
+    'Simon-Solve-Translate',
+    'Simons-Solve-Translate',
+    'simon-solve-translate',
+    'simons-solve-translate'
 ]
 
 def generate_task(seed: int, dx: int, dy: int, percent_noise: float) -> Task:
@@ -92,7 +92,7 @@ def generate_dataset_item_for_output_row(seed: int, task: Task, test_index: int,
     benchmark_width = image_size1d_to_string(max_width)
     benchmark_height = image_size1d_to_string(max_height)
     benchmark_pixels = task_pixels_to_string(task.total_pixel_count())
-    benchmark_id = f'dataset=task_solve group={transformation_id} image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
+    benchmark_id = f'dataset=solve_translate group={transformation_id} image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
 
     result_dict = {
         'instruction': instruction,
@@ -178,7 +178,7 @@ dataset = generate_dataset(
 )
 
 # Save dataset to file
-filename = 'dataset_task_solve.jsonl'
+filename = 'dataset_solve_translate.jsonl'
 with open(filename, 'w') as f:
     for item in dataset:
         f.write(json.dumps(item) + '\n')
