@@ -40,10 +40,10 @@ def task_show(task: Task, answer=True):
         input = task.input_images[i]
         output = task.output_images[i]
         data += [fmt_grid(input), fmt_grid(output)]
-        ix, iy = input.shape
-        ox, oy = output.shape
-        table.add_column(f"{idx2chr(i)}-in {ix}x{iy}", justify="center", no_wrap=True)
-        table.add_column(f"{idx2chr(i)}-out {ox}x{oy}", justify="center", no_wrap=True)
+        in_height, in_width = input.shape
+        out_height, out_width = output.shape
+        table.add_column(f"{idx2chr(i)}-in {in_width}x{in_height}", justify="center", no_wrap=True)
+        table.add_column(f"{idx2chr(i)}-out {out_width}x{out_height}", justify="center", no_wrap=True)
 
     data.append('')
     table.add_column("")
