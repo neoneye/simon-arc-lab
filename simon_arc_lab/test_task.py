@@ -11,6 +11,29 @@ class TestTask(unittest.TestCase):
         with self.assertRaises(ValueError):
             task.append_pair(image, image, True)
 
+    def test_append_pair_clones_image(self):
+        task = Task()
+        image = np.array([[0]], dtype=np.uint8)
+        task.append_pair(image, image, True)
+        task.append_pair(image, image, False)
+        # The task is unaffected by changing the original image
+        image[0][0] = 255
+        actual = task.to_arcagi1_json(compact=True)
+        expected = '{"train":[{"input":[[0]],"output":[[0]]}],"test":[{"input":[[0]],"output":[[0]]}]}'
+        self.assertEqual(actual, expected)
+
+    def test_task_clone(self):
+        task = Task()
+        image = np.array([[0]], dtype=np.uint8)
+        task.append_pair(image, image, True)
+        task.append_pair(image, image, False)
+        new_task = task.clone()
+        # The new task is unaffected by changing the original image
+        image[0][0] = 255
+        actual = new_task.to_arcagi1_json(compact=True)
+        expected = '{"train":[{"input":[[0]],"output":[[0]]}],"test":[{"input":[[0]],"output":[[0]]}]}'
+        self.assertEqual(actual, expected)
+
     def test_to_arcagi1_json_compactfalse(self):
         task = Task()
         input0 = np.array([[0, 0], [0, 0]], dtype=np.uint8)

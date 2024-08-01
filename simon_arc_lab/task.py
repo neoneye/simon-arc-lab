@@ -9,12 +9,24 @@ class Task:
         self.count_examples = 0
         self.count_tests = 0
 
+    def clone(self) -> 'Task':
+        """
+        Create a deep copy of the task.
+        """
+        task = Task()
+        for i in range(self.count()):
+            task.append_pair(self.input_images[i], self.output_images[i], i < self.count_examples)
+        return task
+
     def append_pair(self, input_image: np.array, output_image: Optional[np.array], is_example: bool):
         self.assert_count()
         if is_example and self.count_tests > 0:
             raise ValueError("Example must be added before test")
-        self.input_images.append(input_image)
-        self.output_images.append(output_image)
+        self.input_images.append(np.copy(input_image))
+        if output_image is None:
+            self.output_images.append(None)
+        else:
+            self.output_images.append(np.copy(output_image))
         if is_example:
             self.count_examples += 1
         else:
