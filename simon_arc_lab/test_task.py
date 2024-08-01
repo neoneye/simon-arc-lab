@@ -41,5 +41,18 @@ class TestTask(unittest.TestCase):
         expected = '{"train":[{"input":[[0,0],[0,0]],"output":[[1,1],[1,1]]},{"input":[[2,2],[2,2]],"output":[[3,3],[3,3]]}],"test":[{"input":[[4,4],[4,4]],"output":[[5,5],[5,5]]}]}'
         self.assertEqual(actual, expected)
 
+    def test_get_image(self):
+        task = Task()
+        input0 = np.array([[0]], dtype=np.uint8)
+        output0 = np.array([[1]], dtype=np.uint8)
+        input1 = np.array([[2]], dtype=np.uint8)
+        output1 = np.array([[3]], dtype=np.uint8)
+        task.append_pair(input0, output0, True)
+        task.append_pair(input1, output1, False)
+        self.assertTrue(np.array_equal(task.example_input(0), input0))
+        self.assertTrue(np.array_equal(task.example_output(0), output0))
+        self.assertTrue(np.array_equal(task.test_input(0), input1))
+        self.assertTrue(np.array_equal(task.test_output(0), output1))
+
 if __name__ == '__main__':
     unittest.main()

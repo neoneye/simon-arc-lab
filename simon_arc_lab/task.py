@@ -29,6 +29,26 @@ class Task:
         assert len(self.input_images) == len(self.output_images)
         assert self.count_examples + self.count_tests == len(self.input_images)
 
+    def example_input(self, i: int) -> np.array:
+        if i < 0 or i >= self.count_examples:
+            raise ValueError("Invalid index")
+        return self.input_images[i]
+
+    def example_output(self, i: int) -> np.array:
+        if i < 0 or i >= self.count_examples:
+            raise ValueError("Invalid index")
+        return self.output_images[i]
+
+    def test_input(self, i: int) -> np.array:
+        if i < 0 or i >= self.count_tests:
+            raise ValueError("Invalid index")
+        return self.input_images[self.count_examples + i]
+
+    def test_output(self, i: int) -> Optional[np.array]:
+        if i < 0 or i >= self.count_tests:
+            raise ValueError("Invalid index")
+        return self.output_images[self.count_examples + i]
+
     def max_image_size(self) -> tuple[int, int]:
         """
         Find (width, height) of the biggest images in the task.
