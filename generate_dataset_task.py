@@ -23,6 +23,7 @@ from simon_arc_lab.histogram import *
 from simon_arc_lab.benchmark import *
 from simon_arc_lab.task import *
 from simon_arc_lab.task_formatter_rle_verbose import *
+from simon_arc_lab.task_formatter_rle_compact import *
 
 def generate_task(seed):
     count_example = random.Random(seed + 1).randint(2, 5)
@@ -82,7 +83,8 @@ def generate_dataset_item(seed):
 
     task = generate_task(seed + 1002)
 
-    task_formatter = TaskFormatterRLEVerbose(task)
+    # task_formatter = TaskFormatterRLEVerbose(task)
+    task_formatter = TaskFormatterRLECompact(task)
     input = task_formatter.to_string()
 
     output = None
@@ -396,7 +398,7 @@ def generate_dataset_item(seed):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=900000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1000000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
@@ -409,7 +411,7 @@ def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=9
     return dataset
 
 dataset = generate_dataset(
-    max_num_samples=100,
+    max_num_samples=100000,
     max_byte_size=1024*1024*100,
 )
 
