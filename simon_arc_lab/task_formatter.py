@@ -8,7 +8,7 @@ class TaskFormatterRLE:
     def input_ids(self) -> list[str]:
         self.task.assert_count()
         names = []
-        for i in range(len(self.task.input_images)):
+        for i in range(self.task.count()):
             if i < self.task.count_examples:
                 name = "Example"
             else:
@@ -19,7 +19,7 @@ class TaskFormatterRLE:
     def output_ids(self) -> list[str]:
         self.task.assert_count()
         names = []
-        for i in range(len(self.task.input_images)):
+        for i in range(self.task.count()):
             if i < self.task.count_examples:
                 name = "Example"
             else:
@@ -30,7 +30,7 @@ class TaskFormatterRLE:
     def pair_ids(self) -> list[str]:
         self.task.assert_count()
         names = []
-        for i in range(len(self.task.input_images)):
+        for i in range(self.task.count()):
             if i < self.task.count_examples:
                 name = "Example"
             else:
@@ -40,13 +40,13 @@ class TaskFormatterRLE:
     
     def serialize_input_image(self, i: int) -> str:
         self.task.assert_count()
-        if i < 0 or i >= len(self.task.input_images):
+        if i < 0 or i >= self.task.count():
             raise ValueError("Invalid index")
         return serialize(self.task.input_images[i])
     
     def serialize_output_image(self, i: int) -> str:
         self.task.assert_count()
-        if i < 0 or i >= len(self.task.output_images):
+        if i < 0 or i >= self.task.count():
             raise ValueError("Invalid index")
         output_image = self.task.output_images[i]
         if output_image is None:
@@ -58,12 +58,11 @@ class TaskFormatterRLE:
         self.task.assert_count()
         input_ids = self.input_ids()
         output_ids = self.output_ids()
-        s = ""
-        for i in range(len(self.task.input_images)):
-            if i > 0:
-                s += "\n"
-            s += input_ids[i] + "\n"
-            s += self.serialize_input_image(i) + "\n"
-            s += output_ids[i] + "\n"
-            s += self.serialize_output_image(i)
+        parts = []
+        for i in range(self.task.count()):
+            parts.append(input_ids[i])
+            parts.append(self.serialize_input_image(i))
+            parts.append(output_ids[i])
+            parts.append(self.serialize_output_image(i))
+        s = "\n".join(parts)
         return s
