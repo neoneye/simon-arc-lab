@@ -16,6 +16,17 @@ from simon_arc_lab.task_formatter import *
 from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.benchmark import *
 
+DATASET_NAMES = [
+    'SIMONARCTASKTRANSLATE',
+    'SIMONSARCTASKTRANSLATE',
+    'SIMONTASKTRANSLATE',
+    'SIMONSTASKTRANSLATE',
+    'Simon-Task-Translate',
+    'Simons-Task-Translate',
+    'simon-task-translate',
+    'simons-task-translate'
+]
+
 def generate_task(seed: int, dx: int, dy: int, percent_noise: float) -> Task:
     count_example = random.Random(seed + 1).randint(2, 5)
     count_test = random.Random(seed + 2).randint(2, 3)
@@ -49,7 +60,9 @@ def demo_generate_task():
         task.show()
 
 def generate_dataset_item_for_output_row(seed: int, task: Task, test_index: int, test_output_y: int, pixel_list: list[int], transformation_id: str) -> dict:
-    instruction = f"test {test_index}, predict row {test_output_y} from the output image"
+    dataset_name = random.choice(DATASET_NAMES)
+
+    instruction = f"{dataset_name}, test {test_index}, predict row {test_output_y} from the output image"
 
     task_formatter = TaskFormatterRLE(task)
     input = task_formatter.to_string()
@@ -62,7 +75,7 @@ def generate_dataset_item_for_output_row(seed: int, task: Task, test_index: int,
     benchmark_width = image_size1d_to_string(max_width)
     benchmark_height = image_size1d_to_string(max_height)
     benchmark_pixels = task_pixels_to_string(task.total_pixel_count())
-    benchmark_id = f'dataset=task group={transformation_id} image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
+    benchmark_id = f'dataset=task_solve group={transformation_id} image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
 
     result_dict = {
         'instruction': instruction,
@@ -72,7 +85,7 @@ def generate_dataset_item_for_output_row(seed: int, task: Task, test_index: int,
     }
     return result_dict
 
-def generate_dataset_item_batch(seed):
+def generate_dataset_item_list(seed):
     random.seed(seed)
 
     directions = [
@@ -105,19 +118,27 @@ def generate_dataset_item_batch(seed):
 
     return dataset_items
 
-generate_dataset_item_batch(0)
-exit()
+#generate_dataset_item_batch(0)
+#exit()
 
 def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=100000):
     dataset = []
     dataset_byte_size = 0
+    stop = False
     for i in range(max_num_samples):
-        item = generate_dataset_item_for_output_row(seed_start + i)
-        bytes = len(json.dumps(item))
-        if dataset_byte_size + bytes > max_byte_size:
+        if stop:
             break
-        dataset_byte_size += bytes
-        dataset.append(item)
+        items = generate_dataset_item_list(seed_start + i)
+        for item in items:
+            bytes = len(json.dumps(item))
+            if dataset_byte_size + bytes > max_byte_size:
+                stop = True
+                break
+            if len(dataset) >= max_num_samples:
+                stop = True
+                break
+            dataset_byte_size += bytes
+            dataset.append(item)
     random.Random(seed_start).shuffle(dataset)
     return dataset
 
