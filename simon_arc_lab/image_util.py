@@ -29,6 +29,26 @@ def image_flipy(image: np.array) -> np.array:
     """
     return np.flipud(image)
 
+def image_flip_diagonal_a(image: np.array) -> np.array:
+    """
+    Flip an image over the diagonal a.
+    
+    Swap place of top-right and bottom-left.
+
+    Preserves pixels on the diagonal from the top-left to the bottom-right.
+    """
+    return np.transpose(image)
+
+def image_flip_diagonal_b(image: np.array) -> np.array:
+    """
+    Flip an image over the diagonal a.
+    
+    Swap place of top-left and bottom-right.
+
+    Preserves pixels on the diagonal from the top-right to the bottom-left.
+    """
+    return np.fliplr(np.transpose(np.fliplr(image)))
+
 def image_translate_wrap(image: np.array, dx: int, dy: int) -> np.array:
     """
     Move pixels by dx, dy, wrapping around the image.

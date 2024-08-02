@@ -65,6 +65,56 @@ class TestImageUtil(unittest.TestCase):
         actual = image_flipy(input)
         self.assertTrue(np.array_equal(actual, expected))
 
+    def test_flip_diagonal_a_square(self):
+        input = np.array([
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9]], dtype=np.uint8)
+        expected = np.array([
+            [1, 4, 7],
+            [2, 5, 8],
+            [3, 6, 9]], dtype=np.uint8)
+        actual = image_flip_diagonal_a(input)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_flip_diagonal_a_nonsquare(self):
+        input = np.array([
+            [0, 1, 2, 3],
+            [0, 4, 5, 6],
+            [0, 7, 8, 9]], dtype=np.uint8)
+        expected = np.array([
+            [0, 0, 0],
+            [1, 4, 7],
+            [2, 5, 8],
+            [3, 6, 9]], dtype=np.uint8)
+        actual = image_flip_diagonal_a(input)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_flip_diagonal_b_square(self):
+        input = np.array([
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9]], dtype=np.uint8)
+        expected = np.array([
+            [9, 6, 3],
+            [8, 5, 2],
+            [7, 4, 1]], dtype=np.uint8)
+        actual = image_flip_diagonal_b(input)
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_flip_diagonal_b_nonsquare(self):
+        input = np.array([
+            [0, 1, 2, 3],
+            [0, 4, 5, 6],
+            [0, 7, 8, 9]], dtype=np.uint8)
+        expected = np.array([
+            [9, 6, 3],
+            [8, 5, 2],
+            [7, 4, 1],
+            [0, 0, 0]], dtype=np.uint8)
+        actual = image_flip_diagonal_b(input)
+        self.assertTrue(np.array_equal(actual, expected))
+
     def test_image_translate_wrap_dxplus1(self):
         image = np.array([
             [1, 2, 3], 
