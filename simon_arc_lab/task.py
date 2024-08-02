@@ -10,18 +10,25 @@ class Task:
         self.count_tests = 0
 
     @classmethod
-    def load_arcagi1(cls, filepath) -> 'Task':
+    def load_arcagi1(cls, filepath: str) -> 'Task':
         """
         Load a task from a JSON file in the ARC-AGI version1 file format.
         """
         with open(filepath) as f:
-            json_data = json.load(f)
+            json_dict = json.load(f)
+        return cls.create_with_arcagi1_json(json_dict)
+
+    @classmethod
+    def create_with_arcagi1_json(cls, json_dict: dict) -> 'Task':
+        """
+        Create a task from a JSON dictionary in the ARC-AGI version1 file format.
+        """
         task = Task()
-        for json_pair in json_data['train']:
+        for json_pair in json_dict['train']:
             input = np.array(json_pair['input'], np.uint8)
             output = np.array(json_pair['output'], np.uint8)
             task.append_pair(input, output, True)
-        for json_pair in json_data['test']:
+        for json_pair in json_dict['test']:
             input = np.array(json_pair['input'], np.uint8)
             output = np.array(json_pair['output'], np.uint8)
             task.append_pair(input, output, False)

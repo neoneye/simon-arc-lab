@@ -1,4 +1,5 @@
 import unittest
+import json
 import numpy as np
 from .task import *
 
@@ -98,6 +99,13 @@ class TestTask(unittest.TestCase):
         actual = task.to_arcagi1_json(compact=True)
         expected = '{"train":[{"input":[[0]]},{"input":[[0]]}],"test":[{"input":[[0]]}]}'
         self.assertEqual(actual, expected)
+
+    def test_create_with_arcagi1_json(self):
+        json_str = '{"train":[{"input":[[0]],"output":[[1]]},{"input":[[2]],"output":[[3]]}],"test":[{"input":[[4]],"output":[[5]]}]}'
+        task = Task.create_with_arcagi1_json(json.loads(json_str))
+        self.assertEqual(task.count(), 3)
+        self.assertEqual(task.total_pixel_count(), 6)
+        self.assertEqual(task.max_image_size(), (1, 1))
 
     def test_get_image(self):
         task = Task()
