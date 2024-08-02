@@ -34,9 +34,9 @@ def generate_task(seed: int, dx: int, dy: int, percent_noise: float) -> Task:
     count_test = 1
     task = Task()
     min_width = 3
-    max_width = 4
+    max_width = 5
     min_height = 3
-    max_height = 4
+    max_height = 5
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -155,7 +155,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     return all_dataset_items
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=500000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=600000):
     dataset = []
     dataset_byte_size = 0
     stop = False
