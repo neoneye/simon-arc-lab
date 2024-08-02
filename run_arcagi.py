@@ -64,19 +64,10 @@ def dataset_items_with_task(task: Task) -> list[dict]:
     return dataset_items
 
 
-model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model128'
+model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model133'
 
-path_to_taskdir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training'
-
-
-# filename = 'testdata/25ff71a9.json'
-# filename = 'testdata/3c9b0459.json'
-# filename = 'testdata/74dd1130.json'
-# filename = 'testdata/6150a2bd.json'
-# filename = 'testdata/ed36ccf7.json'
-#filename = 'testdata/68b16354.json' # incorrect
-# task = Task.load_arcagi1(filename)
-
+# path_to_taskdir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training'
+path_to_taskdir = 'testdata'
 
 tasks = load_many_tasks(path_to_taskdir)
 dataset_items = []
