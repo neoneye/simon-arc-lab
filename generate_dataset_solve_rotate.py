@@ -32,9 +32,9 @@ def generate_task(seed: int, transformation_id: str, percent_noise: float) -> Ta
     count_test = 1
     task = Task()
     min_width = 1
-    max_width = 4
+    max_width = 5
     min_height = 1
-    max_height = 4
+    max_height = 5
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -199,7 +199,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     return all_dataset_items
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=100000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=200000):
     dataset = []
     dataset_byte_size = 0
     stop = False
