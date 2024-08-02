@@ -3,10 +3,15 @@ from simon_arc_lab.task import *
 from simon_arc_lab.task_formatter_rle_compact import *
 from model.runner import *
 
-model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model127'
+model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model128'
 
 
-filename = 'testdata/25ff71a9.json'
+# filename = 'testdata/25ff71a9.json'
+filename = 'testdata/3c9b0459.json'
+# filename = 'testdata/74dd1130.json'
+# filename = 'testdata/6150a2bd.json'
+# filename = 'testdata/ed36ccf7.json'
+#filename = 'testdata/68b16354.json' # incorrect
 task = Task.load_arcagi1(filename)
 print(task)
 
@@ -47,8 +52,7 @@ for test_index in range(task.count_tests):
     expected_output = task.test_output(test_index)
     test_output_id = output_ids[task_without_test_output.count_examples + test_index]
 
-    # TODO: let the model make a guess about the output_height, and use the height here
-    output_height = 3
+    output_height = expected_output.shape[0]
     for output_y in range(output_height):
         instruction = f"{dataset_name}, {test_output_id}, predict row {output_y}"
 
