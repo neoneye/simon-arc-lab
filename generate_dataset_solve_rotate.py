@@ -1,5 +1,5 @@
-# Rotate the image by 90 degrees, clockwise, counterclockwise, 180 degrees, and do transpose (swap both x, y axis)
-# Also do flipx and flipy.
+# Rotate the image by 90 degrees, clockwise, counterclockwise, 180 degrees.
+# Does flipx, flipy, flip_diagonal_a, flip_diagonal_b.
 #
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
@@ -29,8 +29,8 @@ BENCHMARK_DATASET_NAME = 'solve_rotate'
 
 def generate_task(seed: int, transformation_id: str, percent_noise: float) -> Task:
     count_example = random.Random(seed + 9).randint(2, 3)
-    # count_test = random.Random(seed + 10).randint(1, 2)
-    count_test = 1
+    count_test = random.Random(seed + 10).randint(1, 2)
+    # count_test = 1
     task = Task()
     min_width = 1
     max_width = 5
@@ -48,8 +48,10 @@ def generate_task(seed: int, transformation_id: str, percent_noise: float) -> Ta
             transformed_image = image_rotate_ccw(input_image)
         elif transformation_id == 'rotate_180':
             transformed_image = image_rotate_180(input_image)
-        elif transformation_id == 'transpose':
-            transformed_image = np.transpose(input_image)
+        elif transformation_id == 'flipa':
+            transformed_image = image_flip_diagonal_a(input_image)
+        elif transformation_id == 'flipb':
+            transformed_image = image_flip_diagonal_b(input_image)
         elif transformation_id == 'flipx':
             transformed_image = image_flipx(input_image)
         elif transformation_id == 'flipy':
@@ -192,7 +194,8 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
         'rotate_cw',
         'rotate_ccw',
         'rotate_180',
-        'transpose',
+        'flipa',
+        'flipb',
         'flipx',
         'flipy',
     ]
@@ -206,7 +209,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     return all_dataset_items
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=400000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=500000):
     dataset = []
     dataset_byte_size = 0
     stop = False
