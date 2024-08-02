@@ -106,8 +106,7 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     random.seed(seed)
 
     task_without_test_output = task.clone()
-    for test_index in range(task.count_tests):
-        task_without_test_output.output_images[task.count_examples + test_index] = None
+    task_without_test_output.set_all_test_outputs_to_none()
 
     dataset_items = []
     for test_index in range(task.count_tests):

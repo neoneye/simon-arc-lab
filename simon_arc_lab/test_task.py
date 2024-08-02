@@ -47,6 +47,17 @@ class TestTask(unittest.TestCase):
         expected = '{"train":[{"input":[[0]],"output":[[0]]}],"test":[{"input":[[0]]}]}'
         self.assertEqual(actual, expected)
 
+    def test_set_all_test_outputs_to_none(self):
+        task = Task()
+        image = np.array([[0]], dtype=np.uint8)
+        task.append_pair(image, image, True)
+        task.append_pair(image, image, False)
+        task.append_pair(image, image, False)
+        task.set_all_test_outputs_to_none()
+        actual = task.to_arcagi1_json(compact=True)
+        expected = '{"train":[{"input":[[0]],"output":[[0]]}],"test":[{"input":[[0]]},{"input":[[0]]}]}'
+        self.assertEqual(actual, expected)
+
     def test_to_arcagi1_json_compactfalse(self):
         task = Task()
         input0 = np.array([[0, 0], [0, 0]], dtype=np.uint8)

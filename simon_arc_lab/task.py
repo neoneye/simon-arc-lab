@@ -117,6 +117,13 @@ class Task:
                 count += self.output_images[i].shape[0] * self.output_images[i].shape[1]
         return count
 
+    def set_all_test_outputs_to_none(self):
+        """
+        Erase all test outputs, so it's not possible to cheat by looking at the answers.
+        """
+        for i in range(self.count_tests):
+            self.output_images[self.count_examples + i] = None
+
     def to_arcagi1_dict(self) -> dict:
         array_train = []
         array_test = []
