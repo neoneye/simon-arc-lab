@@ -1,7 +1,8 @@
 # Rotate the image by 90 degrees, clockwise, counterclockwise, 180 degrees, and do transpose (swap both x, y axis)
+# Also do flipx and flipy.
 #
 # Present the same input images, but with different transformations.
-# so there are examples of rotate cw, rotate ccw, rotate 180, transpose, and the model should determine what happened.
+# so from the examples alone, the model have to determine what happened.
 import random
 import os
 from simon_arc_lab.image_mix import *
@@ -49,6 +50,10 @@ def generate_task(seed: int, transformation_id: str, percent_noise: float) -> Ta
             transformed_image = image_rotate_180(input_image)
         elif transformation_id == 'transpose':
             transformed_image = np.transpose(input_image)
+        elif transformation_id == 'flipx':
+            transformed_image = image_flipx(input_image)
+        elif transformation_id == 'flipy':
+            transformed_image = image_flipy(input_image)
         else:
             raise ValueError(f"Unknown transformation_id: {transformation_id}")
 
@@ -188,6 +193,8 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
         'rotate_ccw',
         'rotate_180',
         'transpose',
+        'flipx',
+        'flipy',
     ]
 
     all_dataset_items = []
@@ -199,7 +206,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     return all_dataset_items
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=200000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=400000):
     dataset = []
     dataset_byte_size = 0
     stop = False

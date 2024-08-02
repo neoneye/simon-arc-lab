@@ -1,7 +1,7 @@
 # Translate the image by 1 pixel, up/down/left/right.
 #
 # Present the same input images, but with different transformations.
-# so there are examples of up, down, left, right, and the model should determine what happened.
+# so from the examples alone, the model have to determine what happened.
 import random
 import os
 from simon_arc_lab.image_mix import *
