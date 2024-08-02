@@ -1,8 +1,4 @@
 # Translate the image by 1 pixel, up/down/left/right.
-# Determine what kind of translation happened.
-#
-# It would be easier if I create an entire ARC task json file.
-# On the other hand, I need the benchmark ids, so I can determine what the model struggles with.
 #
 # Present the same input images, but with different transformations.
 # so there are examples of up, down, left, right, and the model should determine what happened.
