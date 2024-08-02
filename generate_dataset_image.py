@@ -520,11 +520,11 @@ def generate_deserialize_dataset_item(seed_start, item_index):
         histogram = Histogram.create_with_image(image)
         output = histogram.pretty()
     elif transformation_id == 'flipx':
-        flipped_image = image[:, ::-1]
+        flipped_image = image_flipx(image)
         output_rle_string = serialize(flipped_image)
         output = output_rle_string
     elif transformation_id == 'flipy':
-        flipped_image = image[::-1, :]
+        flipped_image = image_flipy(image)
         output_rle_string = serialize(flipped_image)
         output = output_rle_string
     elif transformation_id == 'transpose':

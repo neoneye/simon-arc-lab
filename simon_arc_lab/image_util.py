@@ -40,6 +40,18 @@ def image_translate_wrap(image: np.array, dx: int, dy: int) -> np.array:
 
     return new_image
 
+def image_flipx(image: np.array) -> np.array:
+    """
+    Flip an image horizontally. Reverse the x-axis.
+    """
+    return image[:, ::-1]
+
+def image_flipy(image: np.array) -> np.array:
+    """
+    Flip an image vertically. Reverse the y-axis.
+    """
+    return image[::-1, :]
+
 def image_replace_colors(image: np.array, color_mapping: Dict[int, int]) -> np.array:
     """
     Replace colors in an image according to a dictionary.
