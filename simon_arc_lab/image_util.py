@@ -21,13 +21,13 @@ def image_flipx(image: np.array) -> np.array:
     """
     Flip an image horizontally. Reverse the x-axis.
     """
-    return image[:, ::-1]
+    return np.fliplr(image)
 
 def image_flipy(image: np.array) -> np.array:
     """
     Flip an image vertically. Reverse the y-axis.
     """
-    return image[::-1, :]
+    return np.flipud(image)
 
 def image_translate_wrap(image: np.array, dx: int, dy: int) -> np.array:
     """
