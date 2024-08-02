@@ -13,9 +13,13 @@ def load_many_tasks(path_to_task_dir: str) -> list[Task]:
         # Remove path, and remove the file extension
         task_id = os.path.splitext(os.path.basename(path))[0]
 
+        # Absolute path to task file
+        absolute_path = os.path.abspath(path)
+
         # print("Loading task", task_id)
         task = Task.load_arcagi1(path)
-        task.task_id = task_id
+        task.metadata_task_id = task_id
+        task.metadata_path = absolute_path
         tasks.append(task)
     print(f"Loading {len(json_paths_sorted)} tasks from {path_to_task_dir}")
     return tasks
