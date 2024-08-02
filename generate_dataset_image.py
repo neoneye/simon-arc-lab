@@ -7,10 +7,6 @@
 #
 # IDEA: transformation "replace colors" of the image
 #
-# IDEA: transformation "transpose" the image
-#
-# IDEA: with "rot" prefix, then the image is to be rotated 90 degrees clockwise
-#
 # IDEA: is there a pixel above, below, left, right, that is the same as the center pixel. All the pixels in the 3x3 area.
 # wraparound, wrapx, wrapy, nowrap
 #
@@ -18,11 +14,9 @@
 # IDEA: number of identical neighboring pixels in the 3x3 area in adjacent to center. Max 4 pixels can be the same as the center.
 # wraparound, wrapx, wrapy, nowrap
 #
-# IDEA: transformation "rotate" the image
-#
-# IDEA: transformation "flip" the image
-#
 # IDEA: auto detect what image format it is, and convert it to RLE format.
+#
+# IDEA: with "rot" prefix, then the image is to be rotated 90 degrees clockwise
 #
 # IDEA: deserialize images with "rot" prefix, then the image is to be rotated 90 degrees clockwise
 #
@@ -166,7 +160,7 @@ def generate_serialize_dataset_item(seed):
 def generate_deserialize_dataset_item(seed_start, item_index):
     """
     Convert from RLE representation to pixel representation.
-    Transform the RLE representation to: histogram, flip, rotate, transpose.
+    Transform the RLE representation to: histogram, flip, rotate.
 
     :param seed: The seed for the random number generator
     :return: A dictionary with the instruction, input, and output
@@ -194,7 +188,8 @@ def generate_deserialize_dataset_item(seed_start, item_index):
         'histogram',
         'flipx',
         'flipy',
-        'transpose',
+        'flipa',
+        'flipb',
         'rotate_cw',
         'rotate_ccw',
         'rotate_180',
@@ -214,7 +209,8 @@ def generate_deserialize_dataset_item(seed_start, item_index):
     # transformation_weights = [0, 0, 10, 10, 10, 10, 10, 10, 10, 0, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
     # transformation_weights = [0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     # transformation_weights = [0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10]
-    transformation_weights = [0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10]
+    # transformation_weights = [0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10]
+    transformation_weights = [0, 0, 0, 0, 0, 10, 10, 10, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     transformation_id = random.choices(transformation_ids, weights=transformation_weights, k=1)[0]
     # transformation_id = 'rotate_cw'
     # if item_index % 3 == 0:
@@ -290,7 +286,7 @@ def generate_deserialize_dataset_item(seed_start, item_index):
         f'process {dataset_name} and return flipy',
     ]
 
-    instructions_transpose = [
+    instructions_flipa = [
         f'Transpose {dataset_name}',
         f'transpose {dataset_name}',
         f'{dataset_name} transposed',
@@ -298,6 +294,19 @@ def generate_deserialize_dataset_item(seed_start, item_index):
         f'process {dataset_name} and return the transposed',
         f'Convert {dataset_name} and return the transposed',
         f'convert {dataset_name} and return the transposed',
+        f'FlipA {dataset_name}',
+        f'Flip-A {dataset_name}',
+        f'{dataset_name} flip-a',
+        f'Process {dataset_name} and return the flipa',
+        f'process {dataset_name} and return flipa',
+    ]
+
+    instructions_flipb = [
+        f'FlipB {dataset_name}',
+        f'Flip-B {dataset_name}',
+        f'{dataset_name} flip-b',
+        f'Process {dataset_name} and return the flipb',
+        f'process {dataset_name} and return flipb',
     ]
 
     instructions_rotate_cw = [
@@ -471,8 +480,10 @@ def generate_deserialize_dataset_item(seed_start, item_index):
         instructions = instructions_flipx
     elif transformation_id == 'flipy':
         instructions = instructions_flipy
-    elif transformation_id == 'transpose':
-        instructions = instructions_transpose
+    elif transformation_id == 'flipa':
+        instructions = instructions_flipa
+    elif transformation_id == 'flipb':
+        instructions = instructions_flipb
     elif transformation_id == 'rotate_cw':
         instructions = instructions_rotate_cw
     elif transformation_id == 'rotate_ccw':
@@ -527,9 +538,13 @@ def generate_deserialize_dataset_item(seed_start, item_index):
         flipped_image = image_flipy(image)
         output_rle_string = serialize(flipped_image)
         output = output_rle_string
-    elif transformation_id == 'transpose':
-        transposed_image = image.transpose()
-        output_rle_string = serialize(transposed_image)
+    elif transformation_id == 'flipa':
+        new_image = image_flip_diagonal_a(image)
+        output_rle_string = serialize(new_image)
+        output = output_rle_string
+    elif transformation_id == 'flipb':
+        new_image = image_flip_diagonal_b(image)
+        output_rle_string = serialize(new_image)
         output = output_rle_string
     elif transformation_id == 'rotate_cw':
         new_image = image_rotate_cw(image)
@@ -605,7 +620,7 @@ def generate_deserialize_dataset_item(seed_start, item_index):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=5700000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=5800000):
     dataset = []
     dataset_byte_size = 0
     for i in range(max_num_samples):
