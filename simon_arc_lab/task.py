@@ -9,6 +9,24 @@ class Task:
         self.count_examples = 0
         self.count_tests = 0
 
+    @classmethod
+    def load_arcagi1(cls, filepath) -> 'Task':
+        """
+        Load a task from a JSON file in the ARC-AGI version1 file format.
+        """
+        with open(filepath) as f:
+            json_data = json.load(f)
+        task = Task()
+        for json_pair in json_data['train']:
+            input = np.array(json_pair['input'], np.uint8)
+            output = np.array(json_pair['output'], np.uint8)
+            task.append_pair(input, output, True)
+        for json_pair in json_data['test']:
+            input = np.array(json_pair['input'], np.uint8)
+            output = np.array(json_pair['output'], np.uint8)
+            task.append_pair(input, output, False)
+        return task
+
     def clone(self) -> 'Task':
         """
         Create a deep copy of the task.
@@ -126,7 +144,7 @@ class Task:
         else:
             return json.dumps(dict)
 
-    def save_arcagi1_json(self, path: str, compact: bool = False):
+    def save_arcagi1(self, path: str, compact: bool = False):
         """
         Save the task to a JSON file in the ARC-AGI version1 file format.
         
@@ -138,3 +156,8 @@ class Task:
     def show(self):
         from .task_show import task_show
         task_show(self, answer=True)
+
+if __name__ == '__main__':
+    filename = 'testdata/25ff71a9.json'
+    task = Task.load_arcagi1(filename)
+    print(task)
