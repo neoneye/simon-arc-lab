@@ -17,6 +17,18 @@ def image_rotate_ccw(image: np.array) -> np.array:
 def image_rotate_180(image: np.array) -> np.array:
     return np.rot90(image, k=2)
 
+def image_flipx(image: np.array) -> np.array:
+    """
+    Flip an image horizontally. Reverse the x-axis.
+    """
+    return image[:, ::-1]
+
+def image_flipy(image: np.array) -> np.array:
+    """
+    Flip an image vertically. Reverse the y-axis.
+    """
+    return image[::-1, :]
+
 def image_translate_wrap(image: np.array, dx: int, dy: int) -> np.array:
     """
     Move pixels by dx, dy, wrapping around the image.
@@ -39,18 +51,6 @@ def image_translate_wrap(image: np.array, dx: int, dy: int) -> np.array:
             new_image[new_y, new_x] = image[y, x]
 
     return new_image
-
-def image_flipx(image: np.array) -> np.array:
-    """
-    Flip an image horizontally. Reverse the x-axis.
-    """
-    return image[:, ::-1]
-
-def image_flipy(image: np.array) -> np.array:
-    """
-    Flip an image vertically. Reverse the y-axis.
-    """
-    return image[::-1, :]
 
 def image_replace_colors(image: np.array, color_mapping: Dict[int, int]) -> np.array:
     """
