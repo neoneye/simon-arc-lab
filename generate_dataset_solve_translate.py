@@ -28,6 +28,8 @@ DATASET_NAMES = [
     'simons-solve-translate'
 ]
 
+BENCHMARK_DATASET_NAME = 'solve_translate'
+
 def generate_task(seed: int, dx: int, dy: int, percent_noise: float) -> Task:
     count_example = random.Random(seed + 1).randint(2, 3)
     count_test = random.Random(seed + 2).randint(1, 2)
@@ -61,7 +63,7 @@ def demo_generate_task():
         task = generate_task(0, 0, 1, ratio)
         task.show()
 
-def generate_dataset_item_for_output_row(seed: int, task: Task, test_index: int, test_output_y: int, pixel_list: list[int], transformation_id: str) -> dict:
+def generate_dataset_item_for_pixels_in_output_row(seed: int, task: Task, test_index: int, test_output_y: int, pixel_list: list[int], transformation_id: str) -> dict:
     random.seed(seed)
     dataset_name = random.choice(DATASET_NAMES)
 
@@ -92,7 +94,50 @@ def generate_dataset_item_for_output_row(seed: int, task: Task, test_index: int,
     benchmark_width = image_size1d_to_string(max_width)
     benchmark_height = image_size1d_to_string(max_height)
     benchmark_pixels = task_pixels_to_string(task.total_pixel_count())
-    benchmark_id = f'dataset=solve_translate group={transformation_id} image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
+    benchmark_id = f'dataset={BENCHMARK_DATASET_NAME} group={transformation_id} predict=pixels image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
+
+    result_dict = {
+        'instruction': instruction,
+        'input': input,
+        'output': output,
+        'benchmark': benchmark_id
+    }
+    return result_dict
+
+def generate_dataset_item_for_number_of_output_rows(seed: int, task: Task, test_index: int, output_image: np.array, transformation_id: str) -> dict:
+    random.seed(seed)
+    dataset_name = random.choice(DATASET_NAMES)
+
+    # task_formatter = TaskFormatterRLEVerbose(task)
+    task_formatter = TaskFormatterRLECompact(task)
+
+    output_ids = task_formatter.output_ids()
+    test_output_id = output_ids[task.count_examples + test_index]
+
+    instructions = [
+        f"{dataset_name}, {test_output_id}, predict row count",
+        f"{dataset_name} '{test_output_id}' predict row count",
+        f"{dataset_name} '{test_output_id}' predict the row count",
+        f"{dataset_name}, '{test_output_id}', predict the row count",
+        f"{dataset_name}, '{test_output_id}', predict the height",
+        f"{dataset_name}, '{test_output_id}', predict height",
+        f"{dataset_name} {test_output_id} predict the height",
+        f"{dataset_name} {test_output_id} predict height",
+    ]
+    instruction = random.choice(instructions)
+
+    input = task_formatter.to_string()
+    # print(input)
+
+    output_height = output_image.shape[0]
+    output = str(output_height)
+    # print(output)
+
+    max_width, max_height = task.max_image_size()
+    benchmark_width = image_size1d_to_string(max_width)
+    benchmark_height = image_size1d_to_string(max_height)
+    benchmark_pixels = task_pixels_to_string(task.total_pixel_count())
+    benchmark_id = f'dataset={BENCHMARK_DATASET_NAME} group={transformation_id} predict=height image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
 
     result_dict = {
         'instruction': instruction,
@@ -109,21 +154,21 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     task_without_test_output.set_all_test_outputs_to_none()
 
     dataset_items = []
-    for test_index in range(task.count_tests):
-        # input_image = task.test_input(test_index)
-        output_image = task.test_output(test_index)
-        # print(f"Test {test_index}")
-        # print(input_image)
-        # print(output_image)
 
+    # Predict the pixels of the output image
+    for test_index in range(task.count_tests):
+        output_image = task.test_output(test_index)
         output_height = output_image.shape[0]
         for output_y in range(output_height):
             pixels = image_get_row_as_list(output_image, output_y)
-            # print(pixels)
-
-            dataset_item = generate_dataset_item_for_output_row(seed + output_y, task_without_test_output, test_index, output_y, pixels, transformation_id)
-            # print(dataset_item)
+            dataset_item = generate_dataset_item_for_pixels_in_output_row(seed + output_y + test_index * 100, task_without_test_output, test_index, output_y, pixels, transformation_id)
             dataset_items.append(dataset_item)
+
+    # Predict the number of rows in the output image
+    for test_index in range(task.count_tests):
+        output_image = task.test_output(test_index)
+        dataset_item = generate_dataset_item_for_number_of_output_rows(seed + test_index * 100 + 1000, task_without_test_output, test_index, output_image, transformation_id)
+        dataset_items.append(dataset_item)
 
     return dataset_items
 
@@ -154,7 +199,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     return all_dataset_items
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=700000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=800000):
     dataset = []
     dataset_byte_size = 0
     stop = False
