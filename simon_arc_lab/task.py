@@ -164,7 +164,17 @@ class Task:
         from .task_show import task_show
         task_show(self, answer=True)
 
+    def __str__(self):
+        return (f'Task with {self.count_examples} examples and {self.count_tests} tests.\n'
+                f'Max image size: {self.max_image_size()}\n'
+                f'Total pixel count: {self.total_pixel_count()}')
+
+    def __repr__(self):
+        return (f'<Task(examples={self.count_examples}, tests={self.count_tests}, '
+                f'max_image_size={self.max_image_size()}, total_pixel_count={self.total_pixel_count()})>')
+
 if __name__ == '__main__':
     filename = 'testdata/25ff71a9.json'
     task = Task.load_arcagi1(filename)
     print(task)
+    print(repr(task))
