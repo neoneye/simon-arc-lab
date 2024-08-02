@@ -30,8 +30,8 @@ DATASET_NAMES = [
 
 def generate_task(seed: int, dx: int, dy: int, percent_noise: float) -> Task:
     count_example = random.Random(seed + 1).randint(2, 3)
-    # count_test = random.Random(seed + 2).randint(1, 3)
-    count_test = 1
+    count_test = random.Random(seed + 2).randint(1, 2)
+    # count_test = 1
     task = Task()
     min_width = 3
     max_width = 5
@@ -154,7 +154,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     return all_dataset_items
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=600000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=700000):
     dataset = []
     dataset_byte_size = 0
     stop = False
