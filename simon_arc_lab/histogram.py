@@ -221,6 +221,29 @@ class Histogram:
             return None
         return found_color
 
+    def least_popular_color(self) -> Optional[int]:
+        """
+        Find the color with the unambiguous lowest counter.
+        If there is a tie, return None.
+        If there are no colors, return None.
+        Only consider counters that are 1 or greater. Ignore colors with zero counters or negative counters.
+        """
+        found_count = self.sum_of_counters() + 1
+        found_color = None
+        same_count = 0
+        for color, count in self.color_count.items():
+            if count < 0:
+                continue
+            if count < found_count:
+                found_count = count
+                found_color = color
+                same_count = 1
+            elif count == found_count:
+                same_count += 1
+        if same_count > 1:
+            return None
+        return found_color
+
     def purge_mutable(self):
         """
         Remove colors where the count is less than 1.
