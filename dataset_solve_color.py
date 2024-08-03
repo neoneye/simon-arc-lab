@@ -95,13 +95,13 @@ def generate_task_mostleast_popular_color(seed: int, find_id: str, output_size_i
     random.seed(seed)
 
     count_example = random.randint(2, 3)
-    # count_test = random.randint(1, 2)
-    count_test = 1
+    count_test = random.randint(1, 2)
+    # count_test = 1
     task = Task()
     min_width = 1
-    max_width = 4
+    max_width = 5
     min_height = 1
-    max_height = 4
+    max_height = 5
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -314,7 +314,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     return all_dataset_items
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=400000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=500000):
     dataset = []
     dataset_byte_size = 0
     stop = False
