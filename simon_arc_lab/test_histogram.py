@@ -305,6 +305,10 @@ class TestHistogram(unittest.TestCase):
         actual = Histogram({0: 5, 6: 8, 7: 8, 8: 9, 9: 9}).most_popular_color()
         self.assertEqual(actual, None)
 
+    def test_most_popular_color_tie_c(self):
+        actual = Histogram({0: 1, 1: 1, 2: 2, 3: 2, 6: 8, 7: 8, 8: 9, 9: 9}).most_popular_color()
+        self.assertEqual(actual, None)
+
     def test_most_popular_color_empty(self):
         actual = Histogram({}).most_popular_color()
         self.assertEqual(actual, None)

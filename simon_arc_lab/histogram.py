@@ -203,18 +203,22 @@ class Histogram:
 
     def most_popular_color(self) -> Optional[int]:
         """
-        Find the color with the unambiguous most counters.
+        Find the color with the unambiguous highest counter.
         If there is a tie, return None.
         If there are no colors, return None.
         """
         found_count = -1
         found_color = None
+        same_count = 0
         for color, count in self.color_count.items():
             if count > found_count:
                 found_count = count
                 found_color = color
+                same_count = 1
             elif count == found_count:
-                return None
+                same_count += 1
+        if same_count > 1:
+            return None
         return found_color
 
     def purge_mutable(self):
