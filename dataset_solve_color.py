@@ -139,7 +139,7 @@ def generate_task_mostleast_popular_color(seed: int, find_id: str, output_size_i
 
         output_width = None
         output_height = None
-        if output_size_id == 'one':
+        if output_size_id == '1x1':
             output_width = 1
             output_height = 1
         elif output_size_id == 'same':
@@ -157,8 +157,8 @@ def generate_task_mostleast_popular_color(seed: int, find_id: str, output_size_i
 def demo_generate_task():
     for i in range(10):
         # task = generate_task_swap_colors(i)
-        # task = generate_task_mostleast_popular_color(i, 'most_popular', 'one')
-        task = generate_task_mostleast_popular_color(i, 'least_popular', 'one')
+        # task = generate_task_mostleast_popular_color(i, 'most_popular', '1x1')
+        task = generate_task_mostleast_popular_color(i, 'least_popular', '1x1')
         # task = generate_task_mostleast_popular_color(i, 'most_popular', 'same')
         # task = generate_task_mostleast_popular_color(i, 'least_popular', 'same')
         task.show()
@@ -281,7 +281,11 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     seed_task = seed
 
     transformation_ids = [
-        'swap_colors',
+        # 'swap_colors',
+        'most_popular_color_1x1',
+        'least_popular_color_1x1',
+        # 'most_popular_color_same',
+        # 'least_popular_color_same',
     ]
 
     all_dataset_items = []
@@ -289,6 +293,14 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
         task = None
         if transformation_id == 'swap_colors':
             task = generate_task_swap_colors(seed_task)
+        elif transformation_id == 'most_popular_color_1x1':
+            task = generate_task_mostleast_popular_color(seed_task, 'most_popular', '1x1')
+        elif transformation_id == 'least_popular_color_1x1':
+            task = generate_task_mostleast_popular_color(seed_task, 'least_popular', '1x1')
+        elif transformation_id == 'most_popular_color_same':
+            task = generate_task_mostleast_popular_color(seed_task, 'most_popular', 'same')
+        elif transformation_id == 'least_popular_color_same':
+            task = generate_task_mostleast_popular_color(seed_task, 'least_popular', 'same')
         else:
             raise ValueError(f"Unknown transformation_id: {transformation_id}")
         
@@ -298,7 +310,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     return all_dataset_items
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=200000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=300000):
     dataset = []
     dataset_byte_size = 0
     stop = False
