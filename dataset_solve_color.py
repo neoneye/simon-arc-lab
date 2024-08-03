@@ -1,5 +1,9 @@
-# Replace one color with another color.
-# Swap 2 colors.
+# color transformations:
+# - Swap 2 colors.
+# - Identify the most popular color.
+# - Identify the least popular color.
+#
+# IDEA: Replace one color with another color.
 #
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
