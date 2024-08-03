@@ -87,9 +87,70 @@ def generate_task_swap_colors(seed: int) -> Task:
 
     return task
 
+def generate_task_mostleast_popular_color(seed: int, output_size_id: str) -> Task:
+    random.seed(seed)
+
+    count_example = random.randint(2, 3)
+    # count_test = random.randint(1, 2)
+    count_test = 1
+    task = Task()
+    min_width = 1
+    max_width = 3
+    min_height = 1
+    max_height = 3
+
+    for i in range(count_example+count_test):
+        is_example = i < count_example
+
+        random_image = None
+        found_color = None
+        number_of_retries = 0
+        for retry_index in range(1000):
+            use_min_width = min_width
+            use_min_height = min_height
+            if retry_index == 1:
+                use_min_width = 2
+                use_min_height = 2
+            if retry_index >= 2:
+                use_min_width = 3
+                use_min_height = 3
+            random_image = image_create_random_advanced(seed + i + retry_index, use_min_width, max_width, use_min_height, max_height)
+            histogram = Histogram.create_with_image(random_image)
+            found_color = histogram.most_popular_color()
+            if found_color is not None:
+                number_of_retries = retry_index
+                break
+
+        if random_image is None:
+            raise ValueError(f"Failed to create random image")
+        if found_color is None:
+            raise ValueError(f"Failed to find color")
+        print(f"number_of_retries: {number_of_retries}")
+
+        input_image = random_image
+
+        output_width = None
+        output_height = None
+        if output_size_id == 'one':
+            output_width = 1
+            output_height = 1
+        elif output_size_id == 'same':
+            output_width = input_image.shape[1]
+            output_height = input_image.shape[0]
+        else:
+            raise ValueError(f"Unknown output_size_id: {output_size_id}")
+        
+        output_image = image_create(output_width, output_height, found_color)
+
+        task.append_pair(input_image, output_image, is_example)
+
+    return task
+
 def demo_generate_task():
     for i in range(10):
-        task = generate_task_swap_colors(i + 20)
+        # task = generate_task_swap_colors(i)
+        task = generate_task_mostleast_popular_color(i, 'one')
+        # task = generate_task_mostleast_popular_color(i, 'same')
         task.show()
 
 # demo_generate_task()
