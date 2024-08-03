@@ -293,5 +293,17 @@ class TestHistogram(unittest.TestCase):
         actual = Histogram({9: 1, 8: 2, 7: 3}).sum_of_counters()
         self.assertEqual(actual, 6)
 
+    def test_most_popular_color_unambiguous(self):
+        actual = Histogram({0: 5, 6: 3, 7: 8}).most_popular_color()
+        self.assertEqual(actual, 7)
+
+    def test_most_popular_color_tie(self):
+        actual = Histogram({0: 5, 6: 8, 7: 8}).most_popular_color()
+        self.assertEqual(actual, None)
+
+    def test_most_popular_color_empty(self):
+        actual = Histogram({}).most_popular_color()
+        self.assertEqual(actual, None)
+
 if __name__ == '__main__':
     unittest.main()

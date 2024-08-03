@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 import random
 
 class Histogram:
@@ -200,6 +200,22 @@ class Histogram:
         Traverse all the colors, add up their amount.
         """
         return sum(self.color_count.values())
+
+    def most_popular_color(self) -> Optional[int]:
+        """
+        Find the color with the unambiguous most counters.
+        If there is a tie, return None.
+        If there are no colors, return None.
+        """
+        found_count = -1
+        found_color = None
+        for color, count in self.color_count.items():
+            if count > found_count:
+                found_count = count
+                found_color = color
+            elif count == found_count:
+                return None
+        return found_color
 
     def purge_mutable(self):
         """
