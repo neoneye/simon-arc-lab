@@ -87,7 +87,7 @@ def generate_task_swap_colors(seed: int) -> Task:
 
     return task
 
-def generate_task_mostleast_popular_color(seed: int, output_size_id: str) -> Task:
+def generate_task_mostleast_popular_color(seed: int, find_id: str, output_size_id: str) -> Task:
     random.seed(seed)
 
     count_example = random.randint(2, 3)
@@ -105,7 +105,7 @@ def generate_task_mostleast_popular_color(seed: int, output_size_id: str) -> Tas
         random_image = None
         found_color = None
         number_of_retries = 0
-        for retry_index in range(1000):
+        for retry_index in range(100):
             use_min_width = min_width
             use_min_height = min_height
             if retry_index == 1:
@@ -116,7 +116,14 @@ def generate_task_mostleast_popular_color(seed: int, output_size_id: str) -> Tas
                 use_min_height = 3
             random_image = image_create_random_advanced(seed + i + retry_index, use_min_width, max_width, use_min_height, max_height)
             histogram = Histogram.create_with_image(random_image)
-            found_color = histogram.most_popular_color()
+            found_color = None
+            if find_id == 'most_popular':
+                found_color = histogram.most_popular_color()
+            elif find_id == 'least_popular':
+                found_color = histogram.least_popular_color()
+            else:
+                raise ValueError(f"Unknown find_id: {find_id}")
+            
             if found_color is not None:
                 number_of_retries = retry_index
                 break
@@ -125,7 +132,8 @@ def generate_task_mostleast_popular_color(seed: int, output_size_id: str) -> Tas
             raise ValueError(f"Failed to create random image")
         if found_color is None:
             raise ValueError(f"Failed to find color")
-        print(f"number_of_retries: {number_of_retries}")
+        if number_of_retries >= 50:
+            print(f"number_of_retries: {number_of_retries}")
 
         input_image = random_image
 
@@ -149,8 +157,10 @@ def generate_task_mostleast_popular_color(seed: int, output_size_id: str) -> Tas
 def demo_generate_task():
     for i in range(10):
         # task = generate_task_swap_colors(i)
-        task = generate_task_mostleast_popular_color(i, 'one')
-        # task = generate_task_mostleast_popular_color(i, 'same')
+        # task = generate_task_mostleast_popular_color(i, 'most_popular', 'one')
+        task = generate_task_mostleast_popular_color(i, 'least_popular', 'one')
+        # task = generate_task_mostleast_popular_color(i, 'most_popular', 'same')
+        # task = generate_task_mostleast_popular_color(i, 'least_popular', 'same')
         task.show()
 
 # demo_generate_task()
