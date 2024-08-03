@@ -29,8 +29,10 @@ DATASET_NAMES = [
 BENCHMARK_DATASET_NAME = 'solve_color'
 
 def generate_task_swap_colors(seed: int) -> Task:
-    count_example = random.Random(seed + 9).randint(2, 3)
-    # count_test = random.Random(seed + 10).randint(1, 2)
+    random.seed(seed)
+
+    count_example = random.randint(2, 3)
+    # count_test = random.randint(1, 2)
     count_test = 1
     task = Task()
     min_width = 1
@@ -51,21 +53,21 @@ def generate_task_swap_colors(seed: int) -> Task:
             if retry_index >= 2:
                 use_min_width = 3
                 use_min_height = 3
-            width = random.Random(seed + 1 + i).randint(use_min_width, max_width)
-            height = random.Random(seed + 2 + i).randint(use_min_height, max_height)
+            width = random.randint(use_min_width, max_width)
+            height = random.randint(use_min_height, max_height)
             ratios = [0.2, 0.3, 0.4, 0.5]
-            ratio = random.Random(seed + 3 + i).choice(ratios)
+            ratio = random.choice(ratios)
             mask_image = image_create_random_with_two_colors(width, height, 0, 1, ratio, seed + 1060 + i)
             histogram = Histogram.create_with_image(mask_image)
             if histogram.number_of_unique_colors() == 2:
-                print(f"retry_index: {retry_index}")
+                # print(f"retry_index: {retry_index}")
                 break
 
         if mask_image is None:
             raise ValueError(f"Failed to create mask_image with 2 colors")
 
         colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-        random.Random(seed + 4 + i).shuffle(colors)
+        random.shuffle(colors)
         color0 = colors[0]
         color1 = colors[1]
 
@@ -219,7 +221,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
         else:
             raise ValueError(f"Unknown transformation_id: {transformation_id}")
         
-        task.show()
+        # task.show()
         dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
         all_dataset_items.extend(dataset_items)
 
@@ -247,7 +249,7 @@ def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1
     return dataset
 
 dataset = generate_dataset(
-    max_num_samples=10,
+    max_num_samples=100000,
     max_byte_size=1024*1024*100,
 )
 
