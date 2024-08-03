@@ -313,6 +313,18 @@ class TestHistogram(unittest.TestCase):
         actual = Histogram({}).most_popular_color()
         self.assertEqual(actual, None)
 
+    def test_most_popular_color_zero(self):
+        histogram = Histogram.empty()
+        histogram.color_count = {5: 0}
+        actual = histogram.most_popular_color()
+        self.assertEqual(actual, None)
+
+    def test_most_popular_color_negative(self):
+        histogram = Histogram.empty()
+        histogram.color_count = {5: -1}
+        actual = histogram.most_popular_color()
+        self.assertEqual(actual, None)
+
     def test_least_popular_color_unambiguous(self):
         actual = Histogram({0: 5, 6: 1, 7: 8}).least_popular_color()
         self.assertEqual(actual, 6)
@@ -334,11 +346,15 @@ class TestHistogram(unittest.TestCase):
         self.assertEqual(actual, None)
 
     def test_least_popular_color_zero(self):
-        actual = Histogram({5: 0}).least_popular_color()
+        histogram = Histogram.empty()
+        histogram.color_count = {5: 0}
+        actual = histogram.least_popular_color()
         self.assertEqual(actual, None)
 
     def test_least_popular_color_negative(self):
-        actual = Histogram({5: -1}).least_popular_color()
+        histogram = Histogram.empty()
+        histogram.color_count = {5: -1}
+        actual = histogram.least_popular_color()
         self.assertEqual(actual, None)
 
 if __name__ == '__main__':

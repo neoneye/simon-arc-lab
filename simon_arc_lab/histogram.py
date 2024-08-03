@@ -206,8 +206,9 @@ class Histogram:
         Find the color with the unambiguous highest counter.
         If there is a tie, return None.
         If there are no colors, return None.
+        Only consider counters that are 1 or greater. Ignore colors with zero counters or negative counters.
         """
-        found_count = -1
+        found_count = 0
         found_color = None
         same_count = 0
         for color, count in self.color_count.items():
@@ -232,7 +233,7 @@ class Histogram:
         found_color = None
         same_count = 0
         for color, count in self.color_count.items():
-            if count < 0:
+            if count < 1:
                 continue
             if count < found_count:
                 found_count = count
