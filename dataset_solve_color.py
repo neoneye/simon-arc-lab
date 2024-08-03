@@ -285,11 +285,11 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     seed_task = seed
 
     transformation_ids = [
-        # 'swap_colors',
+        'swap_colors',
         'most_popular_color_1x1',
         'least_popular_color_1x1',
-        # 'most_popular_color_same',
-        # 'least_popular_color_same',
+        'most_popular_color_same',
+        'least_popular_color_same',
     ]
 
     all_dataset_items = []
@@ -314,7 +314,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     return all_dataset_items
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=500000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=600000):
     dataset = []
     dataset_byte_size = 0
     stop = False
