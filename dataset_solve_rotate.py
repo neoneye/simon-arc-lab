@@ -15,16 +15,7 @@ from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.benchmark import *
 from dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
 
-DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES + [
-    'SIMONARCSOLVEROTATE',
-    'SIMONSARCSOLVEROTATE',
-    'SIMONSOLVEROTATE',
-    'SIMONSSOLVEROTATE',
-    'Simon-Solve-Rotate',
-    'Simons-Solve-Rotate',
-    'simon-solve-rotate',
-    'simons-solve-rotate'
-]
+DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 
 BENCHMARK_DATASET_NAME = 'solve_rotate'
 
@@ -210,7 +201,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     return all_dataset_items
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1100000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1200000):
     dataset = []
     dataset_byte_size = 0
     stop = False
