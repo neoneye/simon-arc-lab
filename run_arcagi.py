@@ -87,5 +87,5 @@ for task in tasks:
 print(f"Generated {len(dataset_items)} dataset items")
 
 # Initialize runner
-runner = Runner(model_directory)
+runner = Runner(model_directory, 512)
 runner.run(dataset_items)
