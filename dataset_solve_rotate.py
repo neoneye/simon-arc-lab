@@ -14,6 +14,7 @@ from simon_arc_lab.task_formatter_rle_compact import *
 from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.benchmark import *
 from dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
+from dataset.plot import *
 
 DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 
@@ -25,9 +26,9 @@ def generate_task(seed: int, transformation_id: str, percent_noise: float) -> Ta
     # count_test = 1
     task = Task()
     min_width = 1
-    max_width = 5
+    max_width = 9
     min_height = 1
-    max_height = 5
+    max_height = 9
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -201,7 +202,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     return all_dataset_items
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1400000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1500000):
     dataset = []
     dataset_byte_size = 0
     stop = False
@@ -226,6 +227,8 @@ dataset = generate_dataset(
     max_num_samples=100000,
     max_byte_size=1024*1024*100,
 )
+# plot_prompt_length_distribution(dataset)
+# plot_response_length_distribution(dataset)
 
 # Save dataset to file
 filename = 'dataset_solve_rotate.jsonl'
