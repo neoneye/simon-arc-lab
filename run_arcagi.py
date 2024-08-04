@@ -72,7 +72,8 @@ def dataset_items_with_task(task: Task) -> list[dict]:
 # model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model141'
 # model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model143'
 # model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model144'
-model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model145'
+# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model145'
+model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model146'
 
 # path_to_taskdir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training'
 path_to_taskdir = 'testdata'
