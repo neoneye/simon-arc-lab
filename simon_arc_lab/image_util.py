@@ -41,7 +41,7 @@ def image_flip_diagonal_a(image: np.array) -> np.array:
 
 def image_flip_diagonal_b(image: np.array) -> np.array:
     """
-    Flip an image over the diagonal a.
+    Flip an image over the diagonal b.
     
     Swap place of top-left and bottom-right.
 
