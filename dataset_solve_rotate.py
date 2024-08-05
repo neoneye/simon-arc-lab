@@ -21,7 +21,7 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_rotate'
 
 def generate_task(seed: int, transformation_id: str, percent_noise: float) -> Task:
-    count_example = random.Random(seed + 9).randint(2, 3)
+    count_example = random.Random(seed + 9).randint(2, 4)
     count_test = random.Random(seed + 10).randint(1, 2)
     # count_test = 1
     task = Task()
@@ -202,7 +202,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     return all_dataset_items
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1700000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1800000):
     dataset = []
     dataset_byte_size = 0
     stop = False
