@@ -36,9 +36,9 @@ class FloodFill:
         FloodFill._flood_fill8(image, x, y+1, from_color, to_color)
         FloodFill._flood_fill8(image, x+1, y+1, from_color, to_color)
 
-def image_fill_inplace(image: np.array, x: int, y: int, from_color: int, to_color: int, connectivity: PixelConnectivity):
+def image_fill(image: np.array, x: int, y: int, from_color: int, to_color: int, connectivity: PixelConnectivity):
     """
-    Flood fill
+    Flood fill inplace
     """
     if connectivity == PixelConnectivity.CONNECTIVITY4:
         FloodFill._flood_fill4(image, x, y, from_color, to_color)
