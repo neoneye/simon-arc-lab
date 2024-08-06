@@ -4,9 +4,11 @@ seed = 42
 
 # Define the input file paths
 file_paths = [
+    'dataset_cellular_automaton.jsonl',
+    'dataset_shape.jsonl',
     'dataset_solve_color.jsonl',
     'dataset_solve_rotate.jsonl',
-    'dataset_solve_translate.jsonl'
+    'dataset_solve_translate.jsonl',
 ]
 
 # Number of rows in the output file
