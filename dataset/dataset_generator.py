@@ -36,7 +36,7 @@ class DatasetGenerator:
 
         self.generated_dataset_items = dataset
 
-    def save(self, filename):
+    def save(self, filename: str):
         dataset_items = self.generated_dataset_items
         with open(filename, 'w') as f:
             for item in dataset_items:
