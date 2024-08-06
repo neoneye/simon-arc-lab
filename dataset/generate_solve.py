@@ -138,9 +138,9 @@ class DatasetItemListBuilder:
         self.accumulated_dataset_items = []
 
     def append_pixels(self):
-        random.seed(self.seed * 1000003 + 1)
-
-        # Predict the pixels of the output image
+        """
+        Predict the pixels of the output image
+        """
         for test_index in range(self.task.count_tests):
             output_image = self.task.test_output(test_index)
             output_height = output_image.shape[0]
@@ -159,9 +159,9 @@ class DatasetItemListBuilder:
                 self.accumulated_dataset_items.append(dataset_item)
 
     def append_height(self):
-        random.seed(self.seed * 1000005 + 97)
-
-        # Predict the number of rows in the output image
+        """
+        Predict the number of rows in the output image
+        """
         for test_index in range(self.task.count_tests):
             output_image = self.task.test_output(test_index)
             dataset_item = generate_dataset_item_for_number_of_output_rows(
@@ -176,9 +176,9 @@ class DatasetItemListBuilder:
             self.accumulated_dataset_items.append(dataset_item)
 
     def append_image(self):
-        random.seed(self.seed * 1000007 + 32)
-
-        # Predict the entire output image
+        """
+        Predict the entire output image
+        """
         for test_index in range(self.task.count_tests):
             output_image = self.task.test_output(test_index)
             dataset_item = generate_dataset_item_for_output_image(
