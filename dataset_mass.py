@@ -31,7 +31,7 @@ DATASET_NAMES = [
     'SimonsImageMass',
 ]
 
-def generate_dataset_item_with_max_mass(seed):
+def generate_dataset_item_with_max_mass(seed: int, connectivity: PixelConnectivity) -> dict:
     """
     Find objects less than or equal to a particular mass.
 
@@ -47,16 +47,28 @@ def generate_dataset_item_with_max_mass(seed):
 
     max_mass = random.Random(seed + 3).randint(1, 4)
 
-    instructions = [
+    instructions_connectivity4 = [
         f'{dataset_name} identify places where max mass is {max_mass}, connectivity 4',
         f'{dataset_name} max mass {max_mass}, connectivity 4',
     ]
+
+    instructions_connectivity8 = [
+        f'{dataset_name} identify places where max mass is {max_mass}, connectivity 8',
+        f'{dataset_name} max mass {max_mass}, connectivity 8',
+    ]
+
+    if connectivity == PixelConnectivity.CONNECTIVITY4:
+        instructions = instructions_connectivity4
+    elif connectivity == PixelConnectivity.CONNECTIVITY8:
+        instructions = instructions_connectivity8
+    else:
+        raise ValueError(f"Unknown PixelConnectivity: {connectivity}")
 
     instruction = random.Random(seed + 4).choice(instructions)
 
     input_image = image_create_random_advanced(seed + 5, min_image_size, max_image_size, min_image_size, max_image_size)
 
-    component_list = ConnectedComponent.find_objects(PixelConnectivity.CONNECTIVITY4, input_image)
+    component_list = ConnectedComponent.find_objects(connectivity, input_image)
     # print(f"component_list: {component_list}")
     if len(component_list) == 0:
         mass_image = np.zeros_like(input_image)
@@ -76,7 +88,7 @@ def generate_dataset_item_with_max_mass(seed):
 
     output_image = mask
 
-    if True:
+    if False:
         print(f"---\ninput: {input_image}\nmax mass: {max_mass}\nmass image: {mass_image}\noutput: {output_image}")
         plt.imshow(input_image, cmap='gray')
         plt.show()
@@ -88,11 +100,18 @@ def generate_dataset_item_with_max_mass(seed):
     input = serialize(input_image)
     output = serialize(output_image)
 
+    if connectivity == PixelConnectivity.CONNECTIVITY4: 
+        benchmark_connectivity = 'connectivity=4' 
+    elif connectivity == PixelConnectivity.CONNECTIVITY8: 
+        benchmark_connectivity = 'connectivity=8' 
+    else:
+        raise ValueError(f"Unknown PixelConnectivity: {connectivity}")
+
     width, height = input_image.shape[1], input_image.shape[0]
     benchmark_width = image_size1d_to_string(width)
     benchmark_height = image_size1d_to_string(height)
     benchmark_dataset_name = BENCHMARK_DATASET_NAME
-    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} image_width={benchmark_width} image_height={benchmark_height}'
+    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} image_width={benchmark_width} image_height={benchmark_height} {benchmark_connectivity} max_mass={max_mass}'
 
     result_dict = {
         'instruction': instruction,
@@ -103,16 +122,17 @@ def generate_dataset_item_with_max_mass(seed):
     return result_dict
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    item = generate_dataset_item_with_max_mass(seed)
-    return [item]
+    item_a = generate_dataset_item_with_max_mass(seed + 10000000000, PixelConnectivity.CONNECTIVITY4)
+    item_b = generate_dataset_item_with_max_mass(seed + 20000000000, PixelConnectivity.CONNECTIVITY8)
+    return [item_a, item_b]
 
 generator = DatasetGenerator(
     dataset_names=DATASET_NAMES,
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=4900000,
-    max_num_samples=5,
+    seed=1905000,
+    max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
 # generator.inspect()
