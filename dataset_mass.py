@@ -5,6 +5,7 @@ from simon_arc_lab.image_create_random_advanced import image_create_random_advan
 from simon_arc_lab.benchmark import *
 from simon_arc_lab.pixel_connectivity import *
 from simon_arc_lab.connected_component import *
+from simon_arc_lab.image_object_mass import *
 import matplotlib.pyplot as plt
 from dataset.dataset_generator import *
 
@@ -55,27 +56,31 @@ def generate_dataset_item_with_max_mass(seed):
 
     input_image = image_create_random_advanced(seed + 5, min_image_size, max_image_size, min_image_size, max_image_size)
 
-    ignore_mask = np.zeros_like(input_image)
-    component_list = ConnectedComponent.find_objects_with_ignore_mask_inner(PixelConnectivity.CONNECTIVITY4, input_image, ignore_mask)
+    component_list = ConnectedComponent.find_objects(PixelConnectivity.CONNECTIVITY4, input_image)
     # print(f"component_list: {component_list}")
+    if len(component_list) == 0:
+        mass_image = np.zeros_like(input_image)
+    else:
+        mass_image = object_mass(component_list)
 
     width = input_image.shape[1]
     height = input_image.shape[0]
 
     mask = np.zeros_like(input_image)
-    for component in component_list:
-        if component.mass > max_mass:
-            continue
-        for y in range(height):
-            for x in range(width):
-                if component.mask[y, x] == 1:
-                    mask[y, x] = 1
+    for y in range(height):
+        for x in range(width):
+            mass = mass_image[y, x]
+            if mass == 0 or mass > max_mass:
+                continue
+            mask[y, x] = 1
 
     output_image = mask
 
     if True:
-        print(f"---\ninput: {input_image}\nmax mass: {max_mass}\noutput: {output_image}")
+        print(f"---\ninput: {input_image}\nmax mass: {max_mass}\nmass image: {mass_image}\noutput: {output_image}")
         plt.imshow(input_image, cmap='gray')
+        plt.show()
+        plt.imshow(mass_image, cmap='gray')
         plt.show()
         plt.imshow(output_image, cmap='gray')
         plt.show()
