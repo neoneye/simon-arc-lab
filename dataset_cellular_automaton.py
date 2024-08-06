@@ -13,6 +13,10 @@ from simon_arc_lab.cellular_automaton import *
 from simon_arc_lab.benchmark import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 import matplotlib.pyplot as plt
+from dataset.dataset_generator import *
+
+BENCHMARK_DATASET_NAME = 'cellular_automaton'
+SAVE_FILENAME = 'dataset_cellular_automaton.jsonl'
 
 DATASET_NAMES = [
     'SIMONCELLULARAUTOMATON',
@@ -259,7 +263,8 @@ def generate_dataset_item_transform_simple(seed):
 
     benchmark_width = image_size1d_to_string(width)
     benchmark_height = image_size1d_to_string(height)
-    benchmark_id = f'dataset=cellular_automaton group={transformation_id} ca_step={step_count} image_width={benchmark_width} image_height={benchmark_height}'
+    benchmark_dataset_name = BENCHMARK_DATASET_NAME
+    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} ca_step={step_count} image_width={benchmark_width} image_height={benchmark_height}'
 
     result_dict = {
         'instruction': instruction,
@@ -410,7 +415,8 @@ def generate_dataset_item_transform_recognize(seed):
 
     benchmark_width = image_size1d_to_string(width)
     benchmark_height = image_size1d_to_string(height)
-    benchmark_id = f'dataset=cellular_automaton group={transformation_id} ca_step={step_count} image_width={benchmark_width} image_height={benchmark_height}'
+    benchmark_dataset_name = BENCHMARK_DATASET_NAME
+    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} ca_step={step_count} image_width={benchmark_width} image_height={benchmark_height}'
 
     result_dict = {
         'instruction': instruction,
@@ -420,34 +426,23 @@ def generate_dataset_item_transform_recognize(seed):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=1600000):
-    dataset = []
-    dataset_byte_size = 0
-    for i in range(max_num_samples):
-        if i % 5 == 0:
-            item = generate_dataset_item_transform_simple(seed_start + i)
-        else:
-            item = generate_dataset_item_transform_recognize(seed_start + i)
+def generate_dataset_item_list(seed: int) -> list[dict]:
+    item = None
+    if seed % 5 == 0:
+        item = generate_dataset_item_transform_simple(seed)
+    else:
+        item = generate_dataset_item_transform_recognize(seed)
+    return [item]
 
-        bytes = len(json.dumps(item))
-        if dataset_byte_size + bytes > max_byte_size:
-            break
-        dataset_byte_size += bytes
-        dataset.append(item)
-    return dataset
-
-dataset = generate_dataset(
-    max_num_samples=100000,
-    max_byte_size=1024*1024*60,
+generator = DatasetGenerator(
+    dataset_names=DATASET_NAMES,
+    benchmark_dataset_name=BENCHMARK_DATASET_NAME,
+    generate_dataset_item_list_fn=generate_dataset_item_list
 )
-
-# Save dataset to file
-filename = 'dataset_cellular_automaton.jsonl'
-with open(filename, 'w') as f:
-    for item in dataset:
-        f.write(json.dumps(item) + '\n')
-
-# Summary
-file_size = os.path.getsize(filename)
-print(f"Generated {len(dataset)} samples, saved to {filename}, file size: {file_size} bytes.")
-
+generator.generate(
+    seed=4700000,
+    max_num_samples=100000,
+    max_byte_size=1024*1024*100
+)
+# generator.inspect()
+generator.save(SAVE_FILENAME)
