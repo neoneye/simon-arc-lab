@@ -10,6 +10,10 @@ from simon_arc_lab.image_shape3x3_center import *
 from simon_arc_lab.image_shape3x3_opposite import *
 from simon_arc_lab.image_shape3x3_histogram import *
 import matplotlib.pyplot as plt
+from dataset.dataset_generator import *
+
+BENCHMARK_DATASET_NAME = 'image'
+SAVE_FILENAME = 'dataset_shape.jsonl'
 
 DATASET_NAMES = [
     'SIMONIMAGESHAPE',
@@ -77,7 +81,8 @@ def generate_dataset_item_shape2x2(seed):
     width, height = input_image.shape[1], input_image.shape[0]
     benchmark_width = image_size1d_to_string(width)
     benchmark_height = image_size1d_to_string(height)
-    benchmark_id = f'dataset=image group={transformation_id} image_width={benchmark_width} image_height={benchmark_height}'
+    benchmark_dataset_name = BENCHMARK_DATASET_NAME
+    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} image_width={benchmark_width} image_height={benchmark_height}'
 
     result_dict = {
         'instruction': instruction,
@@ -134,7 +139,8 @@ def generate_dataset_item_shape3x3_center(seed):
     width, height = input_image.shape[1], input_image.shape[0]
     benchmark_width = image_size1d_to_string(width)
     benchmark_height = image_size1d_to_string(height)
-    benchmark_id = f'dataset=image group={transformation_id} image_width={benchmark_width} image_height={benchmark_height}'
+    benchmark_dataset_name = BENCHMARK_DATASET_NAME
+    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} image_width={benchmark_width} image_height={benchmark_height}'
 
     result_dict = {
         'instruction': instruction,
@@ -191,7 +197,8 @@ def generate_dataset_item_shape3x3_opposite(seed):
     width, height = input_image.shape[1], input_image.shape[0]
     benchmark_width = image_size1d_to_string(width)
     benchmark_height = image_size1d_to_string(height)
-    benchmark_id = f'dataset=image group={transformation_id} image_width={benchmark_width} image_height={benchmark_height}'
+    benchmark_dataset_name = BENCHMARK_DATASET_NAME
+    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} image_width={benchmark_width} image_height={benchmark_height}'
 
     result_dict = {
         'instruction': instruction,
@@ -304,7 +311,8 @@ def generate_dataset_item_shape3x3_histogram(seed):
     width, height = input_image.shape[1], input_image.shape[0]
     benchmark_width = image_size1d_to_string(width)
     benchmark_height = image_size1d_to_string(height)
-    benchmark_id = f'dataset=image group={transformation_id} image_width={benchmark_width} image_height={benchmark_height}'
+    benchmark_dataset_name = BENCHMARK_DATASET_NAME
+    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} image_width={benchmark_width} image_height={benchmark_height}'
 
     result_dict = {
         'instruction': instruction,
@@ -314,38 +322,28 @@ def generate_dataset_item_shape3x3_histogram(seed):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=700000):
-    dataset = []
-    dataset_byte_size = 0
-    for i in range(max_num_samples):
-        j = i % 4 
-        if j == 0:
-            item = generate_dataset_item_shape3x3_opposite(seed_start + i)
-        elif j == 1:
-            item = generate_dataset_item_shape2x2(seed_start + i)
-        elif j == 2:
-            item = generate_dataset_item_shape3x3_center(seed_start + i)
-        else:
-            item = generate_dataset_item_shape3x3_histogram(seed_start + i)
-        bytes = len(json.dumps(item))
-        if dataset_byte_size + bytes > max_byte_size:
-            break
-        dataset_byte_size += bytes
-        dataset.append(item)
-    return dataset
+def generate_dataset_item_list(seed: int) -> list[dict]:
+    item = None
+    j = seed % 4
+    if j == 0:
+        item = generate_dataset_item_shape3x3_opposite(seed)
+    elif j == 1:
+        item = generate_dataset_item_shape2x2(seed)
+    elif j == 2:
+        item = generate_dataset_item_shape3x3_center(seed)
+    else:
+        item = generate_dataset_item_shape3x3_histogram(seed)
+    return [item]
 
-dataset = generate_dataset(
-    max_num_samples=100000,
-    max_byte_size=1024*1024*60,
+generator = DatasetGenerator(
+    dataset_names=DATASET_NAMES,
+    benchmark_dataset_name=BENCHMARK_DATASET_NAME,
+    generate_dataset_item_list_fn=generate_dataset_item_list
 )
-
-# Save dataset to file
-filename = 'dataset_shape.jsonl'
-with open(filename, 'w') as f:
-    for item in dataset:
-        f.write(json.dumps(item) + '\n')
-
-# Summary
-file_size = os.path.getsize(filename)
-print(f"Generated {len(dataset)} samples, saved to {filename}, file size: {file_size} bytes.")
-
+generator.generate(
+    seed=4800000,
+    max_num_samples=100000,
+    max_byte_size=1024*1024*100
+)
+# generator.inspect()
+generator.save(SAVE_FILENAME)
