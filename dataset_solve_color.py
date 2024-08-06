@@ -164,44 +164,6 @@ def demo_generate_task():
 # demo_generate_task()
 # exit()
 
-def generate_dataset_item_for_output_image(seed: int, task: Task, test_index: int, output_image: np.array, transformation_id: str) -> dict:
-    random.seed(seed)
-    dataset_name = random.choice(DATASET_NAMES)
-
-    # task_formatter = TaskFormatterRLEVerbose(task)
-    task_formatter = TaskFormatterRLECompact(task)
-
-    output_ids = task_formatter.output_ids()
-    test_output_id = output_ids[task.count_examples + test_index]
-
-    instructions = [
-        f"{dataset_name}, {test_output_id}, predict image",
-        f"{dataset_name} '{test_output_id}' predict the image",
-        f"{dataset_name}, '{test_output_id}', predict the image",
-        f"{dataset_name} predict image for {test_output_id}",
-        f"{dataset_name} predict row image for {test_output_id}",
-    ]
-    instruction = random.choice(instructions)
-
-    input = task_formatter.to_string()
-    # print(input)
-
-    output = serialize(output_image)
-
-    max_width, max_height = task.max_image_size()
-    benchmark_width = image_size1d_to_string(max_width)
-    benchmark_height = image_size1d_to_string(max_height)
-    benchmark_pixels = task_pixels_to_string(task.total_pixel_count())
-    benchmark_id = f'dataset={BENCHMARK_DATASET_NAME} group={transformation_id} predict=image image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
-
-    result_dict = {
-        'instruction': instruction,
-        'input': input,
-        'output': output,
-        'benchmark': benchmark_id
-    }
-    return result_dict
-
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     random.seed(seed)
 
@@ -248,7 +210,15 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     # Predict the entire output image
     for test_index in range(task.count_tests):
         output_image = task.test_output(test_index)
-        dataset_item = generate_dataset_item_for_output_image(seed + test_index * 100 + 2000, task_without_test_output, test_index, output_image, transformation_id)
+        dataset_item = generate_dataset_item_for_output_image(
+            seed + test_index * 100 + 2000, 
+            dataset_names, 
+            benchmark_dataset_name,
+            task_without_test_output, 
+            test_index, 
+            output_image, 
+            transformation_id
+        )
         dataset_items.append(dataset_item)
 
     return dataset_items
