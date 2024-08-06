@@ -18,7 +18,6 @@ from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.histogram import *
 from simon_arc_lab.benchmark import *
 from dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
-from dataset.plot import *
 from dataset.generate_solve import *
 from dataset.dataset_generator import *
 
@@ -207,7 +206,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     return all_dataset_items
 
 generator = DatasetGenerator(
-    dataset_names=SIMON_SOLVE_VERSION1_NAMES,
+    dataset_names=DATASET_NAMES,
     benchmark_dataset_name=BENCHMARK_DATASET_NAME,
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
