@@ -5,6 +5,7 @@ seed = 42
 # Define the input file paths
 file_paths = [
     'dataset_cellular_automaton.jsonl',
+    'dataset_image.jsonl',
     'dataset_shape.jsonl',
     'dataset_solve_color.jsonl',
     'dataset_solve_rotate.jsonl',
