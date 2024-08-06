@@ -99,7 +99,7 @@ def generate_dataset_item_for_output_image(seed: int, dataset_names: list[str], 
         f"{dataset_name} '{test_output_id}' predict the image",
         f"{dataset_name}, '{test_output_id}', predict the image",
         f"{dataset_name} predict image for {test_output_id}",
-        f"{dataset_name} predict row image for {test_output_id}",
+        f"{dataset_name} predict image for '{test_output_id}'",
     ]
     instruction = random.choice(instructions)
 

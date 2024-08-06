@@ -20,7 +20,7 @@ from simon_arc_lab.histogram import *
 from simon_arc_lab.benchmark import *
 from dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
 from dataset.plot import *
-from dataset.generate_common import *
+from dataset.generate_solve import *
 
 DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 
