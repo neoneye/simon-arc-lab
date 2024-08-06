@@ -4,7 +4,6 @@
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
 import random
-import os
 from simon_arc_lab.image_mix import *
 from simon_arc_lab.image_util import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
@@ -14,12 +13,12 @@ from simon_arc_lab.task_formatter_rle_compact import *
 from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.benchmark import *
 from dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
-from dataset.plot import *
 from dataset.generate_solve import *
+from dataset.dataset_generator import *
 
 DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
-
 BENCHMARK_DATASET_NAME = 'solve_rotate'
+SAVE_FILENAME = 'dataset_solve_rotate.jsonl'
 
 def generate_task(seed: int, transformation_id: str, percent_noise: float) -> Task:
     count_example = random.Random(seed + 9).randint(2, 4)
@@ -101,41 +100,15 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     return all_dataset_items
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=2200000):
-    dataset = []
-    dataset_byte_size = 0
-    stop = False
-    for i in range(max_num_samples):
-        if stop:
-            break
-        items = generate_dataset_item_list(seed_start + i)
-        for item in items:
-            bytes = len(json.dumps(item))
-            if dataset_byte_size + bytes > max_byte_size:
-                stop = True
-                break
-            if len(dataset) >= max_num_samples:
-                stop = True
-                break
-            dataset_byte_size += bytes
-            dataset.append(item)
-    random.Random(seed_start).shuffle(dataset)
-    return dataset
-
-dataset = generate_dataset(
-    max_num_samples=100000,
-    max_byte_size=1024*1024*100,
+generator = DatasetGenerator(
+    dataset_names=SIMON_SOLVE_VERSION1_NAMES,
+    benchmark_dataset_name=BENCHMARK_DATASET_NAME,
+    generate_dataset_item_list_fn=generate_dataset_item_list
 )
-# plot_prompt_length_distribution(dataset)
-# plot_response_length_distribution(dataset)
-
-# Save dataset to file
-filename = 'dataset_solve_rotate.jsonl'
-with open(filename, 'w') as f:
-    for item in dataset:
-        f.write(json.dumps(item) + '\n')
-
-# Summary
-file_size = os.path.getsize(filename)
-print(f"Generated {len(dataset)} samples, saved to {filename}, file size: {file_size} bytes.")
-
+generator.generate(
+    seed=4500000,
+    max_num_samples=100000,
+    max_byte_size=1024*1024*100
+)
+# generator.inspect()
+generator.save(SAVE_FILENAME)
