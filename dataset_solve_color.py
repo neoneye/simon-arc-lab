@@ -165,63 +165,11 @@ def demo_generate_task():
 # exit()
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
-    random.seed(seed)
-
-    dataset_names = DATASET_NAMES
-    benchmark_dataset_name = BENCHMARK_DATASET_NAME
-
-    task_without_test_output = task.clone()
-    task_without_test_output.set_all_test_outputs_to_none()
-
-    dataset_items = []
-
-    # Predict the pixels of the output image
-    for test_index in range(task.count_tests):
-        output_image = task.test_output(test_index)
-        output_height = output_image.shape[0]
-        for output_y in range(output_height):
-            pixels = image_get_row_as_list(output_image, output_y)
-            dataset_item = generate_dataset_item_for_pixels_in_output_row(
-                seed + output_y + test_index * 100, 
-                dataset_names, 
-                benchmark_dataset_name,
-                task_without_test_output, 
-                test_index, 
-                output_y, 
-                pixels, 
-                transformation_id
-            )
-            dataset_items.append(dataset_item)
-
-    # Predict the number of rows in the output image
-    for test_index in range(task.count_tests):
-        output_image = task.test_output(test_index)
-        dataset_item = generate_dataset_item_for_number_of_output_rows(
-            seed + test_index * 100 + 1000, 
-            dataset_names, 
-            benchmark_dataset_name,
-            task_without_test_output, 
-            test_index, 
-            output_image, 
-            transformation_id
-        )
-        dataset_items.append(dataset_item)
-
-    # Predict the entire output image
-    for test_index in range(task.count_tests):
-        output_image = task.test_output(test_index)
-        dataset_item = generate_dataset_item_for_output_image(
-            seed + test_index * 100 + 2000, 
-            dataset_names, 
-            benchmark_dataset_name,
-            task_without_test_output, 
-            test_index, 
-            output_image, 
-            transformation_id
-        )
-        dataset_items.append(dataset_item)
-
-    return dataset_items
+    builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
+    builder.append_height()
+    builder.append_pixels()
+    builder.append_image()
+    return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
     random.seed(seed)
