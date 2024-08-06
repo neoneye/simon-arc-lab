@@ -34,6 +34,11 @@ from simon_arc_lab.image_count3x3 import *
 from simon_arc_lab.histogram import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.benchmark import *
+from dataset.dataset_generator import *
+
+BENCHMARK_DATASET_NAME_SERIALIZE = 'image_serialize'
+BENCHMARK_DATASET_NAME_DESERIALIZE = 'image_deserialize'
+SAVE_FILENAME = 'dataset_image.jsonl'
 
 DATASET_NAMES = [
     'SIMONARCRLEIMAGE',
@@ -147,7 +152,8 @@ def generate_serialize_dataset_item(seed):
     width, height = image.shape[1], image.shape[0]
     benchmark_width = image_size1d_to_string(width)
     benchmark_height = image_size1d_to_string(height)
-    benchmark_id = f'dataset=image_serialize group={transformation_id} image_width={benchmark_width} image_height={benchmark_height}'
+    benchmark_dataset = BENCHMARK_DATASET_NAME_SERIALIZE
+    benchmark_id = f'dataset={benchmark_dataset} group={transformation_id} image_width={benchmark_width} image_height={benchmark_height}'
 
     result_dict = {
         'instruction': instruction,
@@ -157,7 +163,7 @@ def generate_serialize_dataset_item(seed):
     }
     return result_dict
 
-def generate_deserialize_dataset_item(seed_start, item_index):
+def generate_deserialize_dataset_item(seed):
     """
     Convert from RLE representation to pixel representation.
     Transform the RLE representation to: histogram, flip, rotate.
@@ -168,7 +174,6 @@ def generate_deserialize_dataset_item(seed_start, item_index):
     min_image_size = 1
     max_image_size = 21
 
-    seed = seed_start + item_index
     random.seed(seed)
 
     image_seed = seed + 1006 
@@ -610,7 +615,8 @@ def generate_deserialize_dataset_item(seed_start, item_index):
     width, height = image.shape[1], image.shape[0]
     benchmark_width = image_size1d_to_string(width)
     benchmark_height = image_size1d_to_string(height)
-    benchmark_id = f'dataset=image_deserialize group={transformation_id} image_width={benchmark_width} image_height={benchmark_height}'
+    benchmark_dataset = BENCHMARK_DATASET_NAME_DESERIALIZE
+    benchmark_id = f'dataset={benchmark_dataset} group={transformation_id} image_width={benchmark_width} image_height={benchmark_height}'
 
     result_dict = {
         'instruction': instruction,
@@ -620,35 +626,22 @@ def generate_deserialize_dataset_item(seed_start, item_index):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=5800000):
-    dataset = []
-    dataset_byte_size = 0
-    for i in range(max_num_samples):
-        # if i % 100 == 0:
-        #     item = generate_serialize_dataset_item(seed_start + i)
-        # else:
-        #     item = generate_deserialize_dataset_item(seed_start, i)
-        item = generate_deserialize_dataset_item(seed_start, i)
-        bytes = len(json.dumps(item))
-        if dataset_byte_size + bytes > max_byte_size:
-            break
-        dataset_byte_size += bytes
-        dataset.append(item)
-    random.Random(seed_start).shuffle(dataset)
-    return dataset
+def generate_dataset_item_list(seed: int) -> list[dict]:
+    # if seed % 100 == 0:
+    #     item = generate_serialize_dataset_item(seed)
+    # else:
+    #     item = generate_deserialize_dataset_item(seed)
+    item = generate_deserialize_dataset_item(seed)
+    return [item]
 
-dataset = generate_dataset(
-    max_num_samples=100000,
-    max_byte_size=1024*1024*60,
+generator = DatasetGenerator(
+    dataset_names=DATASET_NAMES,
+    generate_dataset_item_list_fn=generate_dataset_item_list
 )
-
-# Save dataset to file
-filename = 'dataset_image.jsonl'
-with open(filename, 'w') as f:
-    for item in dataset:
-        f.write(json.dumps(item) + '\n')
-
-# Summary
-file_size = os.path.getsize(filename)
-print(f"Generated {len(dataset)} samples, saved to {filename}, file size: {file_size} bytes.")
-
+generator.generate(
+    seed=4100000,
+    max_num_samples=100000,
+    max_byte_size=1024*1024*100
+)
+# generator.inspect()
+generator.save(SAVE_FILENAME)
