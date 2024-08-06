@@ -72,8 +72,8 @@ def demo_generate_task():
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    builder.append_height()
-    builder.append_pixels()
+    # builder.append_height()
+    # builder.append_pixels()
     builder.append_image()
     return builder.dataset_items()
 
@@ -101,7 +101,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     return all_dataset_items
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=2100000):
+def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=2200000):
     dataset = []
     dataset_byte_size = 0
     stop = False
