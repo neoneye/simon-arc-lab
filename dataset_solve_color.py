@@ -280,11 +280,11 @@ def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=2
     return dataset
 
 dataset = generate_dataset(
-    max_num_samples=100,
+    max_num_samples=100000,
     max_byte_size=1024*1024*100,
 )
 # plot_prompt_length_distribution(dataset)
-plot_response_length_distribution(dataset)
+# plot_response_length_distribution(dataset)
 
 # Save dataset to file
 filename = 'dataset_solve_color.jsonl'
