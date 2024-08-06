@@ -4,6 +4,7 @@
 # so from the examples alone, the model have to determine what happened.
 import random
 import os
+from tqdm import tqdm
 from simon_arc_lab.image_mix import *
 from simon_arc_lab.image_util import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
@@ -91,20 +92,22 @@ def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=2
     dataset = []
     dataset_byte_size = 0
     stop = False
-    for i in range(max_num_samples):
-        if stop:
-            break
-        items = generate_dataset_item_list(seed_start + i)
-        for item in items:
-            bytes = len(json.dumps(item))
-            if dataset_byte_size + bytes > max_byte_size:
-                stop = True
+    with tqdm(total=max_num_samples, desc="Generating dataset", ncols=100, unit="sample", mininterval=1.0, dynamic_ncols=True, leave=True) as pbar:
+        for i in range(max_num_samples):
+            if stop:
                 break
-            if len(dataset) >= max_num_samples:
-                stop = True
-                break
-            dataset_byte_size += bytes
-            dataset.append(item)
+            items = generate_dataset_item_list(seed_start + i)
+            for item in items:
+                bytes = len(json.dumps(item))
+                if dataset_byte_size + bytes > max_byte_size:
+                    stop = True
+                    break
+                if len(dataset) >= max_num_samples:
+                    stop = True
+                    break
+                dataset_byte_size += bytes
+                dataset.append(item)
+                pbar.update(1)
     random.Random(seed_start).shuffle(dataset)
     return dataset
 
