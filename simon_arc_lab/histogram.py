@@ -245,6 +245,14 @@ class Histogram:
             return None
         return found_color
 
+    def get_count_for_color(self, color: int) -> int:
+        """
+        Get the count for a specific color.
+        
+        If the color is not in the histogram, return 0.
+        """
+        return self.color_count.get(color, 0)
+
     def purge_mutable(self):
         """
         Remove colors where the count is less than 1.

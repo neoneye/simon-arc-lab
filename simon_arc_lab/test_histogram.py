@@ -357,5 +357,12 @@ class TestHistogram(unittest.TestCase):
         actual = histogram.least_popular_color()
         self.assertEqual(actual, None)
 
+    def test_get_count_for_color(self):
+        histogram = Histogram({0: 5, 6: 1, 7: 8})
+        self.assertEqual(histogram.get_count_for_color(0), 5)
+        self.assertEqual(histogram.get_count_for_color(6), 1)
+        self.assertEqual(histogram.get_count_for_color(7), 8)
+        self.assertEqual(histogram.get_count_for_color(9), 0)
+
 if __name__ == '__main__':
     unittest.main()
