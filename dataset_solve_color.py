@@ -207,7 +207,6 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
 generator = DatasetGenerator(
     dataset_names=DATASET_NAMES,
-    benchmark_dataset_name=BENCHMARK_DATASET_NAME,
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
