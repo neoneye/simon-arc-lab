@@ -25,9 +25,9 @@ def generate_task(seed: int, dx: int, dy: int, percent_noise: float) -> Task:
     # count_test = 1
     task = Task()
     min_width = 3
-    max_width = 9
+    max_width = 10
     min_height = 3
-    max_height = 9
+    max_height = 10
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -91,7 +91,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=6000005,
+    seed=7000005,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )

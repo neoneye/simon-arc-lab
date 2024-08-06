@@ -33,9 +33,9 @@ def generate_task_swap_colors(seed: int) -> Task:
     # count_test = 1
     task = Task()
     min_width = 1
-    max_width = 13
+    max_width = 14
     min_height = 1
-    max_height = 13
+    max_height = 14
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -92,9 +92,9 @@ def generate_task_mostleast_popular_color(seed: int, find_id: str, output_size_i
     # count_test = 1
     task = Task()
     min_width = 1
-    max_width = 13
+    max_width = 14
     min_height = 1
-    max_height = 13
+    max_height = 14
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -210,7 +210,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=6600232,
+    seed=7600232,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
