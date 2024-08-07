@@ -39,7 +39,7 @@ def generate_dataset_item_with_max_mass(seed: int, connectivity: PixelConnectivi
     :return: A dictionary with the instruction, input, and output
     """
     min_image_size = 1
-    max_image_size = 20
+    max_image_size = 12
 
     transformation_id = 'max_mass'
 
@@ -131,7 +131,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=2905000,
+    seed=3905000,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
