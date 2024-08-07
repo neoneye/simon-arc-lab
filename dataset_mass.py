@@ -39,13 +39,13 @@ def generate_dataset_item_with_max_mass(seed: int, connectivity: PixelConnectivi
     :return: A dictionary with the instruction, input, and output
     """
     min_image_size = 1
-    max_image_size = 20
+    max_image_size = 25
 
     transformation_id = 'max_mass'
 
     dataset_name = random.Random(seed + 2).choice(DATASET_NAMES)
 
-    max_mass = random.Random(seed + 3).randint(1, 3)
+    max_mass = random.Random(seed + 3).randint(1, 4)
 
     instructions_connectivity4 = [
         f'{dataset_name} identify places where max mass is {max_mass}, connectivity 4',
@@ -70,6 +70,9 @@ def generate_dataset_item_with_max_mass(seed: int, connectivity: PixelConnectivi
 
     component_list = ConnectedComponent.find_objects(connectivity, input_image)
     # print(f"component_list: {component_list}")
+    if len(component_list) >= 256:
+        #print(f"Too many objects: {len(component_list)}")
+        raise ValueError(f"Too many objects: {len(component_list)}")
     if len(component_list) == 0:
         mass_image = np.zeros_like(input_image)
     else:
@@ -122,16 +125,31 @@ def generate_dataset_item_with_max_mass(seed: int, connectivity: PixelConnectivi
     return result_dict
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    item_a = generate_dataset_item_with_max_mass(seed + 10000000000, PixelConnectivity.CONNECTIVITY4)
-    item_b = generate_dataset_item_with_max_mass(seed + 20000000000, PixelConnectivity.CONNECTIVITY8)
-    return [item_a, item_b]
+    items = []
+    for retry_index in range(20):
+        try:
+            item = generate_dataset_item_with_max_mass(seed + 10000000000 + 1333 * retry_index, PixelConnectivity.CONNECTIVITY4)
+            items.append(item)
+            break
+        except Exception as e:
+            print(f"trying again {retry_index}")
+    for retry_index in range(20):
+        try:
+            item = generate_dataset_item_with_max_mass(seed + 20000000000 + 7711 * retry_index, PixelConnectivity.CONNECTIVITY8)
+            items.append(item)
+            break
+        except Exception as e:
+            print(f"trying again {retry_index}")
+    if len(items) == 0:
+        print(f"Failed to generate any dataset items")
+    return items
 
 generator = DatasetGenerator(
     dataset_names=DATASET_NAMES,
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=5905000,
+    seed=6905000,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
