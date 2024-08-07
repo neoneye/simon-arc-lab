@@ -12,7 +12,7 @@ from simon_arc_lab.image_shape3x3_histogram import *
 import matplotlib.pyplot as plt
 from dataset.dataset_generator import *
 
-BENCHMARK_DATASET_NAME = 'image'
+BENCHMARK_DATASET_NAME = 'shape'
 SAVE_FILENAME = 'dataset_shape.jsonl'
 
 DATASET_NAMES = [
@@ -340,7 +340,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=6800057,
+    seed=7800057,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
