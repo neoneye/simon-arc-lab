@@ -3,6 +3,7 @@
 from .task import Task
 import matplotlib.pyplot as plt
 from matplotlib import colors
+import numpy as np
 import os
 
 ARCAGI_COLORS = [
@@ -16,16 +17,18 @@ LABEL_COLOR_TRAIN_PAIR = '#444'
 LABEL_COLOR_TEST_PAIR = '#222'
 TASK_BACKGROUND_COLOR = '#dddddd'
 
-def plot_task(dataset, idx, data_category, fdir_to_save=None):
+def plot_task(dataset, idx, data_category, show_grid, fdir_to_save=None):
     """Plots the train and test pairs of a specified task, using the ARC color scheme."""
 
-    def plot_one(input_matrix, ax, train_or_test, input_or_output, cmap, norm):
+    def plot_one(input_matrix, ax, train_or_test, input_or_output, cmap, norm, show_grid: bool):
         height, width = input_matrix.shape
 
         ax.imshow(input_matrix, cmap=cmap, norm=norm)
-        ax.grid(True, which='both', color=GRID_COLOR, linewidth = 1)
-        # When using linewidth = 0.5, then the gridlines isn’t perfectly aligned with the pixels. 
-        # The neighbor pixels can be seen on the other side of the grid lines.
+
+        if show_grid:
+            ax.grid(True, which='both', color=GRID_COLOR, linewidth = 1)
+            # The grid lines isn’t perfectly aligned with the image pixels. 
+            # The neighbor pixels can be seen on the other side of the grid lines.
 
         for spine in ax.spines.values():
             spine.set_linewidth(1)
@@ -70,15 +73,16 @@ def plot_task(dataset, idx, data_category, fdir_to_save=None):
     norm = colors.Normalize(vmin=0, vmax=9)
 
     for j in range(num_train):
-        plot_one(train_inputs[j], axs[0, j], 'train', 'input', cmap, norm)
-        plot_one(train_outputs[j], axs[1, j], 'train', 'output', cmap, norm)
+        plot_one(train_inputs[j], axs[0, j], 'train', 'input', cmap, norm, show_grid)
+        plot_one(train_outputs[j], axs[1, j], 'train', 'output', cmap, norm, show_grid)
 
     for j in range(num_test):
-        plot_one(test_inputs[j], axs[0, j + num_train], 'test', 'input', cmap, norm)
-        if test_outputs != []:
-            plot_one(test_outputs[j], axs[1, j + num_train], 'test', 'output', cmap, norm)
+        plot_one(test_inputs[j], axs[0, j + num_train], 'test', 'input', cmap, norm, show_grid)
+        if test_outputs[j] is None:
+            image = np.zeros((0, 0), dtype=np.uint8)
+            plot_one(image, axs[1, j + num_train], 'test', 'output', cmap, norm, False)
         else:
-            plot_one([[5]], axs[1, j + num_train], 'test', 'output', cmap, norm)
+            plot_one(test_outputs[j], axs[1, j + num_train], 'test', 'output', cmap, norm, show_grid)
 
     fig.patch.set_facecolor(TASK_BACKGROUND_COLOR)
 
@@ -94,7 +98,7 @@ def plot_task(dataset, idx, data_category, fdir_to_save=None):
         plt.show()
 
 
-def task_show_matplotlib(task: Task, answer=True):
+def task_show_matplotlib(task: Task, show_grid: bool, answer=True):
 
     train_inputs = []
     for i in range(task.count_examples):
@@ -113,7 +117,7 @@ def task_show_matplotlib(task: Task, answer=True):
     
     test_outputs = []
     for i in range(task.count_tests):
-        output = task.test_input(i)
+        output = task.test_output(i)
         test_outputs.append(output)
 
     dataset = []
@@ -123,4 +127,4 @@ def task_show_matplotlib(task: Task, answer=True):
     dataset.append(dataset_item)
     dataset.append(dataset_item)
 
-    plot_task(dataset, 1, 'y', fdir_to_save=None)
+    plot_task(dataset, 1, 'y', show_grid, fdir_to_save=None)

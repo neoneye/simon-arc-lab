@@ -176,9 +176,9 @@ class Task:
         from .task_show import task_show
         task_show(self, answer=True)
 
-    def show(self):
+    def show(self, show_grid: bool = True):
         from .task_show_matplotlib import task_show_matplotlib
-        task_show_matplotlib(self, answer=True)
+        task_show_matplotlib(self, show_grid, answer=True)
 
     def __str__(self):
         if self.metadata_task_id is not None:
