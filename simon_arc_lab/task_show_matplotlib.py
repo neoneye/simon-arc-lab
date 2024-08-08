@@ -17,7 +17,7 @@ LABEL_COLOR_TRAIN_PAIR = '#444'
 LABEL_COLOR_TEST_PAIR = '#222'
 TASK_BACKGROUND_COLOR = '#dddddd'
 
-def plot_task(dataset, task_title, show_grid, fdir_to_save=None, save_filename='task'):
+def plot_task(image_groups: list[np.array], task_title: str, show_grid: bool, fdir_to_save=None, save_filename='task'):
     """Plots the train and test pairs of a specified task, using the ARC color scheme."""
 
     def plot_one(input_matrix, ax, train_or_test, input_or_output, cmap, norm, show_grid: bool):
@@ -60,7 +60,7 @@ def plot_task(dataset, task_title, show_grid, fdir_to_save=None, save_filename='
         else:
             ax.set_title(label, **label_params)
 
-    train_inputs, train_outputs, test_inputs, test_outputs = dataset[0]  # Load the first task
+    train_inputs, train_outputs, test_inputs, test_outputs = image_groups
     
     num_train = len(train_inputs)
     num_test = len(test_inputs)
@@ -124,8 +124,7 @@ def task_show_matplotlib(task: Task, show_grid: bool, show_answer: bool):
         test_outputs.append(output)
 
 
-    dataset_item = [train_inputs, train_outputs, test_inputs, test_outputs]
-    dataset = [dataset_item]
+    image_groups = [train_inputs, train_outputs, test_inputs, test_outputs]
 
     if task.metadata_task_id is None:
         task_title = 'Task without id'
@@ -134,4 +133,4 @@ def task_show_matplotlib(task: Task, show_grid: bool, show_answer: bool):
 
     fdir_to_save = None
     # fdir_to_save = '.'
-    plot_task(dataset, task_title, show_grid, fdir_to_save)
+    plot_task(image_groups, task_title, show_grid, fdir_to_save)
