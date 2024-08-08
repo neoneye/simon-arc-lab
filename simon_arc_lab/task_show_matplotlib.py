@@ -3,7 +3,6 @@
 from .task import Task
 import matplotlib.pyplot as plt
 from matplotlib import colors
-import matplotlib.lines as mlines
 import os
 
 ARCAGI_COLORS = [
@@ -12,25 +11,9 @@ ARCAGI_COLORS = [
 ]
 
 GRID_COLOR = '#555555'
-
-PAIR_LABEL_COLOR = '#202020'
-
-def draw_grid_lines(ax, input_matrix, grid_color):
-    height, width = input_matrix.shape
-    # Draw horizontal lines
-    for i in range(height + 1):
-        x0 = -0.5
-        x1 = width - 0.5
-        y = i - 0.5
-        line = mlines.Line2D([x0, x1], [y, y], color=grid_color, linewidth=0.5)
-        ax.add_line(line)
-    # Draw vertical lines
-    for j in range(width + 1):
-        x = j - 0.5
-        y0 = -0.5
-        y1 = height - 0.5
-        line = mlines.Line2D([x, x], [y0, y1], color=grid_color, linewidth=0.5)
-        ax.add_line(line)
+IMAGE_BORDER_COLOR = GRID_COLOR
+PAIR_LABEL_COLOR = '#444'
+TASK_BORDER_COLOR = GRID_COLOR
 
 def plot_task(dataset, idx, data_category, fdir_to_save=None):
     """Plots the train and test pairs of a specified task, using the ARC color scheme."""
@@ -39,15 +22,19 @@ def plot_task(dataset, idx, data_category, fdir_to_save=None):
         height, width = input_matrix.shape
 
         ax.imshow(input_matrix, cmap=cmap, norm=norm)
-        draw_grid_lines(ax, input_matrix, grid_color=GRID_COLOR)
+        ax.grid(True, which='both', color=GRID_COLOR, linewidth = 1)
+        # When using linewidth = 0.5, then the gridlines isn’t perfectly aligned with the pixels. 
+        # The neighbor pixels can be seen on the other side of the grid lines.
 
-         # Remove the axes spines (borders)
         for spine in ax.spines.values():
-            spine.set_visible(False)
+            spine.set_linewidth(1)
+            spine.set_edgecolor(IMAGE_BORDER_COLOR)
 
         plt.setp(plt.gcf().get_axes(), xticklabels=[], yticklabels=[])
-        ax.set_xticks([])
-        ax.set_yticks([])
+        ax.set_xticks([x-0.5 for x in range(1 + width)])
+        ax.set_yticks([y-0.5 for y in range(1 + height)])
+
+        ax.tick_params(top=False, bottom=False, left=False, right=False, labelleft=False, labelbottom=False)
 
         size = f"{width}x{height}"
 
@@ -84,6 +71,8 @@ def plot_task(dataset, idx, data_category, fdir_to_save=None):
         else:
             plot_one([[5]], axs[1, j + num_train], 'test', 'output', cmap, norm)
 
+    fig.patch.set_linewidth(1)
+    fig.patch.set_edgecolor(TASK_BORDER_COLOR)
     fig.patch.set_facecolor('#dddddd')
 
     fig.tight_layout()
