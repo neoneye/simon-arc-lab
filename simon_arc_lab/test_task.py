@@ -118,6 +118,14 @@ class TestTask(unittest.TestCase):
         self.assertEqual(task.total_pixel_count(), 6)
         self.assertEqual(task.max_image_size(), (1, 1))
 
+    def test_create_with_arcagi1_json_without_test_output(self):
+        json_str = '{"train":[{"input":[[0]],"output":[[1]]},{"input":[[2]],"output":[[3]]}],"test":[{"input":[[4]]}]}'
+        task = Task.create_with_arcagi1_json(json.loads(json_str))
+        self.assertEqual(task.count(), 3)
+        self.assertEqual(task.total_pixel_count(), 5)
+        self.assertEqual(task.max_image_size(), (1, 1))
+        self.assertEqual(task.test_output(0), None)
+
     def test_get_image(self):
         task = Task()
         input0 = np.array([[0]], dtype=np.uint8)

@@ -32,7 +32,10 @@ class Task:
             task.append_pair(input, output, True)
         for json_pair in json_dict['test']:
             input = np.array(json_pair['input'], np.uint8)
-            output = np.array(json_pair['output'], np.uint8)
+            if 'output' in json_pair:
+                output = np.array(json_pair['output'], np.uint8)
+            else:
+                output = None
             task.append_pair(input, output, False)
         return task
 
