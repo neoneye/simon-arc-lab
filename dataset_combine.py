@@ -1,6 +1,6 @@
 import random
 
-seed = 42
+seed = 43
 random.seed(seed)
 
 # Define the input file paths
