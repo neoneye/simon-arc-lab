@@ -8,6 +8,11 @@ import os
 import random
 from simon_arc_lab.histogram import *
 from simon_arc_lab.benchmark import *
+from dataset.dataset_generator import *
+
+BENCHMARK_DATASET_NAME_ONE = 'histogram_one'
+BENCHMARK_DATASET_NAME_TWO = 'histogram_two'
+SAVE_FILENAME = 'dataset_histogram.jsonl'
 
 name_formats = [
     'SIMONARCHISTOGRAM',
@@ -74,7 +79,8 @@ def generate_one_histogram_dataset_item(seed):
 
     sum_of_counters = histogram.sum_of_counters()
     benchmark_histogram_size = histogram_total_to_string(sum_of_counters)
-    benchmark_id = f'dataset=histogram_one group={transformation_id} histogram_size={benchmark_histogram_size}'
+    benchmark_dataset_name = BENCHMARK_DATASET_NAME_ONE
+    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} histogram_size={benchmark_histogram_size}'
 
     result_dict = {
         'instruction': instruction,
@@ -260,7 +266,8 @@ def generate_two_histogram_dataset_item(seed):
 
     sum_of_counters = histogram0.sum_of_counters() + histogram1.sum_of_counters()
     benchmark_histogram_size = histogram_total_to_string(sum_of_counters)
-    benchmark_id = f'dataset=histogram_two group={transformation_id} histogram_size={benchmark_histogram_size}'
+    benchmark_dataset_name = BENCHMARK_DATASET_NAME_TWO
+    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} histogram_size={benchmark_histogram_size}'
 
     result_dict = {
         'instruction': instruction,
@@ -270,33 +277,22 @@ def generate_two_histogram_dataset_item(seed):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=900000):
-    dataset = []
-    dataset_byte_size = 0
-    for i in range(max_num_samples):
-        if i % 20 == 0:
-            item = generate_one_histogram_dataset_item(seed_start + i)
-        else:
-            item = generate_two_histogram_dataset_item(seed_start + i)
-        bytes = len(json.dumps(item))
-        if dataset_byte_size + bytes > max_byte_size:
-            break
-        dataset_byte_size += bytes
-        dataset.append(item)
-    return dataset
+def generate_dataset_item_list(seed: int) -> list[dict]:
+    item = None
+    if seed % 20 == 0:
+        item = generate_one_histogram_dataset_item(seed)
+    else:
+        item = generate_two_histogram_dataset_item(seed)
+    return [item]
 
-dataset = generate_dataset(
-    max_num_samples=100000,
-    max_byte_size=1024*1024*20,
+generator = DatasetGenerator(
+    dataset_names=[],
+    generate_dataset_item_list_fn=generate_dataset_item_list
 )
-
-# Save dataset to file
-filename = 'dataset_histogram.jsonl'
-with open(filename, 'w') as f:
-    for item in dataset:
-        f.write(json.dumps(item) + '\n')
-
-# Summary
-file_size = os.path.getsize(filename)
-print(f"Generated {len(dataset)} samples, saved to {filename}, file size: {file_size} bytes.")
-
+generator.generate(
+    seed=1232003,
+    max_num_samples=100000,
+    max_byte_size=1024*1024*100
+)
+# generator.inspect()
+generator.save(SAVE_FILENAME)
