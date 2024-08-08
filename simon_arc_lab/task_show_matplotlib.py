@@ -98,7 +98,7 @@ def plot_task(dataset, idx, data_category, show_grid, fdir_to_save=None):
         plt.show()
 
 
-def task_show_matplotlib(task: Task, show_grid: bool, answer=True):
+def task_show_matplotlib(task: Task, show_grid: bool, show_answer: bool):
 
     train_inputs = []
     for i in range(task.count_examples):
@@ -117,7 +117,10 @@ def task_show_matplotlib(task: Task, show_grid: bool, answer=True):
     
     test_outputs = []
     for i in range(task.count_tests):
-        output = task.test_output(i)
+        if show_answer:
+            output = task.test_output(i)
+        else:
+            output = None
         test_outputs.append(output)
 
     dataset = []
