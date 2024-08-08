@@ -13,6 +13,8 @@ ARCAGI_COLORS = [
 
 GRID_COLOR = '#555555'
 
+PAIR_LABEL_COLOR = '#202020'
+
 def draw_grid_lines(ax, input_matrix, grid_color):
     height, width = input_matrix.shape
     # Draw horizontal lines
@@ -39,6 +41,10 @@ def plot_task(dataset, idx, data_category, fdir_to_save=None):
         ax.imshow(input_matrix, cmap=cmap, norm=norm)
         draw_grid_lines(ax, input_matrix, grid_color=GRID_COLOR)
 
+         # Remove the axes spines (borders)
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+
         plt.setp(plt.gcf().get_axes(), xticklabels=[], yticklabels=[])
         ax.set_xticks([])
         ax.set_yticks([])
@@ -51,9 +57,9 @@ def plot_task(dataset, idx, data_category, fdir_to_save=None):
             label = size
 
         if input_or_output == 'output':
-            ax.set_xlabel(label, fontweight='bold')
+            ax.set_xlabel(label, fontweight='bold', color=PAIR_LABEL_COLOR)
         else:
-            ax.set_title(label, fontweight='bold')
+            ax.set_title(label, fontweight='bold', color=PAIR_LABEL_COLOR)
 
     train_inputs, train_outputs, test_inputs, test_outputs, task_id = dataset[idx]  # Load the first task
     
