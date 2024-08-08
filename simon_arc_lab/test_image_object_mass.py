@@ -44,14 +44,21 @@ class TestImageObjectMass(unittest.TestCase):
 
         np.testing.assert_array_equal(output, expected_pixels)
 
-    def test_10001_object_enumerate_exceed_maximum(self):
+    def test_10001_object_mass_no_maximum(self):
         # Arrange
-        input_objects = [np.zeros((1, 1), dtype=np.uint8) for _ in range(256)]
+        input_objects = []
+        for x in range(256):
+            mask = np.zeros((1, 256), dtype=np.uint8)
+            mask[0, x] = 1
+            input_objects.append(mask)
 
-        # Act / Assert
-        with self.assertRaises(ValueError) as context:
-            object_mass(input_objects)
-        self.assertTrue("maximum" in str(context.exception))
+        # Act
+        output = object_mass(input_objects)
+
+        # Assert
+        expected_pixels = np.ones((1, 256), dtype=np.uint8)
+
+        np.testing.assert_array_equal(output, expected_pixels)
 
     def test_10002_object_enumerate_different_sizes(self):
         # Arrange
