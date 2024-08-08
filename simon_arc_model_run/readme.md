@@ -7,7 +7,7 @@ Command line interface.
 Identify what ARC-AGI puzzles that are predicted correct/incorrect.
 
 ```bash
-(venv) PROMPT> python simon_arc_model_run/run_arcagi.py   
+(venv) PROMPT> python simon_arc_model_run/run_arcagi.py
 Loading 8 tasks from /Users/neoneye/git/simon_arc_lab/testdata
 Generated 9 dataset items
 Processing entries: 100%|██████████████████████████████████████████████████| 9/9 [00:04<00:00,  1.88it/s]
