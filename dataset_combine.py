@@ -6,7 +6,7 @@ seed = 42
 file_paths = [
     'dataset_cellular_automaton.jsonl',
     'dataset_image.jsonl',
-    'dataset_history.jsonl',
+    'dataset_histogram.jsonl',
     'dataset_mass.jsonl',
     'dataset_shape.jsonl',
     'dataset_solve_color.jsonl',
