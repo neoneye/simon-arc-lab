@@ -5,16 +5,17 @@ seed = 42
 # Define the input file paths
 file_paths = [
     'dataset_cellular_automaton.jsonl',
-    # 'dataset_image.jsonl',
+    'dataset_image.jsonl',
+    'dataset_history.jsonl',
     'dataset_mass.jsonl',
     'dataset_shape.jsonl',
-    # 'dataset_solve_color.jsonl',
-    # 'dataset_solve_rotate.jsonl',
-    # 'dataset_solve_translate.jsonl',
+    'dataset_solve_color.jsonl',
+    'dataset_solve_rotate.jsonl',
+    'dataset_solve_translate.jsonl',
 ]
 
 # Number of rows in the output file
-output_rows = 100000
+output_rows = 200000
 
 # Calculate the number of rows to sample from each file
 rows_per_file = output_rows // len(file_paths)

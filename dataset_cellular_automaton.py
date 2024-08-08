@@ -47,7 +47,7 @@ def generate_dataset_item_transform_simple(seed):
     :return: A dictionary with the instruction, input, and output
     """
     min_image_size = 5
-    max_image_size = 25
+    max_image_size = 27
 
     transformation_ids = [
         'gameoflife_wrap',
@@ -282,7 +282,7 @@ def generate_dataset_item_transform_recognize(seed):
     :return: A dictionary with the instruction, input, and output
     """
     min_image_size = 12
-    max_image_size = 25
+    max_image_size = 27
 
     transformation_id = 'recognize_transformation'
 
@@ -438,7 +438,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=6800003,
+    seed=7800003,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
