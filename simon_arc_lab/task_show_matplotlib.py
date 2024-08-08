@@ -3,12 +3,32 @@
 from .task import Task
 import matplotlib.pyplot as plt
 from matplotlib import colors
+import matplotlib.lines as mlines
 import os
 
 ARCAGI_COLORS = [
     '#000000', '#0074D9', '#FF4136', '#2ECC40', '#FFDC00',
     '#AAAAAA', '#F012BE', '#FF851B', '#7FDBFF', '#870C25'
 ]
+
+GRID_COLOR = '#555555'
+
+def draw_grid_lines(ax, input_matrix, grid_color):
+    height, width = input_matrix.shape
+    # Draw horizontal lines
+    for i in range(height + 1):
+        x0 = -0.5
+        x1 = width - 0.5
+        y = i - 0.5
+        line = mlines.Line2D([x0, x1], [y, y], color=grid_color, linewidth=0.5)
+        ax.add_line(line)
+    # Draw vertical lines
+    for j in range(width + 1):
+        x = j - 0.5
+        y0 = -0.5
+        y1 = height - 0.5
+        line = mlines.Line2D([x, x], [y0, y1], color=grid_color, linewidth=0.5)
+        ax.add_line(line)
 
 def plot_task(dataset, idx, data_category, fdir_to_save=None):
     """Plots the train and test pairs of a specified task, using the ARC color scheme."""
@@ -17,11 +37,11 @@ def plot_task(dataset, idx, data_category, fdir_to_save=None):
         height, width = input_matrix.shape
 
         ax.imshow(input_matrix, cmap=cmap, norm=norm)
-        ax.grid(True, which='both', color='lightgrey', linewidth = 0.5)
-        
+        draw_grid_lines(ax, input_matrix, grid_color=GRID_COLOR)
+
         plt.setp(plt.gcf().get_axes(), xticklabels=[], yticklabels=[])
-        ax.set_xticks([x-0.5 for x in range(1 + width)])
-        ax.set_yticks([y-0.5 for y in range(1 + height)])
+        ax.set_xticks([])
+        ax.set_yticks([])
 
         size = f"{width}x{height}"
 
