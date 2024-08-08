@@ -1,6 +1,7 @@
 import random
 
 seed = 42
+random.seed(seed)
 
 # Define the input file paths
 file_paths = [
@@ -35,7 +36,7 @@ for file_path in file_paths:
     sampled_rows.extend(sample_rows(file_path, rows_per_file))
 
 # Shuffle the combined rows
-random.Random(seed).shuffle(sampled_rows)
+random.shuffle(sampled_rows)
 
 # Write the sampled rows to the output file
 output_file_path = 'dataset_combine.jsonl'
