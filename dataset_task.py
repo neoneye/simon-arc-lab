@@ -82,6 +82,7 @@ def generate_dataset_item(seed):
 
 
     task = generate_task(seed + 1002)
+    # task.show()
 
     # task_formatter = TaskFormatterRLEVerbose(task)
     task_formatter = TaskFormatterRLECompact(task)
