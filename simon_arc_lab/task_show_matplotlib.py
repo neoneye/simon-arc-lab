@@ -84,8 +84,6 @@ def plot_task(dataset, idx, data_category, fdir_to_save=None):
         else:
             plot_one([[5]], axs[1, j + num_train], 'test', 'output', cmap, norm)
 
-    # fig.patch.set_linewidth(5)
-    # fig.patch.set_edgecolor('black')  # substitute 'k' for black
     fig.patch.set_facecolor('#dddddd')
 
     fig.tight_layout()
@@ -99,17 +97,6 @@ def plot_task(dataset, idx, data_category, fdir_to_save=None):
     else:
         plt.show()
 
-
-def plot_single_image(matrix, ax, title, cmap, norm):
-    ax.imshow(matrix, cmap=cmap, norm=norm)
-    ax.grid(True, which='both', color='lightgrey', linewidth = 0.5)
-    # ax.grid(False)
-    
-    plt.setp(plt.gcf().get_axes(), xticklabels=[], yticklabels=[])
-    ax.set_xticks([x-0.5 for x in range(1 + len(matrix[0]))])     
-    ax.set_yticks([x-0.5 for x in range(1 + len(matrix))])
-    
-    ax.set_title(title, fontweight='bold')
 
 def task_show_matplotlib(task: Task, answer=True):
 
