@@ -14,17 +14,26 @@ def plot_task(dataset, idx, data_category, fdir_to_save=None):
     """Plots the train and test pairs of a specified task, using the ARC color scheme."""
 
     def plot_one(input_matrix, ax, train_or_test, input_or_output, cmap, norm):
+        height, width = input_matrix.shape
+
         ax.imshow(input_matrix, cmap=cmap, norm=norm)
         ax.grid(True, which='both', color='lightgrey', linewidth = 0.5)
         
         plt.setp(plt.gcf().get_axes(), xticklabels=[], yticklabels=[])
-        ax.set_xticks([x-0.5 for x in range(1 + len(input_matrix[0]))])     
-        ax.set_yticks([x-0.5 for x in range(1 + len(input_matrix))])
-        
-        if train_or_test == 'test' and input_or_output == 'output':
-            ax.set_title('TEST OUTPUT', color='green', fontweight='bold')
+        ax.set_xticks([x-0.5 for x in range(1 + width)])
+        ax.set_yticks([y-0.5 for y in range(1 + height)])
+
+        size = f"{width}x{height}"
+
+        if train_or_test == 'test':
+            label = 'TEST ' + size
         else:
-            ax.set_title(train_or_test + ' ' + input_or_output, fontweight='bold')
+            label = size
+
+        if input_or_output == 'output':
+            ax.set_xlabel(label, fontweight='bold')
+        else:
+            ax.set_title(label, fontweight='bold')
 
     train_inputs, train_outputs, test_inputs, test_outputs, task_id = dataset[idx]  # Load the first task
     
@@ -49,8 +58,8 @@ def plot_task(dataset, idx, data_category, fdir_to_save=None):
         else:
             plot_one([[5]], axs[1, j + num_train], 'test', 'output', cmap, norm)
 
-    fig.patch.set_linewidth(5)
-    fig.patch.set_edgecolor('black')  # substitute 'k' for black
+    # fig.patch.set_linewidth(5)
+    # fig.patch.set_edgecolor('black')  # substitute 'k' for black
     fig.patch.set_facecolor('#dddddd')
 
     fig.tight_layout()
@@ -68,6 +77,7 @@ def plot_task(dataset, idx, data_category, fdir_to_save=None):
 def plot_single_image(matrix, ax, title, cmap, norm):
     ax.imshow(matrix, cmap=cmap, norm=norm)
     ax.grid(True, which='both', color='lightgrey', linewidth = 0.5)
+    # ax.grid(False)
     
     plt.setp(plt.gcf().get_axes(), xticklabels=[], yticklabels=[])
     ax.set_xticks([x-0.5 for x in range(1 + len(matrix[0]))])     
