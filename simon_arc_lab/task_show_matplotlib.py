@@ -12,8 +12,9 @@ ARCAGI_COLORS = [
 
 GRID_COLOR = '#555555'
 IMAGE_BORDER_COLOR = GRID_COLOR
-PAIR_LABEL_COLOR = '#444'
-TASK_BORDER_COLOR = GRID_COLOR
+LABEL_COLOR_TRAIN_PAIR = '#444'
+LABEL_COLOR_TEST_PAIR = '#222'
+TASK_BACKGROUND_COLOR = '#dddddd'
 
 def plot_task(dataset, idx, data_category, fdir_to_save=None):
     """Plots the train and test pairs of a specified task, using the ARC color scheme."""
@@ -43,10 +44,18 @@ def plot_task(dataset, idx, data_category, fdir_to_save=None):
         else:
             label = size
 
-        if input_or_output == 'output':
-            ax.set_xlabel(label, fontweight='bold', color=PAIR_LABEL_COLOR)
+        label_params = {'fontsize': 12}
+        if train_or_test == 'test':
+            label_params['fontweight'] = 'bold'
+            label_params['color'] = LABEL_COLOR_TEST_PAIR
         else:
-            ax.set_title(label, fontweight='bold', color=PAIR_LABEL_COLOR)
+            label_params['fontweight'] = 'normal'
+            label_params['color'] = LABEL_COLOR_TRAIN_PAIR
+
+        if input_or_output == 'output':
+            ax.set_xlabel(label, **label_params)
+        else:
+            ax.set_title(label, **label_params)
 
     train_inputs, train_outputs, test_inputs, test_outputs, task_id = dataset[idx]  # Load the first task
     
@@ -71,9 +80,7 @@ def plot_task(dataset, idx, data_category, fdir_to_save=None):
         else:
             plot_one([[5]], axs[1, j + num_train], 'test', 'output', cmap, norm)
 
-    fig.patch.set_linewidth(1)
-    fig.patch.set_edgecolor(TASK_BORDER_COLOR)
-    fig.patch.set_facecolor('#dddddd')
+    fig.patch.set_facecolor(TASK_BACKGROUND_COLOR)
 
     fig.tight_layout()
     fig.subplots_adjust(top=0.85)
