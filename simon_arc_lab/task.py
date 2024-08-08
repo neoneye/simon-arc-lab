@@ -176,9 +176,21 @@ class Task:
         from .task_show import task_show
         task_show(self, answer=True)
 
-    def show(self, show_grid: bool = True, show_answer: bool = True):
+    def show(self, show_grid: bool = True, show_answer: bool = True, save_path: Optional[str] = None):
+        """
+        Show the task in a graphical user interface, or save the image to a PNG file.
+
+        Show the task in a graphical user interface:
+        task.show()
+
+        Save the image to a PNG file in current directory:
+        task.show(save_path='task.png')
+
+        Save the image to a PNG file in a specific directory:
+        task.show(save_path='path/to/task.png')
+        """
         from .task_show_matplotlib import task_show_matplotlib
-        task_show_matplotlib(self, show_grid, show_answer)
+        task_show_matplotlib(self, show_grid, show_answer, save_path)
 
     def __str__(self):
         if self.metadata_task_id is not None:

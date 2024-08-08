@@ -1,6 +1,7 @@
-# plot_task() by Minseo Kim
+# Based on plot_task() by Minseo Kim
 # https://www.kaggle.com/code/minseo14/arc-task-00d62c1b-with-cnn
 from .task import Task
+from typing import Optional
 import matplotlib.pyplot as plt
 from matplotlib import colors
 import numpy as np
@@ -17,7 +18,7 @@ LABEL_COLOR_TRAIN_PAIR = '#444'
 LABEL_COLOR_TEST_PAIR = '#222'
 TASK_BACKGROUND_COLOR = '#dddddd'
 
-def plot_task(image_groups: list[list[np.array]], task_title: str, show_grid: bool, fdir_to_save=None, save_filename='task'):
+def plot_task(image_groups: list[list[np.array]], task_title: str, show_grid: bool, save_path: Optional[str]):
     """Plots the train and test pairs of a specified task, using the ARC color scheme."""
 
     def plot_one(input_matrix, ax, train_or_test, input_or_output, cmap, norm, show_grid: bool):
@@ -89,16 +90,17 @@ def plot_task(image_groups: list[list[np.array]], task_title: str, show_grid: bo
     fig.tight_layout()
     fig.subplots_adjust(top=0.85)
     
-    if fdir_to_save is not None:
-        fname = os.path.join(fdir_to_save, '{}.png'.format(save_filename))
-        plt.savefig(fname)
+    if save_path is not None:
+        if not save_path.endswith('.png'):
+            raise ValueError('save_path must end with .png')    
+        plt.savefig(save_path)
         plt.close()
-        print('{} saved'.format(fname))
+        print('saved to: {}'.format(save_path))
     else:
         plt.show()
 
 
-def task_show_matplotlib(task: Task, show_grid: bool, show_answer: bool):
+def task_show_matplotlib(task: Task, show_grid: bool, show_answer: bool, save_path: Optional[str]):
 
     train_inputs = []
     for i in range(task.count_examples):
@@ -123,7 +125,6 @@ def task_show_matplotlib(task: Task, show_grid: bool, show_answer: bool):
             output = None
         test_outputs.append(output)
 
-
     image_groups = [train_inputs, train_outputs, test_inputs, test_outputs]
 
     if task.metadata_task_id is None:
@@ -131,6 +132,4 @@ def task_show_matplotlib(task: Task, show_grid: bool, show_answer: bool):
     else:
         task_title = task.metadata_task_id
 
-    fdir_to_save = None
-    # fdir_to_save = '.'
-    plot_task(image_groups, task_title, show_grid, fdir_to_save)
+    plot_task(image_groups, task_title, show_grid, save_path)
