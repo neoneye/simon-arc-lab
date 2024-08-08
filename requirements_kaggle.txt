@@ -1,0 +1,30 @@
+contourpy==1.2.0
+
+# Kaggle: cycler @ file:///home/conda/feedstock_root/build_artifacts/cycler_1696677705766/work
+# cycler==0.12.1
+
+fonttools==4.47.0
+
+# Kaggle: kiwisolver @ file:///home/conda/feedstock_root/build_artifacts/kiwisolver_1695379902431/work
+# kiwisolver==1.4.5
+
+markdown-it-py==3.0.0
+matplotlib==3.7.5
+mdurl==0.1.2
+
+# Kaggle: numpy @ file:///home/conda/feedstock_root/build_artifacts/numpy_1707225380409/work/dist/numpy-1.26.4-cp310-cp310-linux_x86_64.whl#sha256=51131fd8fc130cd168aecaf1bc0ea85f92e8ffebf211772ceb16ac2e7f10d7ca
+# numpy==2.0.1
+
+packaging==21.3
+
+# Kaggle: Pygments @ file:///home/conda/feedstock_root/build_artifacts/pygments_1700607939962/work
+# Pygments==2.18.0
+
+pyparsing==3.1.1
+python-dateutil==2.9.0.post0
+rich==13.7.0
+
+# Kaggle: six @ file:///tmp/build/80754af9/six_1644875935023/work
+# six==1.16.0
+
+tqdm==4.66.4
