@@ -25,5 +25,11 @@ def load_many_tasks(path_to_task_dir: str) -> list[Task]:
     return tasks
 
 if __name__ == '__main__':
+    # How to run this snippet
+    # PROMPT> python -m simon_arc_lab.load_many_tasks
+
     path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training'
     tasks = load_many_tasks(path)
+    for task in tasks[:2]:
+        print(task)
+        task.show()

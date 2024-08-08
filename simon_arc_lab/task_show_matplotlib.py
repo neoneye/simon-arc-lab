@@ -17,7 +17,7 @@ LABEL_COLOR_TRAIN_PAIR = '#444'
 LABEL_COLOR_TEST_PAIR = '#222'
 TASK_BACKGROUND_COLOR = '#dddddd'
 
-def plot_task(dataset, idx, data_category, show_grid, fdir_to_save=None):
+def plot_task(dataset, task_title, show_grid, fdir_to_save=None, save_filename='task'):
     """Plots the train and test pairs of a specified task, using the ARC color scheme."""
 
     def plot_one(input_matrix, ax, train_or_test, input_or_output, cmap, norm, show_grid: bool):
@@ -60,14 +60,14 @@ def plot_task(dataset, idx, data_category, show_grid, fdir_to_save=None):
         else:
             ax.set_title(label, **label_params)
 
-    train_inputs, train_outputs, test_inputs, test_outputs, task_id = dataset[idx]  # Load the first task
+    train_inputs, train_outputs, test_inputs, test_outputs = dataset[0]  # Load the first task
     
     num_train = len(train_inputs)
     num_test = len(test_inputs)
     num_total = num_train + num_test
     
     fig, axs = plt.subplots(2, num_total, figsize=(3*num_total, 3*2))
-    plt.suptitle(f'{data_category.capitalize()} Set #{idx+1}, {task_id}:', fontsize=20, fontweight='bold', y=0.96)
+    plt.suptitle(task_title, fontsize=20, fontweight='bold', y=0.96, ha='left', x=0.02)
     
     cmap = colors.ListedColormap(ARCAGI_COLORS)
     norm = colors.Normalize(vmin=0, vmax=9)
@@ -90,7 +90,7 @@ def plot_task(dataset, idx, data_category, show_grid, fdir_to_save=None):
     fig.subplots_adjust(top=0.85)
     
     if fdir_to_save is not None:
-        fname = os.path.join(fdir_to_save, '{}_{}.png'.format(idx+1, task_id))
+        fname = os.path.join(fdir_to_save, '{}.png'.format(save_filename))
         plt.savefig(fname)
         plt.close()
         print('{} saved'.format(fname))
@@ -123,11 +123,15 @@ def task_show_matplotlib(task: Task, show_grid: bool, show_answer: bool):
             output = None
         test_outputs.append(output)
 
-    dataset = []
 
-    task_id = 'x'
-    dataset_item = [train_inputs, train_outputs, test_inputs, test_outputs, task_id]
-    dataset.append(dataset_item)
-    dataset.append(dataset_item)
+    dataset_item = [train_inputs, train_outputs, test_inputs, test_outputs]
+    dataset = [dataset_item]
 
-    plot_task(dataset, 1, 'y', show_grid, fdir_to_save=None)
+    if task.metadata_task_id is None:
+        task_title = 'Task without id'
+    else:
+        task_title = task.metadata_task_id
+
+    fdir_to_save = None
+    # fdir_to_save = '.'
+    plot_task(dataset, task_title, show_grid, fdir_to_save)
