@@ -1,9 +1,15 @@
+import os
+import sys
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, PROJECT_ROOT)
+
 from simon_arc_lab.image_util import *
 from simon_arc_lab.task import *
 from simon_arc_lab.load_many_tasks import *
 from simon_arc_lab.task_formatter_rle_compact import *
 from simon_arc_lab.rle.serialize import *
-from model.runner import *
+from simon_arc_model.runner import *
 
 def dataset_items_with_task(task: Task) -> list[dict]:
     task_id = task.metadata_task_id
@@ -102,7 +108,7 @@ def dataset_items_with_task(task: Task) -> list[dict]:
 model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model168'
 
 # path_to_taskdir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training'
-path_to_taskdir = 'testdata'
+path_to_taskdir = os.path.join(PROJECT_ROOT, 'testdata')
 
 tasks = load_many_tasks(path_to_taskdir)
 dataset_items = []
