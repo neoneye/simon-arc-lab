@@ -172,9 +172,13 @@ class Task:
         with open(path, 'w') as file:
             file.write(self.to_arcagi1_json(compact))
 
-    def show(self):
+    def xshow(self):
         from .task_show import task_show
         task_show(self, answer=True)
+
+    def show(self):
+        from .task_show_matplotlib import task_show_matplotlib
+        task_show_matplotlib(self, answer=True)
 
     def __str__(self):
         if self.metadata_task_id is not None:
