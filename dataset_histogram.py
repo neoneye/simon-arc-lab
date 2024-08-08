@@ -14,7 +14,7 @@ BENCHMARK_DATASET_NAME_ONE = 'histogram_one'
 BENCHMARK_DATASET_NAME_TWO = 'histogram_two'
 SAVE_FILENAME = 'dataset_histogram.jsonl'
 
-name_formats = [
+DATASET_NAMES = [
     'SIMONARCHISTOGRAM',
     'SIMON-ARC-HISTOGRAM',
     'SIMONS-ARC-HISTOGRAM',
@@ -36,22 +36,22 @@ def generate_one_histogram_dataset_item(seed):
     transformation_weights = [20, 20]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
-    name_format = random.Random(seed + 1005).choice(name_formats)
+    dataset_name = random.Random(seed + 1005).choice(DATASET_NAMES)
 
     instructions_number_of_unique_colors = [
-        f'{name_format}, number of unique colors',
-        f'number of unique colors in {name_format}',
-        f'how many unique colors are there in {name_format}',
-        f'{name_format}, unique color count',
+        f'{dataset_name}, number of unique colors',
+        f'number of unique colors in {dataset_name}',
+        f'how many unique colors are there in {dataset_name}',
+        f'{dataset_name}, unique color count',
     ]
 
     instructions_unique_colors = [
-        f'{name_format}, unique colors',
-        f'unique colors in {name_format}',
-        f'unique colors of {name_format}',
-        f'what are the unique colors in {name_format}',
-        f'{name_format}, unique color list',
-        f'{name_format}, unique colors',
+        f'{dataset_name}, unique colors',
+        f'unique colors in {dataset_name}',
+        f'unique colors of {dataset_name}',
+        f'what are the unique colors in {dataset_name}',
+        f'{dataset_name}, unique color list',
+        f'{dataset_name}, unique colors',
     ]
 
     instructions = None
@@ -105,109 +105,109 @@ def generate_two_histogram_dataset_item(seed):
     transformation_weights = [20, 20, 20, 20, 20, 20, 20, 20, 20]
     transformation_id = random.Random(seed + 1001).choices(transformation_ids, weights=transformation_weights, k=1)[0]
 
-    name_format = random.Random(seed + 1005).choice(name_formats)
+    dataset_name = random.Random(seed + 1005).choice(DATASET_NAMES)
 
     instructions_add = [
-        f'Add two {name_format} together',
-        f'Add these {name_format}',
-        f'Sum these {name_format}',
-        f'{name_format}, perform addition',
-        f'{name_format}, perform add',
-        f'{name_format} add',
-        f'{name_format} plus',
-        f'{name_format} sum',
+        f'Add two {dataset_name} together',
+        f'Add these {dataset_name}',
+        f'Sum these {dataset_name}',
+        f'{dataset_name}, perform addition',
+        f'{dataset_name}, perform add',
+        f'{dataset_name} add',
+        f'{dataset_name} plus',
+        f'{dataset_name} sum',
     ]
 
     instructions_subtract = [
-        f'Subtract these {name_format}',
-        f'{name_format}, perform subtraction',
-        f'{name_format}, perform subtract',
-        f'{name_format}, perform minus',
-        f'{name_format} minus',
-        f'{name_format} subtract',
+        f'Subtract these {dataset_name}',
+        f'{dataset_name}, perform subtraction',
+        f'{dataset_name}, perform subtract',
+        f'{dataset_name}, perform minus',
+        f'{dataset_name} minus',
+        f'{dataset_name} subtract',
     ]
 
     instructions_min = [
-        f'{name_format}, perform min',
-        f'{name_format}, perform minimum',
-        f'{name_format} min',
-        f'{name_format} minimum',
-        f'Min of {name_format}',
-        f'Minimum of {name_format}',
+        f'{dataset_name}, perform min',
+        f'{dataset_name}, perform minimum',
+        f'{dataset_name} min',
+        f'{dataset_name} minimum',
+        f'Min of {dataset_name}',
+        f'Minimum of {dataset_name}',
     ]
 
     instructions_max = [
-        f'{name_format}, perform max',
-        f'{name_format}, perform maximum',
-        f'{name_format} max',
-        f'{name_format} maximum',
-        f'Max of {name_format}',
-        f'Maximum of {name_format}',
+        f'{dataset_name}, perform max',
+        f'{dataset_name}, perform maximum',
+        f'{dataset_name} max',
+        f'{dataset_name} maximum',
+        f'Max of {dataset_name}',
+        f'Maximum of {dataset_name}',
     ]
 
     instructions_number_of_unique_colors = [
-        f'{name_format}, number of unique colors',
-        f'number of unique colors in {name_format}',
-        f'how many unique colors are there in {name_format}',
-        f'{name_format}, unique color count',
+        f'{dataset_name}, number of unique colors',
+        f'number of unique colors in {dataset_name}',
+        f'how many unique colors are there in {dataset_name}',
+        f'{dataset_name}, unique color count',
     ]
 
     instructions_unique_colors = [
-        f'{name_format}, unique colors',
-        f'unique colors in {name_format}',
-        f'unique colors of {name_format}',
-        f'what are the unique colors in {name_format}',
-        f'{name_format}, unique color list',
-        f'{name_format}, unique colors',
+        f'{dataset_name}, unique colors',
+        f'unique colors in {dataset_name}',
+        f'unique colors of {dataset_name}',
+        f'what are the unique colors in {dataset_name}',
+        f'{dataset_name}, unique color list',
+        f'{dataset_name}, unique colors',
     ]
 
     instructions_intersection = [
-        f'{name_format}, color intersection',
-        f'intersection of colors in {name_format}',
-        f'Intersection of colors in {name_format}',
-        f'what are the shared colors between {name_format}',
-        f'{name_format}, intersecting color list',
-        f'{name_format}, intersecting colors',
-        f'{name_format}, overlapping colors',
-        f'{name_format}, color overlap',
+        f'{dataset_name}, color intersection',
+        f'intersection of colors in {dataset_name}',
+        f'Intersection of colors in {dataset_name}',
+        f'what are the shared colors between {dataset_name}',
+        f'{dataset_name}, intersecting color list',
+        f'{dataset_name}, intersecting colors',
+        f'{dataset_name}, overlapping colors',
+        f'{dataset_name}, color overlap',
     ]
 
     instructions_a_remove_b_colors = [
-        f'{name_format}, Remove Histogram B colors from Histogram A',
-        f'{name_format}, Remove Histogram-B colors from Histogram-A',
-        f'{name_format}, remove histogram-b colors from histogram-a',
-        f'{name_format}, remove histogram b colors from histogram a',
-        f'{name_format}, Exclude Histogram B colors from Histogram A',
-        f'{name_format}, Exclude Histogram-B colors from Histogram-A',
-        f'{name_format}, exclude histogram-b colors from histogram-a',
-        f'{name_format}, exclude histogram b colors from histogram a',
-        f'{name_format}, Histogram A without colors of Histogram B',
-        f'{name_format}, Histogram-A without colors of Histogram-B',
-        f'{name_format}, histogram-a without colors of histogram-b',
-        f'{name_format}, histogram a without colors of histogram b',
-        f'{name_format}, Histogram A excluding Histogram B colors',
-        f'{name_format}, Histogram-A excluding Histogram-B colors',
-        f'{name_format}, histogram-a excluding histogram-b colors',
-        f'{name_format}, histogram a excluding histogram b colors',
+        f'{dataset_name}, Remove Histogram B colors from Histogram A',
+        f'{dataset_name}, Remove Histogram-B colors from Histogram-A',
+        f'{dataset_name}, remove histogram-b colors from histogram-a',
+        f'{dataset_name}, remove histogram b colors from histogram a',
+        f'{dataset_name}, Exclude Histogram B colors from Histogram A',
+        f'{dataset_name}, Exclude Histogram-B colors from Histogram-A',
+        f'{dataset_name}, exclude histogram-b colors from histogram-a',
+        f'{dataset_name}, exclude histogram b colors from histogram a',
+        f'{dataset_name}, Histogram A without colors of Histogram B',
+        f'{dataset_name}, Histogram-A without colors of Histogram-B',
+        f'{dataset_name}, histogram-a without colors of histogram-b',
+        f'{dataset_name}, histogram a without colors of histogram b',
+        f'{dataset_name}, Histogram A excluding Histogram B colors',
+        f'{dataset_name}, Histogram-A excluding Histogram-B colors',
+        f'{dataset_name}, histogram-a excluding histogram-b colors',
+        f'{dataset_name}, histogram a excluding histogram b colors',
     ]
 
     instructions_b_remove_a_colors = [
-        f'{name_format}, Remove Histogram A colors from Histogram B',
-        f'{name_format}, Remove Histogram-A colors from Histogram-B',
-        f'{name_format}, remove histogram-a colors from histogram-b',
-        f'{name_format}, remove histogram a colors from histogram b',
-        f'{name_format}, Exclude Histogram A colors from Histogram B',
-        f'{name_format}, Exclude Histogram-A colors from Histogram-B',
-        f'{name_format}, exclude histogram-a colors from histogram-b',
-        f'{name_format}, exclude histogram a colors from histogram b',
-        f'{name_format}, Histogram B without colors of Histogram A',
-        f'{name_format}, Histogram-B without colors of Histogram-a',
-        f'{name_format}, histogram-b without colors of histogram-a',
-        f'{name_format}, histogram b without colors of histogram a',
-        f'{name_format}, Histogram B excluding Histogram A colors',
-        f'{name_format}, Histogram-B excluding Histogram-a colors',
-        f'{name_format}, histogram-b excluding histogram-a colors',
-        f'{name_format}, histogram b excluding histogram A colors',
+        f'{dataset_name}, Remove Histogram A colors from Histogram B',
+        f'{dataset_name}, Remove Histogram-A colors from Histogram-B',
+        f'{dataset_name}, remove histogram-a colors from histogram-b',
+        f'{dataset_name}, remove histogram a colors from histogram b',
+        f'{dataset_name}, Exclude Histogram A colors from Histogram B',
+        f'{dataset_name}, Exclude Histogram-A colors from Histogram-B',
+        f'{dataset_name}, exclude histogram-a colors from histogram-b',
+        f'{dataset_name}, exclude histogram a colors from histogram b',
+        f'{dataset_name}, Histogram B without colors of Histogram A',
+        f'{dataset_name}, Histogram-B without colors of Histogram-a',
+        f'{dataset_name}, histogram-b without colors of histogram-a',
+        f'{dataset_name}, histogram b without colors of histogram a',
+        f'{dataset_name}, Histogram B excluding Histogram A colors',
+        f'{dataset_name}, Histogram-B excluding Histogram-a colors',
+        f'{dataset_name}, histogram-b excluding histogram-a colors',
+        f'{dataset_name}, histogram b excluding histogram A colors',
     ]
 
     instructions = None
