@@ -5,8 +5,7 @@ from tqdm import tqdm
 from .plot import *
 
 class DatasetGenerator:
-    def __init__(self, dataset_names: list[str], generate_dataset_item_list_fn):
-        self.dataset_names = dataset_names
+    def __init__(self, generate_dataset_item_list_fn):
         self.generate_dataset_item_list_fn = generate_dataset_item_list_fn
 
         self.generated_dataset_items = None

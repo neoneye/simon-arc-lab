@@ -145,7 +145,6 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     return items
 
 generator = DatasetGenerator(
-    dataset_names=DATASET_NAMES,
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
