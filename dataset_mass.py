@@ -70,9 +70,6 @@ def generate_dataset_item_with_max_mass(seed: int, connectivity: PixelConnectivi
 
     component_list = ConnectedComponent.find_objects(connectivity, input_image)
     # print(f"component_list: {component_list}")
-    if len(component_list) >= 256:
-        #print(f"Too many objects: {len(component_list)}")
-        raise ValueError(f"Too many objects: {len(component_list)}")
     if len(component_list) == 0:
         mass_image = np.zeros_like(input_image)
     else:
