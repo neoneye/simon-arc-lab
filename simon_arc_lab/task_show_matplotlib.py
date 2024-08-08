@@ -24,7 +24,8 @@ def plot_task(image_groups: list[list[np.array]], task_title: str, show_grid: bo
     def plot_one(input_matrix, ax, train_or_test, input_or_output, cmap, norm, show_grid: bool):
         height, width = input_matrix.shape
 
-        ax.imshow(input_matrix, cmap=cmap, norm=norm)
+        if height > 0 and width > 0:
+            ax.imshow(input_matrix, cmap=cmap, norm=norm)
 
         if show_grid:
             ax.grid(True, which='both', color=GRID_COLOR, linewidth = 1)
