@@ -23,7 +23,7 @@ class Runner:
             print(f"Instruction: {instruction}")
             print(f"Input: {input_data}")
             print(f"Expected response: {expected_response}")
-            print(f"Acutal response: {actual_response}")
+            print(f"Actual response: {actual_response}")
             print(f"Correct: {is_correct}")
             print('-' * 80)
 

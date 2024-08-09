@@ -22,58 +22,9 @@ def dataset_items_with_task(task: Task) -> list[dict]:
     task_formatter = TaskFormatterRLECompact(task_without_test_output)
     output_ids = task_formatter.output_ids()
 
-    # dataset_name = 'SIMONSOLVECOLOR'
-    # dataset_name = 'SIMONSOLVETRANSLATE'
-    # dataset_name = 'SIMONSOLVEROTATE'
     dataset_name = 'SIMON-SOLVE-V1'
 
-    dataset_items_height = []
-    dataset_items_pixels = []
-    dataset_items_image = []
-    # Predict the height of the test output image
-    for test_index in range(task.count_tests):
-        input = task_formatter.to_string()
-        expected_output = task.test_output(test_index)
-        test_output_id = output_ids[task_without_test_output.count_examples + test_index]
-
-        output_height = expected_output.shape[0]
-        output = str(output_height)
-
-        instruction = f"{dataset_name} {test_output_id} predict height"
-        benchmark_id = f'dataset={task_id} predict=height test_index={test_index}'
-
-        dataset_item = {
-            'instruction': instruction,
-            'input': input,
-            'output': output,
-            'benchmark': benchmark_id
-        }
-        # print(dataset_item)
-        dataset_items_height.append(dataset_item)
-
-    # Predict the pixels of the test output image
-    for test_index in range(task.count_tests):
-        input = task_formatter.to_string()
-        expected_output = task.test_output(test_index)
-        test_output_id = output_ids[task_without_test_output.count_examples + test_index]
-
-        output_height = expected_output.shape[0]
-        for output_y in range(output_height):
-            instruction = f"{dataset_name}, {test_output_id}, predict row {output_y}"
-
-            pixel_list = image_get_row_as_list(expected_output, output_y)
-
-            output = ''.join(map(str, pixel_list))
-            benchmark_id = f'dataset={task_id} predict=pixels test_index={test_index} output_y={output_y}'
-
-            dataset_item = {
-                'instruction': instruction,
-                'input': input,
-                'output': output,
-                'benchmark': benchmark_id
-            }
-            # print(dataset_item)
-            dataset_items_pixels.append(dataset_item)
+    dataset_items = []
 
     # Predict the entire image of the test output image
     for test_index in range(task.count_tests):
@@ -81,7 +32,6 @@ def dataset_items_with_task(task: Task) -> list[dict]:
         expected_output = task.test_output(test_index)
         test_output_id = output_ids[task_without_test_output.count_examples + test_index]
 
-        output_height = expected_output.shape[0]
         instruction = f"{dataset_name}, {test_output_id}, predict image"
 
         output = serialize(expected_output)
@@ -93,12 +43,8 @@ def dataset_items_with_task(task: Task) -> list[dict]:
             'output': output,
             'benchmark': benchmark_id
         }
-        # print(dataset_item)
-        dataset_items_image.append(dataset_item)
-
+        dataset_items.append(dataset_item)
     
-    #dataset_items = dataset_items_height + dataset_items_pixels  # This checks if the height and pixels are correct
-    dataset_items = dataset_items_image # This checks if the entire image is correct
     return dataset_items
 
 
