@@ -32,7 +32,7 @@ def fmt_grid(grid, colour=True, spaces=True):
 
         return Text.assemble(*grid_str[:-1])
 
-def task_show(task: Task, answer=True):
+def task_show_rich(task: Task, answer=True):
     table = Table(title=repr(task), show_lines=True)
 
     data = []

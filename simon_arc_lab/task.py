@@ -172,9 +172,9 @@ class Task:
         with open(path, 'w') as file:
             file.write(self.to_arcagi1_json(compact))
 
-    def xshow(self):
-        from .task_show import task_show
-        task_show(self, answer=True)
+    def show_in_terminal(self):
+        from .task_show_rich import task_show_rich
+        task_show_rich(self, answer=True)
 
     def show(self, show_grid: bool = True, show_answer: bool = True, save_path: Optional[str] = None):
         """
@@ -215,7 +215,11 @@ class Task:
                 f"path='{self.metadata_path}')>")
 
 if __name__ == '__main__':
-    filename = 'testdata/25ff71a9.json'
+    # How to run this snippet
+    # PROMPT> python -m simon_arc_lab.task
+    filename = 'testdata/simple_arc_tasks/25ff71a9.json'
     task = Task.load_arcagi1(filename)
     print(task)
     print(repr(task))
+    task.show_in_terminal()
+
