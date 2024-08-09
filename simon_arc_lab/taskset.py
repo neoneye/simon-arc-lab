@@ -1,4 +1,5 @@
 import json
+import random
 from .task import Task
 from .load_tasks_from_directory import load_tasks_from_directory
 
@@ -29,3 +30,14 @@ class TaskSet:
 
     def task_ids(self) -> list[str]:
         return [task.metadata_task_id for task in self.tasks]
+
+    def __repr__(self):
+        return (f'<TaskSet(tasks={len(self.tasks)})>')
+
+    def show_random_tasks(self, count: int=1, seed: int=0):
+        """
+        Inspect a few random tasks from the task set, to verify that the TaskSet has been loaded correctly.
+        """
+        random_tasks = random.Random(seed).sample(self.tasks, count)
+        for task in random_tasks:
+            task.show(show_grid=False)
