@@ -31,9 +31,18 @@ def process_task(task: Task, model: Model):
         # Predict the entire image of the test output image
         prompt = f"{dataset_name}, {test_output_id}, predict image\n{input}"
         response = model.process(prompt)
-        predicted_output_image = deserialize(response)
 
-        if expected_output_image is None:
+        problem_deserialize = True
+        try:
+            predicted_output_image = deserialize(response)
+            problem_deserialize = False
+        except Exception as e:
+            print(f'Error deserializing response for task {task.metadata_task_id} test={test_index}. Error: {e}')
+            predicted_output_image = np.zeros((5, 5), dtype=np.uint8)
+
+        if problem_deserialize:
+            status = 'problemdeserialize'
+        elif expected_output_image is None:
             status = 'unverified'
         elif np.array_equal(predicted_output_image, expected_output_image):
             status = 'correct'
