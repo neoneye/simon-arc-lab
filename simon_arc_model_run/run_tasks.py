@@ -22,23 +22,26 @@ def process_task(task: Task, model: Model):
 
     dataset_name = 'SIMON-SOLVE-V1'
 
-    # Predict the entire image of the test output image
     for test_index in range(task.count_tests):
         input = task_formatter.to_string()
         input_image = task.test_input(test_index)
         expected_output_image = task.test_output(test_index)
         test_output_id = output_ids[task_without_test_output.count_examples + test_index]
 
+        # Predict the entire image of the test output image
         prompt = f"{dataset_name}, {test_output_id}, predict image\n{input}"
         response = model.process(prompt)
         predicted_output_image = deserialize(response)
 
-        is_correct = np.array_equal(predicted_output_image, expected_output_image)
+        if expected_output_image is None:
+            status = 'unverified'
+        elif np.array_equal(predicted_output_image, expected_output_image):
+            status = 'correct'
+        else:
+            status = 'incorrect'
 
-        correct_incorrect = 'correct' if is_correct else 'incorrect'
-        title = f'{task.metadata_task_id} test={test_index} {correct_incorrect}'
+        title = f'{task.metadata_task_id} test={test_index} {status}'
 
-        # expected_output_image = None
         # show_grid = False
         show_grid = True
         plot_xyt(input_image, predicted_output_image, expected_output_image, title, show_grid)
