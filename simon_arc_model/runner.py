@@ -5,7 +5,7 @@ class Runner:
     def __init__(self, pretrained_model_name_or_path: str, input_max_length: int):
         good_input_max_length = input_max_length == 256 or input_max_length == 512
         if not good_input_max_length:
-            # As of 2024-august-04, the model has only been trained on input_max_length 256. Not yet 512.
+            # As of 2024-august-09, the model has been trained on both input_max_length 256 and 512.
             raise ValueError("input_max_length must be 256 or 512")
         
         self.model = T5ForConditionalGeneration.from_pretrained(pretrained_model_name_or_path)
