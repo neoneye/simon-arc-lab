@@ -56,11 +56,13 @@ def process_task(task: Task, model: Model):
         plot_xyt(input_image, predicted_output_image, expected_output_image, title, show_grid=True, save_path=save_path)
 
 
+# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model168'
 model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model179'
 
 path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training'
 # path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation'
 # path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/Mini-ARC/data'
+# path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/ConceptARC/data'
 # path_to_task_dir = os.path.join(PROJECT_ROOT, 'testdata', 'simple_arc_tasks')
 taskset = TaskSet.load_directory(path_to_task_dir)
 
