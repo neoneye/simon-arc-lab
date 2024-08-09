@@ -45,7 +45,7 @@ def generate_dataset_item_with_max_mass(seed: int, connectivity: PixelConnectivi
 
     dataset_name = random.Random(seed + 2).choice(DATASET_NAMES)
 
-    max_mass = random.Random(seed + 3).randint(1, 15)
+    max_mass = random.Random(seed + 3).randint(1, 20)
 
     instructions_connectivity4 = [
         f'{dataset_name} identify places where max mass is {max_mass}, connectivity 4',
