@@ -2,14 +2,14 @@ from transformers import T5ForConditionalGeneration, RobertaTokenizer
 from tqdm import tqdm
 
 class Runner:
-    def __init__(self, model_directory: str, input_max_length: int):
+    def __init__(self, pretrained_model_name_or_path: str, input_max_length: int):
         good_input_max_length = input_max_length == 256 or input_max_length == 512
         if not good_input_max_length:
             # As of 2024-august-04, the model has only been trained on input_max_length 256. Not yet 512.
             raise ValueError("input_max_length must be 256 or 512")
         
-        self.model = T5ForConditionalGeneration.from_pretrained(model_directory)
-        self.tokenizer = RobertaTokenizer.from_pretrained(model_directory)
+        self.model = T5ForConditionalGeneration.from_pretrained(pretrained_model_name_or_path)
+        self.tokenizer = RobertaTokenizer.from_pretrained(pretrained_model_name_or_path)
         self.counters_correct = {}
         self.counters_incorrect = {}
         self.input_max_length = input_max_length
