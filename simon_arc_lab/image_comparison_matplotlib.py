@@ -14,7 +14,7 @@ GRID_COLOR = '#555555'
 IMAGE_BORDER_COLOR = GRID_COLOR
 LABEL_COLOR_TRAIN_PAIR = '#444'
 LABEL_COLOR_TEST_PAIR = '#222'
-TASK_BACKGROUND_COLOR = '#dddddd'
+PLOT_BACKGROUND_COLOR = '#dddddd'
 
 def plot_single_image(image: np.array, ax, title: str, cmap, norm):
     height, width = image.shape
@@ -53,7 +53,7 @@ def plot_xyt(input_image: np.array, predicted_image: np.array, expected_image: O
     if expected_image is not None:
         plot_single_image(expected_image, axs[2], 'Answer', cmap, norm)
     
-    fig.patch.set_facecolor(TASK_BACKGROUND_COLOR)
+    fig.patch.set_facecolor(PLOT_BACKGROUND_COLOR)
 
     fig.tight_layout()
     plt.show()

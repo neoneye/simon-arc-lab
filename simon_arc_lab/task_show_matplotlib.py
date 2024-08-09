@@ -16,7 +16,7 @@ GRID_COLOR = '#555555'
 IMAGE_BORDER_COLOR = GRID_COLOR
 LABEL_COLOR_TRAIN_PAIR = '#444'
 LABEL_COLOR_TEST_PAIR = '#222'
-TASK_BACKGROUND_COLOR = '#dddddd'
+PLOT_BACKGROUND_COLOR = '#dddddd'
 
 def plot_task(image_groups: list[list[np.array]], task_title: str, show_grid: bool, save_path: Optional[str]):
     """Plots the train and test pairs of a specified task, using the ARC color scheme."""
@@ -86,7 +86,7 @@ def plot_task(image_groups: list[list[np.array]], task_title: str, show_grid: bo
         else:
             plot_one(test_outputs[j], axs[1, j + num_train], 'test', 'output', cmap, norm, show_grid)
 
-    fig.patch.set_facecolor(TASK_BACKGROUND_COLOR)
+    fig.patch.set_facecolor(PLOT_BACKGROUND_COLOR)
 
     fig.tight_layout()
     fig.subplots_adjust(top=0.85)
