@@ -40,7 +40,7 @@ def plot_single_image(image: np.array, ax, title: str, cmap, norm, show_grid: bo
 
     ax.set_xlabel(label, **label_params)
 
-def plot_xyt(input_image: np.array, predicted_image: np.array, expected_image: Optional[np.array], title: str, show_grid: bool):
+def plot_xyt(input_image: np.array, predicted_image: np.array, expected_image: Optional[np.array], title: str, show_grid: bool, save_path: Optional[str]):
     """
     Plots the input, predicted, and answer pairs of a specified task, using the ARC color scheme.
     """
@@ -59,5 +59,13 @@ def plot_xyt(input_image: np.array, predicted_image: np.array, expected_image: O
     fig.patch.set_facecolor(PLOT_BACKGROUND_COLOR)
 
     fig.tight_layout()
-    plt.show()
+
+    if save_path is not None:
+        if not save_path.endswith('.png'):
+            raise ValueError('save_path must end with .png')    
+        plt.savefig(save_path)
+        plt.close()
+        print('saved to: {}'.format(save_path))
+    else:
+        plt.show()
 
