@@ -30,6 +30,12 @@ dataset=ed36ccf7 predict=image test_index=0: 1
 
 ## Run benchmark
 
+This measures accuracy of the model. 
+
+Beforehand create a novel dataset jsonl file with a random seed, that the model hasn't previously been trained on.
+
+This way the task is to make predictions on new data, it has never been trained on.
+
 ```bash
 (venv) PROMPT> python simon_arc_model_run/run_benchmark.py
 Processing entries:   0%|██████████████████████████████           | 9/100000 [00:13<33:19:26,  1.20s/it]Correct sum: 9
