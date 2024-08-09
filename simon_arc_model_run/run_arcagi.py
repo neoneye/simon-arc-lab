@@ -6,7 +6,7 @@ sys.path.insert(0, PROJECT_ROOT)
 
 from simon_arc_lab.image_util import *
 from simon_arc_lab.task import *
-from simon_arc_lab.load_many_tasks import *
+from simon_arc_lab.load_tasks_from_directory import *
 from simon_arc_lab.task_formatter_rle_compact import *
 from simon_arc_lab.rle.serialize import *
 from simon_arc_model.runner import *
@@ -110,7 +110,7 @@ model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model168'
 # path_to_taskdir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training'
 path_to_taskdir = os.path.join(PROJECT_ROOT, 'testdata')
 
-tasks = load_many_tasks(path_to_taskdir)
+tasks = load_tasks_from_directory(path_to_taskdir)
 dataset_items = []
 for task in tasks:
     if task.total_pixel_count() > 500:

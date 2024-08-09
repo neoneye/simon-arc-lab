@@ -1,7 +1,7 @@
 import os
 from .task import Task
 
-def load_many_tasks(path_to_task_dir: str) -> list[Task]:
+def load_tasks_from_directory(path_to_task_dir: str) -> list[Task]:
     tasks = []
     json_paths = []
     for root, dirs, files in os.walk(path_to_task_dir):
@@ -26,10 +26,10 @@ def load_many_tasks(path_to_task_dir: str) -> list[Task]:
 
 if __name__ == '__main__':
     # How to run this snippet
-    # PROMPT> python -m simon_arc_lab.load_many_tasks
+    # PROMPT> python -m simon_arc_lab.load_tasks_from_directory
 
     path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training'
-    tasks = load_many_tasks(path)
+    tasks = load_tasks_from_directory(path)
     for task in tasks[:2]:
         print(task)
         task.show()
