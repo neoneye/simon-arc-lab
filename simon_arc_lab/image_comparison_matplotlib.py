@@ -1,11 +1,9 @@
 # Based on plot_xyt(), plot_single_image() by Minseo Kim
 # https://www.kaggle.com/code/minseo14/arc-task-00d62c1b-with-cnn
-from .task import Task
 from typing import Optional
 import matplotlib.pyplot as plt
 from matplotlib import colors
 import numpy as np
-import os
 
 ARCAGI_COLORS = [
     '#000000', '#0074D9', '#FF4136', '#2ECC40', '#FFDC00',
@@ -19,6 +17,8 @@ LABEL_COLOR_TEST_PAIR = '#222'
 TASK_BACKGROUND_COLOR = '#dddddd'
 
 def plot_single_image(image: np.array, ax, title: str, cmap, norm):
+    height, width = image.shape
+
     ax.imshow(image, cmap=cmap, norm=norm)
     ax.grid(True, which='both', color=GRID_COLOR, linewidth = 1)
     
@@ -29,6 +29,15 @@ def plot_single_image(image: np.array, ax, title: str, cmap, norm):
     ax.tick_params(top=False, bottom=False, left=False, right=False, labelleft=False, labelbottom=False)
     
     ax.set_title(title, fontweight='bold')
+
+    label = f"{width}x{height}"
+    label_params = {
+        'fontsize': 12,
+        'fontweight': 'normal',
+        'color': LABEL_COLOR_TRAIN_PAIR
+    }
+
+    ax.set_xlabel(label, **label_params)
 
 def plot_xyt(input_image: np.array, predicted_image: np.array, expected_image: Optional[np.array], title: str):
     """Plots the input, predicted, and answer pairs of a specified task, using the ARC color scheme."""
@@ -44,7 +53,7 @@ def plot_xyt(input_image: np.array, predicted_image: np.array, expected_image: O
     if expected_image is not None:
         plot_single_image(expected_image, axs[2], 'Answer', cmap, norm)
     
-    fig.patch.set_facecolor('#dddddd')
+    fig.patch.set_facecolor(TASK_BACKGROUND_COLOR)
 
     fig.tight_layout()
     plt.show()
