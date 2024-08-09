@@ -16,11 +16,12 @@ LABEL_COLOR_TRAIN_PAIR = '#444'
 LABEL_COLOR_TEST_PAIR = '#222'
 PLOT_BACKGROUND_COLOR = '#dddddd'
 
-def plot_single_image(image: np.array, ax, title: str, cmap, norm):
+def plot_single_image(image: np.array, ax, title: str, cmap, norm, show_grid: bool):
     height, width = image.shape
 
     ax.imshow(image, cmap=cmap, norm=norm)
-    ax.grid(True, which='both', color=GRID_COLOR, linewidth = 1)
+    if show_grid:
+        ax.grid(True, which='both', color=GRID_COLOR, linewidth = 1)
     
     plt.setp(plt.gcf().get_axes(), xticklabels=[], yticklabels=[])
     ax.set_xticks([x-0.5 for x in range(1 + len(image[0]))])     
@@ -39,8 +40,10 @@ def plot_single_image(image: np.array, ax, title: str, cmap, norm):
 
     ax.set_xlabel(label, **label_params)
 
-def plot_xyt(input_image: np.array, predicted_image: np.array, expected_image: Optional[np.array], title: str):
-    """Plots the input, predicted, and answer pairs of a specified task, using the ARC color scheme."""
+def plot_xyt(input_image: np.array, predicted_image: np.array, expected_image: Optional[np.array], title: str, show_grid: bool):
+    """
+    Plots the input, predicted, and answer pairs of a specified task, using the ARC color scheme.
+    """
     num_img = 3
     fig, axs = plt.subplots(1, num_img, figsize=(9, num_img))
     plt.suptitle(title, fontsize=20, fontweight='bold', y=0.96)
@@ -48,10 +51,10 @@ def plot_xyt(input_image: np.array, predicted_image: np.array, expected_image: O
     cmap = colors.ListedColormap(ARCAGI_COLORS)
     norm = colors.Normalize(vmin=0, vmax=9)
     
-    plot_single_image(input_image, axs[0], 'Input', cmap, norm)
-    plot_single_image(predicted_image, axs[1], 'Predicted', cmap, norm)
+    plot_single_image(input_image, axs[0], 'Input', cmap, norm, show_grid)
+    plot_single_image(predicted_image, axs[1], 'Predicted', cmap, norm, show_grid)
     if expected_image is not None:
-        plot_single_image(expected_image, axs[2], 'Answer', cmap, norm)
+        plot_single_image(expected_image, axs[2], 'Expected', cmap, norm, show_grid)
     
     fig.patch.set_facecolor(PLOT_BACKGROUND_COLOR)
 

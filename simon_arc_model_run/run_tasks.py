@@ -38,7 +38,10 @@ def process_task(task: Task, model: Model):
         correct_incorrect = 'correct' if is_correct else 'incorrect'
         title = f'{task.metadata_task_id} test={test_index} {correct_incorrect}'
 
-        plot_xyt(input_image, predicted_output_image, expected_output_image, title)
+        # expected_output_image = None
+        # show_grid = False
+        show_grid = True
+        plot_xyt(input_image, predicted_output_image, expected_output_image, title, show_grid)
 
 
 model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model168'
