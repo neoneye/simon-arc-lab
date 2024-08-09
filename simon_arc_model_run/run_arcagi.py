@@ -9,7 +9,8 @@ from simon_arc_lab.task import *
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.task_formatter_rle_compact import *
 from simon_arc_lab.rle.serialize import *
-from simon_arc_model.runner import *
+from simon_arc_model.model import Model
+from simon_arc_model.runner import Runner
 
 def dataset_items_with_task(task: Task) -> list[dict]:
     task_id = task.metadata_task_id
@@ -118,6 +119,9 @@ for task in taskset.tasks:
     dataset_items += dataset_items_with_task(task)
 print(f"Generated {len(dataset_items)} dataset items")
 
+# Load model
+model = Model(model_directory, 512)
+
 # Initialize runner
-runner = Runner(model_directory, 512)
+runner = Runner(model)
 runner.run(dataset_items)

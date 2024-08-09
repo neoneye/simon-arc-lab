@@ -1,51 +1,29 @@
-from transformers import T5ForConditionalGeneration, RobertaTokenizer
+from .model import Model
 from tqdm import tqdm
 
 class Runner:
-    def __init__(self, pretrained_model_name_or_path: str, input_max_length: int):
-        good_input_max_length = input_max_length == 256 or input_max_length == 512
-        if not good_input_max_length:
-            # As of 2024-august-09, the model has been trained on both input_max_length 256 and 512.
-            raise ValueError("input_max_length must be 256 or 512")
-        
-        self.model = T5ForConditionalGeneration.from_pretrained(pretrained_model_name_or_path)
-        self.tokenizer = RobertaTokenizer.from_pretrained(pretrained_model_name_or_path)
+    def __init__(self, model: Model):
+        self.model = model
         self.counters_correct = {}
         self.counters_incorrect = {}
-        self.input_max_length = input_max_length
     
     def process_dataset_item(self, dataset_item: dict):
         instruction = dataset_item['instruction']
         input_data = dataset_item['input']
-        expected_output = dataset_item['output']
+        expected_response = dataset_item['output']
         benchmark_id = dataset_item['benchmark']
         
-        input_string = f"{instruction}\n{input_data}"
-        # print("length of input_string", len(input_string))
-        input_ids = self.tokenizer(
-            input_string, 
-            return_tensors='pt',
-            max_length=self.input_max_length,
-            padding='max_length',
-            truncation=True
-        ).input_ids
+        prompt = f"{instruction}\n{input_data}"
+        actual_response = self.model.process(prompt)
         
-        outputs = self.model.generate(
-            input_ids,
-            max_length=128,
-            num_beams=5,
-            early_stopping=True
-        )
-        generated_output = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        
-        is_correct = generated_output == expected_output
+        is_correct = actual_response == expected_response
 
         verbose = False        
         if verbose:
             print(f"Instruction: {instruction}")
             print(f"Input: {input_data}")
-            print(f"Expected Output: {expected_output}")
-            print(f"Generated Output: {generated_output}")
+            print(f"Expected response: {expected_response}")
+            print(f"Acutal response: {actual_response}")
             print(f"Correct: {is_correct}")
             print('-' * 80)
 
