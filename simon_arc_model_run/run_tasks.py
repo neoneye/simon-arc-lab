@@ -2,15 +2,30 @@ import os
 import sys
 from tqdm import tqdm
 import json
+from enum import Enum
+import numpy as np
+from typing import Optional
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
-from simon_arc_lab.task import *
+from simon_arc_lab.task import Task
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.show_prediction_result import show_prediction_result
 from simon_arc_model.model import Model
 from simon_arc_model.predict_output_v1 import PredictOutputV1
+
+class WorkItemStatus(Enum):
+    UNASSIGNED = 0
+    UNVERIFIED = 1
+    CORRECT = 2
+    INCORRECT = 3
+    PROBLEM_DESERIALIZE = 4
+
+    def to_string(self):
+        if self == WorkItemStatus.PROBLEM_DESERIALIZE:
+            return 'problemdeserialize'
+        return self.name.lower()
 
 class WorkItem:
     def __init__(self, task: Task, test_index: int):
@@ -18,13 +33,14 @@ class WorkItem:
         self.test_index = test_index
         self.predictor = PredictOutputV1(task, test_index)
         self.predicted_output_image = None
+        self.status = WorkItemStatus.UNASSIGNED
 
     def process(self, model: Model):
         self.predictor.execute(model)
 
         task = self.task
         test_index = self.test_index
-        input_image = task.test_input(test_index)
+        task_id = task.metadata_task_id
         expected_output_image = task.test_output(test_index)
 
         problem_deserialize = True
@@ -33,26 +49,40 @@ class WorkItem:
             self.predicted_output_image = predicted_output_image
             problem_deserialize = False
         except Exception as e:
-            print(f'Error deserializing response for task {task.metadata_task_id} test={test_index}. Error: {e}')
+            print(f'Error deserializing response for task {task_id} test={test_index}. Error: {e}')
             predicted_output_image = np.zeros((5, 5), dtype=np.uint8)
 
         if problem_deserialize:
-            status = 'problemdeserialize'
+            status = WorkItemStatus.PROBLEM_DESERIALIZE
         elif expected_output_image is None:
-            status = 'unverified'
+            status = WorkItemStatus.UNVERIFIED
         elif np.array_equal(predicted_output_image, expected_output_image):
-            status = 'correct'
+            status = WorkItemStatus.CORRECT
         else:
-            status = 'incorrect'
+            status = WorkItemStatus.INCORRECT
 
-        title = f'{task.metadata_task_id} test={test_index} {status}'
+        self.status = status
+        if self.status == WorkItemStatus.CORRECT:
+            print(f'Correct prediction for task {task_id} test={test_index}')
 
-        save_path = f'run_tasks_result/{task.metadata_task_id}_test{test_index}_{status}.png'
-        save_path = None
+    def show(self, save_dir_path: Optional[str] = None):
+        task = self.task
+        test_index = self.test_index
+        input_image = task.test_input(test_index)
+        task_id = task.metadata_task_id
+        status_string = self.status.to_string()
+        title = f'{task_id} test={test_index} {status_string}'
+
+        expected_output_image = task.test_output(test_index)
+        predicted_output_image = self.predicted_output_image
+
+        filename = f'{task_id}_test{test_index}_{status_string}.png'
+        if save_dir_path is not None:
+            save_path = os.path.join(save_dir_path, filename)
+        else:
+            save_path = None
         show_prediction_result(input_image, predicted_output_image, expected_output_image, title, show_grid=True, save_path=save_path)
 
-        if status == 'correct':
-            print(f'Correct prediction for task {task.metadata_task_id} test={test_index}')
 
 class WorkManager:
     def __init__(self, model: Model, taskset: TaskSet):
@@ -80,8 +110,11 @@ class WorkManager:
         print(f'Removed {count_before - count_after} work items with too long prompt. Remaining are {count_after} work items.')
 
     def process_all_work_items(self):
+        # save_dir = 'run_tasks_result'
+        save_dir = None
         for work_item in tqdm(self.work_items, desc="Processing work items"):
             work_item.process(self.model)
+            work_item.show(save_dir)
 
     def collect_predictions_as_arcprize2024_submission_dict(self) -> dict:
         result_dict = {}
