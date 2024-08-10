@@ -109,12 +109,24 @@ class WorkManager:
         self.work_items = filtered_work_items
         print(f'Removed {count_before - count_after} work items with too long prompt. Remaining are {count_after} work items.')
 
-    def process_all_work_items(self):
-        # save_dir = 'run_tasks_result'
-        save_dir = None
+    def process_all_work_items(self, show: bool = False, save_dir: Optional[str] = None):
         for work_item in tqdm(self.work_items, desc="Processing work items"):
             work_item.process(self.model)
-            work_item.show(save_dir)
+            if show:
+                work_item.show()
+            if save_dir is not None:
+                work_item.show(save_dir)
+
+    def summary(self):
+        counters = {}
+        for work_item in self.work_items:
+            status = work_item.status
+            if status in counters:
+                counters[status] += 1
+            else:
+                counters[status] = 1
+        for status, count in counters.items():
+            print(f'{status.name}: {count}')
 
     def collect_predictions_as_arcprize2024_submission_dict(self) -> dict:
         result_dict = {}
@@ -169,5 +181,7 @@ wm = WorkManager(model, taskset)
 wm.load_work_items()
 wm.discard_items_with_too_long_prompts(500)
 wm.process_all_work_items()
-
+# wm.process_all_work_items(save_dir='run_tasks_result')
+# wm.process_all_work_items(show=True)
+wm.summary()
 wm.save_arcprize2024_submission_file('submission.json')
