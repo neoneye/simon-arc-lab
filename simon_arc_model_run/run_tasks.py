@@ -111,8 +111,13 @@ class WorkManager:
         print(f'Removed {count_before - count_after} work items with too long prompt. Remaining are {count_after} work items.')
 
     def process_all_work_items(self, show: bool = False, save_dir: Optional[str] = None):
-        for work_item in tqdm(self.work_items, desc="Processing work items"):
+        correct_count = 0
+        pbar = tqdm(self.work_items, desc="Processing work items")
+        for work_item in pbar:
             work_item.process(self.model)
+            if work_item.status == WorkItemStatus.CORRECT:
+                correct_count += 1
+            pbar.set_postfix({'correct': correct_count})
             if show:
                 work_item.show()
             if save_dir is not None:

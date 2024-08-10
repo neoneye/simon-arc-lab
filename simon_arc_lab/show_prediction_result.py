@@ -84,7 +84,7 @@ def show_prediction_result(input_image: np.array, predicted_image: Optional[np.a
             raise ValueError('save_path must end with .png')    
         plt.savefig(save_path)
         plt.close()
-        print('saved to: {}'.format(save_path))
+        # print('saved to: {}'.format(save_path))
     else:
         plt.show()
 
