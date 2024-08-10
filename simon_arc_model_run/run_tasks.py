@@ -20,11 +20,14 @@ class WorkItemStatus(Enum):
     UNVERIFIED = 1
     CORRECT = 2
     INCORRECT = 3
-    PROBLEM_DESERIALIZE = 4
+    PROBLEM_MISSING_PREDICTION_IMAGE = 4
+    PROBLEM_DESERIALIZE = 5
 
     def to_string(self):
         if self == WorkItemStatus.PROBLEM_DESERIALIZE:
             return 'problemdeserialize'
+        if self == WorkItemStatus.PROBLEM_MISSING_PREDICTION_IMAGE:
+            return 'problemmissingpredictionimage'
         return self.name.lower()
 
 class WorkItem:
@@ -43,27 +46,25 @@ class WorkItem:
         task_id = task.metadata_task_id
         expected_output_image = task.test_output(test_index)
 
-        problem_deserialize = True
         try:
-            predicted_output_image = self.predictor.predicted_image()
-            self.predicted_output_image = predicted_output_image
-            problem_deserialize = False
+            self.predicted_output_image = self.predictor.predicted_image()
         except Exception as e:
             print(f'Error deserializing response for task {task_id} test={test_index}. Error: {e}')
-            predicted_output_image = np.zeros((5, 5), dtype=np.uint8)
+            self.status = WorkItemStatus.PROBLEM_DESERIALIZE
+            return
 
-        if problem_deserialize:
-            status = WorkItemStatus.PROBLEM_DESERIALIZE
-        elif expected_output_image is None:
-            status = WorkItemStatus.UNVERIFIED
-        elif np.array_equal(predicted_output_image, expected_output_image):
-            status = WorkItemStatus.CORRECT
+        if self.predicted_output_image is None:
+            self.status = WorkItemStatus.PROBLEM_MISSING_PREDICTION_IMAGE
+            return
+        
+        if expected_output_image is None:
+            self.status = WorkItemStatus.UNVERIFIED
+            return
+        
+        if np.array_equal(self.predicted_output_image, expected_output_image):
+            self.status = WorkItemStatus.CORRECT
         else:
-            status = WorkItemStatus.INCORRECT
-
-        self.status = status
-        if self.status == WorkItemStatus.CORRECT:
-            print(f'Correct prediction for task {task_id} test={test_index}')
+            self.status = WorkItemStatus.INCORRECT
 
     def show(self, save_dir_path: Optional[str] = None):
         task = self.task
@@ -75,6 +76,8 @@ class WorkItem:
 
         expected_output_image = task.test_output(test_index)
         predicted_output_image = self.predicted_output_image
+        if predicted_output_image is None:
+            predicted_output_image = np.zeros((5, 5), dtype=np.uint8)
 
         filename = f'{task_id}_test{test_index}_{status_string}.png'
         if save_dir_path is not None:
