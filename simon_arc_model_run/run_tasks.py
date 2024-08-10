@@ -19,38 +19,6 @@ class WorkItem:
         self.predictor = PredictOutputV1(task, test_index)
         self.predicted_output_image = None
 
-    @classmethod
-    def collect_predictions_as_arcprize2024_submission_dict(cls, work_items: list['WorkItem']) -> dict:
-        result_dict = {}
-        for work_item in work_items:
-            if work_item.predicted_output_image is None:
-                continue
-            task_id = work_item.task.metadata_task_id
-
-            # Create a new entry in the result_dict if it doesn't exist, with dummy images
-            # This is in order to handle tasks that have 2 or more test pairs.
-            if task_id not in result_dict:
-                count_tests = work_item.task.count_tests
-                dummy_image = [[0]]
-                attempts_dict = {
-                    'attempt_1': dummy_image
-                }
-                test_list = []
-                for _ in range(count_tests):
-                    test_list.append(attempts_dict)
-                result_dict[task_id] = test_list
-
-            # Update the existing entry in the result_dict with the predicted image
-            image = work_item.predicted_output_image.tolist()
-            result_dict[task_id][work_item.test_index]['attempt_1'] = image
-        return result_dict
-    
-    @classmethod
-    def save_arcprize2024_submission_file(cls, work_items: list['WorkItem'], path_to_json_file: str):
-        dict = cls.collect_predictions_as_arcprize2024_submission_dict(work_items)
-        with open(path_to_json_file, 'w') as f:
-            json.dump(dict, f)
-
     def process(self, model: Model):
         self.predictor.execute(model)
 
@@ -115,6 +83,38 @@ class WorkManager:
         for work_item in tqdm(self.work_items, desc="Processing work items"):
             work_item.process(self.model)
 
+    def collect_predictions_as_arcprize2024_submission_dict(self) -> dict:
+        result_dict = {}
+        for work_item in self.work_items:
+            if work_item.predicted_output_image is None:
+                continue
+            task_id = work_item.task.metadata_task_id
+
+            # Create a new entry in the result_dict if it doesn't exist, with dummy images
+            # This is in order to handle tasks that have 2 or more test pairs.
+            if task_id not in result_dict:
+                count_tests = work_item.task.count_tests
+                dummy_image = [[0]]
+                attempts_dict = {
+                    'attempt_1': dummy_image
+                }
+                test_list = []
+                for _ in range(count_tests):
+                    test_list.append(attempts_dict)
+                result_dict[task_id] = test_list
+
+            # Update the existing entry in the result_dict with the predicted image
+            image = work_item.predicted_output_image.tolist()
+            result_dict[task_id][work_item.test_index]['attempt_1'] = image
+        return result_dict
+    
+    def save_arcprize2024_submission_file(self, path_to_json_file: str):
+        dict = self.collect_predictions_as_arcprize2024_submission_dict()
+        with open(path_to_json_file, 'w') as f:
+            json.dump(dict, f)
+
+
+
 model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model168'
 # model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model179'
 # model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model180'
@@ -137,4 +137,4 @@ wm.load_work_items()
 wm.discard_items_with_too_long_prompts(500)
 wm.process_all_work_items()
 
-WorkItem.save_arcprize2024_submission_file(wm.work_items, 'submission.json')
+wm.save_arcprize2024_submission_file('submission.json')
