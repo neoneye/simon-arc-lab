@@ -35,6 +35,30 @@ class TaskFormatterRLECompact:
             names.append(name)
         return names
     
+    def example_input_id(self, i: int) -> str:
+        self.task.assert_count()
+        if i < 0 or i >= self.task.count_examples:
+            raise ValueError("Invalid index")
+        return self.input_ids()[i]
+    
+    def example_output_id(self, i: int) -> str:
+        self.task.assert_count()
+        if i < 0 or i >= self.task.count_examples:
+            raise ValueError("Invalid index")
+        return self.output_ids()[i]
+    
+    def test_input_id(self, i: int) -> str:
+        self.task.assert_count()
+        if i < 0 or i >= self.task.count_tests:
+            raise ValueError("Invalid index")
+        return self.input_ids()[self.task.count_examples + i]
+    
+    def test_output_id(self, i: int) -> str:
+        self.task.assert_count()
+        if i < 0 or i >= self.task.count_tests:
+            raise ValueError("Invalid index")
+        return self.output_ids()[self.task.count_examples + i]
+    
     def pair_ids(self) -> list[str]:
         """
         'P' prefix for 'pair'

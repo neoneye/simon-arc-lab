@@ -10,11 +10,29 @@ class TestTaskFormatterRLECompact(unittest.TestCase):
         expected = ["I0", "I1", "I2", "I3T", "I4T"]
         self.assertEqual(actual, expected)
 
+    def test_input_id_by_index(self):
+        task = self.task_with_3examples_2tests()
+        formatter = TaskFormatterRLECompact(task)
+        self.assertEqual(formatter.example_input_id(0), 'I0')
+        self.assertEqual(formatter.example_input_id(1), 'I1')
+        self.assertEqual(formatter.example_input_id(2), 'I2')
+        self.assertEqual(formatter.test_input_id(0), 'I3T')
+        self.assertEqual(formatter.test_input_id(1), 'I4T')
+
     def test_output_ids(self):
         task = self.task_with_3examples_2tests()
         actual = TaskFormatterRLECompact(task).output_ids()
         expected = ["O0", "O1", "O2", "O3T", "O4T"]
         self.assertEqual(actual, expected)
+
+    def test_output_id_by_index(self):
+        task = self.task_with_3examples_2tests()
+        formatter = TaskFormatterRLECompact(task)
+        self.assertEqual(formatter.example_output_id(0), 'O0')
+        self.assertEqual(formatter.example_output_id(1), 'O1')
+        self.assertEqual(formatter.example_output_id(2), 'O2')
+        self.assertEqual(formatter.test_output_id(0), 'O3T')
+        self.assertEqual(formatter.test_output_id(1), 'O4T')
 
     def test_pair_ids(self):
         task = self.task_with_3examples_2tests()
