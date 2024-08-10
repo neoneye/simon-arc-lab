@@ -14,7 +14,11 @@ GRID_COLOR = '#555555'
 LABEL_COLOR_WIDTHXHEIGHT = '#444'
 PLOT_BACKGROUND_COLOR = '#dddddd'
 
-def plot_single_image(image: np.array, ax, title: str, cmap, norm, show_grid: bool):
+def plot_single_image(ax, title: str, image: Optional[np.array], cmap, norm, show_grid: bool):
+    if image is None:
+        plot_missing_image(ax, title)
+        return
+    
     height, width = image.shape
 
     ax.imshow(image, cmap=cmap, norm=norm)
@@ -22,8 +26,8 @@ def plot_single_image(image: np.array, ax, title: str, cmap, norm, show_grid: bo
         ax.grid(True, which='both', color=GRID_COLOR, linewidth = 1)
     
     plt.setp(plt.gcf().get_axes(), xticklabels=[], yticklabels=[])
-    ax.set_xticks([x-0.5 for x in range(1 + len(image[0]))])     
-    ax.set_yticks([x-0.5 for x in range(1 + len(image))])
+    ax.set_xticks([x-0.5 for x in range(1 + width)])
+    ax.set_yticks([x-0.5 for x in range(1 + height)])
 
     ax.tick_params(top=False, bottom=False, left=False, right=False, labelleft=False, labelbottom=False)
     
@@ -37,7 +41,19 @@ def plot_single_image(image: np.array, ax, title: str, cmap, norm, show_grid: bo
     }
     ax.set_xlabel(label, **label_params)
 
-def show_prediction_result(input_image: np.array, predicted_image: np.array, expected_image: Optional[np.array], title: str = 'Task', show_grid: bool = True, save_path: Optional[str] = None):
+def plot_missing_image(ax, title: str):
+    width = 1
+    height = 1
+    
+    plt.setp(plt.gcf().get_axes(), xticklabels=[], yticklabels=[])
+    ax.set_xticks([x-0.5 for x in range(1 + width)])
+    ax.set_yticks([x-0.5 for x in range(1 + height)])
+
+    ax.tick_params(top=False, bottom=False, left=False, right=False, labelleft=False, labelbottom=False)
+    
+    ax.set_title(title, fontweight='bold')
+
+def show_prediction_result(input_image: np.array, predicted_image: Optional[np.array], expected_image: Optional[np.array], title: str = 'Task', show_grid: bool = True, save_path: Optional[str] = None):
     """
     Plots the input, predicted, and answer pairs of a specified task, using the ARC color scheme.
 
@@ -55,10 +71,9 @@ def show_prediction_result(input_image: np.array, predicted_image: np.array, exp
     cmap = colors.ListedColormap(ARCAGI_COLORS)
     norm = colors.Normalize(vmin=0, vmax=9)
     
-    plot_single_image(input_image, axs[0], 'Input', cmap, norm, show_grid)
-    plot_single_image(predicted_image, axs[1], 'Predicted', cmap, norm, show_grid)
-    if expected_image is not None:
-        plot_single_image(expected_image, axs[2], 'Expected', cmap, norm, show_grid)
+    plot_single_image(axs[0], 'Input', input_image, cmap, norm, show_grid)
+    plot_single_image(axs[1], 'Predicted', predicted_image, cmap, norm, show_grid)
+    plot_single_image(axs[2], 'Expected', expected_image, cmap, norm, show_grid)
     
     fig.patch.set_facecolor(PLOT_BACKGROUND_COLOR)
 

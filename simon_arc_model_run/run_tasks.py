@@ -76,8 +76,6 @@ class WorkItem:
 
         expected_output_image = task.test_output(test_index)
         predicted_output_image = self.predicted_output_image
-        if predicted_output_image is None:
-            predicted_output_image = np.zeros((5, 5), dtype=np.uint8)
 
         filename = f'{task_id}_test{test_index}_{status_string}.png'
         if save_dir_path is not None:
