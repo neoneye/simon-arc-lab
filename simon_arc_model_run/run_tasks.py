@@ -90,7 +90,8 @@ class WorkItem:
 model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model168'
 # model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model179'
 # model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model180'
-model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model181'
+# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model181'
+model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model182'
 
 path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training'
 # path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation'
