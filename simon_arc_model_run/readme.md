@@ -53,3 +53,16 @@ Incorrect sum: 1
 dataset=solve_translate group=translate_xminus1 predict=image image_width=small image_height=small task_pixels=b: 1
 CTRL-C to abort
 ```
+
+## Run tasks
+
+Export the predicted outputs as images.
+
+```bash
+(venv) PROMPT> python simon_arc_model_run/run_tasks.py
+Loading 405 tasks from /absolute/path/to/arc-dataset-collection/dataset/ARC/data/training
+Removed 130 work items with too long prompt. Remaining are 292 work items.
+Saving images to directory: run_tasks_result
+Processing work items:   3%|██▋       | 8/292 [00:08<06:26,  1.36s/it, correct=0]
+CTRL-C to abort
+```
