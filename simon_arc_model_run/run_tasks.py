@@ -20,14 +20,6 @@ class WorkItem:
         self.predicted_output_image = None
 
     @classmethod
-    def remove_items_with_too_long_prompts(cls, work_items: list['WorkItem'], max_prompt_length: int) -> list['WorkItem']:
-        filtered_work_items = []
-        for work_item in work_items:
-            if len(work_item.predictor.prompt()) <= max_prompt_length:
-                filtered_work_items.append(work_item)
-        return filtered_work_items
-
-    @classmethod
     def collect_predictions_as_arcprize2024_submission_dict(cls, work_items: list['WorkItem']) -> dict:
         result_dict = {}
         for work_item in work_items:
@@ -94,6 +86,34 @@ class WorkItem:
         if status == 'correct':
             print(f'Correct prediction for task {task.metadata_task_id} test={test_index}')
 
+class WorkManager:
+    def __init__(self, model: Model, taskset: TaskSet):
+        self.model = model
+        self.taskset = taskset
+        self.work_items = []
+
+    def load_work_items(self):
+        for task in self.taskset.tasks:
+            for test_index in range(task.count_tests):
+                work_item = WorkItem(task, test_index)
+                self.work_items.append(work_item)
+
+    def discard_items_with_too_long_prompts(self, max_prompt_length: int):
+        """
+        Ignore those where the prompt longer than what the model can handle.
+        """
+        count_before = len(self.work_items)
+        filtered_work_items = []
+        for work_item in self.work_items:
+            if len(work_item.predictor.prompt()) <= max_prompt_length:
+                filtered_work_items.append(work_item)
+        count_after = len(filtered_work_items)
+        self.work_items = filtered_work_items
+        print(f'Removed {count_before - count_after} work items with too long prompt. Remaining are {count_after} work items.')
+
+    def process_all_work_items(self):
+        for work_item in tqdm(self.work_items, desc="Processing work items"):
+            work_item.process(self.model)
 
 model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model168'
 # model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model179'
@@ -108,23 +128,13 @@ path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/t
 path_to_task_dir = os.path.join(PROJECT_ROOT, 'testdata', 'simple_arc_tasks')
 taskset = TaskSet.load_directory(path_to_task_dir)
 
+
 # Load model
 model = Model(model_directory, 512)
 
-work_items = []
-for task in taskset.tasks:
-    for test_index in range(task.count_tests):
-        work_item = WorkItem(task, test_index)
-        work_items.append(work_item)
+wm = WorkManager(model, taskset)
+wm.load_work_items()
+wm.discard_items_with_too_long_prompts(500)
+wm.process_all_work_items()
 
-# Ignore those where the prompt longer than what the model can handle
-count_before = len(work_items)
-work_items = WorkItem.remove_items_with_too_long_prompts(work_items, 500)
-count_after = len(work_items)
-print(f'Removed {count_before - count_after} work items with too long prompt. Remaining are {count_after} work items.')
-
-for work_item in tqdm(work_items, desc="Processing work items"):
-    work_item.process(model)
-
-
-# WorkItem.save_arcprize2024_submission_file(work_items, 'submission.json')
+WorkItem.save_arcprize2024_submission_file(wm.work_items, 'submission.json')
