@@ -9,12 +9,21 @@ from simon_arc_lab.task import *
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.show_prediction_result import show_prediction_result
 from simon_arc_model.model import Model
-from simon_arc_model.predict_output_v1 import predict_output_v1
+from simon_arc_model.predict_output_v1 import PredictOutputV1
 
 class WorkItem:
     def __init__(self, task: Task, test_index: int):
         self.task = task
         self.test_index = test_index
+        self.predictor = PredictOutputV1(task, test_index)
+
+    @classmethod
+    def remove_items_with_too_long_prompts(cls, work_items: list['WorkItem'], max_prompt_length: int) -> list['WorkItem']:
+        filtered_work_items = []
+        for work_item in work_items:
+            if len(work_item.predictor.prompt()) <= max_prompt_length:
+                filtered_work_items.append(work_item)
+        return filtered_work_items
 
 def process_work_item(work_item: WorkItem, model: Model):
     task = work_item.task
@@ -24,7 +33,7 @@ def process_work_item(work_item: WorkItem, model: Model):
 
     problem_deserialize = True
     try:
-        predicted_output_image = predict_output_v1(model, task, test_index)
+        predicted_output_image = work_item.predictor.execute(model)
         problem_deserialize = False
     except Exception as e:
         print(f'Error deserializing response for task {task.metadata_task_id} test={test_index}. Error: {e}')
@@ -69,7 +78,11 @@ for task in taskset.tasks:
         work_item = WorkItem(task, test_index)
         work_items.append(work_item)
 
+# Ignore those where the prompt longer than what the model can handle
+count_before = len(work_items)
+work_items = WorkItem.remove_items_with_too_long_prompts(work_items, 500)
+count_after = len(work_items)
+print(f'Removed {count_before - count_after} work items with too long prompt. Remaining are {count_after} work items.')
+
 for index, work_item in enumerate(tqdm(work_items, desc="Processing work items"), start=1):
-    if work_item.task.total_pixel_count() > 500:
-        continue
     process_work_item(work_item, model)
