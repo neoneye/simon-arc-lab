@@ -16,6 +16,7 @@ class WorkItem:
         self.task = task
         self.test_index = test_index
         self.predictor = PredictOutputV1(task, test_index)
+        self.predicted_output_image = None
 
     @classmethod
     def remove_items_with_too_long_prompts(cls, work_items: list['WorkItem'], max_prompt_length: int) -> list['WorkItem']:
@@ -25,44 +26,46 @@ class WorkItem:
                 filtered_work_items.append(work_item)
         return filtered_work_items
 
-def process_work_item(work_item: WorkItem, model: Model):
-    work_item.predictor.execute(model)
+    def process(self, model: Model):
+        self.predictor.execute(model)
 
-    task = work_item.task
-    test_index = work_item.test_index
-    input_image = task.test_input(test_index)
-    expected_output_image = task.test_output(test_index)
+        task = self.task
+        test_index = self.test_index
+        input_image = task.test_input(test_index)
+        expected_output_image = task.test_output(test_index)
 
-    problem_deserialize = True
-    try:
-        predicted_output_image = work_item.predictor.predicted_image()
-        problem_deserialize = False
-    except Exception as e:
-        print(f'Error deserializing response for task {task.metadata_task_id} test={test_index}. Error: {e}')
-        predicted_output_image = np.zeros((5, 5), dtype=np.uint8)
+        problem_deserialize = True
+        try:
+            predicted_output_image = self.predictor.predicted_image()
+            self.predicted_output_image = predicted_output_image
+            problem_deserialize = False
+        except Exception as e:
+            print(f'Error deserializing response for task {task.metadata_task_id} test={test_index}. Error: {e}')
+            predicted_output_image = np.zeros((5, 5), dtype=np.uint8)
 
-    if problem_deserialize:
-        status = 'problemdeserialize'
-    elif expected_output_image is None:
-        status = 'unverified'
-    elif np.array_equal(predicted_output_image, expected_output_image):
-        status = 'correct'
-    else:
-        status = 'incorrect'
+        if problem_deserialize:
+            status = 'problemdeserialize'
+        elif expected_output_image is None:
+            status = 'unverified'
+        elif np.array_equal(predicted_output_image, expected_output_image):
+            status = 'correct'
+        else:
+            status = 'incorrect'
 
-    title = f'{task.metadata_task_id} test={test_index} {status}'
+        title = f'{task.metadata_task_id} test={test_index} {status}'
 
-    save_path = f'result_{task.metadata_task_id}_test{test_index}_{status}.png'
-    save_path = None
-    show_prediction_result(input_image, predicted_output_image, expected_output_image, title, show_grid=True, save_path=save_path)
+        save_path = f'result_{task.metadata_task_id}_test{test_index}_{status}.png'
+        save_path = None
+        show_prediction_result(input_image, predicted_output_image, expected_output_image, title, show_grid=True, save_path=save_path)
 
-    if status == 'correct':
-        print(f'Correct prediction for task {task.metadata_task_id} test={test_index}')
+        if status == 'correct':
+            print(f'Correct prediction for task {task.metadata_task_id} test={test_index}')
 
 
 model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model168'
 # model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model179'
 # model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model180'
+model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model181'
 
 path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training'
 # path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation'
@@ -86,5 +89,14 @@ work_items = WorkItem.remove_items_with_too_long_prompts(work_items, 500)
 count_after = len(work_items)
 print(f'Removed {count_before - count_after} work items with too long prompt. Remaining are {count_after} work items.')
 
-for index, work_item in enumerate(tqdm(work_items, desc="Processing work items"), start=1):
-    process_work_item(work_item, model)
+for work_item in tqdm(work_items, desc="Processing work items"):
+    work_item.process(model)
+
+# Collect the results
+result_dict = {}
+for work_item in work_items:
+    if work_item.predicted_output_image is None:
+        continue
+    result_dict[work_item.task.metadata_task_id] = work_item.predicted_output_image
+
+print(result_dict)
