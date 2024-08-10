@@ -1,6 +1,7 @@
 import os
 import sys
 from tqdm import tqdm
+import json
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
@@ -25,6 +26,30 @@ class WorkItem:
             if len(work_item.predictor.prompt()) <= max_prompt_length:
                 filtered_work_items.append(work_item)
         return filtered_work_items
+
+    @classmethod
+    def collect_predictions_as_arcprize2024_submission_dict(cls, work_items: list['WorkItem']) -> dict:
+        # TODO: this doesn't handle 2 or more tests for the same task
+
+        result_dict = {}
+        for work_item in work_items:
+            if work_item.predicted_output_image is None:
+                continue
+            image = work_item.predicted_output_image.tolist()
+            attempt1_dict = {
+                "attempt_1": image
+            }
+            attempts_list = [
+                attempt1_dict
+            ]
+            result_dict[work_item.task.metadata_task_id] = attempts_list
+        return result_dict
+    
+    @classmethod
+    def save_arcprize2024_submission_file(cls, work_items: list['WorkItem'], path_to_json_file: str):
+        result_dict = cls.collect_predictions_as_arcprize2024_submission_dict(work_items)
+        with open(path_to_json_file, 'w') as f:
+            json.dump(result_dict, f)
 
     def process(self, model: Model):
         self.predictor.execute(model)
@@ -92,11 +117,5 @@ print(f'Removed {count_before - count_after} work items with too long prompt. Re
 for work_item in tqdm(work_items, desc="Processing work items"):
     work_item.process(model)
 
-# Collect the results
-result_dict = {}
-for work_item in work_items:
-    if work_item.predicted_output_image is None:
-        continue
-    result_dict[work_item.task.metadata_task_id] = work_item.predicted_output_image
 
-print(result_dict)
+# WorkItem.save_arcprize2024_submission_file(work_items, 'submission.json')
