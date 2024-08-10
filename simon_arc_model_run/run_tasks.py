@@ -29,27 +29,35 @@ class WorkItem:
 
     @classmethod
     def collect_predictions_as_arcprize2024_submission_dict(cls, work_items: list['WorkItem']) -> dict:
-        # TODO: this doesn't handle 2 or more tests for the same task
-
         result_dict = {}
         for work_item in work_items:
             if work_item.predicted_output_image is None:
                 continue
+            task_id = work_item.task.metadata_task_id
+
+            # Create a new entry in the result_dict if it doesn't exist, with dummy images
+            # This is in order to handle tasks that have 2 or more test pairs.
+            if task_id not in result_dict:
+                count_tests = work_item.task.count_tests
+                dummy_image = [[0]]
+                attempts_dict = {
+                    'attempt_1': dummy_image
+                }
+                test_list = []
+                for _ in range(count_tests):
+                    test_list.append(attempts_dict)
+                result_dict[task_id] = test_list
+
+            # Update the existing entry in the result_dict with the predicted image
             image = work_item.predicted_output_image.tolist()
-            attempt1_dict = {
-                "attempt_1": image
-            }
-            attempts_list = [
-                attempt1_dict
-            ]
-            result_dict[work_item.task.metadata_task_id] = attempts_list
+            result_dict[task_id][work_item.test_index]['attempt_1'] = image
         return result_dict
     
     @classmethod
     def save_arcprize2024_submission_file(cls, work_items: list['WorkItem'], path_to_json_file: str):
-        result_dict = cls.collect_predictions_as_arcprize2024_submission_dict(work_items)
+        dict = cls.collect_predictions_as_arcprize2024_submission_dict(work_items)
         with open(path_to_json_file, 'w') as f:
-            json.dump(result_dict, f)
+            json.dump(dict, f)
 
     def process(self, model: Model):
         self.predictor.execute(model)
@@ -79,7 +87,7 @@ class WorkItem:
 
         title = f'{task.metadata_task_id} test={test_index} {status}'
 
-        save_path = f'result_{task.metadata_task_id}_test{test_index}_{status}.png'
+        save_path = f'run_tasks_result/{task.metadata_task_id}_test{test_index}_{status}.png'
         save_path = None
         show_prediction_result(input_image, predicted_output_image, expected_output_image, title, show_grid=True, save_path=save_path)
 
