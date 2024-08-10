@@ -167,6 +167,8 @@ class WorkManager:
         dict = self.collect_predictions_as_arcprize2024_submission_dict()
         with open(path_to_json_file, 'w') as f:
             json.dump(dict, f)
+        file_size = os.path.getsize(path_to_json_file)
+        print(f"Wrote {file_size} bytes to file: {path_to_json_file}")
 
 
 
