@@ -23,6 +23,7 @@ class PredictOutputV1:
         self.task = task
         self.test_index = test_index
         self.cached_prompt = None
+        self.cached_response = None
 
     def prompt(self) -> str:
         if self.cached_prompt:
@@ -38,8 +39,15 @@ class PredictOutputV1:
         self.cached_prompt = prompt
         return prompt
 
-    def execute(self, model: Model) -> np.array:
+    def execute(self, model: Model):
+        if self.cached_response is not None:
+            return
         prompt = self.prompt()
         response = model.process(prompt)
-        predicted_output_image = deserialize(response)
-        return predicted_output_image
+        self.cached_response = response
+
+    def predicted_image(self) -> np.array:
+        if self.cached_response is None:
+            raise ValueError("No response cached. Call execute() first.")
+        image = deserialize(self.cached_response)
+        return image

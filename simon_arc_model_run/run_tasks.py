@@ -26,6 +26,8 @@ class WorkItem:
         return filtered_work_items
 
 def process_work_item(work_item: WorkItem, model: Model):
+    work_item.predictor.execute(model)
+
     task = work_item.task
     test_index = work_item.test_index
     input_image = task.test_input(test_index)
@@ -33,7 +35,7 @@ def process_work_item(work_item: WorkItem, model: Model):
 
     problem_deserialize = True
     try:
-        predicted_output_image = work_item.predictor.execute(model)
+        predicted_output_image = work_item.predictor.predicted_image()
         problem_deserialize = False
     except Exception as e:
         print(f'Error deserializing response for task {task.metadata_task_id} test={test_index}. Error: {e}')
