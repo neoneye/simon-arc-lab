@@ -13,28 +13,29 @@ from simon_arc_lab.rle.serialize import *
 from simon_arc_lab.rle.deserialize import *
 from simon_arc_model.model import Model
 
-def process_task(task: Task, model: Model):
+def predict_output_v1(model: Model, task: Task, test_index: int) -> np.array:
+    """
+    Predict the output image for a specific test in the task.
+    """
     task_without_test_output = task.clone()
     task_without_test_output.set_all_test_outputs_to_none()
 
     task_formatter = TaskFormatterRLECompact(task_without_test_output)
-    output_ids = task_formatter.output_ids()
+    test_output_id = task_formatter.test_output_id(test_index)
+    input = task_formatter.to_string()
+    prompt = f"SIMON-SOLVE-V1, {test_output_id}, predict image\n{input}"
+    response = model.process(prompt)
+    predicted_output_image = deserialize(response)
+    return predicted_output_image
 
-    dataset_name = 'SIMON-SOLVE-V1'
-
+def process_task(task: Task, model: Model):
     for test_index in range(task.count_tests):
-        input = task_formatter.to_string()
         input_image = task.test_input(test_index)
         expected_output_image = task.test_output(test_index)
-        test_output_id = output_ids[task_without_test_output.count_examples + test_index]
-
-        # Predict the entire image of the test output image
-        prompt = f"{dataset_name}, {test_output_id}, predict image\n{input}"
-        response = model.process(prompt)
 
         problem_deserialize = True
         try:
-            predicted_output_image = deserialize(response)
+            predicted_output_image = predict_output_v1(model, task, test_index)
             problem_deserialize = False
         except Exception as e:
             print(f'Error deserializing response for task {task.metadata_task_id} test={test_index}. Error: {e}')
