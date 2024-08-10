@@ -7,7 +7,7 @@ sys.path.insert(0, PROJECT_ROOT)
 from simon_arc_lab.image_util import *
 from simon_arc_lab.task import *
 from simon_arc_lab.taskset import TaskSet
-from simon_arc_lab.image_comparison_matplotlib import plot_xyt
+from simon_arc_lab.show_prediction_result import show_prediction_result
 from simon_arc_lab.task_formatter_rle_compact import *
 from simon_arc_lab.rle.serialize import *
 from simon_arc_lab.rle.deserialize import *
@@ -53,7 +53,7 @@ def process_task(task: Task, model: Model):
 
         save_path = f'result_{task.metadata_task_id}_test{test_index}_{status}.png'
         # save_path = None
-        plot_xyt(input_image, predicted_output_image, expected_output_image, title, show_grid=True, save_path=save_path)
+        show_prediction_result(input_image, predicted_output_image, expected_output_image, title, show_grid=True, save_path=save_path)
 
 
 # model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model168'

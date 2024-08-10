@@ -11,9 +11,7 @@ ARCAGI_COLORS = [
 ]
 
 GRID_COLOR = '#555555'
-IMAGE_BORDER_COLOR = GRID_COLOR
-LABEL_COLOR_TRAIN_PAIR = '#444'
-LABEL_COLOR_TEST_PAIR = '#222'
+LABEL_COLOR_WIDTHXHEIGHT = '#444'
 PLOT_BACKGROUND_COLOR = '#dddddd'
 
 def plot_single_image(image: np.array, ax, title: str, cmap, norm, show_grid: bool):
@@ -35,14 +33,20 @@ def plot_single_image(image: np.array, ax, title: str, cmap, norm, show_grid: bo
     label_params = {
         'fontsize': 12,
         'fontweight': 'normal',
-        'color': LABEL_COLOR_TRAIN_PAIR
+        'color': LABEL_COLOR_WIDTHXHEIGHT
     }
-
     ax.set_xlabel(label, **label_params)
 
-def plot_xyt(input_image: np.array, predicted_image: np.array, expected_image: Optional[np.array], title: str, show_grid: bool, save_path: Optional[str]):
+def show_prediction_result(input_image: np.array, predicted_image: np.array, expected_image: Optional[np.array], title: str = 'Task', show_grid: bool = True, save_path: Optional[str] = None):
     """
     Plots the input, predicted, and answer pairs of a specified task, using the ARC color scheme.
+
+    input_image: The input image.
+    predicted_image: The predicted image.
+    expected_image: The expected image.
+    title: The title of the plot.
+    show_grid: Whether to show the grid lines.
+    save_path: The path to save the plot as a PNG file. If None, the plot will be displayed.
     """
     num_img = 3
     fig, axs = plt.subplots(1, num_img, figsize=(9, num_img))
