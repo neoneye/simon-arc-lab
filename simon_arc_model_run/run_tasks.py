@@ -14,7 +14,10 @@ model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model168'
 # model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model181'
 # model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model182'
 # model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model183'
-model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model184'
+# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model184'
+# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model185'
+# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model186'
+model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model188'
 
 path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training'
 # path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation'
@@ -29,8 +32,8 @@ model = Model(model_directory, 512)
 
 wm = WorkManager(model, taskset)
 wm.discard_items_with_too_long_prompts(500)
-wm.process_all_work_items()
-# wm.process_all_work_items(save_dir='run_tasks_result')
+# wm.process_all_work_items()
+wm.process_all_work_items(save_dir='run_tasks_result')
 # wm.process_all_work_items(show=True)
 wm.summary()
 wm.save_arcprize2024_submission_file('submission.json')
