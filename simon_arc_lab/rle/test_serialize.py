@@ -51,5 +51,26 @@ class TestSerialize(unittest.TestCase):
         expected = "11 11 0,0c2e0,02a12e0,,,,,,0c2e0,0,"
         self.assertTrue(np.array_equal(actual, expected))
 
+    def test_serialize_full2(self):
+        input = np.array([
+            [4, 4, 4, 4],
+            [4, 4, 4, 4],
+            [4, 4, 4, 4],
+            [4, 7, 4, 7],
+            [4, 7, 4, 7],
+            [4, 7, 4, 7],
+            [8, 8, 2, 4],
+            [8, 8, 2, 4],
+            [8, 8, 2, 4],
+            [7, 4, 2, 4],
+            [7, 4, 2, 4],
+            [7, 4, 2, 4]], dtype=np.uint8)
+        # print(input)
+
+        actual = serialize(input)
+        # print(actual)
+        expected = "4 12 4,,,4747,,,a824,,,7424,,"
+        self.assertTrue(np.array_equal(actual, expected))
+
 if __name__ == '__main__':
     unittest.main()
