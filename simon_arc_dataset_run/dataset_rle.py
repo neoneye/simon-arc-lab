@@ -17,6 +17,7 @@ from simon_arc_lab.rle.deserialize import decode_rle_row_inner
 from simon_arc_lab.rle.serialize import rle_serialize_line_inner
 from simon_arc_lab.list_util import list_compress, list_scaleup
 from simon_arc_lab.benchmark import *
+from simon_arc_dataset.dataset_generator import *
 
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_rle.jsonl')
 
@@ -340,33 +341,21 @@ def generate_deserialize_dataset_item(seed):
     }
     return result_dict
 
-def generate_dataset(max_num_samples=1000, max_byte_size=1024*1024, seed_start=200000):
-    dataset = []
-    dataset_byte_size = 0
-    for i in range(max_num_samples):
-        if i % 6 == 0:
-            item = generate_serialize_dataset_item(seed_start + i)
-        else:
-            item = generate_deserialize_dataset_item(seed_start + i)
-        bytes = len(json.dumps(item))
-        if dataset_byte_size + bytes > max_byte_size:
-            break
-        dataset_byte_size += bytes
-        dataset.append(item)
-    return dataset
+def generate_dataset_item_list(seed: int) -> list[dict]:
+    if seed % 6 == 0:
+        item = generate_serialize_dataset_item(seed)
+    else:
+        item = generate_deserialize_dataset_item(seed)
+    return [item]
 
-dataset = generate_dataset(
-    max_num_samples=100000,
-    max_byte_size=1024*1024*20,
+generator = DatasetGenerator(
+    generate_dataset_item_list_fn=generate_dataset_item_list
 )
-
-# Save dataset to file
-filename = SAVE_FILE_PATH
-with open(filename, 'w') as f:
-    for item in dataset:
-        f.write(json.dumps(item) + '\n')
-
-# Summary
-file_size = os.path.getsize(filename)
-print(f"Generated {len(dataset)} samples, saved to {filename}, file size: {file_size} bytes.")
+generator.generate(
+    seed=1200001,
+    max_num_samples=100000,
+    max_byte_size=1024*1024*100
+)
+# generator.inspect()
+generator.save(SAVE_FILE_PATH)
 
