@@ -38,7 +38,7 @@ DATASET_NAMES = [
     'SimonsImageSymmetry',
 ]
 
-def generate_dataset_item_with_symmetry(seed: int) -> dict:
+def generate_dataset_item_with_symmetry_output(seed: int) -> dict:
     """
     Make a symmetric image.
 
@@ -54,28 +54,60 @@ def generate_dataset_item_with_symmetry(seed: int) -> dict:
 
     dataset_name = random.choice(DATASET_NAMES)
 
+    image_original = image_create_random_advanced(seed + 5, min_image_size, max_image_size, min_image_size, max_image_size)
+    image_fx = image_flipx(image_original)
+    image_fy = image_flipy(image_original)
+    image_180 = image_rotate_180(image_original)
+
+    input_image = image_original.copy()
+
+    name_image_map = [
+        ('orig', image_original),
+        ('flipx', image_fx),
+        ('flipy', image_fy),
+        ('180', image_180),
+    ]
+    name_image0 = random.choice(name_image_map)
+    name_image1 = random.choice(name_image_map)
+    name_image2 = random.choice(name_image_map)
+    name_image3 = random.choice(name_image_map)
+    name0, image0 = name_image0
+    name1, image1 = name_image1
+    name2, image2 = name_image2
+    name3, image3 = name_image3
+
+    pattern = random.choice(['hstack2', 'hstack3', 'vstack2', 'vstack3', '2x2'])
+    output_image = None
+    instruction_sequence = None
+    if pattern == 'hstack2':
+        output_image = np.hstack([image0, image1])
+        instruction_sequence = f'hstack({name0} {name1})'
+    if pattern == 'hstack3':
+        output_image = np.hstack([image0, image1, image2])
+        instruction_sequence = f'hstack({name0} {name1} {name2})'
+    elif pattern == 'vstack2':
+        output_image = np.vstack([image0, image1])
+        instruction_sequence = f'vstack({name0} {name1})'
+    elif pattern == 'vstack3':
+        output_image = np.vstack([image0, image1, image2])
+        instruction_sequence = f'vstack({name0} {name1}, {name2})'
+    elif pattern == '2x2':
+        output_image = np.vstack([np.hstack([image0, image1]), np.hstack([image2, image3])])
+        instruction_sequence = f'2x2({name0} {name1} {name2} {name3})'
+
+    assert output_image is not None
+    assert instruction_sequence is not None
+
     instructions = [
-        f'{dataset_name} symmetry',
+        f'{dataset_name} symmetry {instruction_sequence}',
+        f'{dataset_name} Symmetry {instruction_sequence}',
+        f'{dataset_name} make symmetric {instruction_sequence}',
+        f'{dataset_name} apply symmetry {instruction_sequence}',
     ]
     instruction = random.choice(instructions)
 
-    image1 = image_create_random_advanced(seed + 5, min_image_size, max_image_size, min_image_size, max_image_size)
-    image2 = image_flipx(image1)
-    image3 = image_flipy(image1)
-    image4 = image_rotate_180(image1)
-
-    input_image = image1.copy()
-
-    pattern = random.choice(['horz', 'vert', '2x2'])
-    if pattern == 'horz':
-        output_image = np.hstack([image1, image3])
-    elif pattern == 'vert':
-        output_image = np.vstack([image1, image2])
-    elif pattern == '2x2':
-        output_image = np.vstack([np.hstack([image1, image3]), np.hstack([image2, image4])])
-
-    if True:
-        print(f"---\ninput: {input_image}\n\noutput: {output_image}")
+    if False:
+        print(f"---\ninput: {input_image}\ninstruction: {instruction}\noutput: {output_image}")
         title = instruction
         show_prediction_result(input_image, output_image, None, title, show_grid=True, save_path=None)
 
@@ -97,15 +129,15 @@ def generate_dataset_item_with_symmetry(seed: int) -> dict:
     return result_dict
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    item = generate_dataset_item_with_symmetry(seed)
+    item = generate_dataset_item_with_symmetry_output(seed)
     return [item]
 
 generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=1003011,
-    max_num_samples=3,
+    seed=1003013,
+    max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
 # generator.inspect()

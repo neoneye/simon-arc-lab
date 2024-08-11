@@ -14,3 +14,4 @@ dataset_shape.jsonl
 dataset_solve_color.jsonl
 dataset_solve_rotate.jsonl
 dataset_solve_translate.jsonl
+dataset_symmetry.jsonl
