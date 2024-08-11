@@ -1,3 +1,6 @@
+# Model trained with max_scale_factor: 1-3. Exercise the model with a bigger max_scale_factor.
+#
+# IDEA: Add noise when doing down scaling, so the LLM learns to ignore the noise.
 import os
 import sys
 
