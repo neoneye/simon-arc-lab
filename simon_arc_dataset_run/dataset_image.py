@@ -23,8 +23,13 @@
 # IDEA: scale the image by 2, 3, 4, 5, 6
 # IDEA: take N top/bottom rows, N left/right columns
 # IDEA: remove N top/bottom rows, N left/right columns
-import json
 import os
+import sys
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, PROJECT_ROOT)
+
+import json
 import random
 import numpy as np
 from simon_arc_lab.rle.serialize import serialize
@@ -38,7 +43,7 @@ from simon_arc_dataset.dataset_generator import *
 
 BENCHMARK_DATASET_NAME_SERIALIZE = 'image_serialize'
 BENCHMARK_DATASET_NAME_DESERIALIZE = 'image_deserialize'
-SAVE_FILENAME = 'dataset_image.jsonl'
+SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_image.jsonl')
 
 DATASET_NAMES = [
     'SIMONARCRLEIMAGE',
@@ -643,4 +648,4 @@ generator.generate(
     max_byte_size=1024*1024*100
 )
 # generator.inspect()
-generator.save(SAVE_FILENAME)
+generator.save(SAVE_FILE_PATH)

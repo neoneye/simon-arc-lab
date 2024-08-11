@@ -3,8 +3,13 @@
 # IDEA: recognize the transformation between 2 images: translate, rotate, scale, replace colors.
 #
 # IDEA: comparison of 2 images, are they the same, are they different
-import json
 import os
+import sys
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, PROJECT_ROOT)
+
+import json
 import random
 import numpy as np
 from simon_arc_lab.rle.serialize import serialize
@@ -12,6 +17,8 @@ from simon_arc_lab.image_util import *
 from simon_arc_lab.histogram import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.benchmark import *
+
+SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_image_pair.jsonl')
 
 def generate_dataset_item(seed):
     """
@@ -205,7 +212,7 @@ dataset = generate_dataset(
 )
 
 # Save dataset to file
-filename = 'dataset_image_pair.jsonl'
+filename = SAVE_FILE_PATH
 with open(filename, 'w') as f:
     for item in dataset:
         f.write(json.dumps(item) + '\n')

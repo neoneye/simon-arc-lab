@@ -2,6 +2,12 @@
 # IDEA: Merge two encoded rows into one: "a3b2 + c4d1" = "a3b2c4d1"
 # IDEA: crop
 # IDEA: find pattern
+import os
+import sys
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, PROJECT_ROOT)
+
 import json
 import os
 import random
@@ -11,6 +17,8 @@ from simon_arc_lab.rle.deserialize import decode_rle_row_inner
 from simon_arc_lab.rle.serialize import rle_serialize_line_inner
 from simon_arc_lab.list_util import list_compress, list_scaleup
 from simon_arc_lab.benchmark import *
+
+SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_rle.jsonl')
 
 def generate_rle_string_compacted(string_length=10, pixel_length=50, seed=None):
     """
@@ -353,7 +361,7 @@ dataset = generate_dataset(
 )
 
 # Save dataset to file
-filename = 'dataset_rle.jsonl'
+filename = SAVE_FILE_PATH
 with open(filename, 'w') as f:
     for item in dataset:
         f.write(json.dumps(item) + '\n')

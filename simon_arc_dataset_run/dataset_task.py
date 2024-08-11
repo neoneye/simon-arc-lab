@@ -13,6 +13,12 @@
 # IDEA: intersection of all output histograms
 # IDEA: are the sizes of the input and output the same?
 # IDEA: union of all output histograms
+import os
+import sys
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, PROJECT_ROOT)
+
 import json
 import os
 import random
@@ -24,6 +30,8 @@ from simon_arc_lab.benchmark import *
 from simon_arc_lab.task import *
 from simon_arc_lab.task_formatter_rle_verbose import *
 from simon_arc_lab.task_formatter_rle_compact import *
+
+SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_task.jsonl')
 
 def generate_task(seed):
     count_example = random.Random(seed + 1).randint(2, 5)
@@ -417,7 +425,7 @@ dataset = generate_dataset(
 )
 
 # Save dataset to file
-filename = 'dataset_task.jsonl'
+filename = SAVE_FILE_PATH
 with open(filename, 'w') as f:
     for item in dataset:
         f.write(json.dumps(item) + '\n')

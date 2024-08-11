@@ -2,8 +2,13 @@
 # IDEA: Exercise with number of steps = 2. Has most been exercises with step_count=1. A few exercises with step_count=2.
 #
 # IDEA: wire world
-import json
 import os
+import sys
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, PROJECT_ROOT)
+
+import json
 import random
 import numpy as np
 from simon_arc_lab.rle.serialize import serialize
@@ -16,7 +21,7 @@ import matplotlib.pyplot as plt
 from simon_arc_dataset.dataset_generator import *
 
 BENCHMARK_DATASET_NAME = 'cellular_automaton'
-SAVE_FILENAME = 'dataset_cellular_automaton.jsonl'
+SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_cellular_automaton.jsonl')
 
 DATASET_NAMES = [
     'SIMONCELLULARAUTOMATON',
@@ -443,4 +448,4 @@ generator.generate(
     max_byte_size=1024*1024*100
 )
 # generator.inspect()
-generator.save(SAVE_FILENAME)
+generator.save(SAVE_FILE_PATH)

@@ -3,8 +3,13 @@
 #
 # IDEA: What are the most popular colors in the histogram?
 # IDEA: What are the least popular colors in the histogram?
-import json
 import os
+import sys
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, PROJECT_ROOT)
+
+import json
 import random
 from simon_arc_lab.histogram import *
 from simon_arc_lab.benchmark import *
@@ -12,7 +17,7 @@ from simon_arc_dataset.dataset_generator import *
 
 BENCHMARK_DATASET_NAME_ONE = 'histogram_one'
 BENCHMARK_DATASET_NAME_TWO = 'histogram_two'
-SAVE_FILENAME = 'dataset_histogram.jsonl'
+SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_histogram.jsonl')
 
 DATASET_NAMES = [
     'SIMONARCHISTOGRAM',
@@ -294,4 +299,4 @@ generator.generate(
     max_byte_size=1024*1024*100
 )
 # generator.inspect()
-generator.save(SAVE_FILENAME)
+generator.save(SAVE_FILE_PATH)

@@ -7,6 +7,12 @@
 #
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
+import os
+import sys
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, PROJECT_ROOT)
+
 import random
 from simon_arc_lab.image_mix import *
 from simon_arc_lab.image_util import *
@@ -23,7 +29,7 @@ from simon_arc_dataset.dataset_generator import *
 
 DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_color'
-SAVE_FILENAME = 'dataset_solve_color.jsonl'
+SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_color.jsonl')
 
 def generate_task_swap_colors(seed: int) -> Task:
     random.seed(seed)
@@ -214,4 +220,4 @@ generator.generate(
     max_byte_size=1024*1024*100
 )
 # generator.inspect()
-generator.save(SAVE_FILENAME)
+generator.save(SAVE_FILE_PATH)
