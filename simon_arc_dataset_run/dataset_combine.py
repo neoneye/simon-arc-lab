@@ -5,7 +5,7 @@ import random
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
-seed = 56
+seed = 57
 random.seed(seed)
 
 # Define the input file paths
@@ -20,6 +20,7 @@ file_names = [
     'dataset_solve_color.jsonl',
     'dataset_solve_rotate.jsonl',
     'dataset_solve_translate.jsonl',
+    'dataset_symmetry.jsonl',
 ]
 
 # Number of rows in the output file
