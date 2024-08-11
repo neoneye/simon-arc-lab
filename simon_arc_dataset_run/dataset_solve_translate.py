@@ -1,5 +1,7 @@
 # Translate the image by 1 pixel, up/down/left/right.
 #
+# IDEA: Translate by 2 pixels.
+#
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
 import os
@@ -96,7 +98,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=10000005,
+    seed=11000005,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
