@@ -9,6 +9,7 @@ dataset_histogram.jsonl
 dataset_mass.jsonl
 dataset_task.jsonl
 dataset_cellular_automaton.jsonl
+dataset_scale.jsonl
 dataset_shape.jsonl
 dataset_solve_color.jsonl
 dataset_solve_rotate.jsonl
