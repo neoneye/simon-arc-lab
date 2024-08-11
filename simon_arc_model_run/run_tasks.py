@@ -28,7 +28,6 @@ taskset = TaskSet.load_directory(path_to_task_dir)
 model = Model(model_directory, 512)
 
 wm = WorkManager(model, taskset)
-wm.load_work_items()
 wm.discard_items_with_too_long_prompts(500)
 wm.process_all_work_items()
 # wm.process_all_work_items(save_dir='run_tasks_result')

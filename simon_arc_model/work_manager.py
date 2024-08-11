@@ -89,13 +89,16 @@ class WorkManager:
     def __init__(self, model: Model, taskset: TaskSet):
         self.model = model
         self.taskset = taskset
-        self.work_items = []
+        self.work_items = WorkManager.create_work_items(taskset)
 
-    def load_work_items(self):
-        for task in self.taskset.tasks:
+    @classmethod
+    def create_work_items(cls, taskset: TaskSet) -> list['WorkItem']:
+        work_items = []
+        for task in taskset.tasks:
             for test_index in range(task.count_tests):
                 work_item = WorkItem(task, test_index)
-                self.work_items.append(work_item)
+                work_items.append(work_item)
+        return work_items
 
     def discard_items_with_too_long_prompts(self, max_prompt_length: int):
         """
