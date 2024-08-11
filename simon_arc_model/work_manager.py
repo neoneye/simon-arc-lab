@@ -5,10 +5,6 @@ import json
 from enum import Enum
 import numpy as np
 from typing import Optional
-
-# PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-# sys.path.insert(0, PROJECT_ROOT)
-
 from simon_arc_lab.task import Task
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.show_prediction_result import show_prediction_result
