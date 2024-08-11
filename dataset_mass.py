@@ -1,3 +1,4 @@
+# IDEA: PixelConnectivity.CONNECTIVITYDIAGONAL4 for better understanding of diagonal shapes.
 import random
 import numpy as np
 from simon_arc_lab.rle.serialize import serialize
