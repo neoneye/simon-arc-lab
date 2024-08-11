@@ -34,13 +34,16 @@ class DatasetGenerator:
 
         self.generated_dataset_items = dataset
 
-    def save(self, filename: str):
+    def save(self, file_path: str):
+        """
+        Save the generated dataset to a "jsonl" file
+        """
         dataset_items = self.generated_dataset_items
-        with open(filename, 'w') as f:
+        with open(file_path, 'w') as f:
             for item in dataset_items:
                 f.write(json.dumps(item) + '\n')
-        file_size = os.path.getsize(filename)
-        print(f"Generated {len(dataset_items)} samples, saved to {filename}, file size: {file_size} bytes.")
+        file_size = os.path.getsize(file_path)
+        print(f"Generated {len(dataset_items)} samples, saved to {file_path}, file size: {file_size} bytes.")
 
     def inspect(self):
         plot_prompt_length_distribution(self.generated_dataset_items)
