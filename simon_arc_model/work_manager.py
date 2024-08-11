@@ -137,36 +137,9 @@ class WorkManager:
         for status, count in counters.items():
             print(f'{status.name}: {count}')
 
-    def legacy_collect_predictions_as_arcprize2024_submission_dict(self) -> dict:
-        result_dict = {}
-        for work_item in self.work_items:
-            if work_item.predicted_output_image is None:
-                continue
-            task_id = work_item.task.metadata_task_id
-
-            # Create a new entry in the result_dict if it doesn't exist, with dummy images
-            # This is in order to handle tasks that have 2 or more test pairs.
-            if task_id not in result_dict:
-                count_tests = work_item.task.count_tests
-                empty_image = []
-                attempts_dict = {
-                    'attempt_1': empty_image,
-                    'attempt_2': empty_image,
-                }
-                test_list = []
-                for _ in range(count_tests):
-                    test_list.append(attempts_dict)
-                result_dict[task_id] = test_list
-
-            # Update the existing entry in the result_dict with the predicted image
-            image = work_item.predicted_output_image.tolist()
-            result_dict[task_id][work_item.test_index]['attempt_1'] = image
-        return result_dict
-    
     def collect_predictions_as_arcprize2024_submission_dict(self) -> dict:
         result_dict = {}
-        # My hypothesis is that Kaggle requires all tasks to be present in the submission? 
-        # Using all the original tasks from the original taskset. 
+        # Kaggle requires all the original tasks to be present in the submission file.
         # Create empty entries in the result_dict, with empty images, with the correct number of test pairs.
         for task in self.taskset.tasks:
             task_id = task.metadata_task_id
