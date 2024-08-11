@@ -149,9 +149,10 @@ class WorkManager:
             # This is in order to handle tasks that have 2 or more test pairs.
             if task_id not in result_dict:
                 count_tests = work_item.task.count_tests
-                dummy_image = [[0]]
+                empty_image = []
                 attempts_dict = {
-                    'attempt_1': dummy_image
+                    'attempt_1': empty_image,
+                    'attempt_2': empty_image,
                 }
                 test_list = []
                 for _ in range(count_tests):
