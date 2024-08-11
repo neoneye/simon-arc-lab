@@ -34,7 +34,7 @@ from simon_arc_lab.image_count3x3 import *
 from simon_arc_lab.histogram import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.benchmark import *
-from dataset.dataset_generator import *
+from simon_arc_dataset.dataset_generator import *
 
 BENCHMARK_DATASET_NAME_SERIALIZE = 'image_serialize'
 BENCHMARK_DATASET_NAME_DESERIALIZE = 'image_deserialize'

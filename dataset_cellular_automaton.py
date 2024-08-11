@@ -13,7 +13,7 @@ from simon_arc_lab.cellular_automaton import *
 from simon_arc_lab.benchmark import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 import matplotlib.pyplot as plt
-from dataset.dataset_generator import *
+from simon_arc_dataset.dataset_generator import *
 
 BENCHMARK_DATASET_NAME = 'cellular_automaton'
 SAVE_FILENAME = 'dataset_cellular_automaton.jsonl'

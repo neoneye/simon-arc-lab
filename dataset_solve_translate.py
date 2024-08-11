@@ -11,9 +11,9 @@ from simon_arc_lab.task_formatter_rle_verbose import *
 from simon_arc_lab.task_formatter_rle_compact import *
 from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.benchmark import *
-from dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
-from dataset.generate_solve import *
-from dataset.dataset_generator import *
+from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
+from simon_arc_dataset.generate_solve import *
+from simon_arc_dataset.dataset_generator import *
 
 DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_translate'

@@ -8,7 +8,7 @@ from simon_arc_lab.pixel_connectivity import *
 from simon_arc_lab.connected_component import *
 from simon_arc_lab.image_object_mass import *
 import matplotlib.pyplot as plt
-from dataset.dataset_generator import *
+from simon_arc_dataset.dataset_generator import *
 
 BENCHMARK_DATASET_NAME = 'mass'
 SAVE_FILENAME = 'dataset_mass.jsonl'

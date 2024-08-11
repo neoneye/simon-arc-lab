@@ -10,7 +10,7 @@ from simon_arc_lab.image_shape3x3_center import *
 from simon_arc_lab.image_shape3x3_opposite import *
 from simon_arc_lab.image_shape3x3_histogram import *
 import matplotlib.pyplot as plt
-from dataset.dataset_generator import *
+from simon_arc_dataset.dataset_generator import *
 
 BENCHMARK_DATASET_NAME = 'shape'
 SAVE_FILENAME = 'dataset_shape.jsonl'

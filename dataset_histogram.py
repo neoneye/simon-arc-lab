@@ -8,7 +8,7 @@ import os
 import random
 from simon_arc_lab.histogram import *
 from simon_arc_lab.benchmark import *
-from dataset.dataset_generator import *
+from simon_arc_dataset.dataset_generator import *
 
 BENCHMARK_DATASET_NAME_ONE = 'histogram_one'
 BENCHMARK_DATASET_NAME_TWO = 'histogram_two'
