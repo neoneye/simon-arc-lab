@@ -1,3 +1,10 @@
+# IDEA: From a symmetric image, extract the tile that gets repeated.
+#
+# IDEA: Use diagonal flipping to create a symmetric image.
+#
+# IDEA: Use rotate cw/ccw to create a symmetric image.
+#
+# IDEA: Detect if the image is symmetric, or has some symmetry.
 import os
 import sys
 
