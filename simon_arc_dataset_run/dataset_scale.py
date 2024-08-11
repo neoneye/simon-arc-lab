@@ -12,7 +12,7 @@ from simon_arc_lab.benchmark import *
 from simon_arc_lab.pixel_connectivity import *
 from simon_arc_lab.connected_component import *
 from simon_arc_lab.image_object_mass import *
-import matplotlib.pyplot as plt
+from simon_arc_lab.show_prediction_result import show_prediction_result
 from simon_arc_dataset.dataset_generator import *
 
 BENCHMARK_DATASET_NAME = 'scale'
@@ -37,7 +37,7 @@ DATASET_NAMES = [
     'SimonsImageScale',
 ]
 
-def generate_dataset_item_with_scaleup(seed: int) -> dict:
+def generate_dataset_item_with_scale(seed: int) -> dict:
     """
     Resize the image by a scale factor.
 
@@ -47,28 +47,61 @@ def generate_dataset_item_with_scaleup(seed: int) -> dict:
     min_image_size = 1
     max_image_size = 5
 
-    transformation_id = 'scaleup'
+    min_scale_factor = 1
+    max_scale_factor = 3
 
-    dataset_name = random.Random(seed + 2).choice(DATASET_NAMES)
+    transformation_id = 'scale'
 
-    scaleup_factor = random.Random(seed + 3).randint(2, 4)
+    random.seed(seed)
+
+    dataset_name = random.choice(DATASET_NAMES)
+
+    scale_up_down = ['up', 'down']
+    scalex_up_down = random.choice(scale_up_down)
+    scaley_up_down = random.choice(scale_up_down)
+
+    scalex_factor = 1
+    scaley_factor = 1
+    for _ in range(100):
+        scalex_factor = random.randint(min_scale_factor, max_scale_factor)
+        scaley_factor = random.randint(min_scale_factor, max_scale_factor)
+        if scalex_factor != 1 and scaley_factor != 1:
+            break
+    if scalex_factor == 1 and scaley_factor == 1:
+        if seed % 2 == 0:
+            scalex_factor = 1
+            scaley_factor = 2
+        else:
+            scalex_factor = 2
+            scaley_factor = 1
 
     instructions = [
-        f'{dataset_name} scaleup by {scaleup_factor}',
-        f'{dataset_name} scale up by {scaleup_factor}',
+        f'{dataset_name} scale-x {scalex_up_down} by {scalex_factor}, scale-y {scaley_up_down} by {scaley_factor}',
+        f'{dataset_name} scalex={scalex_up_down}{scalex_factor} scaley={scaley_up_down}{scaley_factor}',
     ]
 
-    instruction = random.Random(seed + 4).choice(instructions)
+    instruction = random.choice(instructions)
 
-    input_image = image_create_random_advanced(seed + 5, min_image_size, max_image_size, min_image_size, max_image_size)
-    output_image = np.kron(input_image, np.ones((scaleup_factor, scaleup_factor)))
+    unscaled_image = image_create_random_advanced(seed + 5, min_image_size, max_image_size, min_image_size, max_image_size)
+
+    # Input image
+    input_image = unscaled_image.copy()
+    if scalex_up_down == 'down':
+        input_image = np.kron(input_image, np.ones((1, scalex_factor)))
+    if scaley_up_down == 'down':
+        input_image = np.kron(input_image, np.ones((scaley_factor, 1)))
+
+    # Output image
+    output_image = unscaled_image.copy()
+    if scalex_up_down == 'up':
+        output_image = np.kron(output_image, np.ones((1, scalex_factor)))
+    if scaley_up_down == 'up':
+        output_image = np.kron(output_image, np.ones((scaley_factor, 1)))
 
     if True:
-        print(f"---\ninput: {input_image}\nscaleup_factor: {scaleup_factor}\n\noutput: {output_image}")
-        plt.imshow(input_image, cmap='gray')
-        plt.show()
-        plt.imshow(output_image, cmap='gray')
-        plt.show()
+        print(f"---\ninput: {input_image}\nscale-x {scalex_up_down} by {scalex_factor}\nscale-y {scaley_up_down} by {scaley_factor}\noutput: {output_image}")
+        title = f'scale-x {scalex_up_down} by {scalex_factor}, scale-y {scaley_up_down} by {scaley_factor}'
+        show_prediction_result(input_image, output_image, None, title, show_grid=True, save_path=None)
 
     input = serialize(input_image)
     output = serialize(output_image)
@@ -77,7 +110,8 @@ def generate_dataset_item_with_scaleup(seed: int) -> dict:
     benchmark_width = image_size1d_to_string(width)
     benchmark_height = image_size1d_to_string(height)
     benchmark_dataset_name = BENCHMARK_DATASET_NAME
-    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} image_width={benchmark_width} image_height={benchmark_height} scaleup_factor={scaleup_factor}'
+    benchmark_params = f'scalex={scalex_up_down}{scalex_factor} scaley={scaley_up_down}{scaley_factor}'
+    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} image_width={benchmark_width} image_height={benchmark_height} {benchmark_params}'
 
     result_dict = {
         'instruction': instruction,
@@ -88,7 +122,7 @@ def generate_dataset_item_with_scaleup(seed: int) -> dict:
     return result_dict
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    item = generate_dataset_item_with_scaleup(seed)
+    item = generate_dataset_item_with_scale(seed)
     return [item]
 
 generator = DatasetGenerator(
@@ -96,7 +130,7 @@ generator = DatasetGenerator(
 )
 generator.generate(
     seed=1003003,
-    max_num_samples=1,
+    max_num_samples=5,
     max_byte_size=1024*1024*100
 )
 # generator.inspect()
