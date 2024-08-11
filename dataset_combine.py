@@ -1,13 +1,13 @@
 import random
 
-seed = 53
+seed = 54
 random.seed(seed)
 
 # Define the input file paths
 file_paths = [
     'dataset_cellular_automaton.jsonl',
-    'dataset_image.jsonl',
     'dataset_histogram.jsonl',
+    'dataset_image.jsonl',
     'dataset_mass.jsonl',
     'dataset_shape.jsonl',
     'dataset_solve_color.jsonl',
