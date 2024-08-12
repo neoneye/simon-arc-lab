@@ -139,6 +139,135 @@ def generate_dataset_item_with_scale(seed: int) -> dict:
     }
     return result_dict
 
+def format_scalexy_identifier(x_up_down: str, x_scale: int, y_up_down: str, y_scale: int) -> str:
+    """
+    the x_up_down and y_up_down are either 'up' or 'down'
+    the x_scale and y_scale are positive integers in the range 1 to max_scale_factor
+    """
+    if x_scale == 1:
+        x_suffix = ''
+    else:
+        x_suffix = str(x_up_down)
+    if y_scale == 1:
+        y_suffix = ''
+    else:
+        y_suffix = str(y_up_down)
+    return f'x{x_scale}{x_suffix}_y{y_scale}{y_suffix}'
+
+def format_scalexy_identifiers(max_scale_factor: int) -> list[str]:
+    name_list = []
+    up_down = ['up', 'down']
+    for x_up_down in up_down:
+        for y_up_down in up_down:
+            for y_scale in range(1, max_scale_factor + 1):
+                for x_scale in range(1, max_scale_factor + 1):
+                    name = format_scalexy_identifier(x_up_down, x_scale, y_up_down, y_scale)
+                    name_list.append(name)
+    return name_list
+
+def generate_dataset_item_transform_recognize(seed: int) -> dict:
+    """
+    Recognize what transformation is being done from one image into another image.
+
+    :param seed: The seed for the random number generator
+    :return: A dictionary with the instruction, input, and output
+    """
+    min_image_size = 1
+    max_image_size = 30
+
+    min_scale_factor = 1
+    max_scale_factor = 3
+
+    transformation_id = 'recognize_transformation'
+
+    random.seed(seed)
+
+    dataset_name = random.choice(DATASET_NAMES)
+
+    scale_up_down = ['up', 'down']
+    scalex_up_down = random.choice(scale_up_down)
+    scaley_up_down = random.choice(scale_up_down)
+
+    scalex_factor = random.randint(min_scale_factor, max_scale_factor)
+    scaley_factor = random.randint(min_scale_factor, max_scale_factor)
+
+    name_list = format_scalexy_identifiers(max_scale_factor)
+
+    print(name_list)
+
+    # truncate image_name_list to a few items
+    truncate_length = random.randint(2, 5)
+    name_list_truncated = name_list[:truncate_length]
+
+    # random value between 0 and 1
+    random_value = random.random()
+    if random_value == 1:
+        # include the current transformation
+        pass
+    else:
+        # exclude the current transformation
+        pass
+
+    # # extract list of the shuffled candidate names
+    # name_list = []
+    # for image_name_candidate in image_name_list_truncated:
+    #     name = image_name_candidate[1]
+    #     name_list.append(name)
+    # #print(name_list)
+    # names_with_comma = ','.join(name_list)
+    names_with_comma = 'a,b,c'
+
+    instructions = [
+        f'{dataset_name}, Given two images, recognize the transformations. {names_with_comma}',
+        f'{dataset_name}, Given two images, recognize the transformation. {names_with_comma}',
+        f'{dataset_name}, Recognize the transformation. {names_with_comma}',
+        f'{dataset_name}, Recognize the transformation between input and output. {names_with_comma}',
+        f'{dataset_name}, Identify the transformation. {names_with_comma}',
+        f'{dataset_name}, What transformation happens. {names_with_comma}',
+        f'{dataset_name}, What transformation happens here. {names_with_comma}',
+    ]
+    instruction = random.choice(instructions)
+
+    unscaled_image = image_create_random_advanced(seed + 5, min_image_size, max_image_size, min_image_size, max_image_size)
+
+    # Input image
+    input_image = unscaled_image.copy()
+    if scalex_up_down == 'down':
+        input_image = np.kron(input_image, np.ones((1, scalex_factor))).astype(np.uint8)
+    if scaley_up_down == 'down':
+        input_image = np.kron(input_image, np.ones((scaley_factor, 1))).astype(np.uint8)
+
+    # Output image
+    output_image = unscaled_image.copy()
+    if scalex_up_down == 'up':
+        output_image = np.kron(output_image, np.ones((1, scalex_factor))).astype(np.uint8)
+    if scaley_up_down == 'up':
+        output_image = np.kron(output_image, np.ones((scaley_factor, 1))).astype(np.uint8)
+
+    if True:
+        print(f"---\ninput: {input_image}\nscale-x {scalex_up_down} by {scalex_factor}\nscale-y {scaley_up_down} by {scaley_factor}\noutput: {output_image}")
+        # title = f'scale-x {scalex_up_down} by {scalex_factor}, scale-y {scaley_up_down} by {scaley_factor}'
+        title = instruction
+        show_prediction_result(input_image, output_image, None, title, show_grid=True, save_path=None)
+
+    input = serialize(input_image)
+    output = serialize(output_image)
+
+    width, height = input_image.shape[1], input_image.shape[0]
+    benchmark_width = image_size1d_to_string(width)
+    benchmark_height = image_size1d_to_string(height)
+    benchmark_dataset_name = BENCHMARK_DATASET_NAME
+    benchmark_params = f'scalex={scalex_up_down}{scalex_factor} scaley={scaley_up_down}{scaley_factor}'
+    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} image_width={benchmark_width} image_height={benchmark_height} {benchmark_params}'
+
+    result_dict = {
+        'instruction': instruction,
+        'input': input,
+        'output': output,
+        'benchmark': benchmark_id
+    }
+    return result_dict
+
 def generate_dataset_item_list(seed: int) -> list[dict]:
     item = generate_dataset_item_with_scale(seed)
     return [item]
