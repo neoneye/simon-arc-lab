@@ -53,7 +53,7 @@ def generate_dataset_item_with_scale(seed: int) -> dict:
     min_scale_factor = 1
     max_scale_factor = 3
 
-    transformation_id = 'scale'
+    transformation_id = 'scale_input'
 
     random.seed(seed)
 
@@ -173,7 +173,7 @@ def generate_dataset_item_transform_recognize(seed: int) -> dict:
     :return: A dictionary with the instruction, input, and output
     """
     min_image_size = 1
-    max_image_size = 30
+    max_image_size = 15
 
     min_scale_factor = 1
     max_scale_factor = 3
@@ -195,8 +195,8 @@ def generate_dataset_item_transform_recognize(seed: int) -> dict:
     name_list = format_scalexy_identifiers(max_scale_factor)
     name_list.remove(current_name_id)
 
-    print(f"current_name_id: {current_name_id}")
-    print(name_list)
+    # print(f"current_name_id: {current_name_id}")
+    # print(name_list)
 
     # create a shuffled list of names, where the current transformation is included half of the time
     # truncate image_name_list to a few items
@@ -208,10 +208,10 @@ def generate_dataset_item_transform_recognize(seed: int) -> dict:
         name_list_truncated[0] = current_name_id
 
     random.shuffle(name_list_truncated)
-    print(f"name_list_truncated: {name_list_truncated}")
+    # print(f"name_list_truncated: {name_list_truncated}")
     
     names_with_comma = ','.join(name_list_truncated)
-    print(f"names_with_comma: {names_with_comma}")
+    # print(f"names_with_comma: {names_with_comma}")
 
     instructions = [
         f'{dataset_name}, Given two images, recognize the transformations. {names_with_comma}',
@@ -253,7 +253,7 @@ def generate_dataset_item_transform_recognize(seed: int) -> dict:
         items.append(f'{name}={value}')
     output = ','.join(items)
 
-    if True:
+    if False:
         print(f"instruction: {instruction}\noutput: {output}")
         print(f"---\ninput: {input_image}\nscale-x {scalex_up_down} by {scalex_factor}\nscale-y {scaley_up_down} by {scaley_factor}\noutput: {output_image}")
         # title = f'scale-x {scalex_up_down} by {scalex_factor}, scale-y {scaley_up_down} by {scaley_factor}'
@@ -276,14 +276,17 @@ def generate_dataset_item_transform_recognize(seed: int) -> dict:
     return result_dict
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    item = generate_dataset_item_with_scale(seed)
+    if seed % 2 == 0:
+        item = generate_dataset_item_with_scale(seed)
+    else:
+        item = generate_dataset_item_transform_recognize(seed)
     return [item]
 
 generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=3003003,
+    seed=4003005,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
