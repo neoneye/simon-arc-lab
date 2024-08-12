@@ -1,3 +1,5 @@
+# IDEA: Recognize what the transformation happens between input/output images.
+#
 # IDEA: From a symmetric image, extract the tile that gets repeated.
 #
 # IDEA: Use diagonal flipping to create a symmetric image.
@@ -5,6 +7,8 @@
 # IDEA: Use rotate cw/ccw to create a symmetric image.
 #
 # IDEA: Detect if the image is symmetric, or has some symmetry.
+#
+# IDEA: Recognize the symmetry structure of an image.
 import os
 import sys
 
