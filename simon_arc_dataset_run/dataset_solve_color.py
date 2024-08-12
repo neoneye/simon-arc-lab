@@ -5,6 +5,12 @@
 #
 # IDEA: Replace one color with another color.
 #
+# IDEA: Swap the most/lest popular colors with each other.
+#
+# IDEA: Image size 1xN, where N is the number of unique colors.
+# IDEA: Image size 1xN, where N is the count of the most popular color.
+# IDEA: Image size 1xN, where N is the count of the least popular color.
+#
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
 import os
