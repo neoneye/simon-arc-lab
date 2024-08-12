@@ -1,4 +1,8 @@
-# Model trained with max_scale_factor: 1-3. Exercise the model with a bigger max_scale_factor.
+# image scaling transformations:
+# - scale the input image by a scale factor, both in the x and y directions, and do up/down scaling.
+# - recognize the transformation between two images, identifying what kind of scaling happened.
+#
+# Model trained with max_scale_factor: 1-5. Exercise the model with a bigger max_scale_factor.
 #
 # IDEA: Add noise when doing down scaling, so the LLM learns to ignore the noise.
 #
@@ -288,7 +292,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=5003005,
+    seed=6003005,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
