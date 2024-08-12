@@ -103,7 +103,7 @@ def generate_dataset_item_with_symmetry_output(seed: int) -> dict:
         instruction_sequence = f'vstack({name0} {name1})'
     elif pattern == 'vstack3':
         output_image = np.vstack([image0, image1, image2])
-        instruction_sequence = f'vstack({name0} {name1}, {name2})'
+        instruction_sequence = f'vstack({name0} {name1} {name2})'
     elif pattern == '2x2':
         output_image = np.vstack([np.hstack([image0, image1]), np.hstack([image2, image3])])
         instruction_sequence = f'2x2({name0} {name1} {name2} {name3})'
