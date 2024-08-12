@@ -191,31 +191,27 @@ def generate_dataset_item_transform_recognize(seed: int) -> dict:
     scalex_factor = random.randint(min_scale_factor, max_scale_factor)
     scaley_factor = random.randint(min_scale_factor, max_scale_factor)
 
+    current_name_id = format_scalexy_identifier(scalex_up_down, scalex_factor, scaley_up_down, scaley_factor)
     name_list = format_scalexy_identifiers(max_scale_factor)
+    name_list.remove(current_name_id)
 
+    print(f"current_name_id: {current_name_id}")
     print(name_list)
 
+    # create a shuffled list of names, where the current transformation is included half of the time
     # truncate image_name_list to a few items
     truncate_length = random.randint(2, 5)
     name_list_truncated = name_list[:truncate_length]
 
-    # random value between 0 and 1
-    random_value = random.random()
-    if random_value == 1:
-        # include the current transformation
-        pass
-    else:
-        # exclude the current transformation
-        pass
+    # Half of the time, include the current transformation
+    if random.randint(0, 1) == 1:
+        name_list_truncated[0] = current_name_id
 
-    # # extract list of the shuffled candidate names
-    # name_list = []
-    # for image_name_candidate in image_name_list_truncated:
-    #     name = image_name_candidate[1]
-    #     name_list.append(name)
-    # #print(name_list)
-    # names_with_comma = ','.join(name_list)
-    names_with_comma = 'a,b,c'
+    random.shuffle(name_list_truncated)
+    print(f"name_list_truncated: {name_list_truncated}")
+    
+    names_with_comma = ','.join(name_list_truncated)
+    print(f"names_with_comma: {names_with_comma}")
 
     instructions = [
         f'{dataset_name}, Given two images, recognize the transformations. {names_with_comma}',
@@ -244,14 +240,25 @@ def generate_dataset_item_transform_recognize(seed: int) -> dict:
     if scaley_up_down == 'up':
         output_image = np.kron(output_image, np.ones((scaley_factor, 1))).astype(np.uint8)
 
+    input_rle = serialize(input_image)
+    output_rle = serialize(output_image)
+    input = f'{input_rle}\n{output_rle}'
+
+    items = []
+    for name in name_list_truncated:
+        if name == current_name_id:
+            value = 1
+        else:
+            value = 0
+        items.append(f'{name}={value}')
+    output = ','.join(items)
+
     if True:
+        print(f"instruction: {instruction}\noutput: {output}")
         print(f"---\ninput: {input_image}\nscale-x {scalex_up_down} by {scalex_factor}\nscale-y {scaley_up_down} by {scaley_factor}\noutput: {output_image}")
         # title = f'scale-x {scalex_up_down} by {scalex_factor}, scale-y {scaley_up_down} by {scaley_factor}'
         title = instruction
         show_prediction_result(input_image, output_image, None, title, show_grid=True, save_path=None)
-
-    input = serialize(input_image)
-    output = serialize(output_image)
 
     width, height = input_image.shape[1], input_image.shape[0]
     benchmark_width = image_size1d_to_string(width)
