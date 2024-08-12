@@ -9,6 +9,8 @@
 # IDEA: Detect if the image is symmetric, or has some symmetry.
 #
 # IDEA: Recognize the symmetry structure of an image.
+#
+# IDEA: When recognizing the transformation, show garbage data in the image, and have the LLM ignore the garbage data.
 import os
 import sys
 
