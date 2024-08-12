@@ -18,11 +18,9 @@ import numpy as np
 from simon_arc_lab.rle.serialize import serialize
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.benchmark import *
-from simon_arc_lab.pixel_connectivity import *
-from simon_arc_lab.connected_component import *
-from simon_arc_lab.image_object_mass import *
 from simon_arc_lab.show_prediction_result import show_prediction_result
-from simon_arc_dataset.dataset_generator import *
+from simon_arc_lab.image_scale import image_scale
+from simon_arc_dataset.dataset_generator import DatasetGenerator
 
 BENCHMARK_DATASET_NAME = 'scale'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_scale.jsonl')
@@ -106,20 +104,7 @@ def generate_dataset_item_with_scale(seed: int) -> dict:
     instruction = random.choice(instructions)
 
     unscaled_image = image_create_random_advanced(seed + 5, min_image_size, max_image_size, min_image_size, max_image_size)
-
-    # Input image
-    input_image = unscaled_image.copy()
-    if scalex_up_down == 'down':
-        input_image = np.kron(input_image, np.ones((1, scalex_factor))).astype(np.uint8)
-    if scaley_up_down == 'down':
-        input_image = np.kron(input_image, np.ones((scaley_factor, 1))).astype(np.uint8)
-
-    # Output image
-    output_image = unscaled_image.copy()
-    if scalex_up_down == 'up':
-        output_image = np.kron(output_image, np.ones((1, scalex_factor))).astype(np.uint8)
-    if scaley_up_down == 'up':
-        output_image = np.kron(output_image, np.ones((scaley_factor, 1))).astype(np.uint8)
+    input_image, output_image = image_scale(unscaled_image, scalex_up_down, scalex_factor, scaley_up_down, scaley_factor)
 
     if False:
         print(f"---\ninput: {input_image}\nscale-x {scalex_up_down} by {scalex_factor}\nscale-y {scaley_up_down} by {scaley_factor}\noutput: {output_image}")
@@ -231,20 +216,7 @@ def generate_dataset_item_transform_recognize(seed: int) -> dict:
     instruction = random.choice(instructions)
 
     unscaled_image = image_create_random_advanced(seed + 5, min_image_size, max_image_size, min_image_size, max_image_size)
-
-    # Input image
-    input_image = unscaled_image.copy()
-    if scalex_up_down == 'down':
-        input_image = np.kron(input_image, np.ones((1, scalex_factor))).astype(np.uint8)
-    if scaley_up_down == 'down':
-        input_image = np.kron(input_image, np.ones((scaley_factor, 1))).astype(np.uint8)
-
-    # Output image
-    output_image = unscaled_image.copy()
-    if scalex_up_down == 'up':
-        output_image = np.kron(output_image, np.ones((1, scalex_factor))).astype(np.uint8)
-    if scaley_up_down == 'up':
-        output_image = np.kron(output_image, np.ones((scaley_factor, 1))).astype(np.uint8)
+    input_image, output_image = image_scale(unscaled_image, scalex_up_down, scalex_factor, scaley_up_down, scaley_factor)
 
     input_rle = serialize(input_image)
     output_rle = serialize(output_image)
