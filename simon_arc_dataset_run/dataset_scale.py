@@ -51,7 +51,7 @@ def generate_dataset_item_with_scale(seed: int) -> dict:
     max_image_size = 30
 
     min_scale_factor = 1
-    max_scale_factor = 3
+    max_scale_factor = 5
 
     transformation_id = 'scale_input'
 
@@ -173,10 +173,10 @@ def generate_dataset_item_transform_recognize(seed: int) -> dict:
     :return: A dictionary with the instruction, input, and output
     """
     min_image_size = 1
-    max_image_size = 15
+    max_image_size = 30
 
     min_scale_factor = 1
-    max_scale_factor = 3
+    max_scale_factor = 5
 
     transformation_id = 'recognize_transformation'
 
@@ -286,7 +286,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=4003005,
+    seed=5003005,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
