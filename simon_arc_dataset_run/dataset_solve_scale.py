@@ -1,5 +1,8 @@
 # Scale the image up/down by x/y factor.
 #
+# Model has been trained with max_image_size: 1-20. Model needs to be train with max_image_size greater than 20.
+# Model has been trained with max_scale_factor: 1-7. Model needs to be train with max_scale_factor greater than 7.
+#
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
 import os
@@ -25,19 +28,30 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_scale'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_scale.jsonl')
 
+def compute_max_image_size(max_image_size: int, scale_factor: int) -> int:
+    computed_max_image_size = max_image_size
+    if scale_factor >= 2:
+        computed_max_image_size = max_image_size // scale_factor
+        if computed_max_image_size < 1:
+            computed_max_image_size = 1
+
+    # print(f"scale_factor: {scale_factor} computed_max_image_size {computed_max_image_size}")
+    return computed_max_image_size
+
+
 def generate_task(seed: int, x_up_down, x_scale, y_up_down, y_scale) -> Task:
     count_example = random.Random(seed + 1).randint(2, 4)
     count_test = random.Random(seed + 2).randint(1, 2)
     # count_test = 1
     task = Task()
-    min_width = 3
-    max_width = 10
-    min_height = 3
-    max_height = 10
+    min_image_size = 1
+    max_image_size = 20
 
     for i in range(count_example+count_test):
         is_example = i < count_example
-        unscaled_image = image_create_random_advanced(seed + 1000 + i, min_width, max_width, min_height, max_height)
+        computed_x_max_image_size = compute_max_image_size(max_image_size, x_scale)
+        computed_y_max_image_size = compute_max_image_size(max_image_size, y_scale)
+        unscaled_image = image_create_random_advanced(seed + 1000 + i, min_image_size, computed_x_max_image_size, min_image_size, computed_y_max_image_size)
 
         input_image, output_image = image_scale(unscaled_image, x_up_down, x_scale, y_up_down, y_scale)
 
@@ -90,7 +104,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     seed_task = seed
 
-    max_scale_factor = 3
+    max_scale_factor = 7
     up_down = ['up', 'down']
     config_list = []
     for x_up_down in up_down:
@@ -124,7 +138,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=21000019,
+    seed=31000019,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
