@@ -71,7 +71,7 @@ class TestImageFill(unittest.TestCase):
             [5, 5, 5, 5, 5]], dtype=np.uint8)
         np.testing.assert_array_equal(image, expected)
 
-    def test_20000_flood_fill8(self):
+    def test_11000_flood_fill8(self):
         # Arrange
         image = np.array([
             [5, 3, 3, 3, 3, 5],
@@ -88,7 +88,7 @@ class TestImageFill(unittest.TestCase):
             [5, 3, 3, 3, 3, 0]], dtype=np.uint8)
         np.testing.assert_array_equal(image, expected)
 
-    def test_20001_flood_fill8(self):
+    def test_11001_flood_fill8(self):
         # Arrange
         image = np.array([
             [5, 5, 5, 5, 5],
@@ -103,6 +103,40 @@ class TestImageFill(unittest.TestCase):
             [5, 0, 0, 0, 5],
             [5, 0, 0, 0, 5],
             [5, 5, 5, 5, 5]], dtype=np.uint8)
+        np.testing.assert_array_equal(image, expected)
+
+    def test_12000_flood_fill4diagonal(self):
+        # Arrange
+        image = np.array([
+            [3, 7, 3, 3, 3, 3],
+            [7, 3, 7, 3, 3, 3],
+            [3, 3, 3, 7, 3, 7],
+            [3, 3, 3, 3, 7, 3]], dtype=np.uint8)
+        # Act
+        image_flood_fill(image, 2, 1, 7, 9, PixelConnectivity.CONNECTIVITY4DIAGONAL)
+        # Assert
+        expected = np.array([
+            [3, 9, 3, 3, 3, 3],
+            [9, 3, 9, 3, 3, 3],
+            [3, 3, 3, 9, 3, 9],
+            [3, 3, 3, 3, 9, 3]], dtype=np.uint8)
+        np.testing.assert_array_equal(image, expected)
+
+    def test_12001_flood_fill4diagonal(self):
+        # Arrange
+        image = np.array([
+            [7, 7, 7, 3, 3, 3],
+            [3, 3, 7, 3, 3, 3],
+            [3, 3, 7, 3, 3, 7],
+            [3, 3, 7, 7, 7, 7]], dtype=np.uint8)
+        # Act
+        image_flood_fill(image, 2, 1, 7, 9, PixelConnectivity.CONNECTIVITY4DIAGONAL)
+        # Assert
+        expected = np.array([
+            [7, 9, 7, 3, 3, 3],
+            [3, 3, 9, 3, 3, 3],
+            [3, 3, 7, 3, 3, 7],
+            [3, 3, 7, 7, 7, 7]], dtype=np.uint8)
         np.testing.assert_array_equal(image, expected)
 
     def test_30000_mask_flood_fill4(self):
