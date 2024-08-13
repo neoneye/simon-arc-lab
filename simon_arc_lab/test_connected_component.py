@@ -407,5 +407,35 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
         self.assertTrue(np.array_equal(output, expected))
 
+    def test_find_objects_corner4(self):
+        # Arrange
+        input_image = np.array([
+            [9, 5, 9],
+            [7, 9, 5],
+            [9, 7, 9],
+        ], dtype=np.uint8)
+
+        # Act
+        mask_vec = ConnectedComponent.find_objects(PixelConnectivity.CORNER4, input_image)
+
+        # Assert
+        self.assertEqual(len(mask_vec), 3)
+        output = np.vstack(mask_vec)
+        expected = np.array([
+            [1, 0, 1],
+            [0, 1, 0],
+            [1, 0, 1],
+
+            [0, 1, 0],
+            [0, 0, 1],
+            [0, 0, 0],
+
+            [0, 0, 0],
+            [1, 0, 0],
+            [0, 1, 0],
+        ], dtype=np.uint8)
+        self.assertTrue(np.array_equal(output, expected))
+
+
 if __name__ == "__main__":
     unittest.main()
