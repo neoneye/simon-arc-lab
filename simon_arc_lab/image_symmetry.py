@@ -49,9 +49,15 @@ class ImageSymmetry:
         self.name_image_list[index] = self.name_image_180
 
     def randomize_name_image_list(self, seed: int):
+        name_image_map = [
+            self.name_image_original,
+            self.name_image_flipx,
+            self.name_image_flipy,
+            self.name_image_180,
+        ]
         self.name_image_list = []
         for i in range(ImageSymmetry.MAX_NUMBER_OF_IMAGES_USED):
-            name_image = random.Random(seed+i).choice(self.name_image_map)
+            name_image = random.Random(seed+i).choice(name_image_map)
             self.name_image_list.append(name_image)
 
     def execute_with_random_pattern(self, seed: int) -> Tuple[np.array, str]:
