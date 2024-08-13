@@ -139,6 +139,74 @@ class TestImageFill(unittest.TestCase):
             [3, 3, 7, 7, 7, 7]], dtype=np.uint8)
         np.testing.assert_array_equal(image, expected)
 
+    def test_13000_flood_fill_lr2(self):
+        # Arrange
+        image = np.array([
+            [7, 7, 7, 3, 3, 3],
+            [3, 3, 7, 3, 3, 3],
+            [3, 3, 7, 3, 3, 7],
+            [3, 3, 7, 7, 7, 7]], dtype=np.uint8)
+        # Act
+        image_flood_fill(image, 4, 1, 3, 9, PixelConnectivity.LR2)
+        # Assert
+        expected = np.array([
+            [7, 7, 7, 3, 3, 3],
+            [3, 3, 7, 9, 9, 9],
+            [3, 3, 7, 3, 3, 7],
+            [3, 3, 7, 7, 7, 7]], dtype=np.uint8)
+        np.testing.assert_array_equal(image, expected)
+
+    def test_14000_flood_fill_tb2(self):
+        # Arrange
+        image = np.array([
+            [7, 7, 7, 3, 3, 3],
+            [3, 3, 7, 3, 3, 3],
+            [3, 3, 7, 3, 3, 7],
+            [3, 3, 7, 7, 7, 7]], dtype=np.uint8)
+        # Act
+        image_flood_fill(image, 4, 1, 3, 9, PixelConnectivity.TB2)
+        # Assert
+        expected = np.array([
+            [7, 7, 7, 3, 9, 3],
+            [3, 3, 7, 3, 9, 3],
+            [3, 3, 7, 3, 9, 7],
+            [3, 3, 7, 7, 7, 7]], dtype=np.uint8)
+        np.testing.assert_array_equal(image, expected)
+
+    def test_15000_flood_fill_tlbr2(self):
+        # Arrange
+        image = np.array([
+            [7, 7, 7, 3, 3, 3],
+            [3, 3, 7, 3, 3, 3],
+            [3, 3, 7, 3, 3, 3],
+            [3, 3, 7, 7, 7, 7]], dtype=np.uint8)
+        # Act
+        image_flood_fill(image, 4, 1, 3, 9, PixelConnectivity.TLBR2)
+        # Assert
+        expected = np.array([
+            [7, 7, 7, 9, 3, 3],
+            [3, 3, 7, 3, 9, 3],
+            [3, 3, 7, 3, 3, 9],
+            [3, 3, 7, 7, 7, 7]], dtype=np.uint8)
+        np.testing.assert_array_equal(image, expected)
+
+    def test_16000_flood_fill_trbl2(self):
+        # Arrange
+        image = np.array([
+            [7, 7, 7, 3, 3, 3],
+            [3, 3, 7, 3, 3, 3],
+            [3, 3, 7, 3, 3, 3],
+            [3, 3, 7, 7, 7, 7]], dtype=np.uint8)
+        # Act
+        image_flood_fill(image, 4, 1, 3, 9, PixelConnectivity.TRBL2)
+        # Assert
+        expected = np.array([
+            [7, 7, 7, 3, 3, 9],
+            [3, 3, 7, 3, 9, 3],
+            [3, 3, 7, 9, 3, 3],
+            [3, 3, 7, 7, 7, 7]], dtype=np.uint8)
+        np.testing.assert_array_equal(image, expected)
+
     def test_30000_mask_flood_fill_nearest4(self):
         # Arrange
         image = np.array([
@@ -280,6 +348,90 @@ class TestImageFill(unittest.TestCase):
             [0, 0, 0, 1, 0],
             [0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0]], dtype=np.uint8)
+        np.testing.assert_array_equal(output, expected)
+
+    def test_33000_mask_flood_fill_lr2(self):
+        # Arrange
+        image = np.array([
+            [5, 8, 8, 8, 5],
+            [8, 5, 5, 5, 8],
+            [8, 5, 8, 5, 8],
+            [8, 5, 5, 5, 8]], dtype=np.uint8)
+        output = np.zeros((4, 5), dtype=np.uint8)
+        color = 5
+
+        # Act
+        image_mask_flood_fill(output, image, 2, 1, color, PixelConnectivity.LR2)
+
+        # Assert
+        expected = np.array([
+            [0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0]], dtype=np.uint8)
+        np.testing.assert_array_equal(output, expected)
+
+    def test_34000_mask_flood_fill_tb2(self):
+        # Arrange
+        image = np.array([
+            [5, 8, 8, 8, 5],
+            [8, 5, 5, 5, 8],
+            [8, 5, 8, 5, 8],
+            [8, 5, 5, 5, 8]], dtype=np.uint8)
+        output = np.zeros((4, 5), dtype=np.uint8)
+        color = 5
+
+        # Act
+        image_mask_flood_fill(output, image, 1, 2, color, PixelConnectivity.TB2)
+
+        # Assert
+        expected = np.array([
+            [0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0],
+            [0, 1, 0, 0, 0],
+            [0, 1, 0, 0, 0]], dtype=np.uint8)
+        np.testing.assert_array_equal(output, expected)
+
+    def test_35000_mask_flood_fill_tlbr2(self):
+        # Arrange
+        image = np.array([
+            [5, 8, 8, 8, 5],
+            [8, 5, 5, 5, 8],
+            [8, 5, 5, 5, 8],
+            [8, 5, 5, 5, 8]], dtype=np.uint8)
+        output = np.zeros((4, 5), dtype=np.uint8)
+        color = 5
+
+        # Act
+        image_mask_flood_fill(output, image, 2, 2, color, PixelConnectivity.TLBR2)
+
+        # Assert
+        expected = np.array([
+            [1, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0],
+            [0, 0, 1, 0, 0],
+            [0, 0, 0, 1, 0]], dtype=np.uint8)
+        np.testing.assert_array_equal(output, expected)
+
+    def test_36000_mask_flood_fill_trbl2(self):
+        # Arrange
+        image = np.array([
+            [5, 8, 8, 8, 5],
+            [8, 5, 5, 5, 8],
+            [8, 5, 5, 5, 8],
+            [8, 5, 5, 5, 8]], dtype=np.uint8)
+        output = np.zeros((4, 5), dtype=np.uint8)
+        color = 5
+
+        # Act
+        image_mask_flood_fill(output, image, 2, 2, color, PixelConnectivity.TRBL2)
+
+        # Assert
+        expected = np.array([
+            [0, 0, 0, 0, 1],
+            [0, 0, 0, 1, 0],
+            [0, 0, 1, 0, 0],
+            [0, 1, 0, 0, 0]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
 
 if __name__ == '__main__':

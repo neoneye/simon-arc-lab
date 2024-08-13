@@ -16,3 +16,14 @@ class PixelConnectivity(Enum):
     # Don't visit the neighboring pixels.
     CORNER4 = 'corner4'
 
+    # Horizontal - Considers only 2 neighbors, left and right around the center pixel.
+    LR2 = 'lr2'
+
+    # Vertical - Considers only 2 neighbors, top and bottom around the center pixel.
+    TB2 = 'tb2'
+
+    # Diagonal A - Considers only 2 neighbors, top-left and bottom-right around the center pixel.
+    TLBR2 = 'tlbr2'
+
+    # Diagonal B - Considers only 2 neighbors, top-right and bottom-left around the center pixel.
+    TRBL2 = 'trbl2'
