@@ -11,7 +11,7 @@ class TestImageFill(unittest.TestCase):
             [5, 8, 5, 5, 8],
             [5, 5, 5, 5, 8]], dtype=np.uint8)
         # Act
-        image_flood_fill(image, 0, 0, 5, 3, PixelConnectivity.CONNECTIVITY4)
+        image_flood_fill(image, 0, 0, 5, 3, PixelConnectivity.NEAREST4)
         # Assert
         expected = np.array([
             [3, 3, 3, 3, 3],
@@ -28,7 +28,7 @@ class TestImageFill(unittest.TestCase):
             [5, 8, 5, 5, 8],
             [5, 5, 5, 5, 8]], dtype=np.uint8)
         # Act
-        image_flood_fill(image, 1, 1, 8, 1, PixelConnectivity.CONNECTIVITY4)
+        image_flood_fill(image, 1, 1, 8, 1, PixelConnectivity.NEAREST4)
         # Assert
         expected = np.array([
             [5, 5, 5, 5, 5],
@@ -45,7 +45,7 @@ class TestImageFill(unittest.TestCase):
             [5, 8, 5, 5, 8],
             [5, 5, 5, 5, 8]], dtype=np.uint8)
         # Act
-        image_flood_fill(image, 4, 1, 8, 1, PixelConnectivity.CONNECTIVITY4)
+        image_flood_fill(image, 4, 1, 8, 1, PixelConnectivity.NEAREST4)
         # Assert
         expected = np.array([
             [5, 5, 5, 5, 5],
@@ -62,7 +62,7 @@ class TestImageFill(unittest.TestCase):
             [5, 0, 0, 0, 5],
             [5, 5, 5, 5, 5]], dtype=np.uint8)
         # Act
-        image_flood_fill(image, 2, 1, 0, 0, PixelConnectivity.CONNECTIVITY4)
+        image_flood_fill(image, 2, 1, 0, 0, PixelConnectivity.NEAREST4)
         # Assert
         expected = np.array([
             [5, 5, 5, 5, 5],
@@ -79,7 +79,7 @@ class TestImageFill(unittest.TestCase):
             [3, 3, 5, 3, 5, 3],
             [5, 3, 3, 3, 3, 5]], dtype=np.uint8)
         # Act
-        image_flood_fill(image, 3, 1, 5, 0, PixelConnectivity.CONNECTIVITY8)
+        image_flood_fill(image, 3, 1, 5, 0, PixelConnectivity.ALL8)
         # Assert
         expected = np.array([
             [0, 3, 3, 3, 3, 5],
@@ -96,7 +96,7 @@ class TestImageFill(unittest.TestCase):
             [5, 0, 0, 0, 5],
             [5, 5, 5, 5, 5]], dtype=np.uint8)
         # Act
-        image_flood_fill(image, 2, 1, 0, 0, PixelConnectivity.CONNECTIVITY8)
+        image_flood_fill(image, 2, 1, 0, 0, PixelConnectivity.ALL8)
         # Assert
         expected = np.array([
             [5, 5, 5, 5, 5],
@@ -113,7 +113,7 @@ class TestImageFill(unittest.TestCase):
             [3, 3, 3, 7, 3, 7],
             [3, 3, 3, 3, 7, 3]], dtype=np.uint8)
         # Act
-        image_flood_fill(image, 2, 1, 7, 9, PixelConnectivity.CONNECTIVITY4DIAGONAL)
+        image_flood_fill(image, 2, 1, 7, 9, PixelConnectivity.CORNER4)
         # Assert
         expected = np.array([
             [3, 9, 3, 3, 3, 3],
@@ -130,7 +130,7 @@ class TestImageFill(unittest.TestCase):
             [3, 3, 7, 3, 3, 7],
             [3, 3, 7, 7, 7, 7]], dtype=np.uint8)
         # Act
-        image_flood_fill(image, 2, 1, 7, 9, PixelConnectivity.CONNECTIVITY4DIAGONAL)
+        image_flood_fill(image, 2, 1, 7, 9, PixelConnectivity.CORNER4)
         # Assert
         expected = np.array([
             [7, 9, 7, 3, 3, 3],
@@ -150,7 +150,7 @@ class TestImageFill(unittest.TestCase):
         color = image[0, 0]
 
         # Act
-        image_mask_flood_fill(output, image, 0, 0, color, PixelConnectivity.CONNECTIVITY4)
+        image_mask_flood_fill(output, image, 0, 0, color, PixelConnectivity.NEAREST4)
 
         # Assert
         expected = np.array([
@@ -171,7 +171,7 @@ class TestImageFill(unittest.TestCase):
         color = image[1, 1]
 
         # Act
-        image_mask_flood_fill(output, image, 1, 1, color, PixelConnectivity.CONNECTIVITY4)
+        image_mask_flood_fill(output, image, 1, 1, color, PixelConnectivity.NEAREST4)
 
         # Assert
         expected = np.array([
@@ -192,7 +192,7 @@ class TestImageFill(unittest.TestCase):
         color = image[1, 4]
 
         # Act
-        image_mask_flood_fill(output, image, 4, 1, color, PixelConnectivity.CONNECTIVITY4)
+        image_mask_flood_fill(output, image, 4, 1, color, PixelConnectivity.NEAREST4)
 
         # Assert
         expected = np.array([
@@ -212,7 +212,7 @@ class TestImageFill(unittest.TestCase):
         color = image[0, 2]
 
         # Act
-        image_mask_flood_fill(output, image, 2, 0, color, PixelConnectivity.CONNECTIVITY4)
+        image_mask_flood_fill(output, image, 2, 0, color, PixelConnectivity.NEAREST4)
 
         # Assert
         expected = np.array([
@@ -231,7 +231,7 @@ class TestImageFill(unittest.TestCase):
         color = image[0, 2]
 
         # Act
-        image_mask_flood_fill(output, image, 2, 0, color, PixelConnectivity.CONNECTIVITY8)
+        image_mask_flood_fill(output, image, 2, 0, color, PixelConnectivity.ALL8)
 
         # Assert
         expected = np.array([
@@ -251,7 +251,7 @@ class TestImageFill(unittest.TestCase):
         color = image[0, 0]
 
         # Act
-        image_mask_flood_fill(output, image, 0, 0, color, PixelConnectivity.CONNECTIVITY4DIAGONAL)
+        image_mask_flood_fill(output, image, 0, 0, color, PixelConnectivity.CORNER4)
 
         # Assert
         expected = np.array([
@@ -272,7 +272,7 @@ class TestImageFill(unittest.TestCase):
         color = image[0, 4]
 
         # Act
-        image_mask_flood_fill(output, image, 4, 0, color, PixelConnectivity.CONNECTIVITY4DIAGONAL)
+        image_mask_flood_fill(output, image, 4, 0, color, PixelConnectivity.CORNER4)
 
         # Assert
         expected = np.array([

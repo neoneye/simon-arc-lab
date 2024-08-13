@@ -14,7 +14,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
 
         # Act
-        mask_vec = ConnectedComponent.find_objects(PixelConnectivity.CONNECTIVITY4, input_image)
+        mask_vec = ConnectedComponent.find_objects(PixelConnectivity.NEAREST4, input_image)
 
         # Assert
         self.assertEqual(len(mask_vec), 3)
@@ -48,7 +48,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
 
         # Act
-        mask_vec = ConnectedComponent.find_objects(PixelConnectivity.CONNECTIVITY4, input_image)
+        mask_vec = ConnectedComponent.find_objects(PixelConnectivity.NEAREST4, input_image)
 
         # Assert
         self.assertEqual(len(mask_vec), 3)
@@ -83,7 +83,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
 
         # Act
-        mask_vec = ConnectedComponent.find_objects(PixelConnectivity.CONNECTIVITY4, input_image)
+        mask_vec = ConnectedComponent.find_objects(PixelConnectivity.NEAREST4, input_image)
 
         # Assert
         self.assertEqual(len(mask_vec), 5)
@@ -120,7 +120,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
 
         # Act
-        mask_vec = ConnectedComponent.find_objects(PixelConnectivity.CONNECTIVITY4, input_image)
+        mask_vec = ConnectedComponent.find_objects(PixelConnectivity.NEAREST4, input_image)
 
         # Assert
         self.assertEqual(len(mask_vec), 2)
@@ -145,7 +145,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
 
         # Act
-        mask_vec = ConnectedComponent.find_objects(PixelConnectivity.CONNECTIVITY4, input_image)
+        mask_vec = ConnectedComponent.find_objects(PixelConnectivity.NEAREST4, input_image)
 
         # Assert
         self.assertEqual(len(mask_vec), 2)
@@ -174,7 +174,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
 
         # Act
-        actual = ConnectedComponent.find_objects(PixelConnectivity.CONNECTIVITY4, input_image)
+        actual = ConnectedComponent.find_objects(PixelConnectivity.NEAREST4, input_image)
 
         # Assert
         self.assertEqual(len(actual), 7)
@@ -266,7 +266,7 @@ class TestConnectedComponent(unittest.TestCase):
         ignore_mask = np.zeros_like(input_image, dtype=np.uint8)
 
         # Act
-        mask_vec = ConnectedComponent.find_objects_with_ignore_mask_inner(PixelConnectivity.CONNECTIVITY8, input_image, ignore_mask)
+        mask_vec = ConnectedComponent.find_objects_with_ignore_mask_inner(PixelConnectivity.ALL8, input_image, ignore_mask)
 
         # Assert
         expected = [
@@ -299,7 +299,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
 
         # Act
-        mask_vec = ConnectedComponent.find_objects_with_ignore_mask_inner(PixelConnectivity.CONNECTIVITY8, input_image, ignore_mask)
+        mask_vec = ConnectedComponent.find_objects_with_ignore_mask_inner(PixelConnectivity.ALL8, input_image, ignore_mask)
 
         # Assert
         expected = [
@@ -327,7 +327,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
 
         # Act
-        mask_vec = ConnectedComponent.find_objects(PixelConnectivity.CONNECTIVITY8, input_image)
+        mask_vec = ConnectedComponent.find_objects(PixelConnectivity.ALL8, input_image)
 
         # Assert
         self.assertEqual(len(mask_vec), 2)
@@ -357,7 +357,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
 
         # Act
-        mask_vec = ConnectedComponent.find_objects_with_ignore_mask(PixelConnectivity.CONNECTIVITY8, input_image, ignore_mask)
+        mask_vec = ConnectedComponent.find_objects_with_ignore_mask(PixelConnectivity.ALL8, input_image, ignore_mask)
 
         # Assert
         self.assertEqual(len(mask_vec), 2)
@@ -389,7 +389,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
 
         # Act
-        mask_vec = ConnectedComponent.find_objects_with_ignore_mask(PixelConnectivity.CONNECTIVITY8, input_image, ignore_mask)
+        mask_vec = ConnectedComponent.find_objects_with_ignore_mask(PixelConnectivity.ALL8, input_image, ignore_mask)
 
         # Assert
         self.assertEqual(len(mask_vec), 2)

@@ -64,9 +64,9 @@ def generate_dataset_item_with_max_mass(seed: int, connectivity: PixelConnectivi
         f'{dataset_name} max mass {max_mass}, connectivity 8',
     ]
 
-    if connectivity == PixelConnectivity.CONNECTIVITY4:
+    if connectivity == PixelConnectivity.NEAREST4:
         instructions = instructions_connectivity4
-    elif connectivity == PixelConnectivity.CONNECTIVITY8:
+    elif connectivity == PixelConnectivity.ALL8:
         instructions = instructions_connectivity8
     else:
         raise ValueError(f"Unknown PixelConnectivity: {connectivity}")
@@ -107,9 +107,9 @@ def generate_dataset_item_with_max_mass(seed: int, connectivity: PixelConnectivi
     input = serialize(input_image)
     output = serialize(output_image)
 
-    if connectivity == PixelConnectivity.CONNECTIVITY4: 
+    if connectivity == PixelConnectivity.NEAREST4: 
         benchmark_connectivity = 'connectivity=4' 
-    elif connectivity == PixelConnectivity.CONNECTIVITY8: 
+    elif connectivity == PixelConnectivity.ALL8: 
         benchmark_connectivity = 'connectivity=8' 
     else:
         raise ValueError(f"Unknown PixelConnectivity: {connectivity}")
@@ -132,14 +132,14 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     items = []
     for retry_index in range(20):
         try:
-            item = generate_dataset_item_with_max_mass(seed + 10000000000 + 1333 * retry_index, PixelConnectivity.CONNECTIVITY4)
+            item = generate_dataset_item_with_max_mass(seed + 10000000000 + 1333 * retry_index, PixelConnectivity.NEAREST4)
             items.append(item)
             break
         except Exception as e:
             print(f"trying again {retry_index}")
     for retry_index in range(20):
         try:
-            item = generate_dataset_item_with_max_mass(seed + 20000000000 + 7711 * retry_index, PixelConnectivity.CONNECTIVITY8)
+            item = generate_dataset_item_with_max_mass(seed + 20000000000 + 7711 * retry_index, PixelConnectivity.ALL8)
             items.append(item)
             break
         except Exception as e:
