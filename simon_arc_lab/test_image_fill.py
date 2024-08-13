@@ -221,7 +221,7 @@ class TestImageFill(unittest.TestCase):
             [0, 0, 0]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
 
-    def test_40000_mask_flood_fill8(self):
+    def test_31000_mask_flood_fill8(self):
         # Arrange
         image = np.array([
             [9, 5, 5],
@@ -238,6 +238,48 @@ class TestImageFill(unittest.TestCase):
             [0, 1, 1],
             [1, 0, 1],
             [1, 1, 0]], dtype=np.uint8)
+        np.testing.assert_array_equal(output, expected)
+
+    def test_32000_mask_flood_fill4diagonal(self):
+        # Arrange
+        image = np.array([
+            [5, 8, 8, 5, 5],
+            [8, 5, 8, 8, 5],
+            [8, 8, 5, 8, 8],
+            [8, 8, 8, 5, 8]], dtype=np.uint8)
+        output = np.zeros((4, 5), dtype=np.uint8)
+        color = image[0, 0]
+
+        # Act
+        image_mask_flood_fill(output, image, 0, 0, color, PixelConnectivity.CONNECTIVITY4DIAGONAL)
+
+        # Assert
+        expected = np.array([
+            [1, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0],
+            [0, 0, 1, 0, 0],
+            [0, 0, 0, 1, 0]], dtype=np.uint8)
+        np.testing.assert_array_equal(output, expected)
+
+    def test_32001_mask_flood_fill4diagonal(self):
+        # Arrange
+        image = np.array([
+            [5, 8, 8, 8, 5],
+            [8, 5, 5, 5, 8],
+            [8, 5, 8, 5, 8],
+            [8, 5, 5, 5, 8]], dtype=np.uint8)
+        output = np.zeros((4, 5), dtype=np.uint8)
+        color = image[0, 4]
+
+        # Act
+        image_mask_flood_fill(output, image, 4, 0, color, PixelConnectivity.CONNECTIVITY4DIAGONAL)
+
+        # Assert
+        expected = np.array([
+            [0, 0, 0, 0, 1],
+            [0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
 
 if __name__ == '__main__':
