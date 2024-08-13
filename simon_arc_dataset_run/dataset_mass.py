@@ -1,4 +1,3 @@
-# IDEA: PixelConnectivity.CONNECTIVITYDIAGONAL4 for better understanding of diagonal shapes.
 import os
 import sys
 
@@ -13,7 +12,7 @@ from simon_arc_lab.benchmark import *
 from simon_arc_lab.pixel_connectivity import *
 from simon_arc_lab.connected_component import *
 from simon_arc_lab.image_object_mass import *
-import matplotlib.pyplot as plt
+from simon_arc_lab.show_prediction_result import show_prediction_result
 from simon_arc_dataset.dataset_generator import *
 
 BENCHMARK_DATASET_NAME = 'mass'
@@ -46,28 +45,39 @@ def generate_dataset_item_with_max_mass(seed: int, connectivity: PixelConnectivi
     :return: A dictionary with the instruction, input, and output
     """
     min_image_size = 1
-    max_image_size = 30
+    max_image_size = 10
 
     transformation_id = 'max_mass'
 
     dataset_name = random.Random(seed + 2).choice(DATASET_NAMES)
 
-    max_mass = random.Random(seed + 3).randint(1, 25)
+    max_mass = random.Random(seed + 3).randint(1, 5)
 
-    instructions_connectivity4 = [
+    instructions_connectivity_nearest4 = [
         f'{dataset_name} identify places where max mass is {max_mass}, connectivity 4',
+        f'{dataset_name} identify places where max mass is {max_mass}, connectivity nearest4',
         f'{dataset_name} max mass {max_mass}, connectivity 4',
+        f'{dataset_name} max mass {max_mass}, connectivity nearest4',
     ]
 
-    instructions_connectivity8 = [
+    instructions_connectivity_all8 = [
         f'{dataset_name} identify places where max mass is {max_mass}, connectivity 8',
+        f'{dataset_name} identify places where max mass is {max_mass}, connectivity all8',
         f'{dataset_name} max mass {max_mass}, connectivity 8',
+        f'{dataset_name} max mass {max_mass}, connectivity all8',
+    ]
+
+    instructions_connectivity_corner4 = [
+        f'{dataset_name} identify places where max mass is {max_mass}, connectivity corner4',
+        f'{dataset_name} max mass {max_mass}, connectivity corner4',
     ]
 
     if connectivity == PixelConnectivity.NEAREST4:
-        instructions = instructions_connectivity4
+        instructions = instructions_connectivity_nearest4
     elif connectivity == PixelConnectivity.ALL8:
-        instructions = instructions_connectivity8
+        instructions = instructions_connectivity_all8
+    elif connectivity == PixelConnectivity.CORNER4:
+        instructions = instructions_connectivity_corner4
     else:
         raise ValueError(f"Unknown PixelConnectivity: {connectivity}")
 
@@ -96,21 +106,20 @@ def generate_dataset_item_with_max_mass(seed: int, connectivity: PixelConnectivi
     output_image = mask
 
     if False:
-        print(f"---\ninput: {input_image}\nmax mass: {max_mass}\nmass image: {mass_image}\noutput: {output_image}")
-        plt.imshow(input_image, cmap='gray')
-        plt.show()
-        plt.imshow(mass_image, cmap='gray')
-        plt.show()
-        plt.imshow(output_image, cmap='gray')
-        plt.show()
+        # print(f"---\ninput: {input_image}\nmax mass: {max_mass}\nmass image: {mass_image}\noutput: {output_image}")
+        print(f"---\ninstruction: {instruction}\nmax mass: {max_mass}")
+        title = f"{connectivity} max_mass={max_mass}"
+        show_prediction_result(input_image, mass_image, output_image, title, show_grid=True, save_path=None)
 
     input = serialize(input_image)
     output = serialize(output_image)
 
     if connectivity == PixelConnectivity.NEAREST4: 
-        benchmark_connectivity = 'connectivity=4' 
+        benchmark_connectivity = 'connectivity=nearest4' 
     elif connectivity == PixelConnectivity.ALL8: 
-        benchmark_connectivity = 'connectivity=8' 
+        benchmark_connectivity = 'connectivity=all8' 
+    elif connectivity == PixelConnectivity.CORNER4: 
+        benchmark_connectivity = 'connectivity=corner4' 
     else:
         raise ValueError(f"Unknown PixelConnectivity: {connectivity}")
 
@@ -144,6 +153,13 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
             break
         except Exception as e:
             print(f"trying again {retry_index}")
+    for retry_index in range(20):
+        try:
+            item = generate_dataset_item_with_max_mass(seed + 30000000000 + 8937 * retry_index, PixelConnectivity.CORNER4)
+            items.append(item)
+            break
+        except Exception as e:
+            print(f"trying again {retry_index}")
     if len(items) == 0:
         print(f"Failed to generate any dataset items")
     return items
@@ -152,7 +168,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=101905000,
+    seed=201905000,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
