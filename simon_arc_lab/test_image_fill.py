@@ -3,7 +3,7 @@ import numpy as np
 from .image_fill import *
 
 class TestImageFill(unittest.TestCase):
-    def test_10000_flood_fill4(self):
+    def test_10000_flood_fill_nearest4(self):
         # Arrange
         image = np.array([
             [5, 5, 5, 5, 5],
@@ -20,7 +20,7 @@ class TestImageFill(unittest.TestCase):
             [3, 3, 3, 3, 8]], dtype=np.uint8)
         np.testing.assert_array_equal(image, expected)
 
-    def test_10001_flood_fill4(self):
+    def test_10001_flood_fill_nearest4(self):
         # Arrange
         image = np.array([
             [5, 5, 5, 5, 5],
@@ -37,7 +37,7 @@ class TestImageFill(unittest.TestCase):
             [5, 5, 5, 5, 8]], dtype=np.uint8)
         np.testing.assert_array_equal(image, expected)
 
-    def test_10002_flood_fill4(self):
+    def test_10002_flood_fill_nearest4(self):
         # Arrange
         image = np.array([
             [5, 5, 5, 5, 5],
@@ -54,7 +54,7 @@ class TestImageFill(unittest.TestCase):
             [5, 5, 5, 5, 1]], dtype=np.uint8)
         np.testing.assert_array_equal(image, expected)
 
-    def test_10003_flood_fill4(self):
+    def test_10003_flood_fill_nearest4(self):
         # Arrange
         image = np.array([
             [5, 5, 5, 5, 5],
@@ -71,7 +71,7 @@ class TestImageFill(unittest.TestCase):
             [5, 5, 5, 5, 5]], dtype=np.uint8)
         np.testing.assert_array_equal(image, expected)
 
-    def test_11000_flood_fill8(self):
+    def test_11000_flood_fill_all8(self):
         # Arrange
         image = np.array([
             [5, 3, 3, 3, 3, 5],
@@ -88,7 +88,7 @@ class TestImageFill(unittest.TestCase):
             [5, 3, 3, 3, 3, 0]], dtype=np.uint8)
         np.testing.assert_array_equal(image, expected)
 
-    def test_11001_flood_fill8(self):
+    def test_11001_flood_fill_all8(self):
         # Arrange
         image = np.array([
             [5, 5, 5, 5, 5],
@@ -105,7 +105,7 @@ class TestImageFill(unittest.TestCase):
             [5, 5, 5, 5, 5]], dtype=np.uint8)
         np.testing.assert_array_equal(image, expected)
 
-    def test_12000_flood_fill4diagonal(self):
+    def test_12000_flood_fill_corner4(self):
         # Arrange
         image = np.array([
             [3, 7, 3, 3, 3, 3],
@@ -122,7 +122,7 @@ class TestImageFill(unittest.TestCase):
             [3, 3, 3, 3, 9, 3]], dtype=np.uint8)
         np.testing.assert_array_equal(image, expected)
 
-    def test_12001_flood_fill4diagonal(self):
+    def test_12001_flood_fill_corner4(self):
         # Arrange
         image = np.array([
             [7, 7, 7, 3, 3, 3],
@@ -139,7 +139,7 @@ class TestImageFill(unittest.TestCase):
             [3, 3, 7, 7, 7, 7]], dtype=np.uint8)
         np.testing.assert_array_equal(image, expected)
 
-    def test_30000_mask_flood_fill4(self):
+    def test_30000_mask_flood_fill_nearest4(self):
         # Arrange
         image = np.array([
             [5, 5, 5, 5, 5],
@@ -160,7 +160,7 @@ class TestImageFill(unittest.TestCase):
             [1, 1, 1, 1, 0]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
 
-    def test_30001_mask_flood_fill4(self):
+    def test_30001_mask_flood_fill_nearest4(self):
         # Arrange
         image = np.array([
             [5, 5, 5, 5, 5],
@@ -181,7 +181,7 @@ class TestImageFill(unittest.TestCase):
             [0, 0, 0, 0, 0]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
 
-    def test_30002_mask_flood_fill4(self):
+    def test_30002_mask_flood_fill_nearest4(self):
         # Arrange
         image = np.array([
             [5, 5, 5, 5, 5],
@@ -221,7 +221,7 @@ class TestImageFill(unittest.TestCase):
             [0, 0, 0]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
 
-    def test_31000_mask_flood_fill8(self):
+    def test_31000_mask_flood_fill_all8(self):
         # Arrange
         image = np.array([
             [9, 5, 5],
@@ -240,7 +240,7 @@ class TestImageFill(unittest.TestCase):
             [1, 1, 0]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
 
-    def test_32000_mask_flood_fill4diagonal(self):
+    def test_32000_mask_flood_fill_corner4(self):
         # Arrange
         image = np.array([
             [5, 8, 8, 5, 5],
@@ -261,7 +261,7 @@ class TestImageFill(unittest.TestCase):
             [0, 0, 0, 1, 0]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
 
-    def test_32001_mask_flood_fill4diagonal(self):
+    def test_32001_mask_flood_fill_corner4(self):
         # Arrange
         image = np.array([
             [5, 8, 8, 8, 5],
