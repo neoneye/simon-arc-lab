@@ -44,6 +44,17 @@ DATASET_NAMES = [
     'SimonsImageScale',
 ]
 
+def compute_max_image_size(max_image_size: int, scale_factor: int) -> int:
+    computed_max_image_size = max_image_size
+    if scale_factor >= 2:
+        computed_max_image_size = max_image_size // scale_factor
+        if computed_max_image_size < 1:
+            computed_max_image_size = 1
+
+    # print(f"scale_factor: {scale_factor} computed_max_image_size {computed_max_image_size}")
+    return computed_max_image_size
+
+
 def generate_dataset_item_with_scale(seed: int) -> dict:
     """
     Resize the image by a scale factor.
@@ -55,8 +66,8 @@ def generate_dataset_item_with_scale(seed: int) -> dict:
     max_image_size = 30
 
     min_scale_factor = 1
-    max_scale_factor = 5
-
+    max_scale_factor = 7
+        
     transformation_id = 'scale_input'
 
     random.seed(seed)
@@ -103,7 +114,10 @@ def generate_dataset_item_with_scale(seed: int) -> dict:
         instructions = instructions_scale_x_with_y1
     instruction = random.choice(instructions)
 
-    unscaled_image = image_create_random_advanced(seed + 5, min_image_size, max_image_size, min_image_size, max_image_size)
+    computed_x_max_image_size = compute_max_image_size(max_image_size, scalex_factor)
+    computed_y_max_image_size = compute_max_image_size(max_image_size, scaley_factor)
+
+    unscaled_image = image_create_random_advanced(seed + 5, min_image_size, computed_x_max_image_size, min_image_size, computed_y_max_image_size)
     input_image, output_image = image_scale(unscaled_image, scalex_up_down, scalex_factor, scaley_up_down, scaley_factor)
 
     if False:
@@ -167,7 +181,7 @@ def generate_dataset_item_transform_recognize(seed: int) -> dict:
     max_image_size = 30
 
     min_scale_factor = 1
-    max_scale_factor = 5
+    max_scale_factor = 7
 
     transformation_id = 'recognize_transformation'
 
@@ -215,7 +229,10 @@ def generate_dataset_item_transform_recognize(seed: int) -> dict:
     ]
     instruction = random.choice(instructions)
 
-    unscaled_image = image_create_random_advanced(seed + 5, min_image_size, max_image_size, min_image_size, max_image_size)
+    computed_x_max_image_size = compute_max_image_size(max_image_size, scalex_factor)
+    computed_y_max_image_size = compute_max_image_size(max_image_size, scaley_factor)
+
+    unscaled_image = image_create_random_advanced(seed + 5, min_image_size, computed_x_max_image_size, min_image_size, computed_y_max_image_size)
     input_image, output_image = image_scale(unscaled_image, scalex_up_down, scalex_factor, scaley_up_down, scaley_factor)
 
     input_rle = serialize(input_image)
@@ -264,7 +281,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=8003005,
+    seed=9003005,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
