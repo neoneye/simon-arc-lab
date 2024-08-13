@@ -8,7 +8,7 @@ class TestImageSymmetry(unittest.TestCase):
         image = np.array([
             [1, 2, 3]], dtype=np.uint8)
         # Act
-        output, instruction_sequence = ImageSymmetry(image).execute('hstack2')
+        output, instruction_sequence = ImageSymmetry(image).execute(ImageSymmetryPatternId.HSTACK2)
         # Assert
         expected = np.array([
             [1, 2, 3, 1, 2, 3]], dtype=np.uint8)
@@ -20,7 +20,7 @@ class TestImageSymmetry(unittest.TestCase):
         image = np.array([
             [1, 2, 3]], dtype=np.uint8)
         # Act
-        output, instruction_sequence = ImageSymmetry(image).execute('hstack3')
+        output, instruction_sequence = ImageSymmetry(image).execute(ImageSymmetryPatternId.HSTACK3)
         # Assert
         expected = np.array([
             [1, 2, 3, 1, 2, 3, 1, 2, 3]], dtype=np.uint8)
@@ -32,7 +32,7 @@ class TestImageSymmetry(unittest.TestCase):
         image = np.array([
             [1, 2, 3]], dtype=np.uint8)
         # Act
-        output, instruction_sequence = ImageSymmetry(image).execute('vstack2')
+        output, instruction_sequence = ImageSymmetry(image).execute(ImageSymmetryPatternId.VSTACK2)
         # Assert
         expected = np.array([
             [1, 2, 3], 
@@ -45,7 +45,7 @@ class TestImageSymmetry(unittest.TestCase):
         image = np.array([
             [1, 2, 3]], dtype=np.uint8)
         # Act
-        output, instruction_sequence = ImageSymmetry(image).execute('vstack3')
+        output, instruction_sequence = ImageSymmetry(image).execute(ImageSymmetryPatternId.VSTACK3)
         # Assert
         expected = np.array([
             [1, 2, 3],
@@ -59,7 +59,7 @@ class TestImageSymmetry(unittest.TestCase):
         image = np.array([
             [1, 2, 3]], dtype=np.uint8)
         # Act
-        output, instruction_sequence = ImageSymmetry(image).execute('2x2')
+        output, instruction_sequence = ImageSymmetry(image).execute(ImageSymmetryPatternId.GRID2X2)
         # Assert
         expected = np.array([
             [1, 2, 3, 1, 2, 3],
@@ -75,7 +75,7 @@ class TestImageSymmetry(unittest.TestCase):
         # Act
         i = ImageSymmetry(image)
         i.use_flipx_for_name_image_index(0)
-        output, instruction_sequence = i.execute('hstack2')
+        output, instruction_sequence = i.execute(ImageSymmetryPatternId.HSTACK2)
         # Assert
         expected = np.array([
             [3, 2, 1, 1, 2, 3],
@@ -91,7 +91,7 @@ class TestImageSymmetry(unittest.TestCase):
         # Act
         i = ImageSymmetry(image)
         i.use_flipy_for_name_image_index(1)
-        output, instruction_sequence = i.execute('hstack2')
+        output, instruction_sequence = i.execute(ImageSymmetryPatternId.HSTACK2)
         # Assert
         expected = np.array([
             [1, 2, 3, 4, 5, 6],
@@ -107,7 +107,7 @@ class TestImageSymmetry(unittest.TestCase):
         # Act
         i = ImageSymmetry(image)
         i.use_180_for_name_image_index(1)
-        output, instruction_sequence = i.execute('hstack2')
+        output, instruction_sequence = i.execute(ImageSymmetryPatternId.HSTACK2)
         # Assert
         expected = np.array([
             [1, 2, 3, 6, 5, 4],
