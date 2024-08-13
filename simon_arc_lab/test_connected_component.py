@@ -436,6 +436,161 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
         self.assertTrue(np.array_equal(output, expected))
 
+    def test_60000_find_objects_lr2(self):
+        # Arrange
+        input_image = np.array([
+            [9, 9, 9],
+            [7, 9, 9],
+            [7, 7, 9],
+        ], dtype=np.uint8)
+
+        # Act
+        mask_vec = ConnectedComponent.find_objects(PixelConnectivity.LR2, input_image)
+
+        # Assert
+        self.assertEqual(len(mask_vec), 5)
+        output = np.vstack(mask_vec)
+        expected = np.array([
+            [1, 1, 1],
+            [0, 0, 0],
+            [0, 0, 0],
+
+            [0, 0, 0],
+            [1, 0, 0],
+            [0, 0, 0],
+
+            [0, 0, 0],
+            [0, 1, 1],
+            [0, 0, 0],
+
+            [0, 0, 0],
+            [0, 0, 0],
+            [1, 1, 0],
+
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 1],
+        ], dtype=np.uint8)
+        np.testing.assert_array_equal(output, expected)
+
+    def test_70000_find_objects_tb2(self):
+        # Arrange
+        input_image = np.array([
+            [9, 9, 9],
+            [7, 9, 9],
+            [7, 7, 9],
+        ], dtype=np.uint8)
+
+        # Act
+        mask_vec = ConnectedComponent.find_objects(PixelConnectivity.TB2, input_image)
+
+        # Assert
+        self.assertEqual(len(mask_vec), 5)
+        output = np.vstack(mask_vec)
+        expected = np.array([
+            [1, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+
+            [0, 1, 0],
+            [0, 1, 0],
+            [0, 0, 0],
+
+            [0, 0, 1],
+            [0, 0, 1],
+            [0, 0, 1],
+
+            [0, 0, 0],
+            [1, 0, 0],
+            [1, 0, 0],
+
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 1, 0],
+        ], dtype=np.uint8)
+        np.testing.assert_array_equal(output, expected)
+
+    def test_80000_find_objects_tlbr2(self):
+        # Arrange
+        input_image = np.array([
+            [9, 9, 9],
+            [7, 9, 9],
+            [7, 7, 9],
+        ], dtype=np.uint8)
+
+        # Act
+        mask_vec = ConnectedComponent.find_objects(PixelConnectivity.TLBR2, input_image)
+
+        # Assert
+        self.assertEqual(len(mask_vec), 5)
+        output = np.vstack(mask_vec)
+        expected = np.array([
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1],
+
+            [0, 1, 0],
+            [0, 0, 1],
+            [0, 0, 0],
+
+            [0, 0, 1],
+            [0, 0, 0],
+            [0, 0, 0],
+
+            [0, 0, 0],
+            [1, 0, 0],
+            [0, 1, 0],
+
+            [0, 0, 0],
+            [0, 0, 0],
+            [1, 0, 0],
+        ], dtype=np.uint8)
+        np.testing.assert_array_equal(output, expected)
+
+    def test_90000_find_objects_trbl2(self):
+        # Arrange
+        input_image = np.array([
+            [9, 9, 9],
+            [7, 9, 9],
+            [7, 9, 9],
+        ], dtype=np.uint8)
+
+        # Act
+        mask_vec = ConnectedComponent.find_objects(PixelConnectivity.TRBL2, input_image)
+
+        # Assert
+        self.assertEqual(len(mask_vec), 7)
+        output = np.vstack(mask_vec)
+        expected = np.array([
+            [1, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+
+            [0, 1, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+
+            [0, 0, 1],
+            [0, 1, 0],
+            [0, 0, 0],
+
+            [0, 0, 0],
+            [1, 0, 0],
+            [0, 0, 0],
+
+            [0, 0, 0],
+            [0, 0, 1],
+            [0, 1, 0],
+
+            [0, 0, 0],
+            [0, 0, 0],
+            [1, 0, 0],
+
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 1],
+        ], dtype=np.uint8)
+        np.testing.assert_array_equal(output, expected)
 
 if __name__ == "__main__":
     unittest.main()
