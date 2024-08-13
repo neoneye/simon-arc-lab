@@ -4,7 +4,7 @@ from .connected_component import ConnectedComponent, ConnectedComponentItem
 from .pixel_connectivity import PixelConnectivity
 
 class TestConnectedComponent(unittest.TestCase):
-    def test_find_objects_neighbors_10000(self):
+    def test_10000_find_objects_neighbors(self):
         # Arrange
         input_image = np.array([
             [5, 5, 5, 5, 5],
@@ -37,7 +37,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
         self.assertTrue(np.array_equal(output, expected))
 
-    def test_find_objects_neighbors_10001(self):
+    def test_10001_find_objects_neighbors(self):
         # Arrange
         input_image = np.array([
             [5, 5, 5, 5, 5],
@@ -74,7 +74,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
         self.assertTrue(np.array_equal(output, expected))
 
-    def test_find_objects_neighbors_10002(self):
+    def test_10002_find_objects_neighbors(self):
         # Arrange
         input_image = np.array([
             [9, 5, 5],
@@ -111,7 +111,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
         self.assertTrue(np.array_equal(output, expected))
 
-    def test_find_objects_neighbors_10003(self):
+    def test_10003_find_objects_neighbors(self):
         # Arrange
         input_image = np.array([
             [0, 0, 0],
@@ -136,7 +136,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
         self.assertTrue(np.array_equal(output, expected))
 
-    def test_find_objects_neighbors_10004(self):
+    def test_10004_find_objects_neighbors(self):
         # Arrange
         input_image = np.array([
             [1, 1, 1],
@@ -161,7 +161,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
         self.assertTrue(np.array_equal(output, expected))
 
-    def test_find_objects_connectivity4_10005(self):
+    def test_10005_find_objects_nearest4(self):
         # Arrange
         input_image = np.array([
             [7, 7, 7, 0, 0, 5],
@@ -256,7 +256,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
         self.assertTrue(np.array_equal(actual[6], expected6))
 
-    def test_find_objects_with_ignore_mask_inner_20000(self):
+    def test_20000_find_objects_with_ignore_mask_inner(self):
         # Arrange
         input_image = np.array([
             [9, 5, 5],
@@ -283,7 +283,7 @@ class TestConnectedComponent(unittest.TestCase):
         ]
         self.assertEqual(mask_vec, expected)
 
-    def test_find_objects_with_ignore_mask_inner_20001(self):
+    def test_20001_find_objects_with_ignore_mask_inner(self):
         # Arrange
         input_image = np.array([
             [5, 5, 5, 5],
@@ -318,7 +318,7 @@ class TestConnectedComponent(unittest.TestCase):
         ]
         self.assertEqual(mask_vec, expected)
 
-    def test_find_objects_all_30000(self):
+    def test_30000_find_objects_all8(self):
         # Arrange
         input_image = np.array([
             [9, 5, 5],
@@ -343,7 +343,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
         self.assertTrue(np.array_equal(output, expected))
 
-    def test_find_objects_with_ignore_mask_40000(self):
+    def test_40000_find_objects_with_ignore_mask_all8(self):
         # Arrange
         input_image = np.array([
             [9, 5, 5],
@@ -373,7 +373,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
         self.assertTrue(np.array_equal(output, expected))
 
-    def test_find_objects_with_ignore_mask_40001(self):
+    def test_40001_find_objects_with_ignore_mask(self):
         # Arrange
         input_image = np.array([
             [5, 5, 6, 6],
@@ -407,7 +407,7 @@ class TestConnectedComponent(unittest.TestCase):
         ], dtype=np.uint8)
         self.assertTrue(np.array_equal(output, expected))
 
-    def test_find_objects_corner4(self):
+    def test_50000_find_objects_corner4(self):
         # Arrange
         input_image = np.array([
             [9, 5, 9],
