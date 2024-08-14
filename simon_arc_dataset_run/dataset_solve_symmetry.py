@@ -1,5 +1,11 @@
 # Symmetric transformations.
 # - generate a palindrome image, hstack(original, flipx(original))
+# - extract the tile that makes up the symmetric input image.
+#
+# IDEA: Use rotate cw/ccw to create a symmetric image.
+# IDEA: Use flip diagonal to create a symmetric image.
+# IDEA: Introduce hstack4, hstack5, vstack4, vstack5.
+# IDEA: Introduce grid2x3, grid3x3, grid3x3.
 #
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
