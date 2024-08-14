@@ -40,9 +40,9 @@ def generate_task_with_input_image_create_output_symmetry(seed: int) -> Task:
     # count_test = 1
     task = Task()
     min_width = 2
-    max_width = 3
+    max_width = 4
     min_height = 2
-    max_height = 3
+    max_height = 4
 
     image_symmetry = ImageSymmetry.create_random(seed * 1333 + 100)
     image_symmetry.randomize_name_list(seed * 8773 + 2)
@@ -124,7 +124,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=118000410,
+    seed=218000410,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
