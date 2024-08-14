@@ -25,42 +25,42 @@ class ImageSymmetry:
     def __init__(self, pattern: ImageSymmetryPatternId):
         self.pattern = pattern
 
-        self.name_image_original = 'orig'
-        self.name_image_flipx = 'flipx'
-        self.name_image_flipy = 'flipy'
-        self.name_image_180 = '180'
+        self.name_original = 'orig'
+        self.name_flipx = 'flipx'
+        self.name_flipy = 'flipy'
+        self.name_180 = '180'
 
         # by default use the original image for all images in the symmetry
-        self.name_image_list = []
+        self.name_list = []
         for _ in range(ImageSymmetry.MAX_NUMBER_OF_IMAGES_USED):
-            name_image = self.name_image_original
-            self.name_image_list.append(name_image)
+            name_image = self.name_original
+            self.name_list.append(name_image)
 
     @classmethod
     def create_random(cls, seed: int) -> Tuple['ImageSymmetry', str]:
         pattern = random.Random(seed).choice(ImageSymmetry.PATTERN_IDS)
         return ImageSymmetry(pattern)
     
-    def use_flipx_for_name_image_index(self, index: int):
-        self.name_image_list[index] = self.name_image_flipx
+    def use_flipx_for_index(self, index: int):
+        self.name_list[index] = self.name_flipx
 
-    def use_flipy_for_name_image_index(self, index: int):
-        self.name_image_list[index] = self.name_image_flipy
+    def use_flipy_for_index(self, index: int):
+        self.name_list[index] = self.name_flipy
 
-    def use_180_for_name_image_index(self, index: int):
-        self.name_image_list[index] = self.name_image_180
+    def use_180_for_index(self, index: int):
+        self.name_list[index] = self.name_180
 
-    def randomize_name_image_list(self, seed: int):
-        name_image_map = [
-            self.name_image_original,
-            self.name_image_flipx,
-            self.name_image_flipy,
-            self.name_image_180,
+    def randomize_name_list(self, seed: int):
+        name_list = [
+            self.name_original,
+            self.name_flipx,
+            self.name_flipy,
+            self.name_180,
         ]
-        self.name_image_list = []
+        self.name_list = []
         for i in range(ImageSymmetry.MAX_NUMBER_OF_IMAGES_USED):
-            name_image = random.Random(seed+i).choice(name_image_map)
-            self.name_image_list.append(name_image)
+            name_image = random.Random(seed+i).choice(name_list)
+            self.name_list.append(name_image)
 
     def execute(self, image: np.array) -> Tuple[np.array, str]:
         image_original = image.copy()
@@ -76,10 +76,10 @@ class ImageSymmetry:
         }
 
         pattern = self.pattern
-        name0 = self.name_image_list[0]
-        name1 = self.name_image_list[1]
-        name2 = self.name_image_list[2]
-        name3 = self.name_image_list[3]
+        name0 = self.name_list[0]
+        name1 = self.name_list[1]
+        name2 = self.name_list[2]
+        name3 = self.name_list[3]
 
         image0 = name_to_image[name0]
         image1 = name_to_image[name1]

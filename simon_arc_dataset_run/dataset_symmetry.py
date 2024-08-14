@@ -67,7 +67,7 @@ def generate_dataset_item_with_symmetry_output(seed: int) -> dict:
 
     input_image = image_create_random_advanced(seed + 5, min_image_size, max_image_size, min_image_size, max_image_size)
     i = ImageSymmetry.create_random(seed+1)
-    i.randomize_name_image_list(seed+2)
+    i.randomize_name_list(seed+2)
     output_image, instruction_sequence = i.execute(input_image)
 
     assert output_image is not None

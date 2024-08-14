@@ -74,7 +74,7 @@ class TestImageSymmetry(unittest.TestCase):
             [4, 5, 6]], dtype=np.uint8)
         # Act
         i = ImageSymmetry(ImageSymmetryPatternId.HSTACK2)
-        i.use_flipx_for_name_image_index(0)
+        i.use_flipx_for_index(0)
         output, instruction_sequence = i.execute(image)
         # Assert
         expected = np.array([
@@ -90,7 +90,7 @@ class TestImageSymmetry(unittest.TestCase):
             [4, 5, 6]], dtype=np.uint8)
         # Act
         i = ImageSymmetry(ImageSymmetryPatternId.HSTACK2)
-        i.use_flipy_for_name_image_index(1)
+        i.use_flipy_for_index(1)
         output, instruction_sequence = i.execute(image)
         # Assert
         expected = np.array([
@@ -106,7 +106,7 @@ class TestImageSymmetry(unittest.TestCase):
             [4, 5, 6]], dtype=np.uint8)
         # Act
         i = ImageSymmetry(ImageSymmetryPatternId.HSTACK2)
-        i.use_180_for_name_image_index(1)
+        i.use_180_for_index(1)
         output, instruction_sequence = i.execute(image)
         # Assert
         expected = np.array([
