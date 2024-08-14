@@ -4,7 +4,7 @@
 #
 # IDEA: Use rotate cw/ccw to create a symmetric image.
 # IDEA: Use flip diagonal to create a symmetric image.
-# IDEA: Introduce hstack4, hstack5, vstack4, vstack5.
+# IDEA: Introduce hstack5, vstack5.
 # IDEA: Introduce grid2x3, grid3x3, grid3x3.
 #
 # Present the same input images, but with different transformations.
@@ -124,7 +124,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=218000410,
+    seed=318000410,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )

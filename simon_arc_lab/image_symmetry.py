@@ -7,8 +7,10 @@ from .image_util import *
 class ImageSymmetryPatternId(Enum):
     HSTACK2 = 'hstack2'
     HSTACK3 = 'hstack3'
+    HSTACK4 = 'hstack4'
     VSTACK2 = 'vstack2'
     VSTACK3 = 'vstack3'
+    VSTACK4 = 'vstack4'
     GRID2X2 = '2x2'
 
 class ImageSymmetry:
@@ -17,8 +19,10 @@ class ImageSymmetry:
     PATTERN_IDS = [
         ImageSymmetryPatternId.HSTACK2, 
         ImageSymmetryPatternId.HSTACK3, 
+        ImageSymmetryPatternId.HSTACK4, 
         ImageSymmetryPatternId.VSTACK2, 
         ImageSymmetryPatternId.VSTACK3, 
+        ImageSymmetryPatternId.VSTACK4, 
         ImageSymmetryPatternId.GRID2X2
     ]
 
@@ -94,10 +98,14 @@ class ImageSymmetry:
             output_image = np.hstack([image0, image1])
         elif pattern == ImageSymmetryPatternId.HSTACK3:
             output_image = np.hstack([image0, image1, image2])
+        elif pattern == ImageSymmetryPatternId.HSTACK4:
+            output_image = np.hstack([image0, image1, image2, image3])
         elif pattern == ImageSymmetryPatternId.VSTACK2:
             output_image = np.vstack([image0, image1])
         elif pattern == ImageSymmetryPatternId.VSTACK3:
             output_image = np.vstack([image0, image1, image2])
+        elif pattern == ImageSymmetryPatternId.VSTACK4:
+            output_image = np.vstack([image0, image1, image2, image3])
         elif pattern == ImageSymmetryPatternId.GRID2X2:
             output_image = np.vstack([np.hstack([image0, image1]), np.hstack([image2, image3])])
         else:
@@ -117,10 +125,14 @@ class ImageSymmetry:
             instruction_sequence = f'hstack({name0} {name1})'
         elif pattern == ImageSymmetryPatternId.HSTACK3:
             instruction_sequence = f'hstack({name0} {name1} {name2})'
+        elif pattern == ImageSymmetryPatternId.HSTACK4:
+            instruction_sequence = f'hstack({name0} {name1} {name2} {name3})'
         elif pattern == ImageSymmetryPatternId.VSTACK2:
             instruction_sequence = f'vstack({name0} {name1})'
         elif pattern == ImageSymmetryPatternId.VSTACK3:
             instruction_sequence = f'vstack({name0} {name1} {name2})'
+        elif pattern == ImageSymmetryPatternId.VSTACK4:
+            instruction_sequence = f'vstack({name0} {name1} {name2} {name3})'
         elif pattern == ImageSymmetryPatternId.GRID2X2:
             instruction_sequence = f'2x2({name0} {name1} {name2} {name3})'
         else:
