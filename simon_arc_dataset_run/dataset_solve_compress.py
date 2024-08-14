@@ -43,9 +43,9 @@ def generate_task_compress_xy(seed: int) -> Task:
     task = Task()
     task.metadata_task_id = 'compress_xy'
     min_width = 2
-    max_width = 4
+    max_width = 6
     min_height = 2
-    max_height = 4
+    max_height = 6
 
     count_compress_x = 0
     count_compress_y = 0
@@ -111,7 +111,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=303600313,
+    seed=403600313,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
