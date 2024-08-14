@@ -167,9 +167,9 @@ def generate_dataset_item_with_max_mass(seed: int, connectivity: PixelConnectivi
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
     connectivity_list = [
-        PixelConnectivity.NEAREST4,
-        PixelConnectivity.ALL8,
-        PixelConnectivity.CORNER4,
+        # PixelConnectivity.NEAREST4,
+        # PixelConnectivity.ALL8,
+        # PixelConnectivity.CORNER4,
         PixelConnectivity.LR2,
         PixelConnectivity.TB2,
         PixelConnectivity.TLBR2,
@@ -192,7 +192,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=701905000,
+    seed=801905000,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
