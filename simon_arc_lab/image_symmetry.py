@@ -41,6 +41,9 @@ class ImageSymmetry:
         pattern = random.Random(seed).choice(ImageSymmetry.PATTERN_IDS)
         return ImageSymmetry(pattern)
     
+    def use_original_for_index(self, index: int):
+        self.name_list[index] = self.name_original
+
     def use_flipx_for_index(self, index: int):
         self.name_list[index] = self.name_flipx
 

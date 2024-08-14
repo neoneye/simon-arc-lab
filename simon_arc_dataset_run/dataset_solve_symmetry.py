@@ -26,6 +26,9 @@ BENCHMARK_DATASET_NAME = 'solve_symmetry'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_symmetry.jsonl')
 
 def generate_task_with_input_image_create_output_symmetry(seed: int) -> Task:
+    """
+    Create a symmetric image from an input image.
+    """
     count_example = random.Random(seed + 9).randint(2, 4)
     count_test = random.Random(seed + 10).randint(1, 2)
     # count_test = 1
@@ -48,9 +51,46 @@ def generate_task_with_input_image_create_output_symmetry(seed: int) -> Task:
 
     return task
 
+def generate_task_with_symmetric_input_image_and_extract_a_particular_tile(seed: int) -> Task:
+    """
+    Identify the top-left tile of a symmetric image.
+    """
+    count_example = random.Random(seed + 1).randint(2, 4)
+    count_test = random.Random(seed + 2).randint(1, 2)
+    # count_test = 1
+    task = Task()
+    min_width = 2
+    max_width = 3
+    min_height = 2
+    max_height = 3
+
+    image_symmetry = ImageSymmetry.create_random(seed * 1333 + 100)
+    image_symmetry.randomize_name_list(seed * 8773 + 2)
+
+    # It's the top-left tile that is always extracted. It's the first tile.
+    image_symmetry.use_original_for_index(0)
+
+    instruction_sequence = image_symmetry.instruction_sequence()
+    task.metadata_task_id = instruction_sequence
+
+    # Rotate the image, so the tile is not always at the top-left, but also in the other corners.
+    rotate90_count = random.Random(seed + 3).randint(0, 3)
+    for i in range(count_example+count_test):
+        is_example = i < count_example
+        output_image_raw = image_create_random_advanced((seed * 31) + 1002 + i, min_width, max_width, min_height, max_height)
+        input_image_raw = image_symmetry.execute(output_image_raw)
+        input_image = np.rot90(input_image_raw, rotate90_count)
+        output_image = np.rot90(output_image_raw, rotate90_count)
+        task.append_pair(input_image, output_image, is_example)
+
+    return task
+
 def demo_generate_task():
     for i in range(5):
-        task = generate_task_with_input_image_create_output_symmetry(i)
+        if i % 2 == 0:
+            task = generate_task_with_input_image_create_output_symmetry(i)
+        else:
+            task = generate_task_with_symmetric_input_image_and_extract_a_particular_tile(i)
         task.show()
 
 # demo_generate_task()
@@ -62,20 +102,24 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    all_dataset_items = []
-    task = generate_task_with_input_image_create_output_symmetry(seed)
-    task.show()
-    dataset_items = generate_dataset_item_list_inner(seed, task, 'create_symmetry')
-    all_dataset_items.extend(dataset_items)
-
-    return all_dataset_items
+    if seed % 2 == 0:
+        task = generate_task_with_input_image_create_output_symmetry(seed)
+        task_id = task.metadata_task_id
+        transformation_id = f"'create_symmetry {task_id}'"
+    else:
+        task = generate_task_with_symmetric_input_image_and_extract_a_particular_tile(seed)
+        task_id = task.metadata_task_id
+        transformation_id = f"'extract_tile {task_id}'"
+    # task.show()
+    dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
+    return dataset_items
 
 generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
     seed=118000410,
-    max_num_samples=10,
+    max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
 # generator.inspect()
