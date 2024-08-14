@@ -62,7 +62,7 @@ class ImageSymmetry:
             name_image = random.Random(seed+i).choice(name_list)
             self.name_list.append(name_image)
 
-    def execute(self, image: np.array) -> Tuple[np.array, str]:
+    def execute(self, image: np.array) -> np.array:
         image_original = image.copy()
         image_fx = image_flipx(image)
         image_fy = image_flipy(image)
@@ -87,21 +87,40 @@ class ImageSymmetry:
         image3 = name_to_image[name3]
 
         output_image = None
-        instruction_sequence = None
         if pattern == ImageSymmetryPatternId.HSTACK2:
             output_image = np.hstack([image0, image1])
-            instruction_sequence = f'hstack({name0} {name1})'
-        if pattern == ImageSymmetryPatternId.HSTACK3:
+        elif pattern == ImageSymmetryPatternId.HSTACK3:
             output_image = np.hstack([image0, image1, image2])
-            instruction_sequence = f'hstack({name0} {name1} {name2})'
         elif pattern == ImageSymmetryPatternId.VSTACK2:
             output_image = np.vstack([image0, image1])
-            instruction_sequence = f'vstack({name0} {name1})'
         elif pattern == ImageSymmetryPatternId.VSTACK3:
             output_image = np.vstack([image0, image1, image2])
-            instruction_sequence = f'vstack({name0} {name1} {name2})'
         elif pattern == ImageSymmetryPatternId.GRID2X2:
             output_image = np.vstack([np.hstack([image0, image1]), np.hstack([image2, image3])])
-            instruction_sequence = f'2x2({name0} {name1} {name2} {name3})'
+        else:
+            raise ValueError(f"Unknown ImageSymmetryPatternId: {pattern}")
         
-        return (output_image, instruction_sequence)
+        return output_image
+
+    def instruction_sequence(self) -> str:
+        pattern = self.pattern
+        name0 = self.name_list[0]
+        name1 = self.name_list[1]
+        name2 = self.name_list[2]
+        name3 = self.name_list[3]
+
+        instruction_sequence = None
+        if pattern == ImageSymmetryPatternId.HSTACK2:
+            instruction_sequence = f'hstack({name0} {name1})'
+        elif pattern == ImageSymmetryPatternId.HSTACK3:
+            instruction_sequence = f'hstack({name0} {name1} {name2})'
+        elif pattern == ImageSymmetryPatternId.VSTACK2:
+            instruction_sequence = f'vstack({name0} {name1})'
+        elif pattern == ImageSymmetryPatternId.VSTACK3:
+            instruction_sequence = f'vstack({name0} {name1} {name2})'
+        elif pattern == ImageSymmetryPatternId.GRID2X2:
+            instruction_sequence = f'2x2({name0} {name1} {name2} {name3})'
+        else:
+            raise ValueError(f"Unknown ImageSymmetryPatternId: {pattern}")
+        
+        return instruction_sequence
