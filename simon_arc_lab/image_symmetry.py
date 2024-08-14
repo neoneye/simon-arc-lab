@@ -22,22 +22,24 @@ class ImageSymmetry:
         ImageSymmetryPatternId.GRID2X2
     ]
 
-    def __init__(self, image: np.array):
-        self.image_original = image.copy()
-        self.image_fx = image_flipx(image)
-        self.image_fy = image_flipy(image)
-        self.image_180 = image_rotate_180(image)
+    def __init__(self, pattern: ImageSymmetryPatternId):
+        self.pattern = pattern
 
-        self.name_image_original = ('orig', self.image_original)
-        self.name_image_flipx = ('flipx', self.image_fx)
-        self.name_image_flipy = ('flipy', self.image_fy)
-        self.name_image_180 = ('180', self.image_180)
+        self.name_image_original = 'orig'
+        self.name_image_flipx = 'flipx'
+        self.name_image_flipy = 'flipy'
+        self.name_image_180 = '180'
 
         # by default use the original image for all images in the symmetry
         self.name_image_list = []
         for _ in range(ImageSymmetry.MAX_NUMBER_OF_IMAGES_USED):
             name_image = self.name_image_original
             self.name_image_list.append(name_image)
+
+    @classmethod
+    def create_random(cls, seed: int) -> Tuple['ImageSymmetry', str]:
+        pattern = random.Random(seed).choice(ImageSymmetry.PATTERN_IDS)
+        return ImageSymmetry(pattern)
     
     def use_flipx_for_name_image_index(self, index: int):
         self.name_image_list[index] = self.name_image_flipx
@@ -60,15 +62,29 @@ class ImageSymmetry:
             name_image = random.Random(seed+i).choice(name_image_map)
             self.name_image_list.append(name_image)
 
-    def execute_with_random_pattern(self, seed: int) -> Tuple[np.array, str]:
-        pattern = random.Random(seed).choice(ImageSymmetry.PATTERN_IDS)
-        return self.execute(pattern)
+    def execute(self, image: np.array) -> Tuple[np.array, str]:
+        image_original = image.copy()
+        image_fx = image_flipx(image)
+        image_fy = image_flipy(image)
+        image_180 = image_rotate_180(image)
 
-    def execute(self, pattern: ImageSymmetryPatternId) -> Tuple[np.array, str]:
-        name0, image0 = self.name_image_list[0]
-        name1, image1 = self.name_image_list[1]
-        name2, image2 = self.name_image_list[2]
-        name3, image3 = self.name_image_list[3]
+        name_to_image = {
+            'orig': image_original,
+            'flipx': image_fx,
+            'flipy': image_fy,
+            '180': image_180
+        }
+
+        pattern = self.pattern
+        name0 = self.name_image_list[0]
+        name1 = self.name_image_list[1]
+        name2 = self.name_image_list[2]
+        name3 = self.name_image_list[3]
+
+        image0 = name_to_image[name0]
+        image1 = name_to_image[name1]
+        image2 = name_to_image[name2]
+        image3 = name_to_image[name3]
 
         output_image = None
         instruction_sequence = None
