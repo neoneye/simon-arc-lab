@@ -1,6 +1,14 @@
 # Compression transformations.
 # - remove duplicate rows/columns.
 #
+# IDEA: compress only the x-axis, compress only the y-axis.
+#
+# IDEA: Extract only the identical rows/columns. uncompressed.
+# IDEA: Extract only the identical rows/columns. compressed.
+#
+# IDEA: Mask of the removed rows/columns.
+# IDEA: Mask of the identical rows/columns.
+#
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
 import os
