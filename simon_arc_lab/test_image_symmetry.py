@@ -45,7 +45,21 @@ class TestImageSymmetry(unittest.TestCase):
         np.testing.assert_array_equal(output, expected)
         np.testing.assert_array_equal(instruction_sequence, 'hstack(orig orig orig orig)')
 
-    def test_10003_vstack2(self):
+    def test_10003_hstack5(self):
+        # Arrange
+        image = np.array([
+            [1, 2, 3]], dtype=np.uint8)
+        # Act
+        i = ImageSymmetry(ImageSymmetryPatternId.HSTACK5)
+        output = i.execute(image)
+        instruction_sequence = i.instruction_sequence()
+        # Assert
+        expected = np.array([
+            [1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3]], dtype=np.uint8)
+        np.testing.assert_array_equal(output, expected)
+        np.testing.assert_array_equal(instruction_sequence, 'hstack(orig orig orig orig orig)')
+
+    def test_10004_vstack2(self):
         # Arrange
         image = np.array([
             [1, 2, 3]], dtype=np.uint8)
@@ -60,7 +74,7 @@ class TestImageSymmetry(unittest.TestCase):
         np.testing.assert_array_equal(output, expected)
         np.testing.assert_array_equal(instruction_sequence, 'vstack(orig orig)')
 
-    def test_10004_vstack3(self):
+    def test_10005_vstack3(self):
         # Arrange
         image = np.array([
             [1, 2, 3]], dtype=np.uint8)
@@ -76,7 +90,7 @@ class TestImageSymmetry(unittest.TestCase):
         np.testing.assert_array_equal(output, expected)
         np.testing.assert_array_equal(instruction_sequence, 'vstack(orig orig orig)')
 
-    def test_10005_vstack4(self):
+    def test_10006_vstack4(self):
         # Arrange
         image = np.array([
             [1, 2, 3]], dtype=np.uint8)
@@ -93,7 +107,25 @@ class TestImageSymmetry(unittest.TestCase):
         np.testing.assert_array_equal(output, expected)
         np.testing.assert_array_equal(instruction_sequence, 'vstack(orig orig orig orig)')
 
-    def test_10006_grid2x2(self):
+    def test_10007_vstack5(self):
+        # Arrange
+        image = np.array([
+            [1, 2, 3]], dtype=np.uint8)
+        # Act
+        i = ImageSymmetry(ImageSymmetryPatternId.VSTACK5)
+        output = i.execute(image)
+        instruction_sequence = i.instruction_sequence()
+        # Assert
+        expected = np.array([
+            [1, 2, 3],
+            [1, 2, 3],
+            [1, 2, 3],
+            [1, 2, 3],
+            [1, 2, 3]], dtype=np.uint8)
+        np.testing.assert_array_equal(output, expected)
+        np.testing.assert_array_equal(instruction_sequence, 'vstack(orig orig orig orig orig)')
+
+    def test_10008_grid2x2(self):
         # Arrange
         image = np.array([
             [1, 2, 3]], dtype=np.uint8)

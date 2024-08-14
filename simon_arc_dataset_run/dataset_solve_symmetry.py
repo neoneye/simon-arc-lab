@@ -2,9 +2,9 @@
 # - generate a palindrome image, hstack(original, flipx(original))
 # - extract the tile that makes up the symmetric input image.
 #
+# IDEA: currently extract a tile from a corner. Also extract the tile from the center, or another coordinate.
 # IDEA: Use rotate cw/ccw to create a symmetric image.
 # IDEA: Use flip diagonal to create a symmetric image.
-# IDEA: Introduce hstack5, vstack5.
 # IDEA: Introduce grid2x3, grid3x3, grid3x3.
 #
 # Present the same input images, but with different transformations.
@@ -66,9 +66,9 @@ def generate_task_with_symmetric_input_image_and_extract_a_particular_tile(seed:
     # count_test = 1
     task = Task()
     min_width = 2
-    max_width = 3
+    max_width = 4
     min_height = 2
-    max_height = 3
+    max_height = 4
 
     image_symmetry = ImageSymmetry.create_random(seed * 1333 + 100)
     image_symmetry.randomize_name_list(seed * 8773 + 2)
@@ -124,7 +124,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=318000410,
+    seed=418000410,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )

@@ -8,21 +8,25 @@ class ImageSymmetryPatternId(Enum):
     HSTACK2 = 'hstack2'
     HSTACK3 = 'hstack3'
     HSTACK4 = 'hstack4'
+    HSTACK5 = 'hstack5'
     VSTACK2 = 'vstack2'
     VSTACK3 = 'vstack3'
     VSTACK4 = 'vstack4'
+    VSTACK5 = 'vstack5'
     GRID2X2 = '2x2'
 
 class ImageSymmetry:
-    MAX_NUMBER_OF_IMAGES_USED = 4
+    MAX_NUMBER_OF_IMAGES_USED = 5
 
     PATTERN_IDS = [
         ImageSymmetryPatternId.HSTACK2, 
         ImageSymmetryPatternId.HSTACK3, 
         ImageSymmetryPatternId.HSTACK4, 
+        ImageSymmetryPatternId.HSTACK5, 
         ImageSymmetryPatternId.VSTACK2, 
         ImageSymmetryPatternId.VSTACK3, 
         ImageSymmetryPatternId.VSTACK4, 
+        ImageSymmetryPatternId.VSTACK5, 
         ImageSymmetryPatternId.GRID2X2
     ]
 
@@ -87,11 +91,13 @@ class ImageSymmetry:
         name1 = self.name_list[1]
         name2 = self.name_list[2]
         name3 = self.name_list[3]
+        name4 = self.name_list[4]
 
         image0 = name_to_image[name0]
         image1 = name_to_image[name1]
         image2 = name_to_image[name2]
         image3 = name_to_image[name3]
+        image4 = name_to_image[name4]
 
         output_image = None
         if pattern == ImageSymmetryPatternId.HSTACK2:
@@ -100,12 +106,16 @@ class ImageSymmetry:
             output_image = np.hstack([image0, image1, image2])
         elif pattern == ImageSymmetryPatternId.HSTACK4:
             output_image = np.hstack([image0, image1, image2, image3])
+        elif pattern == ImageSymmetryPatternId.HSTACK5:
+            output_image = np.hstack([image0, image1, image2, image3, image4])
         elif pattern == ImageSymmetryPatternId.VSTACK2:
             output_image = np.vstack([image0, image1])
         elif pattern == ImageSymmetryPatternId.VSTACK3:
             output_image = np.vstack([image0, image1, image2])
         elif pattern == ImageSymmetryPatternId.VSTACK4:
             output_image = np.vstack([image0, image1, image2, image3])
+        elif pattern == ImageSymmetryPatternId.VSTACK5:
+            output_image = np.vstack([image0, image1, image2, image3, image4])
         elif pattern == ImageSymmetryPatternId.GRID2X2:
             output_image = np.vstack([np.hstack([image0, image1]), np.hstack([image2, image3])])
         else:
@@ -119,6 +129,7 @@ class ImageSymmetry:
         name1 = self.name_list[1]
         name2 = self.name_list[2]
         name3 = self.name_list[3]
+        name4 = self.name_list[4]
 
         instruction_sequence = None
         if pattern == ImageSymmetryPatternId.HSTACK2:
@@ -127,12 +138,16 @@ class ImageSymmetry:
             instruction_sequence = f'hstack({name0} {name1} {name2})'
         elif pattern == ImageSymmetryPatternId.HSTACK4:
             instruction_sequence = f'hstack({name0} {name1} {name2} {name3})'
+        elif pattern == ImageSymmetryPatternId.HSTACK5:
+            instruction_sequence = f'hstack({name0} {name1} {name2} {name3} {name4})'
         elif pattern == ImageSymmetryPatternId.VSTACK2:
             instruction_sequence = f'vstack({name0} {name1})'
         elif pattern == ImageSymmetryPatternId.VSTACK3:
             instruction_sequence = f'vstack({name0} {name1} {name2})'
         elif pattern == ImageSymmetryPatternId.VSTACK4:
             instruction_sequence = f'vstack({name0} {name1} {name2} {name3})'
+        elif pattern == ImageSymmetryPatternId.VSTACK5:
+            instruction_sequence = f'vstack({name0} {name1} {name2} {name3} {name4})'
         elif pattern == ImageSymmetryPatternId.GRID2X2:
             instruction_sequence = f'2x2({name0} {name1} {name2} {name3})'
         else:
