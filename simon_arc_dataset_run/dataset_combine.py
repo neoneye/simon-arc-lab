@@ -5,7 +5,7 @@ import random
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
-seed = 66
+seed = 68
 random.seed(seed)
 
 # Define the input file paths
@@ -13,11 +13,11 @@ dataset_dir = os.path.dirname(__file__)
 file_names = [
     'dataset_cellular_automaton.jsonl',
     'dataset_histogram.jsonl',
-    # 'dataset_image.jsonl',
-    # 'dataset_image_pair.jsonl',
-    # 'dataset_mass.jsonl',
-    # 'dataset_scale.jsonl',
-    # 'dataset_shape.jsonl',
+    'dataset_image.jsonl',
+    'dataset_image_pair.jsonl',
+    'dataset_mass.jsonl',
+    'dataset_scale.jsonl',
+    'dataset_shape.jsonl',
     'dataset_solve_color.jsonl',
     'dataset_solve_rotate.jsonl',
     'dataset_solve_scale.jsonl',
