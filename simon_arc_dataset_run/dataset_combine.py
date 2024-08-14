@@ -5,7 +5,7 @@ import random
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
-seed = 65
+seed = 66
 random.seed(seed)
 
 # Define the input file paths
@@ -13,14 +13,15 @@ dataset_dir = os.path.dirname(__file__)
 file_names = [
     'dataset_cellular_automaton.jsonl',
     'dataset_histogram.jsonl',
-    'dataset_image.jsonl',
-    'dataset_image_pair.jsonl',
-    'dataset_mass.jsonl',
-    'dataset_scale.jsonl',
-    'dataset_shape.jsonl',
+    # 'dataset_image.jsonl',
+    # 'dataset_image_pair.jsonl',
+    # 'dataset_mass.jsonl',
+    # 'dataset_scale.jsonl',
+    # 'dataset_shape.jsonl',
     'dataset_solve_color.jsonl',
     'dataset_solve_rotate.jsonl',
     'dataset_solve_scale.jsonl',
+    'dataset_solve_symmetry.jsonl',
     'dataset_solve_translate.jsonl',
     'dataset_symmetry.jsonl',
 ]
@@ -36,6 +37,7 @@ sampled_rows = []
 
 # Function to read and sample rows from a JSONL file
 def sample_rows(file_path, num_rows):
+    print(f"Sampling {num_rows} rows from {file_path}")
     with open(file_path, 'r') as file:
         lines = file.readlines()
         sampled = random.sample(lines, num_rows)
