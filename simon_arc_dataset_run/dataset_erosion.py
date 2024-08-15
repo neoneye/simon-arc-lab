@@ -52,9 +52,9 @@ def generate_dataset_item(seed: int, connectivity: PixelConnectivity) -> dict:
     :return: A dictionary with the instruction, input, and output
     """
     min_image_size = 5
-    max_image_size = 10
+    max_image_size = 15
 
-    transformation_id = 'erosion'
+    transformation_id = 'apply_erosion'
 
     dataset_name = random.Random(seed + 2).choice(DATASET_NAMES)
 
@@ -75,9 +75,11 @@ def generate_dataset_item(seed: int, connectivity: PixelConnectivity) -> dict:
 
     input_image = None
     accumulated_mask = None
-    found = False
+    has_erosion_mask = False
     for retry_index in range(100):
-        input_image = image_create_random_advanced(seed + 5 + retry_index * 133, min_image_size, max_image_size, min_image_size, max_image_size)
+        seed_for_input_image = seed + 5 + retry_index * 133
+        # print(f"retry_index={retry_index} seed_for_input_image={seed_for_input_image}")
+        input_image = image_create_random_advanced(seed_for_input_image, min_image_size, max_image_size, min_image_size, max_image_size)
         component_list = ConnectedComponent.find_objects(connectivity, input_image)
         accumulated_mask = np.zeros_like(input_image)
         for component in component_list:
@@ -85,10 +87,8 @@ def generate_dataset_item(seed: int, connectivity: PixelConnectivity) -> dict:
             accumulated_mask = np.maximum(accumulated_mask, eroded_mask)
         count = np.count_nonzero(accumulated_mask)
         if count > 0:
-            found = True
+            has_erosion_mask = True
             break
-    if not found:
-        raise Exception("Failed to find a image with an erosion mask.")
 
     output_image = accumulated_mask
 
@@ -97,14 +97,17 @@ def generate_dataset_item(seed: int, connectivity: PixelConnectivity) -> dict:
         title = connectivity_name_lower
         show_prediction_result(input_image, output_image, None, title, show_grid=True, save_path=None)
 
+    if not has_erosion_mask:
+        raise Exception(f"Failed to find a image with an erosion mask. connectivity={connectivity}")
+
     input = serialize(input_image)
     output = serialize(output_image)
 
-    width, height = input_image.shape[1], input_image.shape[0]
+    height, width = input_image.shape
     benchmark_width = image_size1d_to_string(width)
     benchmark_height = image_size1d_to_string(height)
     benchmark_dataset_name = BENCHMARK_DATASET_NAME
-    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} image_width={benchmark_width} image_height={benchmark_height} connectivity={connectivity}'
+    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} image_width={benchmark_width} image_height={benchmark_height} connectivity={connectivity_name_lower}'
 
     result_dict = {
         'instruction': instruction,
@@ -127,12 +130,13 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     items = []
     for index, connectivity in enumerate(connectivity_list):
         for retry_index in range(20):
+            current_seed = seed + index * 10000 + 1333 * retry_index
             try:
-                item = generate_dataset_item(seed + index * 10000 + 1333 * retry_index, connectivity)
+                item = generate_dataset_item(current_seed, connectivity)
                 items.append(item)
                 break
             except Exception as e:
-                print(f"trying again {retry_index}")
+                print(f"trying again {retry_index} with connectivity {connectivity}. error: {e}")
     if len(items) == 0:
         print(f"Failed to generate any dataset items")
     return items
@@ -141,7 +145,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=7101101000,
+    seed=8101101000,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
