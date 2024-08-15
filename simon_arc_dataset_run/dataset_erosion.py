@@ -97,7 +97,7 @@ def generate_dataset_item(seed: int, connectivity: PixelConnectivity) -> dict:
 
     if False:
         print(f"---\ninstruction: {instruction}\nconnectivity={connectivity}")
-        title = connectivity_name_lower
+        title = f"erosion {connectivity_name_lower}"
         show_prediction_result(input_image, output_image, None, title, show_grid=True, save_path=None)
 
     if not has_erosion_mask:
