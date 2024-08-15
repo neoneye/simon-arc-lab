@@ -85,6 +85,8 @@ def generate_dataset_item(seed: int, connectivity: PixelConnectivity) -> dict:
         for component in component_list:
             dilated_mask = image_dilation(component, connectivity)
             sum_mask = np.add(sum_mask, dilated_mask)
+        sum_mask = np.clip(sum_mask, 1, 10)
+        sum_mask = sum_mask - 1
         count = np.count_nonzero(sum_mask)
         if count > 0:
             has_dilation_mask = True
