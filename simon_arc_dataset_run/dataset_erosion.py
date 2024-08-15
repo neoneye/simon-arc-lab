@@ -1,3 +1,4 @@
+# IDEA: Recognize the erosion mask with a particular connectivity.
 import os
 import sys
 
@@ -37,7 +38,7 @@ DATASET_NAMES = [
     'SimonsImageErosion',
 ]
 
-def generate_dataset_item(seed: int, xconnectivity: PixelConnectivity) -> dict:
+def generate_dataset_item(seed: int, connectivity: PixelConnectivity) -> dict:
     """
     Find objects less than or equal to a particular mass.
 
@@ -47,20 +48,22 @@ def generate_dataset_item(seed: int, xconnectivity: PixelConnectivity) -> dict:
     min_image_size = 5
     max_image_size = 10
 
-    transformation_id = 'max_mass'
+    transformation_id = 'erosion'
 
     dataset_name = random.Random(seed + 2).choice(DATASET_NAMES)
 
-    connectivity = PixelConnectivity.ALL8
-    erosion_id = ImageErosionId.ALL8
-    erosion_name = 'all8'
+    # get name from connectivity enum
+    connectivity_name_lower = connectivity.name.lower()
+    connectivity_name_upper = connectivity.name.upper()
 
-    instructions_all8 = [
-        f'{dataset_name} erosion mask all8',
-        f'{dataset_name} mask when doing erosion ALL8',
-        f'{dataset_name} erosion mask with connectivity all8',
+    instructions = [
+        f'{dataset_name} erosion mask {connectivity_name_lower}',
+        f'{dataset_name} erosion mask {connectivity_name_upper}',
+        f'{dataset_name} mask when doing erosion {connectivity_name_lower}',
+        f'{dataset_name} mask when doing erosion {connectivity_name_upper}',
+        f'{dataset_name} erosion mask with connectivity {connectivity_name_lower}',
+        f'{dataset_name} erosion mask with connectivity {connectivity_name_upper}',
     ]
-    instructions = instructions_all8
 
     instruction = random.Random(seed + 4).choice(instructions)
 
@@ -72,7 +75,7 @@ def generate_dataset_item(seed: int, xconnectivity: PixelConnectivity) -> dict:
         component_list = ConnectedComponent.find_objects(connectivity, input_image)
         accumulated_mask = np.zeros_like(input_image)
         for component in component_list:
-            eroded_mask = image_erosion(component, erosion_id)
+            eroded_mask = image_erosion(component, connectivity)
             accumulated_mask = np.maximum(accumulated_mask, eroded_mask)
         count = np.count_nonzero(accumulated_mask)
         if count > 0:
@@ -84,8 +87,8 @@ def generate_dataset_item(seed: int, xconnectivity: PixelConnectivity) -> dict:
     output_image = accumulated_mask
 
     if False:
-        print(f"---\ninstruction: {instruction}\nerosion_id={erosion_id}")
-        title = f"{erosion_name}"
+        print(f"---\ninstruction: {instruction}\nconnectivity={connectivity}")
+        title = connectivity_name_lower
         show_prediction_result(input_image, output_image, None, title, show_grid=True, save_path=None)
 
     input = serialize(input_image)
@@ -95,7 +98,7 @@ def generate_dataset_item(seed: int, xconnectivity: PixelConnectivity) -> dict:
     benchmark_width = image_size1d_to_string(width)
     benchmark_height = image_size1d_to_string(height)
     benchmark_dataset_name = BENCHMARK_DATASET_NAME
-    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} image_width={benchmark_width} image_height={benchmark_height} erosion_id={erosion_id}'
+    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} image_width={benchmark_width} image_height={benchmark_height} connectivity={connectivity}'
 
     result_dict = {
         'instruction': instruction,
@@ -132,7 +135,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=1401905000,
+    seed=7101101000,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
