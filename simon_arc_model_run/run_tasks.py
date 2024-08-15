@@ -8,16 +8,9 @@ from simon_arc_lab.taskset import TaskSet
 from simon_arc_model.model import Model
 from simon_arc_model.work_manager import WorkManager
 
-model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model168'
-# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model179'
-# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model180'
-# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model181'
-# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model182'
-# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model183'
-# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model184'
-# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model185'
-# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model186'
-model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model188'
+# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model229' # training=21 evaluation=6
+# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model231'
+model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model232'
 
 path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training'
 # path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation'
