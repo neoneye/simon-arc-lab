@@ -2,12 +2,6 @@ import numpy as np
 from enum import Enum
 from .pixel_connectivity import PixelConnectivity
 
-class ImageErosionId(Enum):
-    ALL8 = 'all8'
-    NEAREST4 = 'nearest4'
-    CORNER4 = 'corners4'
-
-
 def image_erosion(image: np.array, pixel_connectivity: PixelConnectivity) -> np.array:
     """
     Erosion with mask.
