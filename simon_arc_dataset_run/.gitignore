@@ -3,6 +3,7 @@ __pycache__/
 
 dataset_cellular_automaton.jsonl
 dataset_combine.jsonl
+dataset_dilation.jsonl
 dataset_erosion.jsonl
 dataset_histogram.jsonl
 dataset_image.jsonl
