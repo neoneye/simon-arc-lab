@@ -85,7 +85,10 @@ def generate_dataset_item(seed: int, connectivity: PixelConnectivity) -> dict:
         for component in component_list:
             dilated_mask = image_dilation(component, connectivity)
             sum_mask = np.add(sum_mask, dilated_mask)
+        # The minimum value is always 1. Since a 1x1 pixel with any color, will always have a mask of 1 pixel value. Dilating that will still result in a 1 pixel value.
+        # With PixelConnectivity.ALL8, the max value is 9, when there are 3x3 pixels with unique colors.
         sum_mask = np.clip(sum_mask, 1, 10)
+        # Adjust the values, so they start from 0.
         sum_mask = sum_mask - 1
         count = np.count_nonzero(sum_mask)
         if count > 0:
@@ -94,7 +97,7 @@ def generate_dataset_item(seed: int, connectivity: PixelConnectivity) -> dict:
 
     output_image = sum_mask
 
-    if True:
+    if False:
         print(f"---\ninstruction: {instruction}\nconnectivity={connectivity}")
         title = f"dilation {connectivity_name_lower}"
         show_prediction_result(input_image, output_image, None, title, show_grid=True, save_path=None)
@@ -147,7 +150,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=10101101000,
+    seed=10103737390,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
