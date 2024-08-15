@@ -1,4 +1,9 @@
+# Generate a dataset for the erosion transformation.
+# A mask of what remains after 1 iteration of erosion.
+#
 # IDEA: Recognize the erosion mask with a particular connectivity.
+#
+# IDEA: Apply 2 or 3 iterations of erosion.
 import os
 import sys
 
@@ -40,9 +45,10 @@ DATASET_NAMES = [
 
 def generate_dataset_item(seed: int, connectivity: PixelConnectivity) -> dict:
     """
-    Find objects less than or equal to a particular mass.
+    Erode the image with a particular connectivity.
 
     :param seed: The seed for the random number generator
+    :param connectivity: The pixel connectivity to use for the erosion
     :return: A dictionary with the instruction, input, and output
     """
     min_image_size = 5
