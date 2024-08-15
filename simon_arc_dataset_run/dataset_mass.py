@@ -1,3 +1,12 @@
+# Measure the mass of the objects in the image.
+# The model has no problems with tiny objects with max_mass 3.
+# The model has has serious problems identifying the mass when approaching max_mass 10.
+#
+# IDEA: Recognize the pixel connectivity that was used for the image mass.
+#
+# IDEA: Recognize the max_mass that was used for the transformation.
+#
+# IDEA: Recognize both the max_mass and the pixel connectivity that was used for the transformation.
 import os
 import sys
 
