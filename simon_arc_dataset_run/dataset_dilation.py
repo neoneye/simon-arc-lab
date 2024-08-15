@@ -51,8 +51,8 @@ def generate_dataset_item(seed: int, connectivity: PixelConnectivity) -> dict:
     :param connectivity: The pixel connectivity to use for the dilation
     :return: A dictionary with the instruction, input, and output
     """
-    min_image_size = 5
-    max_image_size = 10
+    min_image_size = 3
+    max_image_size = 15
 
     transformation_id = 'apply_dilation'
 
@@ -150,7 +150,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=10103737390,
+    seed=11103737390,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
