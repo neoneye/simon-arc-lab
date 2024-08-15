@@ -1,6 +1,9 @@
 # Generate a dataset for the erosion transformation.
 # A mask of what remains after 1 iteration of erosion.
 #
+# IDEA: Optimize. This is the slowest dataset generator that I have. It takes around 30 minutes to generate 100.000 rows.
+# Had it been Rust, it would have been near instant.
+#
 # IDEA: Recognize the erosion mask with a particular connectivity.
 #
 # IDEA: Apply 2 or 3 iterations of erosion.
