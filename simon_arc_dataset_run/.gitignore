@@ -1,16 +1,17 @@
 __pycache__/
 .ipynb_checkpoints/
 
+dataset_cellular_automaton.jsonl
 dataset_combine.jsonl
-dataset_rle.jsonl
+dataset_erosion.jsonl
+dataset_histogram.jsonl
 dataset_image.jsonl
 dataset_image_pair.jsonl
-dataset_histogram.jsonl
 dataset_mass.jsonl
-dataset_task.jsonl
-dataset_cellular_automaton.jsonl
+dataset_rle.jsonl
 dataset_scale.jsonl
 dataset_shape.jsonl
+dataset_task.jsonl
 dataset_solve_color.jsonl
 dataset_solve_compress.jsonl
 dataset_solve_rotate.jsonl
