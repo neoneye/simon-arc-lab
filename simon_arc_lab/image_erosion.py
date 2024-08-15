@@ -1,5 +1,4 @@
 import numpy as np
-from enum import Enum
 from .pixel_connectivity import PixelConnectivity
 
 def image_erosion(image: np.array, pixel_connectivity: PixelConnectivity) -> np.array:
