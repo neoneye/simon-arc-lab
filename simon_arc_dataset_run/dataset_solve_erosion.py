@@ -15,7 +15,7 @@ from simon_arc_lab.image_util import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.task import *
 from simon_arc_lab.image_create_random_simple import *
-from simon_arc_lab.image_erosion import *
+from simon_arc_lab.image_erosion_multicolor import *
 from simon_arc_lab.image_util import *
 from simon_arc_lab.pixel_connectivity import *
 from simon_arc_lab.benchmark import *
@@ -31,9 +31,7 @@ def generate_task_erosion(seed: int, connectivity: PixelConnectivity) -> Task:
     """
     Create an eroded image from an input image, by removing the outermost pixels.
     """
-    # get name from connectivity enum
     connectivity_name_lower = connectivity.name.lower()
-    connectivity_name_upper = connectivity.name.upper()
 
     count_example = random.Random(seed + 9).randint(2, 4)
     count_test = random.Random(seed + 10).randint(1, 2)
@@ -60,7 +58,7 @@ def generate_task_erosion(seed: int, connectivity: PixelConnectivity) -> Task:
         output_image = None
         for retry_index in range(100):
             input_image = image_create_random_advanced((retry_index * 10000) + (seed * 37) + 101 + i, min_width, max_width, min_height, max_height)
-            image_mask = image_erosion(input_image, connectivity)
+            image_mask = image_erosion_multicolor(input_image, connectivity)
 
             # most of the eroded images, have the same color for all pixels, except the border. Ignore those.
             # I'm only interested in non-trivial images where there is stuff remaining after the erosion has taken place.
@@ -72,8 +70,16 @@ def generate_task_erosion(seed: int, connectivity: PixelConnectivity) -> Task:
                 # there is nothing remaining after the erosion, skip this image.
                 continue
 
+            # loop through all the connectivity enums, and check if the image is the same as the input image.
+            # if it is, then skip this image, since I don't want a puzzle that is ambiguous.
+            for pc in PixelConnectivity:
+                if pc == connectivity:
+                    continue
+                image_mask_other = image_erosion_multicolor(input_image, pc)
+                if np.array_equal(image_mask, image_mask_other):
+                    continue
+
             output_image = image_replace_colors(image_mask, color_mapping)
-            # output_image = image_mask
             break
         if output_image is None:
             raise Exception("Failed to find a non-trivial example.")
@@ -87,8 +93,8 @@ def demo_generate_task():
         task = generate_task_erosion(i, connectivity)
         task.show()
 
-demo_generate_task()
-exit()
+# demo_generate_task()
+# exit()
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
@@ -96,11 +102,34 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    transformation_id = 'apply_erosion'
-    task = generate_task_erosion(seed, PixelConnectivity.ALL8)
-    # task.show()
-    dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
-    return dataset_items
+    connectivity_list = [
+        PixelConnectivity.NEAREST4,
+        PixelConnectivity.ALL8,
+        PixelConnectivity.CORNER4,
+        PixelConnectivity.LR2,
+        PixelConnectivity.TB2,
+        PixelConnectivity.TLBR2,
+        PixelConnectivity.TRBL2,
+    ]
+    accumulated_items = []
+    for index, connectivity in enumerate(connectivity_list):
+        connectivity_name_lower = connectivity.name.lower()
+        transformation_id = f'apply_erosion_{connectivity_name_lower}'
+
+        for retry_index in range(20):
+            current_seed = seed + index * 10000 + 1333 * retry_index
+            try:
+                task = generate_task_erosion(current_seed, connectivity)
+                # task.show()
+                items = generate_dataset_item_list_inner(seed, task, transformation_id)
+                accumulated_items.extend(items)
+                break
+            except Exception as e:
+                print(f"trying again {retry_index} with connectivity {connectivity}. error: {e}")
+    if len(accumulated_items) == 0:
+        print(f"Failed to generate any dataset items")
+    return accumulated_items
+
 
 generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
