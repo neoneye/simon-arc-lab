@@ -8,19 +8,19 @@ from simon_arc_lab.taskset import TaskSet
 from simon_arc_model.model import Model
 from simon_arc_model.work_manager import WorkManager
 
-# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model229' # training=21 evaluation=6
-# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model231'
-# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model232'
-# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model233'
-# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model235'
-# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model237'
-# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model239'
-# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model240' # training=23 evaluation=4
-# model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model241'
-model_directory = '/Users/neoneye/nobackup/git/simon-arc-lab-model242'
+# iteration=229 training=21 evaluation=6
+# iteration=240 training=23 evaluation=4
+model_iteration = 248
+model_name = f'simon-arc-lab-model{model_iteration}'
+model_directory = f'/Users/neoneye/nobackup/git/{model_name}'
 
-path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training'
-# path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation'
+# check if the model is a dir in the file system
+if not os.path.isdir(model_directory):
+    print(f"Model directory '{model_directory}' does not exist.")
+    sys.exit(1)
+
+path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation'
+# path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training'
 # path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/Mini-ARC/data'
 # path_to_task_dir = '/Users/neoneye/git/arc-dataset-collection/dataset/ConceptARC/data'
 # path_to_task_dir = os.path.join(PROJECT_ROOT, 'testdata', 'simple_arc_tasks')
