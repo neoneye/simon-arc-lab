@@ -50,8 +50,8 @@ def generate_task_pattern_to_fractal(seed: int) -> Task:
     count_example = random.Random(seed + 9).randint(2, 4)
     count_test = random.Random(seed + 10).randint(1, 2)
 
-    scale_input = random.Random(seed + 11).randint(1, 3)
-    scale_output = random.Random(seed + 12).randint(1, 3)
+    scale_input = random.Random(seed + 11).randint(1, 4)
+    scale_output = random.Random(seed + 12).randint(1, 4)
     is_inverse_mask = random.Random(seed + 14).choice([False, True])
     is_padded = random.Random(seed + 16).choice([False, True])
     empty_color = random.Random(seed + 15).choice([0, 1])
@@ -60,8 +60,8 @@ def generate_task_pattern_to_fractal(seed: int) -> Task:
     task = Task()
     task.metadata_task_id = f"pattern_to_fractal in={scale_input} out={scale_output} inv={is_inverse_mask} empty={empty_color} pad={is_padded}"
     min_image_size = 2
-    max_image_size = 3
-    max_pad_count = 4
+    max_image_size = 4
+    max_pad_count = 5
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 13).shuffle(colors)
@@ -130,8 +130,8 @@ def generate_task_fractal_to_pattern(seed: int) -> Task:
     count_example = random.Random(seed + 9).randint(2, 4)
     count_test = random.Random(seed + 10).randint(1, 2)
 
-    scale_input = random.Random(seed + 11).randint(1, 3)
-    scale_output = random.Random(seed + 12).randint(1, 3)
+    scale_input = random.Random(seed + 11).randint(1, 4)
+    scale_output = random.Random(seed + 12).randint(1, 4)
     is_inverse_mask = random.Random(seed + 14).choice([False, True])
     is_padded = random.Random(seed + 16).choice([False, True])
     empty_color = random.Random(seed + 15).choice([0, 1])
@@ -140,8 +140,8 @@ def generate_task_fractal_to_pattern(seed: int) -> Task:
     task = Task()
     task.metadata_task_id = f"fractal_to_pattern in={scale_input} out={scale_output} inv={is_inverse_mask} empty={empty_color} pad={is_padded}"
     min_image_size = 2
-    max_image_size = 3
-    max_pad_count = 4
+    max_image_size = 4
+    max_pad_count = 5
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 13).shuffle(colors)
@@ -234,7 +234,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=10001103031,
+    seed=11001103031,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
