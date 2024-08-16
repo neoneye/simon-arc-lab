@@ -16,6 +16,7 @@ dataset_task.jsonl
 dataset_solve_color.jsonl
 dataset_solve_compress.jsonl
 dataset_solve_erosion.jsonl
+dataset_solve_fractal.jsonl
 dataset_solve_rotate.jsonl
 dataset_solve_scale.jsonl
 dataset_solve_symmetry.jsonl
