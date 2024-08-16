@@ -20,7 +20,7 @@ from simon_arc_lab.image_create_random_advanced import image_create_random_advan
 from simon_arc_lab.benchmark import *
 from simon_arc_lab.pixel_connectivity import *
 from simon_arc_lab.connected_component import *
-from simon_arc_lab.image_erosion import *
+from simon_arc_lab.image_erosion_multicolor import *
 from simon_arc_lab.show_prediction_result import show_prediction_result
 from simon_arc_dataset.dataset_generator import *
 
@@ -83,11 +83,7 @@ def generate_dataset_item(seed: int, connectivity: PixelConnectivity) -> dict:
         seed_for_input_image = seed + 5 + retry_index * 133
         # print(f"retry_index={retry_index} seed_for_input_image={seed_for_input_image}")
         input_image = image_create_random_advanced(seed_for_input_image, min_image_size, max_image_size, min_image_size, max_image_size)
-        component_list = ConnectedComponent.find_objects(connectivity, input_image)
-        accumulated_mask = np.zeros_like(input_image)
-        for component in component_list:
-            eroded_mask = image_erosion(component, connectivity)
-            accumulated_mask = np.maximum(accumulated_mask, eroded_mask)
+        accumulated_mask = image_erosion_multicolor(input_image, connectivity)
         count = np.count_nonzero(accumulated_mask)
         if count > 0:
             has_erosion_mask = True
