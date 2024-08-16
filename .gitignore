@@ -3,3 +3,4 @@ __pycache__/
 .ipynb_checkpoints/
 
 submission.json
+run_tasks_result/**/*.png
