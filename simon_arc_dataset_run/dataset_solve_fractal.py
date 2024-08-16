@@ -1,9 +1,10 @@
 # Fractals transformations.
 # - create a fractal from a pattern.
 # - create a pattern from a fractal.
-#
+# - scale up the fractal by 1-3, scale up the pattern by 1-3.
+# - invert the pattern.
+# 
 # IDEA: Swap the output colors.
-# IDEA: Swap the mask colors inside the pattern.
 #
 # IDEA: add padding around the input image.
 #
