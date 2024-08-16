@@ -2,6 +2,9 @@
 # - create a fractal from a pattern.
 # - create a pattern from a fractal.
 #
+# IDEA: Swap the output colors.
+# IDEA: Swap the mask colors inside the pattern.
+#
 # IDEA: add padding around the input image.
 #
 # IDEA: use different colors for the output image, than the input image.
