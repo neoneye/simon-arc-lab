@@ -39,9 +39,9 @@ def generate_task_erosion(seed: int, connectivity: PixelConnectivity) -> Task:
     task = Task()
     task.metadata_task_id = f'erosion {connectivity_name_lower}'
     min_width = 3
-    max_width = 6
+    max_width = 8
     min_height = 3
-    max_height = 6
+    max_height = 8
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 11).shuffle(colors)
@@ -135,7 +135,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=503600313,
+    seed=603600313,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
