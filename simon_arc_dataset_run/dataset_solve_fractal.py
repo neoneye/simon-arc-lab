@@ -2,9 +2,11 @@
 # - create a fractal from a pattern.
 # - create a pattern from a fractal.
 #
-# IDEA: scale up the input image.
-#
 # IDEA: add padding around the input image.
+#
+# IDEA: use different colors for the output image, than the input image.
+#
+# IDEA: use another tile for the output, than the input pattern.
 #
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
@@ -23,6 +25,7 @@ from simon_arc_lab.task import *
 from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.image_fractal import *
 from simon_arc_lab.image_compress import *
+from simon_arc_lab.image_scale import *
 from simon_arc_lab.benchmark import *
 from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
 from simon_arc_dataset.generate_solve import *
@@ -38,14 +41,17 @@ def generate_task_pattern_to_fractal(seed: int) -> Task:
     """
     count_example = random.Random(seed + 9).randint(2, 4)
     count_test = random.Random(seed + 10).randint(1, 2)
+
+    scale_input = random.Random(seed + 11).randint(1, 3)
+    scale_output = random.Random(seed + 12).randint(1, 3)
     # count_test = 1
     task = Task()
-    task.metadata_task_id = 'pattern_to_fractal'
+    task.metadata_task_id = f"pattern_to_fractal input_scale={scale_input} output_scale={scale_output}"
     min_image_size = 2
     max_image_size = 3
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    random.Random(seed + 11).shuffle(colors)
+    random.Random(seed + 13).shuffle(colors)
     color0 = colors[0]
     color1 = colors[1]
     color_mapping = {
@@ -55,8 +61,8 @@ def generate_task_pattern_to_fractal(seed: int) -> Task:
 
     for i in range(count_example+count_test):
         is_example = i < count_example
-        input_image = None
-        output_image = None
+        pattern_mask = None
+        fractal_mask = None
         for retry_index in range(100):
             input_image_seed = (retry_index * 10000) + (seed * 37) + 101 + i * 1333
             width = random.Random(input_image_seed + 1).randint(min_image_size, max_image_size)
@@ -76,12 +82,15 @@ def generate_task_pattern_to_fractal(seed: int) -> Task:
                 continue
 
             fractal_mask = image_fractal_from_mask(pattern_mask)
-
-            input_image = image_replace_colors(pattern_mask, color_mapping)
-            output_image = image_replace_colors(fractal_mask, color_mapping)
             break
-        if output_image is None:
+        if pattern_mask is None:
             raise Exception("Failed to find a non-trivial example.")
+        if fractal_mask is None:
+            raise Exception("Failed to find a non-trivial example.")
+        input_image = image_replace_colors(pattern_mask, color_mapping)
+        output_image = image_replace_colors(fractal_mask, color_mapping)
+        input_image = image_scale_uniform(input_image, 'up', scale_input)[1]
+        output_image = image_scale_uniform(output_image, 'up', scale_output)[1]
         task.append_pair(input_image, output_image, is_example)
 
     return task
@@ -92,9 +101,12 @@ def generate_task_fractal_to_pattern(seed: int) -> Task:
     """
     count_example = random.Random(seed + 9).randint(2, 4)
     count_test = random.Random(seed + 10).randint(1, 2)
+
+    scale_input = random.Random(seed + 11).randint(1, 3)
+    scale_output = random.Random(seed + 12).randint(1, 3)
     # count_test = 1
     task = Task()
-    task.metadata_task_id = 'fractal_to_pattern'
+    task.metadata_task_id = f"fractal_to_pattern input_scale={scale_input} output_scale={scale_output}"
     min_image_size = 2
     max_image_size = 3
 
@@ -109,8 +121,8 @@ def generate_task_fractal_to_pattern(seed: int) -> Task:
 
     for i in range(count_example+count_test):
         is_example = i < count_example
-        input_image = None
-        output_image = None
+        pattern_mask = None
+        fractal_mask = None
         for retry_index in range(100):
             input_image_seed = (retry_index * 10000) + (seed * 37) + 101 + i * 1333
             width = random.Random(input_image_seed + 1).randint(min_image_size, max_image_size)
@@ -130,18 +142,21 @@ def generate_task_fractal_to_pattern(seed: int) -> Task:
                 continue
 
             fractal_mask = image_fractal_from_mask(pattern_mask)
-
-            input_image = image_replace_colors(fractal_mask, color_mapping)
-            output_image = image_replace_colors(pattern_mask, color_mapping)
             break
-        if output_image is None:
+        if pattern_mask is None:
             raise Exception("Failed to find a non-trivial example.")
+        if fractal_mask is None:
+            raise Exception("Failed to find a non-trivial example.")
+        input_image = image_replace_colors(fractal_mask, color_mapping)
+        output_image = image_replace_colors(pattern_mask, color_mapping)
+        input_image = image_scale_uniform(input_image, 'up', scale_input)[1]
+        output_image = image_scale_uniform(output_image, 'up', scale_output)[1]
         task.append_pair(input_image, output_image, is_example)
 
     return task
 
 def demo_generate_task():
-    for i in range(5):
+    for i in range(20):
         if i % 2 == 0:
             task = generate_task_pattern_to_fractal(i)
         else:
@@ -171,7 +186,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=7701103031,
+    seed=8701103031,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
