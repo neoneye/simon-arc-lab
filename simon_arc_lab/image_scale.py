@@ -26,3 +26,6 @@ def image_scale(unscaled_image: np.array, x_up_down: str, x_scale: int, y_up_dow
     if y_up_down == 'up':
         output_image = np.kron(output_image, np.ones((y_scale, 1))).astype(np.uint8)
     return (input_image, output_image)
+
+def image_scale_uniform(unscaled_image: np.array, up_down: str, scale: int) -> Tuple[np.array, np.array]:
+    return image_scale(unscaled_image, up_down, scale, up_down, scale)
