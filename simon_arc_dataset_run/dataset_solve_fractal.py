@@ -47,9 +47,12 @@ def generate_task_pattern_to_fractal(seed: int) -> Task:
 
     scale_input = random.Random(seed + 11).randint(1, 3)
     scale_output = random.Random(seed + 12).randint(1, 3)
+    is_inverse_mask = random.Random(seed + 14).choice([False, True])
+    empty_color = random.Random(seed + 15).choice([0, 1])
+
     # count_test = 1
     task = Task()
-    task.metadata_task_id = f"pattern_to_fractal input_scale={scale_input} output_scale={scale_output}"
+    task.metadata_task_id = f"pattern_to_fractal in={scale_input} out={scale_output} inv={is_inverse_mask} empty={empty_color}"
     min_image_size = 2
     max_image_size = 3
 
@@ -62,6 +65,11 @@ def generate_task_pattern_to_fractal(seed: int) -> Task:
         1: color1,
     }
 
+    color_mapping_swap01 = {
+        0: 1,
+        1: 0,
+    }
+
     for i in range(count_example+count_test):
         is_example = i < count_example
         pattern_mask = None
@@ -72,6 +80,10 @@ def generate_task_pattern_to_fractal(seed: int) -> Task:
             height = random.Random(input_image_seed + 2).randint(min_image_size, max_image_size)
             ratio = 0.5
             pattern_mask = image_create_random_with_two_colors(width, height, 0, 1, ratio, input_image_seed + 3)
+            if is_inverse_mask:
+                pattern_image = image_replace_colors(pattern_mask, color_mapping_swap01)
+            else:
+                pattern_image = pattern_mask.copy()
 
             pattern_mask_compressed = image_compress_xy(pattern_mask)
             if pattern_mask_compressed.shape[0] < 2 or pattern_mask_compressed.shape[1] < 2:
@@ -84,7 +96,7 @@ def generate_task_pattern_to_fractal(seed: int) -> Task:
                 # both value 0 and value 1 must be present in the mask.
                 continue
 
-            fractal_mask = image_fractal_from_mask(pattern_mask)
+            fractal_mask = image_fractal_from_mask_and_image(pattern_mask, pattern_image, empty_color)
             break
         if pattern_mask is None:
             raise Exception("Failed to find a non-trivial example.")
@@ -107,19 +119,27 @@ def generate_task_fractal_to_pattern(seed: int) -> Task:
 
     scale_input = random.Random(seed + 11).randint(1, 3)
     scale_output = random.Random(seed + 12).randint(1, 3)
+    is_inverse_mask = random.Random(seed + 14).choice([False, True])
+    empty_color = random.Random(seed + 15).choice([0, 1])
+
     # count_test = 1
     task = Task()
-    task.metadata_task_id = f"fractal_to_pattern input_scale={scale_input} output_scale={scale_output}"
+    task.metadata_task_id = f"fractal_to_pattern in={scale_input} out={scale_output} inv={is_inverse_mask} empty={empty_color}"
     min_image_size = 2
     max_image_size = 3
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    random.Random(seed + 11).shuffle(colors)
+    random.Random(seed + 13).shuffle(colors)
     color0 = colors[0]
     color1 = colors[1]
     color_mapping = {
         0: color0,
         1: color1,
+    }
+
+    color_mapping_swap01 = {
+        0: 1,
+        1: 0,
     }
 
     for i in range(count_example+count_test):
@@ -132,6 +152,10 @@ def generate_task_fractal_to_pattern(seed: int) -> Task:
             height = random.Random(input_image_seed + 2).randint(min_image_size, max_image_size)
             ratio = 0.5
             pattern_mask = image_create_random_with_two_colors(width, height, 0, 1, ratio, input_image_seed + 3)
+            if is_inverse_mask:
+                pattern_image = image_replace_colors(pattern_mask, color_mapping_swap01)
+            else:
+                pattern_image = pattern_mask.copy()
 
             pattern_mask_compressed = image_compress_xy(pattern_mask)
             if pattern_mask_compressed.shape[0] < 2 or pattern_mask_compressed.shape[1] < 2:
@@ -144,7 +168,7 @@ def generate_task_fractal_to_pattern(seed: int) -> Task:
                 # both value 0 and value 1 must be present in the mask.
                 continue
 
-            fractal_mask = image_fractal_from_mask(pattern_mask)
+            fractal_mask = image_fractal_from_mask_and_image(pattern_mask, pattern_image, empty_color)
             break
         if pattern_mask is None:
             raise Exception("Failed to find a non-trivial example.")
@@ -189,7 +213,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=8701103031,
+    seed=9701103031,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
