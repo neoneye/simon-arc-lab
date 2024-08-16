@@ -3,7 +3,18 @@ import numpy as np
 from .image_pad import *
 
 class TestImagePad(unittest.TestCase):
-    def test_10000_image_pad_random_size1(self):
+    def test_10000_image_pad_random_size0(self):
+        # Arrange
+        image = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        expected = image.copy()
+        # Act
+        actual = image_pad_random(image, seed=1, color=9, min_pad_count=0, max_pad_count=0)
+        # Assert
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_10001_image_pad_random_size1(self):
         # Arrange
         image = np.array([
             [1, 2, 3],
@@ -18,7 +29,7 @@ class TestImagePad(unittest.TestCase):
             [9, 9, 9, 9, 9]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_10001_image_pad_random_sizevary(self):
+    def test_10002_image_pad_random_sizevary(self):
         # Arrange
         image = np.array([
             [1, 2, 3],
