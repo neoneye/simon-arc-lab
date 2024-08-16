@@ -3,12 +3,11 @@
 # - create a pattern from a fractal.
 # - scale up the fractal by 1-3, scale up the pattern by 1-3.
 # - invert the pattern.
+# - add padding around the input image.
 # 
 # IDEA: Swap the output colors.
 #
 # IDEA: rotate the pattern_image by 90, 180, 270 degrees.
-#
-# IDEA: add padding around the input image.
 #
 # IDEA: use different colors for the output image, than the input image.
 #
@@ -30,9 +29,10 @@ from simon_arc_lab.image_mix import *
 from simon_arc_lab.image_util import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.task import *
+from simon_arc_lab.image_compress import *
 from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.image_fractal import *
-from simon_arc_lab.image_compress import *
+from simon_arc_lab.image_pad import *
 from simon_arc_lab.image_scale import *
 from simon_arc_lab.benchmark import *
 from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
@@ -53,18 +53,22 @@ def generate_task_pattern_to_fractal(seed: int) -> Task:
     scale_input = random.Random(seed + 11).randint(1, 3)
     scale_output = random.Random(seed + 12).randint(1, 3)
     is_inverse_mask = random.Random(seed + 14).choice([False, True])
+    is_padded = random.Random(seed + 16).choice([False, True])
     empty_color = random.Random(seed + 15).choice([0, 1])
 
     # count_test = 1
     task = Task()
-    task.metadata_task_id = f"pattern_to_fractal in={scale_input} out={scale_output} inv={is_inverse_mask} empty={empty_color}"
+    task.metadata_task_id = f"pattern_to_fractal in={scale_input} out={scale_output} inv={is_inverse_mask} empty={empty_color} pad={is_padded}"
     min_image_size = 2
     max_image_size = 3
+    max_pad_count = 3
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 13).shuffle(colors)
     color0 = colors[0]
     color1 = colors[1]
+    color_padding = colors[2]
+
     color_mapping = {
         0: color0,
         1: color1,
@@ -109,7 +113,11 @@ def generate_task_pattern_to_fractal(seed: int) -> Task:
             raise Exception("Failed to find a non-trivial example.")
         input_image = image_replace_colors(pattern_mask, color_mapping)
         output_image = image_replace_colors(fractal_mask, color_mapping)
+
         input_image = image_scale_uniform(input_image, 'up', scale_input)[1]
+        if is_padded:
+            input_image = image_pad_random(input_image, seed=seed + 1000 + i * 997, color=color_padding, min_pad_count=1, max_pad_count=max_pad_count)
+
         output_image = image_scale_uniform(output_image, 'up', scale_output)[1]
         task.append_pair(input_image, output_image, is_example)
 
@@ -125,18 +133,22 @@ def generate_task_fractal_to_pattern(seed: int) -> Task:
     scale_input = random.Random(seed + 11).randint(1, 3)
     scale_output = random.Random(seed + 12).randint(1, 3)
     is_inverse_mask = random.Random(seed + 14).choice([False, True])
+    is_padded = random.Random(seed + 16).choice([False, True])
     empty_color = random.Random(seed + 15).choice([0, 1])
 
     # count_test = 1
     task = Task()
-    task.metadata_task_id = f"fractal_to_pattern in={scale_input} out={scale_output} inv={is_inverse_mask} empty={empty_color}"
+    task.metadata_task_id = f"fractal_to_pattern in={scale_input} out={scale_output} inv={is_inverse_mask} empty={empty_color} pad={is_padded}"
     min_image_size = 2
     max_image_size = 3
+    max_pad_count = 3
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 13).shuffle(colors)
     color0 = colors[0]
     color1 = colors[1]
+    color_padding = colors[2]
+
     color_mapping = {
         0: color0,
         1: color1,
@@ -181,7 +193,11 @@ def generate_task_fractal_to_pattern(seed: int) -> Task:
             raise Exception("Failed to find a non-trivial example.")
         input_image = image_replace_colors(fractal_mask, color_mapping)
         output_image = image_replace_colors(pattern_mask, color_mapping)
+
         input_image = image_scale_uniform(input_image, 'up', scale_input)[1]
+        if is_padded:
+            input_image = image_pad_random(input_image, seed=seed + 1000 + i * 997, color=color_padding, min_pad_count=1, max_pad_count=max_pad_count)
+
         output_image = image_scale_uniform(output_image, 'up', scale_output)[1]
         task.append_pair(input_image, output_image, is_example)
 
@@ -218,7 +234,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=9801103031,
+    seed=9901103031,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
