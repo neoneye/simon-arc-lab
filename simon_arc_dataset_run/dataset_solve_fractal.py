@@ -6,9 +6,13 @@
 # 
 # IDEA: Swap the output colors.
 #
+# IDEA: rotate the pattern_image by 90, 180, 270 degrees.
+#
 # IDEA: add padding around the input image.
 #
 # IDEA: use different colors for the output image, than the input image.
+#
+# IDEA: use different colors in each pair. Currently uses the same global colors for all pairs.
 #
 # IDEA: use another tile for the output, than the input pattern.
 #
@@ -214,7 +218,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=9701103031,
+    seed=9801103031,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
