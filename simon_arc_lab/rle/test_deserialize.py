@@ -97,5 +97,19 @@ class TestDeserialize(unittest.TestCase):
         self.assertTrue("Invalid character inside row" in str(context.exception))
         self.assertEqual("Character: {", context.exception.details)
 
+    def test_deserialize_exception_adjacent_az(self):
+        junk = "1 2 aa3,"
+        with self.assertRaises(DecodeRLEError) as context:
+            deserialize(junk)
+        self.assertTrue("No adjacent a-z characters are allowed" in str(context.exception))
+        self.assertEqual("Character: a", context.exception.details)
+
+    def test_deserialize_exception_last_character(self):
+        junk = "3 2 345a,678"
+        with self.assertRaises(DecodeRLEError) as context:
+            deserialize(junk)
+        self.assertTrue("Last character must not be a-z character" in str(context.exception))
+        self.assertEqual("Character: a", context.exception.details)
+
 if __name__ == '__main__':
     unittest.main()

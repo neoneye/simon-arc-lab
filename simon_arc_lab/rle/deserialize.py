@@ -13,6 +13,7 @@ def decode_rle_row_inner(row):
     decoded_row = []
     prev_count = 1
     x = 0
+    current_az_count = 0
 
     for ch in row:
         if ch.isdigit():
@@ -21,11 +22,18 @@ def decode_rle_row_inner(row):
                 decoded_row.append(color)
                 x += 1
             prev_count = 1
+            current_az_count = 0
         else:
             if not ('a' <= ch <= 'z'):
                 raise DecodeRLEError("Invalid character inside row", details=f"Character: {ch}")
+            current_az_count += 1
+            if current_az_count >= 2:
+                raise DecodeRLEError("No adjacent a-z characters are allowed", details=f"Character: {ch}")
             count = ord(ch) - ord('a') + 2
             prev_count = count
+
+    if current_az_count > 0:
+        raise DecodeRLEError("Last character must not be a-z character", details=f"Character: {ch}")
 
     return decoded_row
 
