@@ -1,8 +1,14 @@
 import numpy as np
 
+class DecodeRLEError(ValueError):
+    """Exception raised for errors in RLE decoding."""
+    def __init__(self, message, details=None):
+        super().__init__(message)
+        self.details = details
+
 def decode_rle_row_inner(row):
     if not row:
-        raise ValueError("invalid row")
+        raise DecodeRLEError("Invalid row: row cannot be empty")
 
     decoded_row = []
     prev_count = 1
@@ -16,6 +22,8 @@ def decode_rle_row_inner(row):
                 x += 1
             prev_count = 1
         else:
+            if not ('a' <= ch <= 'z'):
+                raise DecodeRLEError("Invalid character inside row", details=f"Character: {ch}")
             count = ord(ch) - ord('a') + 2
             prev_count = count
 
@@ -31,11 +39,13 @@ def decode_rle_row(row, width):
             color = int(ch)
             return [color] * width
         else:
-            raise ValueError("invalid character for full row")
+            raise DecodeRLEError("Invalid character for full row", details=f"Character: {ch}")
 
     decoded_row = decode_rle_row_inner(row)
-    if len(decoded_row) != width:
-        raise ValueError("mismatch width and the number of RLE columns")
+    length_decoded_row = len(decoded_row)
+    if length_decoded_row != width:
+        raise DecodeRLEError("Mismatch between width and the number of RLE columns",
+                             details=f"Expected width: {width}, Decoded width: {length_decoded_row}")
 
     return decoded_row
 
@@ -43,15 +53,18 @@ def deserialize(input_str):
     verbose = False
 
     parts = input_str.split(' ')
-    if len(parts) != 3:
-        raise ValueError("invalid input")
+    count_parts = len(parts)
+    if count_parts != 3:
+        raise DecodeRLEError("Expected 3 parts", details=f"But got {count_parts} parts")
 
     width = int(parts[0])
     height = int(parts[1])
     rows = parts[2].split(',')
 
-    if len(rows) != height:
-        raise ValueError("mismatch height and the number of RLE rows")
+    count_rows = len(rows)
+    if count_rows != height:
+        raise DecodeRLEError("Mismatch between height and the number of RLE rows",
+                             details=f"Expected height: {height}, Number of rows: {count_rows}")
 
     image = np.zeros((height, width), dtype=np.uint8)
     copy_y = 0
@@ -62,7 +75,7 @@ def deserialize(input_str):
             print(f"y: {y} row: {row}")
         if not row:
             if y == 0:
-                raise ValueError("first row is empty")
+                raise DecodeRLEError("First row is empty")
             image[y, :] = image[copy_y, :]
             continue
         copy_y = y

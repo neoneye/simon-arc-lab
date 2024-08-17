@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from .deserialize import deserialize, decode_rle_row, decode_rle_row_inner
+from .deserialize import deserialize, decode_rle_row, decode_rle_row_inner, DecodeRLEError
 
 class TestDeserialize(unittest.TestCase):
     def test_decode_rle_row_inner_0(self):
@@ -65,6 +65,37 @@ class TestDeserialize(unittest.TestCase):
             [2, 2, 2, 2]]
         # print(expected)
         self.assertTrue(np.array_equal(actual, expected))
+
+    def test_deserialize_exception_3parts(self):
+        junk = "1 2 3 4"
+        with self.assertRaises(DecodeRLEError) as context:
+            deserialize(junk)
+        self.assertTrue("Expected 3 parts" in str(context.exception))
+
+    def test_deserialize_exception_heightmismatch(self):
+        junk = "1 5 0,,,,,,,,,,,"
+        with self.assertRaises(DecodeRLEError) as context:
+            deserialize(junk)
+        self.assertTrue("Mismatch between height and the number of RLE rows" in str(context.exception))
+
+    def test_deserialize_exception_emptyfirstrow(self):
+        junk = "1 2 ,5"
+        with self.assertRaises(DecodeRLEError) as context:
+            deserialize(junk)
+        self.assertTrue("First row is empty" in str(context.exception))
+
+    def test_deserialize_exception_invalidcharacterforfullrow(self):
+        junk = "1 2 3,#"
+        with self.assertRaises(DecodeRLEError) as context:
+            deserialize(junk)
+        self.assertTrue("Invalid character for full row" in str(context.exception))
+
+    def test_deserialize_exception_invalidcharacterinsiderow(self):
+        junk = "1 2 {3,"
+        with self.assertRaises(DecodeRLEError) as context:
+            deserialize(junk)
+        self.assertTrue("Invalid character inside row" in str(context.exception))
+        self.assertEqual("Character: {", context.exception.details)
 
 if __name__ == '__main__':
     unittest.main()
