@@ -1,12 +1,13 @@
+from typing import List, Optional
 import numpy as np
 
 class DecodeRLEError(ValueError):
     """Exception raised for errors in RLE decoding."""
-    def __init__(self, message, details=None):
+    def __init__(self, message: str, details: Optional[str] = None):
         super().__init__(message)
         self.details = details
 
-def decode_rle_row_inner(row):
+def decode_rle_row_inner(row: str) -> List[int]:
     if not row:
         raise DecodeRLEError("Invalid row: row cannot be empty")
 
@@ -37,7 +38,7 @@ def decode_rle_row_inner(row):
 
     return decoded_row
 
-def decode_rle_row(row, width):
+def decode_rle_row(row: str, width: int) -> List[int]:
     if not row:
         return []
 
@@ -57,7 +58,7 @@ def decode_rle_row(row, width):
 
     return decoded_row
 
-def deserialize(input_str):
+def deserialize(input_str: str) -> np.array:
     verbose = False
 
     parts = input_str.split(' ')
