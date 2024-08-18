@@ -5,7 +5,7 @@ import random
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
-seed = 88
+seed = 89
 random.seed(seed)
 
 # Define the input file paths
