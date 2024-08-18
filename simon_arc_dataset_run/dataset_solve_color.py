@@ -3,6 +3,7 @@
 # - Identify the most popular color.
 # - Identify the least popular color.
 #
+# IDEA: Mask of where a particular color occurs in the input.
 # IDEA: Replace one color with another color.
 #
 # IDEA: Swap the most/lest popular colors with each other.
