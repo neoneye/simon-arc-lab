@@ -8,10 +8,12 @@ from simon_arc_lab.taskset import TaskSet
 from simon_arc_model.model import Model
 from simon_arc_model.work_manager import WorkManager
 
-# iteration=229 training=21 evaluation=6
-# iteration=240 training=23 evaluation=4
-# iteration=254 training=23 evaluation=4
-model_iteration = 254
+# iteration=229 training=21 evaluation=6 total=27
+# iteration=240 training=23 evaluation=4 total=27
+# iteration=254 training=23 evaluation=4 total=27
+# iteration=255 training=23 evaluation=4 total=27
+# iteration=256 training=22 evaluation=6 total=28
+model_iteration = 256
 model_name = f'simon-arc-lab-model{model_iteration}'
 model_directory = f'/Users/neoneye/nobackup/git/{model_name}'
 
