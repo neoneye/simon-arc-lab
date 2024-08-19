@@ -19,11 +19,11 @@ class ImageSymmetryMutationId(Enum):
     ORIGINAL = 'orig'
     FLIPX = 'flipx'
     FLIPY = 'flipy'
+    FLIP_DIAGONAL_A = 'flipa'
+    FLIP_DIAGONAL_B = 'flipb'
     ROTATE_180 = '180'
     ROTATE_CW = 'cw'
     ROTATE_CCW = 'ccw'
-    FLIP_DIAGONAL_A = 'flipa'
-    FLIP_DIAGONAL_B = 'flipb'
 
 class ImageSymmetryBase:
     MAX_NUMBER_OF_IMAGES_USED = 5
