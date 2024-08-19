@@ -4,6 +4,9 @@
 # - Use rotate cw/ccw to create a symmetric image.
 # - Use flip diagonal to create a symmetric image.
 #
+# IDEA: add spacing around the input tile, so the job is to remove the spacing, and tile the image.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=73182012
+#
 # IDEA: rotational symmetry, in order to solve the task:
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2697da3f
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=46442a0e
