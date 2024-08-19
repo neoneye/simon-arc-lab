@@ -45,18 +45,16 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_symmetry'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_symmetry.jsonl')
 
-def generate_task_with_input_image_create_output_symmetry(seed: int) -> Task:
+def generate_task_with_input_image_create_output_symmetry_rect(seed: int) -> Task:
     """
-    Create a symmetric image from an input image.
+    Create a symmetric image from a rectangular input image.
     """
     count_example = random.Random(seed + 9).randint(2, 4)
     count_test = random.Random(seed + 10).randint(1, 2)
     # count_test = 1
     task = Task()
-    min_width = 2
-    max_width = 4
-    min_height = 2
-    max_height = 4
+    min_image_size = 2
+    max_image_size = 4
 
     image_symmetry = ImageSymmetryRect.create_random(seed * 1333 + 100)
     image_symmetry.randomize_name_list(seed * 8773 + 2)
@@ -65,24 +63,22 @@ def generate_task_with_input_image_create_output_symmetry(seed: int) -> Task:
 
     for i in range(count_example+count_test):
         is_example = i < count_example
-        input_image = image_create_random_advanced((seed * 31) + 1002 + i, min_width, max_width, min_height, max_height)
+        input_image = image_create_random_advanced((seed * 31) + 1002 + i, min_image_size, max_image_size, min_image_size, max_image_size)
         output_image = image_symmetry.execute(input_image)
         task.append_pair(input_image, output_image, is_example)
 
     return task
 
-def generate_task_with_symmetric_input_image_and_extract_a_particular_tile(seed: int) -> Task:
+def generate_task_with_symmetry_rect_input_image_and_extract_a_particular_tile(seed: int) -> Task:
     """
-    Identify the top-left tile of a symmetric image.
+    Identify the top-left rectangular tile of a symmetric image.
     """
     count_example = random.Random(seed + 1).randint(2, 4)
     count_test = random.Random(seed + 2).randint(1, 2)
     # count_test = 1
     task = Task()
-    min_width = 2
-    max_width = 4
-    min_height = 2
-    max_height = 4
+    min_image_size = 2
+    max_image_size = 4
 
     image_symmetry = ImageSymmetryRect.create_random(seed * 1333 + 100)
     image_symmetry.randomize_name_list(seed * 8773 + 2)
@@ -97,7 +93,7 @@ def generate_task_with_symmetric_input_image_and_extract_a_particular_tile(seed:
     rotate90_count = random.Random(seed + 3).randint(0, 3)
     for i in range(count_example+count_test):
         is_example = i < count_example
-        output_image_raw = image_create_random_advanced((seed * 31) + 1002 + i, min_width, max_width, min_height, max_height)
+        output_image_raw = image_create_random_advanced((seed * 31) + 1002 + i, min_image_size, max_image_size, min_image_size, max_image_size)
         input_image_raw = image_symmetry.execute(output_image_raw)
         input_image = np.rot90(input_image_raw, rotate90_count)
         output_image = np.rot90(output_image_raw, rotate90_count)
@@ -108,9 +104,9 @@ def generate_task_with_symmetric_input_image_and_extract_a_particular_tile(seed:
 def demo_generate_task():
     for i in range(5):
         if i % 2 == 0:
-            task = generate_task_with_input_image_create_output_symmetry(i)
+            task = generate_task_with_input_image_create_output_symmetry_rect(i)
         else:
-            task = generate_task_with_symmetric_input_image_and_extract_a_particular_tile(i)
+            task = generate_task_with_symmetry_rect_input_image_and_extract_a_particular_tile(i)
         task.show()
 
 # demo_generate_task()
@@ -123,11 +119,11 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
     if seed % 2 == 0:
-        task = generate_task_with_input_image_create_output_symmetry(seed)
+        task = generate_task_with_input_image_create_output_symmetry_rect(seed)
         task_id = task.metadata_task_id
         transformation_id = f"'create_symmetry {task_id}'"
     else:
-        task = generate_task_with_symmetric_input_image_and_extract_a_particular_tile(seed)
+        task = generate_task_with_symmetry_rect_input_image_and_extract_a_particular_tile(seed)
         task_id = task.metadata_task_id
         transformation_id = f"'extract_tile {task_id}'"
     # task.show()
