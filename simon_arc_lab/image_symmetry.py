@@ -19,9 +19,13 @@ class ImageSymmetryMutationId(Enum):
     ORIGINAL = 'orig'
     FLIPX = 'flipx'
     FLIPY = 'flipy'
-    ROTATE180 = '180'
+    ROTATE_180 = '180'
+    ROTATE_CW = 'cw'
+    ROTATE_CCW = 'ccw'
+    FLIP_DIAGONAL_A = 'flipa'
+    FLIP_DIAGONAL_B = 'flipb'
 
-class ImageSymmetry:
+class ImageSymmetryBase:
     MAX_NUMBER_OF_IMAGES_USED = 5
 
     PATTERN_IDS = [
@@ -41,14 +45,14 @@ class ImageSymmetry:
 
         # by default use the original image for all images in the symmetry
         self.name_list = []
-        for _ in range(ImageSymmetry.MAX_NUMBER_OF_IMAGES_USED):
+        for _ in range(ImageSymmetryRect.MAX_NUMBER_OF_IMAGES_USED):
             name_image = ImageSymmetryMutationId.ORIGINAL
             self.name_list.append(name_image)
 
     @classmethod
-    def create_random(cls, seed: int) -> Tuple['ImageSymmetry', str]:
-        pattern = random.Random(seed).choice(ImageSymmetry.PATTERN_IDS)
-        return ImageSymmetry(pattern)
+    def create_random(cls, seed: int) -> Tuple['ImageSymmetryRect', str]:
+        pattern = random.Random(seed).choice(ImageSymmetryRect.PATTERN_IDS)
+        return ImageSymmetryRect(pattern)
     
     def use_original_for_index(self, index: int):
         self.name_list[index] = ImageSymmetryMutationId.ORIGINAL
@@ -60,32 +64,25 @@ class ImageSymmetry:
         self.name_list[index] = ImageSymmetryMutationId.FLIPY
 
     def use_180_for_index(self, index: int):
-        self.name_list[index] = ImageSymmetryMutationId.ROTATE180
+        self.name_list[index] = ImageSymmetryMutationId.ROTATE_180
 
     def randomize_name_list(self, seed: int):
         name_list = [
             ImageSymmetryMutationId.ORIGINAL,
             ImageSymmetryMutationId.FLIPX,
             ImageSymmetryMutationId.FLIPY,
-            ImageSymmetryMutationId.ROTATE180,
+            ImageSymmetryMutationId.ROTATE_180,
         ]
         self.name_list = []
-        for i in range(ImageSymmetry.MAX_NUMBER_OF_IMAGES_USED):
+        for i in range(ImageSymmetryRect.MAX_NUMBER_OF_IMAGES_USED):
             name_image = random.Random(seed+i).choice(name_list)
             self.name_list.append(name_image)
 
-    def execute(self, image: np.array) -> np.array:
-        image_original = image.copy()
-        image_fx = image_flipx(image)
-        image_fy = image_flipy(image)
-        image_180 = image_rotate_180(image)
+    def populate_name_to_image_dict(self, image: np.array) -> dict:
+        raise NotImplementedError()
 
-        name_to_image = {
-            ImageSymmetryMutationId.ORIGINAL: image_original,
-            ImageSymmetryMutationId.FLIPX: image_fx,
-            ImageSymmetryMutationId.FLIPY: image_fy,
-            ImageSymmetryMutationId.ROTATE180: image_180
-        }
+    def execute(self, image: np.array) -> np.array:
+        name_to_image = self.populate_name_to_image_dict(image)
 
         pattern = self.pattern
         name0 = self.name_list[0]
@@ -155,3 +152,57 @@ class ImageSymmetry:
             raise ValueError(f"Unknown ImageSymmetryPatternId: {pattern}")
         
         return instruction_sequence
+
+class ImageSymmetryRect(ImageSymmetryBase):
+    def populate_name_to_image_dict(self, image: np.array) -> dict:
+        image_original = image.copy()
+        image_fx = image_flipx(image)
+        image_fy = image_flipy(image)
+        image_180 = image_rotate_180(image)
+
+        name_to_image = {
+            ImageSymmetryMutationId.ORIGINAL: image_original,
+            ImageSymmetryMutationId.FLIPX: image_fx,
+            ImageSymmetryMutationId.FLIPY: image_fy,
+            ImageSymmetryMutationId.ROTATE_180: image_180
+        }
+        return name_to_image
+
+class ImageSymmetrySquare(ImageSymmetryBase):
+    def populate_name_to_image_dict(self, image: np.array) -> dict:
+        if image.shape[0] != image.shape[1]:
+            raise ValueError(f"ImageSymmetrySquare requires square image. Got {image.shape}")
+        
+        image_original = image.copy()
+        image_fx = image_flipx(image)
+        image_fy = image_flipy(image)
+        image_fa = image_flip_diagonal_a(image)
+        image_fb = image_flip_diagonal_b(image)
+        image_180 = image_rotate_180(image)
+        image_cw = image_rotate_cw(image)
+        image_ccw = image_rotate_ccw(image)
+
+        name_to_image = {
+            ImageSymmetryMutationId.ORIGINAL: image_original,
+            ImageSymmetryMutationId.FLIPX: image_fx,
+            ImageSymmetryMutationId.FLIPY: image_fy,
+            ImageSymmetryMutationId.FLIP_DIAGONAL_A: image_fa,
+            ImageSymmetryMutationId.FLIP_DIAGONAL_B: image_fb,
+            ImageSymmetryMutationId.ROTATE_180: image_180,
+            ImageSymmetryMutationId.ROTATE_CW: image_cw,
+            ImageSymmetryMutationId.ROTATE_CCW: image_ccw
+        }
+        return name_to_image
+
+    def use_rotate_cw_for_index(self, index: int):
+        self.name_list[index] = ImageSymmetryMutationId.ROTATE_CW
+
+    def use_rotate_ccw_for_index(self, index: int):
+        self.name_list[index] = ImageSymmetryMutationId.ROTATE_CCW
+
+    def use_flipa_for_index(self, index: int):
+        self.name_list[index] = ImageSymmetryMutationId.FLIP_DIAGONAL_A
+
+    def use_flipb_for_index(self, index: int):
+        self.name_list[index] = ImageSymmetryMutationId.FLIP_DIAGONAL_B
+

@@ -66,7 +66,7 @@ def generate_dataset_item_with_symmetry_output(seed: int) -> dict:
     dataset_name = random.choice(DATASET_NAMES)
 
     input_image = image_create_random_advanced(seed + 5, min_image_size, max_image_size, min_image_size, max_image_size)
-    i = ImageSymmetry.create_random(seed+1)
+    i = ImageSymmetryRect.create_random(seed+1)
     i.randomize_name_list(seed+2)
     instruction_sequence = i.instruction_sequence()
     output_image = i.execute(input_image)

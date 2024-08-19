@@ -58,7 +58,7 @@ def generate_task_with_input_image_create_output_symmetry(seed: int) -> Task:
     min_height = 2
     max_height = 4
 
-    image_symmetry = ImageSymmetry.create_random(seed * 1333 + 100)
+    image_symmetry = ImageSymmetryRect.create_random(seed * 1333 + 100)
     image_symmetry.randomize_name_list(seed * 8773 + 2)
     instruction_sequence = image_symmetry.instruction_sequence()
     task.metadata_task_id = instruction_sequence
@@ -84,7 +84,7 @@ def generate_task_with_symmetric_input_image_and_extract_a_particular_tile(seed:
     min_height = 2
     max_height = 4
 
-    image_symmetry = ImageSymmetry.create_random(seed * 1333 + 100)
+    image_symmetry = ImageSymmetryRect.create_random(seed * 1333 + 100)
     image_symmetry.randomize_name_list(seed * 8773 + 2)
 
     # It's the top-left tile that is always extracted. It's the first tile.
