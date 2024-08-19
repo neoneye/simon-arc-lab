@@ -13,7 +13,8 @@ from simon_arc_model.work_manager import WorkManager
 # iteration=254 training=23 evaluation=4 total=27
 # iteration=255 training=23 evaluation=4 total=27
 # iteration=256 training=22 evaluation=6 total=28
-model_iteration = 256
+# iteration=262 training=23 evaluation=5 total=28
+model_iteration = 262
 model_name = f'simon-arc-lab-model{model_iteration}'
 model_directory = f'/Users/neoneye/nobackup/git/{model_name}'
 
