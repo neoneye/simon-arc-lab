@@ -15,7 +15,7 @@ class TestImageSymmetry(unittest.TestCase):
         expected = np.array([
             [1, 2, 3, 1, 2, 3]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
-        np.testing.assert_array_equal(instruction_sequence, 'hstack(orig orig)')
+        self.assertEqual(instruction_sequence, 'hstack(orig orig)')
 
     def test_10001_rect_hstack3(self):
         # Arrange
@@ -29,7 +29,7 @@ class TestImageSymmetry(unittest.TestCase):
         expected = np.array([
             [1, 2, 3, 1, 2, 3, 1, 2, 3]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
-        np.testing.assert_array_equal(instruction_sequence, 'hstack(orig orig orig)')
+        self.assertEqual(instruction_sequence, 'hstack(orig orig orig)')
 
     def test_10002_rect_hstack4(self):
         # Arrange
@@ -43,7 +43,7 @@ class TestImageSymmetry(unittest.TestCase):
         expected = np.array([
             [1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
-        np.testing.assert_array_equal(instruction_sequence, 'hstack(orig orig orig orig)')
+        self.assertEqual(instruction_sequence, 'hstack(orig orig orig orig)')
 
     def test_10003_rect_hstack5(self):
         # Arrange
@@ -57,7 +57,7 @@ class TestImageSymmetry(unittest.TestCase):
         expected = np.array([
             [1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
-        np.testing.assert_array_equal(instruction_sequence, 'hstack(orig orig orig orig orig)')
+        self.assertEqual(instruction_sequence, 'hstack(orig orig orig orig orig)')
 
     def test_10004_rect_vstack2(self):
         # Arrange
@@ -72,7 +72,7 @@ class TestImageSymmetry(unittest.TestCase):
             [1, 2, 3], 
             [1, 2, 3]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
-        np.testing.assert_array_equal(instruction_sequence, 'vstack(orig orig)')
+        self.assertEqual(instruction_sequence, 'vstack(orig orig)')
 
     def test_10005_rect_vstack3(self):
         # Arrange
@@ -88,7 +88,7 @@ class TestImageSymmetry(unittest.TestCase):
             [1, 2, 3],
             [1, 2, 3]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
-        np.testing.assert_array_equal(instruction_sequence, 'vstack(orig orig orig)')
+        self.assertEqual(instruction_sequence, 'vstack(orig orig orig)')
 
     def test_10006_rect_vstack4(self):
         # Arrange
@@ -105,7 +105,7 @@ class TestImageSymmetry(unittest.TestCase):
             [1, 2, 3],
             [1, 2, 3]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
-        np.testing.assert_array_equal(instruction_sequence, 'vstack(orig orig orig orig)')
+        self.assertEqual(instruction_sequence, 'vstack(orig orig orig orig)')
 
     def test_10007_rect_vstack5(self):
         # Arrange
@@ -123,7 +123,7 @@ class TestImageSymmetry(unittest.TestCase):
             [1, 2, 3],
             [1, 2, 3]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
-        np.testing.assert_array_equal(instruction_sequence, 'vstack(orig orig orig orig orig)')
+        self.assertEqual(instruction_sequence, 'vstack(orig orig orig orig orig)')
 
     def test_10008_rect_grid2x2(self):
         # Arrange
@@ -138,7 +138,7 @@ class TestImageSymmetry(unittest.TestCase):
             [1, 2, 3, 1, 2, 3],
             [1, 2, 3, 1, 2, 3]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
-        np.testing.assert_array_equal(instruction_sequence, '2x2(orig orig orig orig)')
+        self.assertEqual(instruction_sequence, '2x2(orig orig orig orig)')
 
     def test_20000_rect_name_flipx(self):
         # Arrange
@@ -155,7 +155,7 @@ class TestImageSymmetry(unittest.TestCase):
             [3, 2, 1, 1, 2, 3],
             [6, 5, 4, 4, 5, 6]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
-        np.testing.assert_array_equal(instruction_sequence, 'hstack(flipx orig)')
+        self.assertEqual(instruction_sequence, 'hstack(flipx orig)')
 
     def test_20001_rect_name_flipy(self):
         # Arrange
@@ -172,7 +172,7 @@ class TestImageSymmetry(unittest.TestCase):
             [1, 2, 3, 4, 5, 6],
             [4, 5, 6, 1, 2, 3]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
-        np.testing.assert_array_equal(instruction_sequence, 'hstack(orig flipy)')
+        self.assertEqual(instruction_sequence, 'hstack(orig flipy)')
 
     def test_20002_rect_name_180(self):
         # Arrange
@@ -189,7 +189,7 @@ class TestImageSymmetry(unittest.TestCase):
             [1, 2, 3, 6, 5, 4],
             [4, 5, 6, 3, 2, 1]], dtype=np.uint8)
         np.testing.assert_array_equal(output, expected)
-        np.testing.assert_array_equal(instruction_sequence, 'hstack(orig 180)')
+        self.assertEqual(instruction_sequence, 'hstack(orig 180)')
 
     def test_30000_rect_execute_with_multiple_different_images(self):
         # Arrange
@@ -210,7 +210,7 @@ class TestImageSymmetry(unittest.TestCase):
         expected456 = np.array([
             [6, 5, 4, 4, 5, 6]], dtype=np.uint8)
         np.testing.assert_array_equal(output456, expected456)
-        np.testing.assert_array_equal(instruction_sequence, 'hstack(flipx orig)')
+        self.assertEqual(instruction_sequence, 'hstack(flipx orig)')
 
     def test_40000_square_rotate_cw(self):
         # Arrange
