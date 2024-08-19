@@ -15,6 +15,12 @@ class ImageSymmetryPatternId(Enum):
     VSTACK5 = 'vstack5'
     GRID2X2 = '2x2'
 
+class ImageSymmetryMutationId(Enum):
+    ORIGINAL = 'orig'
+    FLIPX = 'flipx'
+    FLIPY = 'flipy'
+    ROTATE180 = '180'
+
 class ImageSymmetry:
     MAX_NUMBER_OF_IMAGES_USED = 5
 
@@ -33,15 +39,10 @@ class ImageSymmetry:
     def __init__(self, pattern: ImageSymmetryPatternId):
         self.pattern = pattern
 
-        self.name_original = 'orig'
-        self.name_flipx = 'flipx'
-        self.name_flipy = 'flipy'
-        self.name_180 = '180'
-
         # by default use the original image for all images in the symmetry
         self.name_list = []
         for _ in range(ImageSymmetry.MAX_NUMBER_OF_IMAGES_USED):
-            name_image = self.name_original
+            name_image = ImageSymmetryMutationId.ORIGINAL
             self.name_list.append(name_image)
 
     @classmethod
@@ -50,23 +51,23 @@ class ImageSymmetry:
         return ImageSymmetry(pattern)
     
     def use_original_for_index(self, index: int):
-        self.name_list[index] = self.name_original
+        self.name_list[index] = ImageSymmetryMutationId.ORIGINAL
 
     def use_flipx_for_index(self, index: int):
-        self.name_list[index] = self.name_flipx
+        self.name_list[index] = ImageSymmetryMutationId.FLIPX
 
     def use_flipy_for_index(self, index: int):
-        self.name_list[index] = self.name_flipy
+        self.name_list[index] = ImageSymmetryMutationId.FLIPY
 
     def use_180_for_index(self, index: int):
-        self.name_list[index] = self.name_180
+        self.name_list[index] = ImageSymmetryMutationId.ROTATE180
 
     def randomize_name_list(self, seed: int):
         name_list = [
-            self.name_original,
-            self.name_flipx,
-            self.name_flipy,
-            self.name_180,
+            ImageSymmetryMutationId.ORIGINAL,
+            ImageSymmetryMutationId.FLIPX,
+            ImageSymmetryMutationId.FLIPY,
+            ImageSymmetryMutationId.ROTATE180,
         ]
         self.name_list = []
         for i in range(ImageSymmetry.MAX_NUMBER_OF_IMAGES_USED):
@@ -80,10 +81,10 @@ class ImageSymmetry:
         image_180 = image_rotate_180(image)
 
         name_to_image = {
-            'orig': image_original,
-            'flipx': image_fx,
-            'flipy': image_fy,
-            '180': image_180
+            ImageSymmetryMutationId.ORIGINAL: image_original,
+            ImageSymmetryMutationId.FLIPX: image_fx,
+            ImageSymmetryMutationId.FLIPY: image_fy,
+            ImageSymmetryMutationId.ROTATE180: image_180
         }
 
         pattern = self.pattern
@@ -125,11 +126,11 @@ class ImageSymmetry:
 
     def instruction_sequence(self) -> str:
         pattern = self.pattern
-        name0 = self.name_list[0]
-        name1 = self.name_list[1]
-        name2 = self.name_list[2]
-        name3 = self.name_list[3]
-        name4 = self.name_list[4]
+        name0 = self.name_list[0].value
+        name1 = self.name_list[1].value
+        name2 = self.name_list[2].value
+        name3 = self.name_list[3].value
+        name4 = self.name_list[4].value
 
         instruction_sequence = None
         if pattern == ImageSymmetryPatternId.HSTACK2:
