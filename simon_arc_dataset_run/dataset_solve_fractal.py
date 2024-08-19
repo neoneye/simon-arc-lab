@@ -5,6 +5,34 @@
 # - invert the pattern.
 # - add padding around the input image.
 # 
+# IDEA: Use image_mask that is multi colored, in order to solve these tasks:
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=8f2ea7aa
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=27f8ce4f
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=48f8583b
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ad7e01d0
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=15696249
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=3af2c5a8
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=c3e719e8
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=cce03e0d
+#
+# IDEA: Instead of drawing with a solid color, then use a pattern to draw with, in order to solve the task:
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2072aba6
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ce22a75a
+#
+# IDEA: Draw image_pattern of 2 scales, in order to solve the task:
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=8719f442
+#
+# IDEA: Split view, one side is the template image, the other side is the tile image, in order to solve the task:
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=b4a43f3b_v2
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=363442ee
+#
+# IDEA: Repair the masked out cells, in order to solve the task:
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9ddd00f0
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f9012d9b
+#
+# IDEA: Two object areas, template image and tile image, in order to solve the task:
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6ecd11f4
+#
 # IDEA: Swap the output colors.
 #
 # IDEA: rotate the pattern_image by 90, 180, 270 degrees.

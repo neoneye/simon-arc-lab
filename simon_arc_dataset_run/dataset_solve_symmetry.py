@@ -2,41 +2,16 @@
 # - generate a palindrome image, hstack(original, flipx(original))
 # - extract the tile that makes up the symmetric input image.
 #
-# IDEA: Use image_mask that is multi colored, in order to solve these tasks:
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=8f2ea7aa
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=27f8ce4f
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=48f8583b
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ad7e01d0
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=15696249
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=3af2c5a8
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=c3e719e8
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=cce03e0d
-#
 # IDEA: rotational symmetry, in order to solve the task:
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2697da3f
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=46442a0e
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=7fe24cdd
 #
+# IDEA: mirror the image, where the mirrored version has a different color scheme.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6f473927
+#
 # IDEA: Extract tile that is repeated in the symmetric image, in order to solve the task:
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2013d3e2
-#
-# IDEA: Instead of drawing with a solid color, then use a pattern to draw with, in order to solve the task:
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2072aba6
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ce22a75a
-#
-# IDEA: Draw image_pattern of 2 scales, in order to solve the task:
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=8719f442
-#
-# IDEA: Split view, one side is the template image, the other side is the tile image, in order to solve the task:
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=b4a43f3b_v2
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=363442ee
-#
-# IDEA: Repair the masked out cells, in order to solve the task:
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9ddd00f0
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f9012d9b
-#
-# IDEA: Two object areas, template image and tile image, in order to solve the task:
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6ecd11f4
 #
 # IDEA: repair rotational symmetry, with red color, in order to solve the task:
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=1b60fb0c
