@@ -47,14 +47,14 @@ class ImageSymmetryBase:
 
         # by default use the original image for all images in the symmetry
         self.name_list = []
-        for _ in range(ImageSymmetryRect.MAX_NUMBER_OF_IMAGES_USED):
+        for _ in range(self.MAX_NUMBER_OF_IMAGES_USED):
             name_image = ImageSymmetryMutationId.ORIGINAL
             self.name_list.append(name_image)
 
     @classmethod
-    def create_random(cls, seed: int) -> Tuple['ImageSymmetryRect', str]:
-        pattern = random.Random(seed).choice(ImageSymmetryRect.PATTERN_IDS)
-        return ImageSymmetryRect(pattern)
+    def create_random(cls, seed: int) -> Tuple['ImageSymmetryBase', str]:
+        pattern = random.Random(seed).choice(cls.PATTERN_IDS)
+        return cls(pattern)
     
     def use_mutation_for_index(self, index: int, mutation_id: ImageSymmetryMutationId):
         if mutation_id not in self.available_name_list:
@@ -63,7 +63,7 @@ class ImageSymmetryBase:
 
     def randomize_name_list(self, seed: int):
         self.name_list = []
-        for i in range(ImageSymmetryRect.MAX_NUMBER_OF_IMAGES_USED):
+        for i in range(self.MAX_NUMBER_OF_IMAGES_USED):
             name_image = random.Random(seed+i).choice(self.available_name_list)
             self.name_list.append(name_image)
 
@@ -167,7 +167,6 @@ class ImageSymmetryRect(ImageSymmetryBase):
             ImageSymmetryMutationId.ROTATE_180: image_180
         }
         return name_to_image
-
 
 class ImageSymmetrySquare(ImageSymmetryBase):
     def populate_available_name_list(self) -> list[ImageSymmetryMutationId]:
