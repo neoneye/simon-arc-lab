@@ -1,6 +1,8 @@
 # Symmetric transformations.
 # - generate a palindrome image, hstack(original, flipx(original))
 # - extract the tile that makes up the symmetric input image.
+# - Use rotate cw/ccw to create a symmetric image.
+# - Use flip diagonal to create a symmetric image.
 #
 # IDEA: rotational symmetry, in order to solve the task:
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2697da3f
@@ -17,8 +19,6 @@
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=1b60fb0c
 #
 # IDEA: currently extract a tile from a corner. Also extract the tile from the center, or another coordinate.
-# IDEA: Use rotate cw/ccw to create a symmetric image.
-# IDEA: Use flip diagonal to create a symmetric image.
 # IDEA: Introduce grid2x3, grid3x3, grid3x3.
 #
 # Present the same input images, but with different transformations.
@@ -60,7 +60,7 @@ def generate_task_with_input_image_create_output_symmetry_rect(seed: int) -> Tas
     image_symmetry = ImageSymmetryRect.create_random(seed * 1333 + 100)
     image_symmetry.randomize_name_list(seed * 8773 + 2)
     instruction_sequence = image_symmetry.instruction_sequence()
-    task.metadata_task_id = instruction_sequence
+    task.metadata_task_id = "rect " + instruction_sequence
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -84,14 +84,14 @@ def generate_task_with_input_image_create_output_symmetry_square(seed: int) -> T
     image_symmetry = ImageSymmetrySquare.create_random(seed * 1333 + 100)
     image_symmetry.randomize_name_list(seed * 8773 + 2)
     instruction_sequence = image_symmetry.instruction_sequence()
-    task.metadata_task_id = instruction_sequence
+    task.metadata_task_id = "square " + instruction_sequence
 
     for i in range(count_example+count_test):
         is_example = i < count_example
         input_image = None
         for retry_index in range(100):
-            seed_for_input_image_size = seed + 5 + retry_index * 133 * i
-            seed_for_input_image_data = seed + 6 + retry_index * 133 * i
+            seed_for_input_image_size = seed * 5 + retry_index * 133 + i
+            seed_for_input_image_data = seed * 6 + retry_index * 137 + i
             image_size = random.Random(seed_for_input_image_size).randint(min_image_size, max_image_size)
             candidate_image = image_create_random_advanced(seed_for_input_image_data, image_size, image_size, image_size, image_size)
             histogram = Histogram.create_with_image(candidate_image)
@@ -123,7 +123,7 @@ def generate_task_with_symmetry_rect_input_image_and_extract_a_particular_tile(s
     image_symmetry.use_mutation_for_index(0, ImageSymmetryMutationId.ORIGINAL)
 
     instruction_sequence = image_symmetry.instruction_sequence()
-    task.metadata_task_id = instruction_sequence
+    task.metadata_task_id = "rect " + instruction_sequence
 
     # Rotate the image, so the tile is not always at the top-left, but also in the other corners.
     rotate90_count = random.Random(seed + 3).randint(0, 3)
@@ -137,12 +137,61 @@ def generate_task_with_symmetry_rect_input_image_and_extract_a_particular_tile(s
 
     return task
 
+def generate_task_with_symmetry_square_input_image_and_extract_a_particular_tile(seed: int) -> Task:
+    """
+    Identify the top-left square tile of a symmetric image.
+    """
+    count_example = random.Random(seed + 1).randint(3, 4)
+    count_test = random.Random(seed + 2).randint(1, 2)
+    # count_test = 1
+    task = Task()
+    min_image_size = 2
+    max_image_size = 4
+
+    image_symmetry = ImageSymmetryRect.create_random(seed * 1333 + 100)
+    image_symmetry.randomize_name_list(seed * 8773 + 2)
+
+    # It's the top-left tile that is always extracted. It's the first tile.
+    image_symmetry.use_mutation_for_index(0, ImageSymmetryMutationId.ORIGINAL)
+
+    instruction_sequence = image_symmetry.instruction_sequence()
+    task.metadata_task_id = "square " + instruction_sequence
+
+    # Rotate the image, so the tile is not always at the top-left, but also in the other corners.
+    rotate90_count = random.Random(seed + 3).randint(0, 3)
+    for i in range(count_example+count_test):
+        is_example = i < count_example
+        output_image_raw = None
+        for retry_index in range(100):
+            seed_for_input_image_size = seed * 5 + retry_index * 133 + i
+            seed_for_input_image_data = seed * 7 + retry_index * 133 + i
+            image_size = random.Random(seed_for_input_image_size).randint(min_image_size, max_image_size)
+            candidate_image = image_create_random_advanced(seed_for_input_image_data, image_size, image_size, image_size, image_size)
+            histogram = Histogram.create_with_image(candidate_image)
+            if histogram.number_of_unique_colors() > 1:
+                output_image_raw = candidate_image
+                break
+        if output_image_raw is None:
+            raise Exception("Failed to create a square image with more than one color")
+        input_image_raw = image_symmetry.execute(output_image_raw)
+        input_image = np.rot90(input_image_raw, rotate90_count)
+        output_image = np.rot90(output_image_raw, rotate90_count)
+        task.append_pair(input_image, output_image, is_example)
+
+    return task
+
 def demo_generate_task():
     for i in range(5):
-        if i % 2 == 0:
+        j = i % 4
+        task = generate_task_with_symmetry_square_input_image_and_extract_a_particular_tile(i)
+        if j == 0:
             task = generate_task_with_input_image_create_output_symmetry_rect(i)
-        else:
+        elif j == 1:
             task = generate_task_with_symmetry_rect_input_image_and_extract_a_particular_tile(i)
+        elif j == 2:
+            task = generate_task_with_input_image_create_output_symmetry_square(i)
+        elif j == 3:
+            task = generate_task_with_symmetry_square_input_image_and_extract_a_particular_tile(i)
         task.show()
 
 # demo_generate_task()
@@ -154,14 +203,23 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    if seed % 2 == 0:
+    j = seed % 4
+    if j == 0:
         task = generate_task_with_input_image_create_output_symmetry_rect(seed)
         task_id = task.metadata_task_id
-        transformation_id = f"'create_symmetry {task_id}'"
-    else:
+        transformation_id = f"'create_rect_symmetry {task_id}'"
+    elif j == 1:
         task = generate_task_with_symmetry_rect_input_image_and_extract_a_particular_tile(seed)
         task_id = task.metadata_task_id
-        transformation_id = f"'extract_tile {task_id}'"
+        transformation_id = f"'extract_rect_tile {task_id}'"
+    elif j == 2:
+        task = generate_task_with_input_image_create_output_symmetry_square(seed)
+        task_id = task.metadata_task_id
+        transformation_id = f"'create_square_symmetry {task_id}'"
+    elif j == 3:
+        task = generate_task_with_symmetry_square_input_image_and_extract_a_particular_tile(seed)
+        task_id = task.metadata_task_id
+        transformation_id = f"'extract_square_tile {task_id}'"
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
@@ -170,7 +228,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=518000410,
+    seed=618000410,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
