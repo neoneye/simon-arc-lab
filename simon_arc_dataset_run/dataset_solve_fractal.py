@@ -25,6 +25,7 @@
 # IDEA: Split view, one side is the template image, the other side is the tile image, in order to solve the task:
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=b4a43f3b_v2
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=363442ee
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=b190f7f5
 #
 # IDEA: Repair the masked out cells, in order to solve the task:
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9ddd00f0
