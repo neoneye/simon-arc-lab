@@ -88,7 +88,7 @@ def generate_task_with_symmetric_input_image_and_extract_a_particular_tile(seed:
     image_symmetry.randomize_name_list(seed * 8773 + 2)
 
     # It's the top-left tile that is always extracted. It's the first tile.
-    image_symmetry.use_original_for_index(0)
+    image_symmetry.use_mutation_for_index(0, ImageSymmetryMutationId.ORIGINAL)
 
     instruction_sequence = image_symmetry.instruction_sequence()
     task.metadata_task_id = instruction_sequence

@@ -43,6 +43,8 @@ class ImageSymmetryBase:
     def __init__(self, pattern: ImageSymmetryPatternId):
         self.pattern = pattern
 
+        self.available_name_list = self.populate_available_name_list()
+
         # by default use the original image for all images in the symmetry
         self.name_list = []
         for _ in range(ImageSymmetryRect.MAX_NUMBER_OF_IMAGES_USED):
@@ -54,29 +56,19 @@ class ImageSymmetryBase:
         pattern = random.Random(seed).choice(ImageSymmetryRect.PATTERN_IDS)
         return ImageSymmetryRect(pattern)
     
-    def use_original_for_index(self, index: int):
-        self.name_list[index] = ImageSymmetryMutationId.ORIGINAL
-
-    def use_flipx_for_index(self, index: int):
-        self.name_list[index] = ImageSymmetryMutationId.FLIPX
-
-    def use_flipy_for_index(self, index: int):
-        self.name_list[index] = ImageSymmetryMutationId.FLIPY
-
-    def use_180_for_index(self, index: int):
-        self.name_list[index] = ImageSymmetryMutationId.ROTATE_180
+    def use_mutation_for_index(self, index: int, mutation_id: ImageSymmetryMutationId):
+        if mutation_id not in self.available_name_list:
+            raise ValueError(f"Mutation id {mutation_id} is not in available_name list: {self.available_name_list}. class: {self.__class__}")
+        self.name_list[index] = mutation_id
 
     def randomize_name_list(self, seed: int):
-        name_list = [
-            ImageSymmetryMutationId.ORIGINAL,
-            ImageSymmetryMutationId.FLIPX,
-            ImageSymmetryMutationId.FLIPY,
-            ImageSymmetryMutationId.ROTATE_180,
-        ]
         self.name_list = []
         for i in range(ImageSymmetryRect.MAX_NUMBER_OF_IMAGES_USED):
-            name_image = random.Random(seed+i).choice(name_list)
+            name_image = random.Random(seed+i).choice(self.available_name_list)
             self.name_list.append(name_image)
+
+    def populate_available_name_list(self) -> list[ImageSymmetryMutationId]:
+        raise NotImplementedError()
 
     def populate_name_to_image_dict(self, image: np.array) -> dict:
         raise NotImplementedError()
@@ -154,6 +146,14 @@ class ImageSymmetryBase:
         return instruction_sequence
 
 class ImageSymmetryRect(ImageSymmetryBase):
+    def populate_available_name_list(self) -> list[ImageSymmetryMutationId]:
+        return [
+            ImageSymmetryMutationId.ORIGINAL,
+            ImageSymmetryMutationId.FLIPX,
+            ImageSymmetryMutationId.FLIPY,
+            ImageSymmetryMutationId.ROTATE_180,
+        ]
+
     def populate_name_to_image_dict(self, image: np.array) -> dict:
         image_original = image.copy()
         image_fx = image_flipx(image)
@@ -168,7 +168,20 @@ class ImageSymmetryRect(ImageSymmetryBase):
         }
         return name_to_image
 
+
 class ImageSymmetrySquare(ImageSymmetryBase):
+    def populate_available_name_list(self) -> list[ImageSymmetryMutationId]:
+        return [
+            ImageSymmetryMutationId.ORIGINAL,
+            ImageSymmetryMutationId.FLIPX,
+            ImageSymmetryMutationId.FLIPY,
+            ImageSymmetryMutationId.FLIP_DIAGONAL_A,
+            ImageSymmetryMutationId.FLIP_DIAGONAL_B,
+            ImageSymmetryMutationId.ROTATE_180,
+            ImageSymmetryMutationId.ROTATE_CW,
+            ImageSymmetryMutationId.ROTATE_CCW,
+        ]
+
     def populate_name_to_image_dict(self, image: np.array) -> dict:
         if image.shape[0] != image.shape[1]:
             raise ValueError(f"ImageSymmetrySquare requires square image. Got {image.shape}")
@@ -193,16 +206,3 @@ class ImageSymmetrySquare(ImageSymmetryBase):
             ImageSymmetryMutationId.ROTATE_CCW: image_ccw
         }
         return name_to_image
-
-    def use_rotate_cw_for_index(self, index: int):
-        self.name_list[index] = ImageSymmetryMutationId.ROTATE_CW
-
-    def use_rotate_ccw_for_index(self, index: int):
-        self.name_list[index] = ImageSymmetryMutationId.ROTATE_CCW
-
-    def use_flipa_for_index(self, index: int):
-        self.name_list[index] = ImageSymmetryMutationId.FLIP_DIAGONAL_A
-
-    def use_flipb_for_index(self, index: int):
-        self.name_list[index] = ImageSymmetryMutationId.FLIP_DIAGONAL_B
-

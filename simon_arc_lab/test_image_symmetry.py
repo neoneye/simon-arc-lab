@@ -147,7 +147,7 @@ class TestImageSymmetry(unittest.TestCase):
             [4, 5, 6]], dtype=np.uint8)
         # Act
         i = ImageSymmetryRect(ImageSymmetryPatternId.HSTACK2)
-        i.use_flipx_for_index(0)
+        i.use_mutation_for_index(0, ImageSymmetryMutationId.FLIPX)
         output = i.execute(image)
         instruction_sequence = i.instruction_sequence()
         # Assert
@@ -164,7 +164,7 @@ class TestImageSymmetry(unittest.TestCase):
             [4, 5, 6]], dtype=np.uint8)
         # Act
         i = ImageSymmetryRect(ImageSymmetryPatternId.HSTACK2)
-        i.use_flipy_for_index(1)
+        i.use_mutation_for_index(1, ImageSymmetryMutationId.FLIPY)
         output = i.execute(image)
         instruction_sequence = i.instruction_sequence()
         # Assert
@@ -181,7 +181,7 @@ class TestImageSymmetry(unittest.TestCase):
             [4, 5, 6]], dtype=np.uint8)
         # Act
         i = ImageSymmetryRect(ImageSymmetryPatternId.HSTACK2)
-        i.use_180_for_index(1)
+        i.use_mutation_for_index(1, ImageSymmetryMutationId.ROTATE_180)
         output = i.execute(image)
         instruction_sequence = i.instruction_sequence()
         # Assert
@@ -194,7 +194,7 @@ class TestImageSymmetry(unittest.TestCase):
     def test_30000_rect_execute_with_multiple_different_images(self):
         # Arrange
         i = ImageSymmetryRect(ImageSymmetryPatternId.HSTACK2)
-        i.use_flipx_for_index(0)
+        i.use_mutation_for_index(0, ImageSymmetryMutationId.FLIPX)
         image123 = np.array([
             [1, 2, 3]], dtype=np.uint8)
         image456 = np.array([
@@ -219,8 +219,8 @@ class TestImageSymmetry(unittest.TestCase):
             [3, 4]], dtype=np.uint8)
         # Act
         i = ImageSymmetrySquare(ImageSymmetryPatternId.HSTACK2)
-        i.use_rotate_cw_for_index(0)
-        i.use_rotate_cw_for_index(1)
+        i.use_mutation_for_index(0, ImageSymmetryMutationId.ROTATE_CW)
+        i.use_mutation_for_index(1, ImageSymmetryMutationId.ROTATE_CW)
         output = i.execute(image)
         instruction_sequence = i.instruction_sequence()
         # Assert
@@ -237,8 +237,8 @@ class TestImageSymmetry(unittest.TestCase):
             [3, 4]], dtype=np.uint8)
         # Act
         i = ImageSymmetrySquare(ImageSymmetryPatternId.HSTACK2)
-        i.use_rotate_ccw_for_index(0)
-        i.use_rotate_ccw_for_index(1)
+        i.use_mutation_for_index(0, ImageSymmetryMutationId.ROTATE_CCW)
+        i.use_mutation_for_index(1, ImageSymmetryMutationId.ROTATE_CCW)
         output = i.execute(image)
         instruction_sequence = i.instruction_sequence()
         # Assert
@@ -255,8 +255,8 @@ class TestImageSymmetry(unittest.TestCase):
             [3, 4]], dtype=np.uint8)
         # Act
         i = ImageSymmetrySquare(ImageSymmetryPatternId.HSTACK2)
-        i.use_flipa_for_index(0)
-        i.use_flipa_for_index(1)
+        i.use_mutation_for_index(0, ImageSymmetryMutationId.FLIP_DIAGONAL_A)
+        i.use_mutation_for_index(1, ImageSymmetryMutationId.FLIP_DIAGONAL_A)
         output = i.execute(image)
         instruction_sequence = i.instruction_sequence()
         # Assert
@@ -273,8 +273,8 @@ class TestImageSymmetry(unittest.TestCase):
             [3, 4]], dtype=np.uint8)
         # Act
         i = ImageSymmetrySquare(ImageSymmetryPatternId.HSTACK2)
-        i.use_flipb_for_index(0)
-        i.use_flipb_for_index(1)
+        i.use_mutation_for_index(0, ImageSymmetryMutationId.FLIP_DIAGONAL_B)
+        i.use_mutation_for_index(1, ImageSymmetryMutationId.FLIP_DIAGONAL_B)
         output = i.execute(image)
         instruction_sequence = i.instruction_sequence()
         # Assert
