@@ -36,6 +36,7 @@ from simon_arc_lab.image_create_random_advanced import image_create_random_advan
 from simon_arc_lab.task import *
 from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.image_symmetry import *
+from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.benchmark import *
 from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
 from simon_arc_dataset.generate_solve import *
@@ -64,6 +65,41 @@ def generate_task_with_input_image_create_output_symmetry_rect(seed: int) -> Tas
     for i in range(count_example+count_test):
         is_example = i < count_example
         input_image = image_create_random_advanced((seed * 31) + 1002 + i, min_image_size, max_image_size, min_image_size, max_image_size)
+        output_image = image_symmetry.execute(input_image)
+        task.append_pair(input_image, output_image, is_example)
+
+    return task
+
+def generate_task_with_input_image_create_output_symmetry_square(seed: int) -> Task:
+    """
+    Create a symmetric image from a square input image.
+    """
+    count_example = random.Random(seed + 9).randint(3, 5)
+    count_test = random.Random(seed + 10).randint(1, 2)
+    # count_test = 1
+    task = Task()
+    min_image_size = 2
+    max_image_size = 4
+
+    image_symmetry = ImageSymmetrySquare.create_random(seed * 1333 + 100)
+    image_symmetry.randomize_name_list(seed * 8773 + 2)
+    instruction_sequence = image_symmetry.instruction_sequence()
+    task.metadata_task_id = instruction_sequence
+
+    for i in range(count_example+count_test):
+        is_example = i < count_example
+        input_image = None
+        for retry_index in range(100):
+            seed_for_input_image_size = seed + 5 + retry_index * 133 * i
+            seed_for_input_image_data = seed + 6 + retry_index * 133 * i
+            image_size = random.Random(seed_for_input_image_size).randint(min_image_size, max_image_size)
+            candidate_image = image_create_random_advanced(seed_for_input_image_data, image_size, image_size, image_size, image_size)
+            histogram = Histogram.create_with_image(candidate_image)
+            if histogram.number_of_unique_colors() > 1:
+                input_image = candidate_image
+                break
+        if input_image is None:
+            raise Exception("Failed to create a square image with more than one color")
         output_image = image_symmetry.execute(input_image)
         task.append_pair(input_image, output_image, is_example)
 
