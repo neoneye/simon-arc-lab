@@ -92,9 +92,9 @@ def generate_task_with_input_image_create_output_symmetry_square(seed: int) -> T
     # pattern_ids = [ImageSymmetryPatternId.HSTACK2, ImageSymmetryPatternId.VSTACK2]
     # pattern_ids = [ImageSymmetryPatternId.GRID2X2]
     # pattern_ids = [ImageSymmetryPatternId.HSTACK3, ImageSymmetryPatternId.VSTACK3]
-    pattern_ids = [ImageSymmetryPatternId.HSTACK4, ImageSymmetryPatternId.HSTACK5, ImageSymmetryPatternId.VSTACK4, ImageSymmetryPatternId.VSTACK5]
+    pattern_ids = [ImageSymmetryPatternId.HSTACK4, ImageSymmetryPatternId.VSTACK4]
+    # pattern_ids = [ImageSymmetryPatternId.HSTACK4, ImageSymmetryPatternId.HSTACK5, ImageSymmetryPatternId.VSTACK4, ImageSymmetryPatternId.VSTACK5]
     pattern_id = random.Random(seed + 773).choice(pattern_ids)
-
     image_symmetry = ImageSymmetrySquare(pattern_id)
     # image_symmetry = ImageSymmetrySquare.create_random(seed * 1333 + 100)
     image_symmetry.randomize_name_list(seed * 8773 + 2)
@@ -196,9 +196,9 @@ def generate_task_with_symmetry_square_input_image_and_extract_a_particular_tile
     # pattern_ids = [ImageSymmetryPatternId.HSTACK2, ImageSymmetryPatternId.VSTACK2]
     # pattern_ids = [ImageSymmetryPatternId.GRID2X2]
     # pattern_ids = [ImageSymmetryPatternId.HSTACK3, ImageSymmetryPatternId.VSTACK3]
-    pattern_ids = [ImageSymmetryPatternId.HSTACK4, ImageSymmetryPatternId.HSTACK5, ImageSymmetryPatternId.VSTACK4, ImageSymmetryPatternId.VSTACK5]
+    pattern_ids = [ImageSymmetryPatternId.HSTACK4, ImageSymmetryPatternId.VSTACK4]
+    # pattern_ids = [ImageSymmetryPatternId.HSTACK4, ImageSymmetryPatternId.HSTACK5, ImageSymmetryPatternId.VSTACK4, ImageSymmetryPatternId.VSTACK5]
     pattern_id = random.Random(seed + 773).choice(pattern_ids)
-
     image_symmetry = ImageSymmetrySquare(pattern_id)
     # image_symmetry = ImageSymmetrySquare.create_random(seed * 1333 + 100)
     image_symmetry.randomize_name_list(seed * 8773 + 2)
@@ -303,7 +303,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=1318000410,
+    seed=1518000410,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
