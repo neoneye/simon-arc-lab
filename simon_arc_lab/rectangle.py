@@ -19,3 +19,6 @@ class Rectangle:
 
     def __repr__(self):
         return f"Rectangle(x={self.x}, y={self.y}, width={self.width}, height={self.height})"
+
+    def is_empty(self) -> bool:
+        return self.width == 0 or self.height == 0
