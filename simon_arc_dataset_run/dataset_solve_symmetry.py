@@ -57,15 +57,50 @@ def generate_task_with_input_image_create_output_symmetry_rect(seed: int) -> Tas
     min_image_size = 2
     max_image_size = 4
 
+    is_padded = random.Random(seed + 16).choice([False, True])
+    max_pad_count = 5
+    color_padding = random.Random(seed + 17).randint(0, 9)
+
     image_symmetry = ImageSymmetryRect.create_random(seed * 1333 + 100)
     image_symmetry.randomize_name_list(seed * 8773 + 2)
+    
     instruction_sequence = image_symmetry.instruction_sequence()
-    task.metadata_task_id = "rect " + instruction_sequence
+    if is_padded:
+        task_id_padding_text = ' padded'
+    else:
+        task_id_padding_text = ''
+    task.metadata_task_id = "rect " + instruction_sequence + task_id_padding_text
 
     for i in range(count_example+count_test):
         is_example = i < count_example
-        input_image = image_create_random_advanced((seed * 31) + 1002 + i, min_image_size, max_image_size, min_image_size, max_image_size)
-        output_image = image_symmetry.execute(input_image)
+        output_image = None
+        input_image = None
+        for retry_index in range(100):
+            seed_for_input_image_data = seed * 6 + retry_index * 137 + i
+            candidate_image = image_create_random_advanced(seed_for_input_image_data, min_image_size, max_image_size, min_image_size, max_image_size)
+            histogram = Histogram.create_with_image(candidate_image)
+            if histogram.number_of_unique_colors() < 2:
+                continue
+            input_image = candidate_image
+            if is_padded:
+                height, width = input_image.shape
+                input_image = image_pad_random(input_image, seed=seed * 11 + 1000 + i * 997, color=color_padding, min_pad_count=1, max_pad_count=max_pad_count)
+                # Reject the image if the padding color conflicts with the tile color, so it's impossible to extract the tile.
+                rect = outer_bounding_box_after_trim_with_color(input_image, color_padding)
+                if rect.is_empty():
+                    continue
+                if rect.width != width or rect.height != height:
+                    # print("ambiguous padding")
+                    # The trimmed image doesn't have the same dimensions as the input_image, then there is the padding color
+                    # occurs too many times in the input_image making it difficult to extract the tile.
+                    continue
+
+            output_image = image_symmetry.execute(candidate_image)
+            break
+        if input_image is None:
+            raise Exception("Failed to create image")
+        if output_image is None:
+            raise Exception("Failed to create image")
         task.append_pair(input_image, output_image, is_example)
 
     return task
@@ -135,9 +170,9 @@ def generate_task_with_input_image_create_output_symmetry_square(seed: int) -> T
             output_image = image_symmetry.execute(candidate_image)
             break
         if input_image is None:
-            raise Exception("Failed to create a square image with more than one color")
+            raise Exception("Failed to create image")
         if output_image is None:
-            raise Exception("Failed to create a square image with more than one color")
+            raise Exception("Failed to create image")
         task.append_pair(input_image, output_image, is_example)
 
     return task
@@ -153,6 +188,10 @@ def generate_task_with_symmetry_rect_input_image_and_extract_a_particular_tile(s
     min_image_size = 2
     max_image_size = 4
 
+    is_padded = random.Random(seed + 16).choice([False, True])
+    max_pad_count = 5
+    color_padding = random.Random(seed + 17).randint(0, 9)
+
     image_symmetry = ImageSymmetryRect.create_random(seed * 1333 + 100)
     image_symmetry.randomize_name_list(seed * 8773 + 2)
 
@@ -160,16 +199,48 @@ def generate_task_with_symmetry_rect_input_image_and_extract_a_particular_tile(s
     image_symmetry.use_mutation_for_index(0, ImageSymmetryMutationId.ORIGINAL)
 
     instruction_sequence = image_symmetry.instruction_sequence()
-    task.metadata_task_id = "rect " + instruction_sequence
+    if is_padded:
+        task_id_padding_text = ' padded'
+    else:
+        task_id_padding_text = ''
+    task.metadata_task_id = "rect " + instruction_sequence + task_id_padding_text
 
     # Rotate the image, so the tile is not always at the top-left, but also in the other corners.
     rotate90_count = random.Random(seed + 3).randint(0, 3)
     for i in range(count_example+count_test):
         is_example = i < count_example
-        output_image_raw = image_create_random_advanced((seed * 31) + 1002 + i, min_image_size, max_image_size, min_image_size, max_image_size)
-        input_image_raw = image_symmetry.execute(output_image_raw)
-        input_image = np.rot90(input_image_raw, rotate90_count)
-        output_image = np.rot90(output_image_raw, rotate90_count)
+        output_image = None
+        input_image = None
+        for retry_index in range(100):
+            seed_for_input_image_size = seed * 11 + retry_index * 133 + i
+            seed_for_input_image_data = seed * 17 + retry_index * 133 + i
+            candidate_image = image_create_random_advanced(seed_for_input_image_data, min_image_size, max_image_size, min_image_size, max_image_size)
+            histogram = Histogram.create_with_image(candidate_image)
+            if histogram.number_of_unique_colors() < 2:
+                continue
+            output_image_raw = candidate_image
+            input_image_raw = image_symmetry.execute(output_image_raw)
+
+            input_image = np.rot90(input_image_raw, rotate90_count)
+            if is_padded:
+                height, width = input_image.shape
+                input_image = image_pad_random(input_image, seed=seed * 11 + 1000 + i * 997, color=color_padding, min_pad_count=1, max_pad_count=max_pad_count)
+                # Reject the image if the padding color conflicts with the tile color, so it's impossible to extract the tile.
+                rect = outer_bounding_box_after_trim_with_color(input_image, color_padding)
+                if rect.is_empty():
+                    continue
+                if rect.width != width or rect.height != height:
+                    # print("ambiguous padding")
+                    # The trimmed image doesn't have the same dimensions as the input_image, then there is the padding color
+                    # occurs too many times in the input_image making it difficult to extract the tile.
+                    continue
+
+            output_image = np.rot90(output_image_raw, rotate90_count)
+            break
+        if input_image is None:
+            raise Exception("Failed to create image")
+        if output_image is None:
+            raise Exception("Failed to create image")
         task.append_pair(input_image, output_image, is_example)
 
     return task
@@ -247,9 +318,9 @@ def generate_task_with_symmetry_square_input_image_and_extract_a_particular_tile
             output_image = np.rot90(output_image_raw, rotate90_count)
             break
         if input_image is None:
-            raise Exception("Failed to create a square image with more than one color")
+            raise Exception("Failed to create image")
         if output_image is None:
-            raise Exception("Failed to create a square image with more than one color")
+            raise Exception("Failed to create image")
         task.append_pair(input_image, output_image, is_example)
 
     return task
@@ -257,7 +328,6 @@ def generate_task_with_symmetry_square_input_image_and_extract_a_particular_tile
 def demo_generate_task():
     for i in range(5):
         j = i % 4
-        task = generate_task_with_symmetry_square_input_image_and_extract_a_particular_tile(i)
         if j == 0:
             task = generate_task_with_input_image_create_output_symmetry_rect(i)
         elif j == 1:
