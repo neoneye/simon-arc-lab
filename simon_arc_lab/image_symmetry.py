@@ -52,7 +52,7 @@ class ImageSymmetryBase:
             self.name_list.append(name_image)
 
     @classmethod
-    def create_random(cls, seed: int) -> Tuple['ImageSymmetryBase', str]:
+    def create_random(cls, seed: int) -> 'ImageSymmetryBase':
         pattern = random.Random(seed).choice(cls.PATTERN_IDS)
         return cls(pattern)
     
