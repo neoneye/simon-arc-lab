@@ -3,20 +3,14 @@
 # - extract the tile that makes up the symmetric input image.
 # - Use rotate cw/ccw to create a symmetric image.
 # - Use flip diagonal to create a symmetric image.
-#
-# IDEA: add spacing around the input tile, so the job is to remove the spacing, and tile the image.
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=73182012
+# - add spacing around the input tile, so the job is to remove the spacing, and tile the image.
+# - add spacing around the symmetric input image, so the job is to remove the spacing, and extract the tile image.
 #
 # IDEA: rotational symmetry, in order to solve the task:
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2697da3f
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=46442a0e
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=7fe24cdd
 #
 # IDEA: mirror the image, where the mirrored version has a different color scheme.
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6f473927
-#
-# IDEA: Extract tile that is repeated in the symmetric image, in order to solve the task:
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2013d3e2
 #
 # IDEA: repair rotational symmetry, with red color, in order to solve the task:
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=1b60fb0c
@@ -79,6 +73,10 @@ def generate_task_with_input_image_create_output_symmetry_rect(seed: int) -> Tas
 def generate_task_with_input_image_create_output_symmetry_square(seed: int) -> Task:
     """
     Create a symmetric image from a square input image.
+
+    Similar tasks:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=46442a0e
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=7fe24cdd
     """
     count_example = random.Random(seed + 9).randint(3, 5)
     count_test = random.Random(seed + 10).randint(1, 2)
@@ -176,6 +174,10 @@ def generate_task_with_symmetry_rect_input_image_and_extract_a_particular_tile(s
 def generate_task_with_symmetry_square_input_image_and_extract_a_particular_tile(seed: int) -> Task:
     """
     Identify the top-left square tile of a symmetric image.
+
+    Similar tasks:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=73182012
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2013d3e2
     """
     count_example = random.Random(seed + 1).randint(3, 4)
     count_test = random.Random(seed + 2).randint(1, 2)
