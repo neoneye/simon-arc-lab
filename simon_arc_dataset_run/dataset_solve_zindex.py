@@ -2,6 +2,9 @@
 # - extract mask of primary rectangle
 # - place 2 rectangles on top of each other, and then restore the obscured area.
 # 
+# IDEA: crop out the obscured rectangle.
+# IDEA: swap colors of the 2 rectangles.
+# 
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
 import os
@@ -39,7 +42,7 @@ def generate_task_mask_of_primary_rectangle(seed: int) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 6
-    max_image_size = 10
+    max_image_size = 12
 
     # input colors
     colors_input = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -70,7 +73,7 @@ def generate_task_mask_of_primary_rectangle(seed: int) -> Task:
             image_width = random.Random(input_seed + 1).randint(min_image_size, max_image_size)
             image_height = random.Random(input_seed + 2).randint(min_image_size, max_image_size)
 
-            ratios = [0.1, 0.2]
+            ratios = [0.1, 0.2, 0.3]
             ratio = random.Random(input_seed + 3).choice(ratios)
             image = image_create_random_with_two_colors(image_width, image_height, 0, 1, ratio, input_seed + 4)
 
@@ -110,7 +113,7 @@ def generate_task_mask_of_obscured_rectangle(seed: int) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 6
-    max_image_size = 10
+    max_image_size = 12
 
     # input colors
     colors_input = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -142,7 +145,7 @@ def generate_task_mask_of_obscured_rectangle(seed: int) -> Task:
             image_width = random.Random(input_seed + 1).randint(min_image_size, max_image_size)
             image_height = random.Random(input_seed + 2).randint(min_image_size, max_image_size)
 
-            ratios = [0.1, 0.2]
+            ratios = [0.1, 0.2, 0.3]
             ratio = random.Random(input_seed + 3).choice(ratios)
             image = image_create_random_with_two_colors(image_width, image_height, 0, 1, ratio, input_seed + 4)
 
@@ -246,7 +249,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=117100911,
+    seed=127100911,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
