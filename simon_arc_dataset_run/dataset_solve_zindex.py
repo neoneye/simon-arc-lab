@@ -4,6 +4,8 @@
 # 
 # IDEA: crop out the obscured rectangle.
 # IDEA: swap colors of the 2 rectangles.
+# IDEA: draw diagonal lines on the obscured area.
+# IDEA: draw rectangles that are 45 degree rotated.
 # 
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
