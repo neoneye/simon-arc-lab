@@ -22,9 +22,8 @@ from simon_arc_lab.image_create_random_advanced import image_create_random_advan
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.task import *
 from simon_arc_lab.image_rect import *
+from simon_arc_lab.image_grid import ImageGridBuilder
 from simon_arc_lab.image_util import *
-from simon_arc_lab.rectangle import Rectangle
-from simon_arc_lab.pixel_connectivity import *
 from simon_arc_lab.benchmark import *
 from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
 from simon_arc_dataset.generate_solve import *
@@ -95,58 +94,25 @@ def generate_task_extract_content_from_grid(seed: int) -> Task:
             if histogram.number_of_unique_colors() < 2:
                 continue
 
-            cell_widths = []
-            for x in range(width):
-                cell_width = random.Random(seed_for_input_image_data + 2 + x * 1000).randint(min_cell_size, max_cell_size)
-                cell_widths.append(cell_width)
-
-            cell_heights = []
-            for y in range(height):
-                cell_height = random.Random(seed_for_input_image_data + 3 + y * 1003).randint(min_cell_size, max_cell_size)
-                cell_heights.append(cell_height)
-
-            separator_widths = []
-            for x in range(width+1):
-                separator_widths.append(grid_size)
-
-            separator_heights = []
-            for y in range(height+1):
-                separator_heights.append(grid_size)
+            builder = ImageGridBuilder(width, height)
+            builder.set_cell_size_random(seed_for_input_image_data * 3779 + 188282821, min_cell_size, max_cell_size)
+            builder.set_separator_size(grid_size)
 
             if has_no_top_line:
-                separator_heights[0] = 0
+                builder.set_top_separator_size(0)
             
             if has_no_bottom_line:
-                separator_heights[-1] = 0
+                builder.set_bottom_separator_size(0)
 
             if has_no_left_line:
-                separator_widths[0] = 0
+                builder.set_left_separator_size(0)
 
             if has_no_right_line:
-                separator_widths[-1] = 0
+                builder.set_right_separator_size(0)
 
-            destination_width = sum(cell_widths) + sum(separator_widths)
-            destination_height = sum(cell_heights) + sum(separator_heights)
-            destination_image = np.full((destination_height, destination_width), color_grid, dtype=np.uint8)
+            grid_image = builder.draw(candidate_image, color_grid)
 
-            current_y = 0
-            for y in range(height):
-                current_y += separator_heights[y]
-                if y > 0:
-                    current_y += cell_heights[y-1]
-                current_x = 0
-                for x in range(width):
-                    current_x += separator_widths[x]
-                    if x > 0:
-                        current_x += cell_widths[x-1]
-                    column_width = cell_widths[x]
-                    row_height = cell_heights[y]
-
-                    for dy in range(row_height):
-                        for dx in range(column_width):
-                            destination_image[current_y + dy, current_x + dx] = candidate_image[y, x]
-
-            input_image = image_replace_colors(destination_image, color_mapping)
+            input_image = image_replace_colors(grid_image, color_mapping)
             output_image = image_replace_colors(candidate_image, color_mapping)
             break
         if input_image is None or output_image is None:
