@@ -33,11 +33,14 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_grid'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_grid.jsonl')
 
-def generate_task_extract_content_from_grid(seed: int) -> Task:
+def generate_task_extract_content_from_grid(seed: int, transformation_id: str) -> Task:
     """
     Original image is random noise.
     Wrap the original image in a grid in different ways.
     The job is to extract the original image from the grid structure.
+
+    Example:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9f236235
     """
     count_example = random.Random(seed + 1).randint(2, 4)
     count_test = random.Random(seed + 2).randint(1, 2)
@@ -70,7 +73,7 @@ def generate_task_extract_content_from_grid(seed: int) -> Task:
 
     grid_size = random.Random(seed + 8).randint(1, 2)
 
-    task.metadata_task_id = 'extract_content_from_grid'
+    task.metadata_task_id = f'extract_content_from_grid_{transformation_id}'
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -113,7 +116,27 @@ def generate_task_extract_content_from_grid(seed: int) -> Task:
             grid_image = builder.draw(candidate_image, color_grid)
 
             input_image = image_replace_colors(grid_image, color_mapping)
-            output_image = image_replace_colors(candidate_image, color_mapping)
+
+            if transformation_id == 'original':
+                mutated_image = candidate_image
+            elif transformation_id == 'flipx':
+                mutated_image = image_flipx(candidate_image)
+            elif transformation_id == 'flipy':
+                mutated_image = image_flipy(candidate_image)
+            elif transformation_id == '180':
+                mutated_image = image_rotate_180(candidate_image)
+            elif transformation_id == 'cw':
+                mutated_image = image_rotate_cw(candidate_image)
+            elif transformation_id == 'ccw':
+                mutated_image = image_rotate_ccw(candidate_image)
+            elif transformation_id == 'flipa':
+                mutated_image = image_flip_diagonal_a(candidate_image)
+            elif transformation_id == 'flipb':
+                mutated_image = image_flip_diagonal_b(candidate_image)
+            else:
+                raise ValueError(f"Unknown transformation id: {transformation_id}")
+
+            output_image = image_replace_colors(mutated_image, color_mapping)
             break
         if input_image is None or output_image is None:
             raise Exception("Failed to create a pair.")
@@ -224,7 +247,7 @@ def demo_generate_task():
     for i in range(100):
         j = i % 4
         if j == 0:
-            task = generate_task_extract_content_from_grid(i)
+            task = generate_task_extract_content_from_grid(i, 'original')
         elif j == 1:
             task = generate_task_mutate_content_inside_grid(i, 'flipx')
         elif j == 2:
@@ -242,17 +265,38 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 4
+    j = seed % 11
     if j == 0:
-        task = generate_task_extract_content_from_grid(seed)
-        transformation_id = 'extract_content_from_grid'
+        task = generate_task_extract_content_from_grid(seed, 'original')
+        transformation_id = 'extract_content_from_grid_original'
     elif j == 1:
+        task = generate_task_extract_content_from_grid(seed, 'flipx')
+        transformation_id = 'extract_content_from_grid_flipx'
+    elif j == 2:
+        task = generate_task_extract_content_from_grid(seed, 'flipy')
+        transformation_id = 'extract_content_from_grid_flipy'
+    elif j == 3:
+        task = generate_task_extract_content_from_grid(seed, '180')
+        transformation_id = 'extract_content_from_grid_180'
+    elif j == 4:
+        task = generate_task_extract_content_from_grid(seed, 'cw')
+        transformation_id = 'extract_content_from_grid_cw'
+    elif j == 5:
+        task = generate_task_extract_content_from_grid(seed, 'ccw')
+        transformation_id = 'extract_content_from_grid_ccw'
+    elif j == 6:
+        task = generate_task_extract_content_from_grid(seed, 'flipa')
+        transformation_id = 'extract_content_from_grid_flipa'
+    elif j == 7:
+        task = generate_task_extract_content_from_grid(seed, 'flipb')
+        transformation_id = 'extract_content_from_grid_flipb'
+    elif j == 8:
         task = generate_task_mutate_content_inside_grid(seed, 'flipx')
         transformation_id = 'mutate_content_inside_grid_flipx'
-    elif j == 2:
+    elif j == 9:
         task = generate_task_mutate_content_inside_grid(seed, 'flipy')
         transformation_id = 'mutate_content_inside_grid_flipy'
-    elif j == 3:
+    elif j == 10:
         task = generate_task_mutate_content_inside_grid(seed, '180')
         transformation_id = 'mutate_content_inside_grid_180'
 
@@ -265,7 +309,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=51300013,
+    seed=61300013,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
