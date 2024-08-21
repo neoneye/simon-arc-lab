@@ -22,4 +22,5 @@ dataset_solve_rotate.jsonl
 dataset_solve_scale.jsonl
 dataset_solve_symmetry.jsonl
 dataset_solve_translate.jsonl
+dataset_solve_zindex.jsonl
 dataset_symmetry.jsonl

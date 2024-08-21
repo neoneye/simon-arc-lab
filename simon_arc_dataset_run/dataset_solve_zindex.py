@@ -1,0 +1,133 @@
+# Z-index transformations.
+# - extract mask of primary rectangle
+# 
+# IDEA: recreate the obscured area.
+# Place 2 rectangles on top of each other, and then restore the obscured area.
+#
+# Present the same input images, but with different transformations.
+# so from the examples alone, the model have to determine what happened.
+import os
+import sys
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, PROJECT_ROOT)
+
+import random
+from simon_arc_lab.image_mix import *
+from simon_arc_lab.image_util import *
+from simon_arc_lab.image_create_random_simple import *
+from simon_arc_lab.task import *
+from simon_arc_lab.image_rect import *
+from simon_arc_lab.image_util import *
+from simon_arc_lab.rectangle import Rectangle
+from simon_arc_lab.pixel_connectivity import *
+from simon_arc_lab.benchmark import *
+from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
+from simon_arc_dataset.generate_solve import *
+from simon_arc_dataset.dataset_generator import *
+
+DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
+BENCHMARK_DATASET_NAME = 'solve_zindex'
+SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_zindex.jsonl')
+
+def generate_task_mask_of_primary_rectangle(seed: int) -> Task:
+    """
+    Random noisy background with two colors.
+    Draw a rectangle on top of the background.
+    The job is to identify the rectangle.
+    """
+    count_example = random.Random(seed + 1).randint(2, 4)
+    count_test = random.Random(seed + 2).randint(1, 2)
+    # count_test = 1
+    task = Task()
+    min_image_size = 6
+    max_image_size = 10
+
+    # input colors
+    colors_input = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    random.Random(seed + 3).shuffle(colors_input)
+    color_mapping_input = {
+        0: colors_input[0],
+        1: colors_input[1],
+        2: colors_input[2],
+    }
+
+    # output colors
+    colors_output = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    random.Random(seed + 4).shuffle(colors_output)
+    color_mapping_output = {
+        0: colors_output[0],
+        1: colors_output[1],
+    }
+
+    task.metadata_task_id = f'mask_of_primary_rectangle'
+
+    for i in range(count_example+count_test):
+        is_example = i < count_example
+        input_image = None
+        output_image = None
+        for retry_index in range(100):
+            input_seed = (retry_index * 10000) + ((seed + 17) * 37) + 101 + i
+
+            image_width = random.Random(input_seed + 1).randint(min_image_size, max_image_size)
+            image_height = random.Random(input_seed + 2).randint(min_image_size, max_image_size)
+
+            ratios = [0.1, 0.2]
+            ratio = random.Random(input_seed + 3).choice(ratios)
+            image = image_create_random_with_two_colors(image_width, image_height, 0, 1, ratio, input_seed + 4)
+
+            layer0_width = random.Random(input_seed + 4).randint(1, image_width)
+            layer0_height = random.Random(input_seed + 5).randint(1, image_height)
+            layer0_x = random.Random(input_seed + 6).randint(0, image_width - layer0_width)
+            layer0_y = random.Random(input_seed + 7).randint(0, image_height - layer0_height)
+            layer0_rect = Rectangle(
+                layer0_x,
+                layer0_y,
+                layer0_width,
+                layer0_height
+            )
+            # print(f"layer0_rect: {layer0_rect}")
+            layer0_image = image_rect(image, layer0_rect, 2)
+
+            mask_image = image_create(image_width, image_height, 0)
+            layer0_mask = image_rect(mask_image, layer0_rect, 1)
+
+            input_image = image_replace_colors(layer0_image, color_mapping_input)
+            output_image = image_replace_colors(layer0_mask, color_mapping_output)
+            break
+        if input_image is None or output_image is None:
+            raise Exception("Failed to create a pair.")
+        task.append_pair(input_image, output_image, is_example)
+
+    return task
+
+def demo_generate_task():
+    for i in range(10):
+        task = generate_task_mask_of_primary_rectangle(i)
+        task.show()
+
+# demo_generate_task()
+# exit()
+
+def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
+    builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
+    builder.append_image()
+    return builder.dataset_items()
+
+def generate_dataset_item_list(seed: int) -> list[dict]:
+    task = generate_task_mask_of_primary_rectangle(seed)
+    # task.show()
+    items = generate_dataset_item_list_inner((seed + 1) * 11, task, 'mask_of_primary_rectangle')
+    return items
+
+
+generator = DatasetGenerator(
+    generate_dataset_item_list_fn=generate_dataset_item_list
+)
+generator.generate(
+    seed=107100911,
+    max_num_samples=100000,
+    max_byte_size=1024*1024*100
+)
+# generator.inspect()
+generator.save(SAVE_FILE_PATH)
