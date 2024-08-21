@@ -1,6 +1,7 @@
 # Grid transformations.
 # - Extract content from an grid with irregular sized cells.
 # 
+# IDEA: flipx/flipy and preserve the grid structure.
 # IDEA: Add noise to the input grid cells. Either the most/least popular color of the cell, becomes the output color.
 # IDEA: Convert the input to a grid.
 # IDEA: different colors for grid horizontal/vertical lines, and grid line intersections.
@@ -44,10 +45,10 @@ def generate_task_extract_content_from_grid(seed: int) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 2
-    max_image_size = 4
+    max_image_size = 5
 
     min_cell_size = 1
-    max_cell_size = 5
+    max_cell_size = 6
 
     # grid colors
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -67,6 +68,8 @@ def generate_task_extract_content_from_grid(seed: int) -> Task:
     has_no_bottom_line = random.Random(seed + 5).randint(0, 99) > 50
     has_no_left_line = random.Random(seed + 6).randint(0, 99) > 50
     has_no_right_line = random.Random(seed + 7).randint(0, 99) > 50
+
+    grid_size = random.Random(seed + 8).randint(1, 2)
 
     task.metadata_task_id = 'extract_content_from_grid'
 
@@ -104,15 +107,11 @@ def generate_task_extract_content_from_grid(seed: int) -> Task:
 
             separator_widths = []
             for x in range(width+1):
-                # size = random.Random(seed_for_input_image_data + 2 + x * 1000).randint(0, 2)
-                size = 1
-                separator_widths.append(size)
+                separator_widths.append(grid_size)
 
             separator_heights = []
             for y in range(height+1):
-                # size = random.Random(seed_for_input_image_data + 2 + y * 1000).randint(0, 2)
-                size = 1
-                separator_heights.append(size)
+                separator_heights.append(grid_size)
 
             if has_no_top_line:
                 separator_heights[0] = 0
@@ -182,7 +181,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=31300013,
+    seed=41300013,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
