@@ -21,7 +21,7 @@ class Rectangle:
         return f"Rectangle(x={self.x}, y={self.y}, width={self.width}, height={self.height})"
 
     def is_empty(self) -> bool:
-        return self.width == 0 or self.height == 0
+        return self.width <= 0 or self.height <= 0
     
     def intersection(self, other: 'Rectangle') -> 'Rectangle':
         """
