@@ -23,6 +23,9 @@ class Rectangle:
     def is_empty(self) -> bool:
         return self.width <= 0 or self.height <= 0
     
+    def is_not_empty(self) -> bool:
+        return not self.is_empty()
+    
     def intersection(self, other: 'Rectangle') -> 'Rectangle':
         """
         Find the intersection of two rectangles.

@@ -180,6 +180,30 @@ def generate_task_mask_of_obscured_rectangle(seed: int) -> Task:
             overlap_rect = layer0_rect.intersection(layer1_rect)
             if overlap_rect.is_empty():
                 continue
+            if overlap_rect == layer0_rect:
+                # print(f"overlap the entire layer0, skip")
+                continue
+
+            # if the overlap obscures the edge of the rectangle, then it's not possible to repair the obscured area, since the rectangle have no size info.
+            corner_topleft = Rectangle(layer0_x, layer0_y, 1, 1)
+            corner_topright = Rectangle(layer0_x + layer0_width - 1, layer0_y, 1, 1)
+            corner_bottomleft = Rectangle(layer0_x, layer0_y + layer0_height - 1, 1, 1)
+            corner_bottomright = Rectangle(layer0_x + layer0_width - 1, layer0_y + layer0_height - 1, 1, 1)
+
+            hidden_topleft = corner_topleft.intersection(layer1_rect).is_not_empty()
+            hidden_topright = corner_topright.intersection(layer1_rect).is_not_empty()
+            hidden_bottomleft = corner_bottomleft.intersection(layer1_rect).is_not_empty()
+            hidden_bottomright = corner_bottomright.intersection(layer1_rect).is_not_empty()
+
+            hidden_top = hidden_topleft and hidden_topright
+            hidden_bottom = hidden_bottomleft and hidden_bottomright
+            hidden_left = hidden_topleft and hidden_bottomleft
+            hidden_right = hidden_topright and hidden_bottomright
+            if hidden_top or hidden_bottom or hidden_left or hidden_right:
+                # print(f"hidden_top: {hidden_top}, hidden_bottom: {hidden_bottom}, hidden_left: {hidden_left}, hidden_right: {hidden_right}")
+                # The obscured area is not repairable.
+                continue
+
             layer1_image = image_rect(layer0_image, layer1_rect, 3)
 
             input_image = image_replace_colors(layer1_image, color_mapping_input)
@@ -192,8 +216,11 @@ def generate_task_mask_of_obscured_rectangle(seed: int) -> Task:
     return task
 
 def demo_generate_task():
-    for i in range(10):
-        task = generate_task_mask_of_primary_rectangle(i)
+    for i in range(100):
+        if i % 2 == 0:
+            task = generate_task_mask_of_primary_rectangle(i)
+        else:
+            task = generate_task_mask_of_obscured_rectangle(i)
         task.show()
 
 # demo_generate_task()
@@ -205,9 +232,15 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    task = generate_task_mask_of_primary_rectangle(seed)
+    if seed % 2 == 0:
+        task = generate_task_mask_of_primary_rectangle(seed)
+        transformation_id = 'mask_of_primary_rectangle'
+    else:
+        task = generate_task_mask_of_obscured_rectangle(seed)
+        transformation_id = 'mask_of_obscured_rectangle'
+        
     # task.show()
-    items = generate_dataset_item_list_inner((seed + 1) * 11, task, 'mask_of_primary_rectangle')
+    items = generate_dataset_item_list_inner((seed + 1) * 11, task, transformation_id)
     return items
 
 
@@ -215,7 +248,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=107100911,
+    seed=117100911,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
