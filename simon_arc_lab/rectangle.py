@@ -22,3 +22,15 @@ class Rectangle:
 
     def is_empty(self) -> bool:
         return self.width == 0 or self.height == 0
+    
+    def intersection(self, other: 'Rectangle') -> 'Rectangle':
+        """
+        Find the intersection of two rectangles.
+        """
+        x0 = max(self.x, other.x)
+        y0 = max(self.y, other.y)
+        x1 = min(self.x + self.width, other.x + other.width)
+        y1 = min(self.y + self.height, other.y + other.height)
+        if x0 >= x1 or y0 >= y1:
+            return Rectangle.empty()
+        return Rectangle(x0, y0, x1 - x0, y1 - y0)
