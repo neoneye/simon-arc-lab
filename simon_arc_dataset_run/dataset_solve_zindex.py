@@ -1,9 +1,7 @@
 # Z-index transformations.
 # - extract mask of primary rectangle
+# - place 2 rectangles on top of each other, and then restore the obscured area.
 # 
-# IDEA: recreate the obscured area.
-# Place 2 rectangles on top of each other, and then restore the obscured area.
-#
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
 import os
