@@ -1,7 +1,7 @@
 # Grid transformations.
 # - Extract content from an grid with irregular sized cells.
+# - Mutate the content inside the grid: flipx, flipy, rotate 180 degrees.
 # 
-# IDEA: flipx/flipy and preserve the grid structure.
 # IDEA: Add noise to the input grid cells. Either the most/least popular color of the cell, becomes the output color.
 # IDEA: Convert the input to a grid.
 # IDEA: different colors for grid horizontal/vertical lines, and grid line intersections.
@@ -121,10 +121,117 @@ def generate_task_extract_content_from_grid(seed: int) -> Task:
 
     return task
 
-# def demo_generate_task():
-#     for i in range(100):
-#         task = generate_task_extract_content_from_grid(i)
-#         task.show()
+def generate_task_mutate_content_inside_grid(seed: int, transformation_id: str) -> Task:
+    """
+    Original image is random noise.
+    Wrap the original image in a grid in different ways.
+    The job is to manipulate the image, while preserving the grid structure.
+    """
+    count_example = random.Random(seed + 1).randint(2, 4)
+    count_test = random.Random(seed + 2).randint(1, 2)
+    # count_test = 1
+    task = Task()
+    min_image_size = 2
+    max_image_size = 4
+
+    min_cell_size = 1
+    max_cell_size = 3
+
+    # grid colors
+    colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    random.Random(seed + 3).shuffle(colors)
+    color_mapping = {}
+    for i, color in enumerate(colors):
+        color_mapping[i] = color
+
+    color_grid = 0
+    color_deceiving_pixel = color_grid
+
+    color_mapping_eliminate_grid_color = {
+        0: 1,
+    }
+
+    has_no_top_line = random.Random(seed + 4).randint(0, 99) > 50
+    has_no_bottom_line = random.Random(seed + 5).randint(0, 99) > 50
+    has_no_left_line = random.Random(seed + 6).randint(0, 99) > 50
+    has_no_right_line = random.Random(seed + 7).randint(0, 99) > 50
+
+    grid_size = random.Random(seed + 8).randint(1, 2)
+
+    task.metadata_task_id = f'mutate_content_inside_grid_{transformation_id}'
+
+    for i in range(count_example+count_test):
+        is_example = i < count_example
+        input_image = None
+        output_image = None
+        for retry_index in range(100):
+            seed_for_input_image_data = (retry_index * 10000) + ((seed + 17) * 37) + 101 + i * 1991
+
+            candidate_image = image_create_random_advanced(seed_for_input_image_data + 1, min_image_size, max_image_size, min_image_size, max_image_size)
+            height, width = candidate_image.shape
+            candidate_image = image_replace_colors(candidate_image, color_mapping_eliminate_grid_color)
+
+            # The image has one pixel with the same color as the grid color.
+            has_deceiving_pixel = random.Random(seed_for_input_image_data + 2).randint(0, 99) > 30
+            if has_deceiving_pixel:
+                rx = random.Random(seed_for_input_image_data + 1).randint(0, width - 1)
+                ry = random.Random(seed_for_input_image_data + 2).randint(0, height - 1)
+                candidate_image[ry, rx] = color_deceiving_pixel
+
+            histogram = Histogram.create_with_image(candidate_image)
+            if histogram.number_of_unique_colors() < 2:
+                continue
+
+            builder = ImageGridBuilder(width, height)
+            builder.set_cell_size_random(seed_for_input_image_data * 3779 + 188282821, min_cell_size, max_cell_size)
+            builder.set_separator_size(grid_size)
+
+            if has_no_top_line:
+                builder.set_top_separator_size(0)
+            
+            if has_no_bottom_line:
+                builder.set_bottom_separator_size(0)
+
+            if has_no_left_line:
+                builder.set_left_separator_size(0)
+
+            if has_no_right_line:
+                builder.set_right_separator_size(0)
+
+            grid_input_image = builder.draw(candidate_image, color_grid)
+
+            if transformation_id == 'flipx':
+                modified_image = image_flipx(candidate_image)
+            elif transformation_id == 'flipy':
+                modified_image = image_flipy(candidate_image)
+            elif transformation_id == '180':
+                modified_image = image_rotate_180(candidate_image)
+            else:
+                raise ValueError(f"Unknown transformation id: {transformation_id}")
+
+            grid_output_image = builder.draw(modified_image, color_grid)
+
+            input_image = image_replace_colors(grid_input_image, color_mapping)
+            output_image = image_replace_colors(grid_output_image, color_mapping)
+            break
+        if input_image is None or output_image is None:
+            raise Exception("Failed to create a pair.")
+        task.append_pair(input_image, output_image, is_example)
+
+    return task
+
+def demo_generate_task():
+    for i in range(100):
+        j = i % 4
+        if j == 0:
+            task = generate_task_extract_content_from_grid(i)
+        elif j == 1:
+            task = generate_task_mutate_content_inside_grid(i, 'flipx')
+        elif j == 2:
+            task = generate_task_mutate_content_inside_grid(i, 'flipy')
+        elif j == 3:
+            task = generate_task_mutate_content_inside_grid(i, '180')
+        task.show()
 
 # demo_generate_task()
 # exit()
@@ -135,9 +242,20 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    task = generate_task_extract_content_from_grid(seed)
-    transformation_id = 'extract_content_from_grid'
-        
+    j = seed % 4
+    if j == 0:
+        task = generate_task_extract_content_from_grid(seed)
+        transformation_id = 'extract_content_from_grid'
+    elif j == 1:
+        task = generate_task_mutate_content_inside_grid(seed, 'flipx')
+        transformation_id = 'mutate_content_inside_grid_flipx'
+    elif j == 2:
+        task = generate_task_mutate_content_inside_grid(seed, 'flipy')
+        transformation_id = 'mutate_content_inside_grid_flipy'
+    elif j == 3:
+        task = generate_task_mutate_content_inside_grid(seed, '180')
+        transformation_id = 'mutate_content_inside_grid_180'
+
     # task.show()
     items = generate_dataset_item_list_inner((seed + 1) * 11, task, transformation_id)
     return items
