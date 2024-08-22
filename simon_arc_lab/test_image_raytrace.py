@@ -74,3 +74,80 @@ class TestImageRaytrace(unittest.TestCase):
             [ 1,  4,  4,  0, 10],
             [10, 10, 10, 10, 10]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
+
+    def test_14000_image_raytrace_probe_color_direction_upleft(self):
+        # Arrange
+        image = np.array([
+            [1, 0, 0, 2],
+            [0, 1, 2, 3],
+            [0, 1, 1, 0],
+            [0, 4, 5, 6],
+            [4, 0, 5, 3]], dtype=np.uint8)
+        # Act
+        actual = image_raytrace_probe_color_direction_upleft(image, 10)
+        # Assert
+        expected = np.array([
+            [10, 10, 10, 10],
+            [10, 10,  0,  0],
+            [10,  0, 10,  2],
+            [10,  0,  1,  1],
+            [10, 10,  4,  5]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_15000_image_raytrace_probe_color_direction_downleft(self):
+        # Arrange
+        image = np.array([
+            [1, 0, 0, 2],
+            [0, 1, 2, 3],
+            [0, 1, 1, 0],
+            [0, 4, 5, 6],
+            [4, 0, 5, 3]], dtype=np.uint8)
+        # Act
+        actual = image_raytrace_probe_color_direction_downleft(image, 10)
+        # Assert
+        expected = np.array([
+            [10, 10,  1,  1],
+            [10,  0,  1,  1],
+            [10,  0,  4,  5],
+            [10, 10,  0,  5],
+            [10, 10, 10, 10]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_16000_image_raytrace_probe_color_direction_upright(self):
+        # Arrange
+        image = np.array([
+            [1, 0, 0, 2],
+            [0, 1, 2, 3],
+            [0, 1, 1, 0],
+            [0, 4, 5, 6],
+            [4, 0, 5, 3]], dtype=np.uint8)
+        # Act
+        actual = image_raytrace_probe_color_direction_upright(image, 10)
+        # Assert
+        expected = np.array([
+            [10, 10, 10, 10],
+            [10,  0, 10, 10],
+            [ 1,  2,  3, 10],
+            [ 1,  1,  0, 10],
+            [ 1,  5,  6, 10]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_17000_image_raytrace_probe_color_direction_downright(self):
+        # Arrange
+        image = np.array([
+            [1, 0, 0, 2],
+            [0, 1, 2, 3],
+            [0, 1, 1, 0],
+            [0, 4, 5, 6],
+            [4, 0, 5, 3]], dtype=np.uint8)
+        # Act
+        actual = image_raytrace_probe_color_direction_downright(image, 10)
+        # Assert
+        expected = np.array([
+            [ 6,  2,  3, 10],
+            [ 1,  6,  0, 10],
+            [ 4,  5,  6, 10],
+            [10,  5,  3, 10],
+            [10, 10, 10, 10]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
