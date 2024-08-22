@@ -32,7 +32,7 @@ def generate_task(seed: int) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 3
-    max_image_size = 8
+    max_image_size = 9
 
     probecolor_direction_list = [
         ImageRaytraceProbeColorDirection.TOP,
@@ -60,7 +60,7 @@ def generate_task(seed: int) -> Task:
         is_example = i < count_example
         if is_example == False:
             min_image_size = 1
-            max_image_size = 12
+            max_image_size = 14
 
         random_image = None
         for retry_index in range(100):
@@ -107,7 +107,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=344300232,
+    seed=354300232,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
