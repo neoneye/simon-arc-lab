@@ -37,12 +37,12 @@ def generate_task(seed: int) -> Task:
     probecolor_direction_list = [
         ImageRaytraceProbeColorDirection.TOP,
         ImageRaytraceProbeColorDirection.BOTTOM,
-        ImageRaytraceProbeColorDirection.LEFT,
-        ImageRaytraceProbeColorDirection.RIGHT,
-        ImageRaytraceProbeColorDirection.TOPLEFT,
-        ImageRaytraceProbeColorDirection.TOPRIGHT,
-        ImageRaytraceProbeColorDirection.BOTTOMLEFT,
-        ImageRaytraceProbeColorDirection.BOTTOMRIGHT,
+        # ImageRaytraceProbeColorDirection.LEFT,
+        # ImageRaytraceProbeColorDirection.RIGHT,
+        # ImageRaytraceProbeColorDirection.TOPLEFT,
+        # ImageRaytraceProbeColorDirection.TOPRIGHT,
+        # ImageRaytraceProbeColorDirection.BOTTOMLEFT,
+        # ImageRaytraceProbeColorDirection.BOTTOMRIGHT,
     ]
     probe_color_direction = random.choice(probecolor_direction_list)
     direction_name = probe_color_direction.name.lower()
@@ -107,7 +107,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=354300232,
+    seed=364300232,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
