@@ -1,4 +1,5 @@
 import numpy as np
+from enum import Enum
 
 def probe_color_inner(pixel_list: list[int], edge_color: int) -> list[int]:
     """
@@ -142,3 +143,35 @@ def image_raytrace_probecolor_direction_bottomright(image: np.array, edge_color:
             unskewed_image[y, x] = skewed_image[y, height-1-y+x]
     return unskewed_image
 
+class ImageRaytraceProbeColorDirection(Enum):
+    TOP = 'top'
+    BOTTOM = 'bottom'
+    LEFT = 'left'
+    RIGHT = 'right'
+    TOPLEFT = 'topleft'
+    TOPRIGHT = 'topright'
+    BOTTOMLEFT = 'bottomleft'
+    BOTTOMRIGHT = 'bottomright'
+
+def image_raytrace_probecolor_direction(image: np.array, edge_color: int, direction: ImageRaytraceProbeColorDirection) -> np.array:
+    """
+    Raytrace in the given direction, and determine what color is there.
+    """
+    if direction == ImageRaytraceProbeColorDirection.TOP:
+        return image_raytrace_probecolor_direction_top(image, edge_color)
+    elif direction == ImageRaytraceProbeColorDirection.BOTTOM:
+        return image_raytrace_probecolor_direction_bottom(image, edge_color)
+    elif direction == ImageRaytraceProbeColorDirection.LEFT:
+        return image_raytrace_probecolor_direction_left(image, edge_color)
+    elif direction == ImageRaytraceProbeColorDirection.RIGHT:
+        return image_raytrace_probecolor_direction_right(image, edge_color)
+    elif direction == ImageRaytraceProbeColorDirection.TOPLEFT:
+        return image_raytrace_probecolor_direction_topleft(image, edge_color)
+    elif direction == ImageRaytraceProbeColorDirection.TOPRIGHT:
+        return image_raytrace_probecolor_direction_topright(image, edge_color)
+    elif direction == ImageRaytraceProbeColorDirection.BOTTOMLEFT:
+        return image_raytrace_probecolor_direction_bottomleft(image, edge_color)
+    elif direction == ImageRaytraceProbeColorDirection.BOTTOMRIGHT:
+        return image_raytrace_probecolor_direction_bottomright(image, edge_color)
+    else:
+        raise ValueError(f"Unknown direction: {direction}")
