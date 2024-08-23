@@ -57,8 +57,8 @@ def generate_task_specific_mass(seed: int, find_mass_size: int, connectivity: Pi
     # count_test = 1
     task = Task()
     task.metadata_task_id = f'mass{find_mass_size}_{connectivity.name.lower()}'
-    min_image_size = 3
-    max_image_size = 10
+    min_image_size = 1
+    max_image_size = 15
 
     connectivity = PixelConnectivity.ALL8
 
@@ -137,7 +137,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=110000777,
+    seed=130000777,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
