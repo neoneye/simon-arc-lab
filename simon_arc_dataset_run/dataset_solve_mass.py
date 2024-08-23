@@ -27,17 +27,38 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_mass'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_mass.jsonl')
 
-def generate_task_mass1(seed: int, find_mass_size: int, connectivity: PixelConnectivity) -> Task:
+def generate_task_specific_mass(seed: int, find_mass_size: int, connectivity: PixelConnectivity) -> Task:
     """
     Identify the areas with a particular mass.
+
+    Example of tasks with mass=1:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=178fcbfb
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=23581191
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2dc579da
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=3f23242b
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=4258a5f9
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=444801d8
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=56ff96f3
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=8d510a79
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=8403a5d5
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=99fa7670
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=dc1df850
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ddf7fa4f
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ded97339
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e179c5f4
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e9614598
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ea786f4a
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ecdecbb3
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f15e1fac
+
     """
     count_example = random.Random(seed + 9).randint(2, 4)
     count_test = random.Random(seed + 10).randint(1, 2)
     # count_test = 1
     task = Task()
     task.metadata_task_id = f'mass{find_mass_size}_{connectivity.name.lower()}'
-    min_image_size = 4
-    max_image_size = 6
+    min_image_size = 3
+    max_image_size = 10
 
     connectivity = PixelConnectivity.ALL8
 
@@ -89,7 +110,7 @@ def generate_task_mass1(seed: int, find_mass_size: int, connectivity: PixelConne
 
 def demo_generate_task():
     for i in range(5):
-        task = generate_task_mass1(i, 1, PixelConnectivity.ALL8)
+        task = generate_task_specific_mass(i, 1, PixelConnectivity.ALL8)
         task.show()
 
 # demo_generate_task()
@@ -104,10 +125,10 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 2
     if j == 0:
         transformation_id = 'mass1_all8'
-        task = generate_task_mass1(seed, 1, PixelConnectivity.ALL8)
+        task = generate_task_specific_mass(seed, 1, PixelConnectivity.ALL8)
     elif j == 1:
         transformation_id = 'mass2_all8'
-        task = generate_task_mass1(seed, 2, PixelConnectivity.ALL8)
+        task = generate_task_specific_mass(seed, 2, PixelConnectivity.ALL8)
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
@@ -116,7 +137,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=100000777,
+    seed=110000777,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
