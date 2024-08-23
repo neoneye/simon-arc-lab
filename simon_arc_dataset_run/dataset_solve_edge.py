@@ -1,6 +1,8 @@
 # Where is a pixel located inside an object?
 # - If it's the top/bottom/left/right -facing of the object, then set the mask to 1, otherwise 0.
 #
+# IDEA: Also exercise ImageShape3x3Center.TOP_LEFT, ImageShape3x3Center.TOP_RIGHT, ImageShape3x3Center.BOTTOM_LEFT, ImageShape3x3Center.BOTTOM_RIGHT
+#
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
 import os
@@ -28,7 +30,7 @@ SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_edge.jso
 
 def generate_task_edge(seed: int, edge_name: str) -> Task:
     """
-    Identify the mask of the pixels that are inside an object.
+    Identify the mask of the pixels that are on the edge of an object.
     """
 
     if edge_name == 'top':
