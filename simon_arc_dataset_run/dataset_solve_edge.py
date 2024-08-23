@@ -58,7 +58,7 @@ def generate_task_edge(seed: int, edge_name: str) -> Task:
     task = Task()
     task.metadata_task_id = f'edge_{edge_name}'
     min_image_size = 3
-    max_image_size = 5
+    max_image_size = 10
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.shuffle(colors)
@@ -140,7 +140,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=130999999,
+    seed=140999999,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
