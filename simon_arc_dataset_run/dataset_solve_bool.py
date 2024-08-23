@@ -1,4 +1,4 @@
-# Boolean operations between 2 images: SAME, XOR, AND, OR.
+# Boolean operations between 2 images: AND, OR, XOR.
 #
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
@@ -22,14 +22,6 @@ from simon_arc_dataset.dataset_generator import *
 DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_bool'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_bool.jsonl')
-
-def image_mask_same(image0: np.ndarray, image1: np.ndarray) -> np.ndarray:
-    mask = np.zeros_like(image0)
-    for y in range(image0.shape[0]):
-        for x in range(image0.shape[1]):
-            if image0[y, x] == image1[y, x]:
-                mask[y, x] = 1
-    return mask
 
 def image_mask_and(image0: np.ndarray, image1: np.ndarray) -> np.ndarray:
     mask = np.zeros_like(image0)
@@ -57,10 +49,7 @@ def image_mask_xor(image0: np.ndarray, image1: np.ndarray) -> np.ndarray:
 
 def generate_task_bool_transformation(seed: int, transformation_id: str) -> Task:
     """
-    Stack two images together and apply a boolean transformation, such as AND, OR, XOR, SAME.
-
-    Example of tasks with 'SAME' transformation:
-    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=3428a4f5
+    Stack two images together and apply a boolean transformation, such as AND, OR, XOR.
 
     Example of tasks with 'AND' transformation:
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=0520fde7
@@ -74,6 +63,7 @@ def generate_task_bool_transformation(seed: int, transformation_id: str) -> Task
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=dae9d2b5
     
     Example of tasks with 'XOR' transformation:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=3428a4f5
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=99b1bc43
 
     """
@@ -88,18 +78,23 @@ def generate_task_bool_transformation(seed: int, transformation_id: str) -> Task
     input_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(input_colors)
 
-    input_color0 = input_colors[0]
-    input_color1 = input_colors[1]
-    input_color2 = input_colors[2]
-    wall_color = 2
-    color_map_input = {
-        0: input_color0,
-        1: input_color1,
-        wall_color: input_color2,
+    wall_color = input_colors[9]
+
+    color_map_input_a = {
+        0: input_colors[0],
+        1: input_colors[1],
+    }
+    color_map_input_b = {
+        0: input_colors[2],
+        1: input_colors[3],
     }
 
+    is_same_palette_for_inputs = random.Random(seed + 4).randint(0, 1) == 0
+    if is_same_palette_for_inputs:
+        color_map_input_b = color_map_input_a
+
     output_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    random.Random(seed + 4).shuffle(output_colors)
+    random.Random(seed + 5).shuffle(output_colors)
     output_color0 = output_colors[0]
     output_color1 = output_colors[1]
     color_map_output = {
@@ -109,12 +104,13 @@ def generate_task_bool_transformation(seed: int, transformation_id: str) -> Task
     
     wall_size = 1
 
-    is_hstack = random.Random(seed + 5).randint(0, 1) == 0
-    has_wall = random.Random(seed + 6).randint(0, 1) == 0
+    is_hstack = random.Random(seed + 6).randint(0, 1) == 0
+    has_wall = random.Random(seed + 7).randint(0, 1) == 0
 
     stack_name = 'hstack' if is_hstack else 'vstack'
-    wall_name = '_wall' if has_wall else ''
-    task.metadata_task_id = f'{transformation_id}_{stack_name}{wall_name}'
+    palette_name = '_samepalette' if is_same_palette_for_inputs else '_differentpalette'
+    wall_name = f'_wall{wall_size}' if has_wall else ''
+    task.metadata_task_id = f'{transformation_id}_{stack_name}{palette_name}{wall_name}'
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -127,30 +123,28 @@ def generate_task_bool_transformation(seed: int, transformation_id: str) -> Task
             height = random.Random(iteration_seed + 2).randint(min_image_size, max_image_size)
 
             ratios = [0.1, 0.2, 0.3, 0.4, 0.5]
-            ratio0 = random.Random(iteration_seed + 5).choice(ratios)
-            random_image0 = image_create_random_with_two_colors(width, height, 0, 1, ratio0, iteration_seed + 6)
-            histogram_random_image0 = Histogram.create_with_image(random_image0)
-            if histogram_random_image0.number_of_unique_colors() < 2:
+            ratio_a = random.Random(iteration_seed + 5).choice(ratios)
+            random_a_image = image_create_random_with_two_colors(width, height, 0, 1, ratio_a, iteration_seed + 6)
+            histogram_a = Histogram.create_with_image(random_a_image)
+            if histogram_a.number_of_unique_colors() < 2:
                 # We are not interested in empty images
                 continue
 
-            ratio1 = random.Random(iteration_seed + 7).choice(ratios)
-            random_image1 = image_create_random_with_two_colors(width, height, 0, 1, ratio1, iteration_seed + 8)
-            histogram_random_image1 = Histogram.create_with_image(random_image1)
-            if histogram_random_image1.number_of_unique_colors() < 2:
+            ratio_b = random.Random(iteration_seed + 7).choice(ratios)
+            random_b_image = image_create_random_with_two_colors(width, height, 0, 1, ratio_b, iteration_seed + 8)
+            histogram_b = Histogram.create_with_image(random_b_image)
+            if histogram_b.number_of_unique_colors() < 2:
                 # We are not interested in empty images
                 continue
 
-            # Identify where the pixels are the same
+            # Apply transformation
             mask = None
-            if transformation_id == 'same':
-                mask = image_mask_same(random_image0, random_image1)
-            elif transformation_id == 'and':
-                mask = image_mask_and(random_image0, random_image1)
+            if transformation_id == 'and':
+                mask = image_mask_and(random_a_image, random_b_image)
             elif transformation_id == 'or':
-                mask = image_mask_or(random_image0, random_image1)
+                mask = image_mask_or(random_a_image, random_b_image)
             elif transformation_id == 'xor':
-                mask = image_mask_xor(random_image0, random_image1)
+                mask = image_mask_xor(random_a_image, random_b_image)
             else:
                 raise Exception(f"Unknown transformation_id: {transformation_id}")
             
@@ -162,18 +156,21 @@ def generate_task_bool_transformation(seed: int, transformation_id: str) -> Task
             hstack_wall_image = image_create(wall_size, height, wall_color)
             vstack_wall_image = image_create(width, wall_size, wall_color)
 
+            input_a_image = image_replace_colors(random_a_image, color_map_input_a)
+            input_b_image = image_replace_colors(random_b_image, color_map_input_b)
+
             if is_hstack:
                 if has_wall:
-                    stacked_image = np.hstack([random_image0, hstack_wall_image, random_image1])
+                    stacked_image = np.hstack([input_a_image, hstack_wall_image, input_b_image])
                 else:
-                    stacked_image = np.hstack([random_image0, random_image1])
+                    stacked_image = np.hstack([input_a_image, input_b_image])
             else:
                 if has_wall:
-                    stacked_image = np.vstack([random_image0, vstack_wall_image, random_image1])
+                    stacked_image = np.vstack([input_a_image, vstack_wall_image, input_b_image])
                 else:
-                    stacked_image = np.vstack([random_image0, random_image1])
+                    stacked_image = np.vstack([input_a_image, input_b_image])
 
-            input_image = image_replace_colors(stacked_image, color_map_input)
+            input_image = stacked_image
             output_image = image_replace_colors(mask, color_map_output)
             break
         if (input_image is None) or (output_image is None):
@@ -184,7 +181,7 @@ def generate_task_bool_transformation(seed: int, transformation_id: str) -> Task
 
 def demo_generate_task():
     for i in range(5):
-        task = generate_task_bool_transformation(i, 'same')
+        task = generate_task_bool_transformation(i, 'xor')
         task.show()
 
 # demo_generate_task()
@@ -197,7 +194,6 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
     transformation_ids = [
-        'same',
         'and',
         'or',
         'xor',
@@ -214,7 +210,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=190000771,
+    seed=200000771,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
