@@ -1,5 +1,8 @@
 # Boolean operations between 2 images: AND, OR, XOR.
 #
+# IDEA: use same background color when the input_a and input_b are using different colors.
+# IDEA: use different colors for each pair, and pass on the input colors to the output.
+#
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
 import os
@@ -223,7 +226,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=210000771,
+    seed=220000771,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
