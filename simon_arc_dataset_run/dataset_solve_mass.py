@@ -1,5 +1,8 @@
 # Identify areas with a particular mass.
 #
+# IDEA: train with other connectitivity types, than ALL8, so that a task like this can be solved.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=aedd82e4
+#
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
 import os
