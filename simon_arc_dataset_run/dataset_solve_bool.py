@@ -142,6 +142,7 @@ def generate_task_bool_transformation(seed: int, transformation_id: str) -> Task
             mask_or = image_mask_or(random_a_image, random_b_image)
             mask_xor = image_mask_xor(random_a_image, random_b_image)
 
+            # IDEA: allow for some ambiguity, but not too much.
             # Ensures there are no ambiguous images where the other transformations yield the same result
             ambiguous_and_or = np.array_equal(mask_and, mask_or)
             ambiguous_and_xor = np.array_equal(mask_and, mask_xor)
