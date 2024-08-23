@@ -58,6 +58,24 @@ def image_mask_xor(image0: np.ndarray, image1: np.ndarray) -> np.ndarray:
 def generate_task_bool_transformation(seed: int, transformation_id: str) -> Task:
     """
     Stack two images together and apply a boolean transformation, such as AND, OR, XOR, SAME.
+
+    Example of tasks with 'SAME' transformation:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=3428a4f5
+
+    Example of tasks with 'AND' transformation:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=0520fde7
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=1b2d62fb
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6430c8c4
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=94f9d214
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f2829549
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=fafffa47
+    
+    Example of tasks with 'OR' transformation:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=dae9d2b5
+    
+    Example of tasks with 'XOR' transformation:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=99b1bc43
+
     """
     count_example = random.Random(seed + 1).randint(2, 4)
     count_test = random.Random(seed + 2).randint(1, 2)
