@@ -72,8 +72,8 @@ def generate_task_bool_transformation(seed: int, transformation_id: str) -> Task
     # count_test = 1
     task = Task()
     task.metadata_task_id = transformation_id
-    min_image_size = 3
-    max_image_size = 5
+    min_image_size = 2
+    max_image_size = 7
 
     input_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(input_colors)
@@ -138,13 +138,25 @@ def generate_task_bool_transformation(seed: int, transformation_id: str) -> Task
                 continue
 
             # Apply transformation
+            mask_and = image_mask_and(random_a_image, random_b_image)
+            mask_or = image_mask_or(random_a_image, random_b_image)
+            mask_xor = image_mask_xor(random_a_image, random_b_image)
+
+            # Ensures there are no ambiguous images where the other transformations yield the same result
+            ambiguous_and_or = np.array_equal(mask_and, mask_or)
+            ambiguous_and_xor = np.array_equal(mask_and, mask_xor)
+            is_ambiguous = ambiguous_and_or or ambiguous_and_xor
+            if is_ambiguous:
+                # print(f"Skipping ambiguous.")
+                continue
+
             mask = None
             if transformation_id == 'and':
-                mask = image_mask_and(random_a_image, random_b_image)
+                mask = mask_and
             elif transformation_id == 'or':
-                mask = image_mask_or(random_a_image, random_b_image)
+                mask = mask_or
             elif transformation_id == 'xor':
-                mask = image_mask_xor(random_a_image, random_b_image)
+                mask = mask_xor
             else:
                 raise Exception(f"Unknown transformation_id: {transformation_id}")
             
@@ -210,7 +222,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=200000771,
+    seed=210000771,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
