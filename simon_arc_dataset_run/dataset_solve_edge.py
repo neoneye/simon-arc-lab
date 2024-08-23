@@ -41,6 +41,14 @@ def generate_task_edge(seed: int, edge_name: str) -> Task:
         find_bitmask = ImageShape3x3Center.LEFT
     elif edge_name == 'right':
         find_bitmask = ImageShape3x3Center.RIGHT
+    elif edge_name == 'top_left':
+        find_bitmask = ImageShape3x3Center.TOP_LEFT
+    elif edge_name == 'top_right':
+        find_bitmask = ImageShape3x3Center.TOP_RIGHT
+    elif edge_name == 'bottom_left':
+        find_bitmask = ImageShape3x3Center.BOTTOM_LEFT
+    elif edge_name == 'bottom_right':
+        find_bitmask = ImageShape3x3Center.BOTTOM_RIGHT
     else:
         raise Exception(f"Unknown edge_name: {edge_name}")
 
@@ -50,7 +58,7 @@ def generate_task_edge(seed: int, edge_name: str) -> Task:
     task = Task()
     task.metadata_task_id = f'edge_{edge_name}'
     min_image_size = 3
-    max_image_size = 10
+    max_image_size = 5
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.shuffle(colors)
@@ -108,10 +116,14 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
     name_list = [
-        'top',
-        'bottom', 
-        'left',
-        'right',
+        # 'top',
+        # 'bottom', 
+        # 'left',
+        # 'right',
+        'top_left',
+        'top_right',
+        'bottom_left',
+        'bottom_right',
     ]
     accumulated_dataset_items = []
     for index, name in enumerate(name_list):
@@ -128,7 +140,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=120999999,
+    seed=130999999,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
