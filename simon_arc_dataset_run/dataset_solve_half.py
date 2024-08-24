@@ -50,7 +50,7 @@ def generate_task_half(seed: int, edge_name: str, connectivity: PixelConnectivit
     task = Task()
     task.metadata_task_id = f'half_{edge_name}_{connectivity_name}'
     min_image_size = 4
-    max_image_size = 7
+    max_image_size = 6
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.shuffle(colors)
@@ -149,7 +149,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=1209377377,
+    seed=1309377377,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
