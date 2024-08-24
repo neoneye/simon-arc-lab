@@ -470,7 +470,7 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 4
-    j = (seed % 2) + 2
+    # j = (seed % 2) + 2
     if j == 0:
         task = generate_task_mask_of_primary_rectangle(seed)
         transformation_id = 'mask_of_primary_rectangle'
@@ -493,7 +493,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=197100911,
+    seed=207100911,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
