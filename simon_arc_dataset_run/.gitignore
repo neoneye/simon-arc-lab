@@ -20,6 +20,7 @@ dataset_solve_edge.jsonl
 dataset_solve_erosion.jsonl
 dataset_solve_fractal.jsonl
 dataset_solve_grid.jsonl
+dataset_solve_half.jsonl
 dataset_solve_mass.jsonl
 dataset_solve_outline.jsonl
 dataset_solve_probecolor.jsonl
