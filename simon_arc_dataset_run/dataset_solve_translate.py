@@ -31,7 +31,7 @@ def generate_task(seed: int, dx: int, dy: int, percent_noise: float) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 1
-    max_image_size = 8
+    max_image_size = 12
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -68,7 +68,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     seed_task = seed
 
-    max_translate = 2
+    max_translate = 3
 
     # Populate a config_list like this 
     # [(-1, -1, 'translate_xminus1yminus1'), (0, -1, 'translate_yminus1'), (1, -1, 'translate_xplus1yminus1'), 
@@ -124,7 +124,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=41000005,
+    seed=51000005,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
