@@ -1,7 +1,6 @@
 # Where is a pixel located inside an object?
 # - If it's the top/bottom/left/right -facing of the object, then set the mask to 1, otherwise 0.
-#
-# IDEA: Also exercise ImageShape3x3Center.TOP_LEFT, ImageShape3x3Center.TOP_RIGHT, ImageShape3x3Center.BOTTOM_LEFT, ImageShape3x3Center.BOTTOM_RIGHT
+# - If it's the diagonal -faces of the object, then set the mask to 1, otherwise 0.
 #
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
