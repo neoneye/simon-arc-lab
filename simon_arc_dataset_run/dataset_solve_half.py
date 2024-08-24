@@ -36,6 +36,8 @@ def generate_task_half(seed: int, edge_name: str, connectivity: PixelConnectivit
     Identify the mask of the pixels that are inside an object.
 
     Example of tasks:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=29c11459
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=639f5a19
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e7dd8335
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e9ac8c9e
     """

@@ -1,7 +1,8 @@
 # Z-index transformations.
 # - extract mask of primary rectangle
 # - place 2 rectangles on top of each other, and then restore the obscured area.
-# 
+#
+# IDEA: draw the obscured rectangle on top. 
 # IDEA: mask with the intersection rectangle between the 2 rectangles.
 # IDEA: crop out the obscured rectangle.
 # IDEA: swap colors of the 2 rectangles.
