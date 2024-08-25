@@ -19,7 +19,11 @@ class Model:
             padding='max_length',
             truncation=True
         ).input_ids
-        
+
+        # Tweaking these parameters, may yield better results:
+        # num_beams=3,
+        # do_sample=True,
+        # temperature=0.7,
         outputs = self.model.generate(
             input_ids,
             max_length=128,
