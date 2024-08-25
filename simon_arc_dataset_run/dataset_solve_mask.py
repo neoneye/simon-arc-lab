@@ -68,12 +68,19 @@ def generate_task_linepatterns_with_masked_areas(seed: int, transformation_id: s
     line_colors = []
     color_count = random.Random(seed + 20).randint(2, 4)
     for i in range(color_count):
-        line_colors.append(input_colors[i])
+        line_colors.append(1 + i)
 
     square_size = random.Random(seed + 20).randint(1, 2)
 
+    verbose = False
+    # if seed == 1100000002:
+    #     verbose = True
+
     for i in range(count_example+count_test):
         is_example = i < count_example
+        if verbose:
+            print(f'pair_index={i} is_example={is_example}')
+
         input_image = None
         output_image = None
         for retry_index in range(100):
@@ -90,6 +97,8 @@ def generate_task_linepatterns_with_masked_areas(seed: int, transformation_id: s
             random_a_image = image_replace_colors(random_a_image_raw, color_map_eliminate_mask_color)
             histogram_a = Histogram.create_with_image(random_a_image)
             if histogram_a.number_of_unique_colors() < 2:
+                if verbose:
+                    print(f'We are not interested in empty images. histogram_a.number_of_unique_colors() < 2')
                 # We are not interested in empty images
                 continue
 
@@ -98,6 +107,8 @@ def generate_task_linepatterns_with_masked_areas(seed: int, transformation_id: s
             random_b_image = image_create_random_with_two_colors(width, height, 0, 1, ratio_b, iteration_seed + 8)
             histogram_b = Histogram.create_with_image(random_b_image)
             if histogram_b.number_of_unique_colors() < 2:
+                if verbose:
+                    print(f'We are not interested in empty images. histogram_b.number_of_unique_colors() < 2')
                 # We are not interested in empty images
                 continue
 
@@ -109,6 +120,8 @@ def generate_task_linepatterns_with_masked_areas(seed: int, transformation_id: s
 
             histogram_c = Histogram.create_with_image(image_with_masked_areas)
             if histogram_c.number_of_unique_colors() < 2:
+                if verbose:
+                    print(f'We are not interested in empty images. histogram_c.number_of_unique_colors() < 2')
                 # We are not interested in empty images
                 continue
 
@@ -121,7 +134,7 @@ def generate_task_linepatterns_with_masked_areas(seed: int, transformation_id: s
                 raise Exception(f"Unknown transformation_id: {transformation_id}")
             break
         if (input_image is None) or (output_image is None):
-            raise Exception("Failed to find a candidate images.")
+            raise Exception(f'Failed to find a candidate images. seed={seed}, transformation_id={transformation_id}')
         task.append_pair(input_image, output_image, is_example)
 
     return task
@@ -146,7 +159,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
         iteration_seed = seed * 1000000 + index
         task = generate_task_linepatterns_with_masked_areas(iteration_seed + 1, transformation_id)
         dataset_items = generate_dataset_item_list_inner(iteration_seed + 2, task, transformation_id)
-        task.show()
+        # task.show()
         accumulated_dataset_items.extend(dataset_items)
     return accumulated_dataset_items
 
