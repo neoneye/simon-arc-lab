@@ -202,8 +202,8 @@ class TestImagePattern(unittest.TestCase):
         # Assert
         expected = np.array([
             [5, 5, 6, 6, 7],
-            [6, 6, 7, 7, 5],
             [7, 7, 5, 5, 6],
+            [6, 6, 7, 7, 5],
             [5, 5, 6, 6, 7]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
 
@@ -212,10 +212,10 @@ class TestImagePattern(unittest.TestCase):
         actual = image_pattern_lines_slope(5, 4, -1, 2, [5, 6, 7])
         # Assert
         expected = np.array([
-            [5, 6, 7, 5, 6],
-            [5, 6, 7, 5, 6],
-            [6, 7, 5, 6, 7],
-            [6, 7, 5, 6, 7]], dtype=np.uint8)
+            [5, 7, 6, 5, 7],
+            [5, 7, 6, 5, 7],
+            [6, 5, 7, 6, 5],
+            [6, 5, 7, 6, 5]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
 
     def test_40006_image_pattern_lines_minus1minus1_colors3(self):
@@ -223,9 +223,56 @@ class TestImagePattern(unittest.TestCase):
         actual = image_pattern_lines_slope(5, 4, -1, -1, [5, 6, 7])
         # Assert
         expected = np.array([
-            [5, 6, 7, 5, 6],
-            [6, 7, 5, 6, 7],
-            [7, 5, 6, 7, 5],
-            [5, 6, 7, 5, 6]], dtype=np.uint8)
+            [5, 7, 6, 5, 7],
+            [7, 6, 5, 7, 6],
+            [6, 5, 7, 6, 5],
+            [5, 7, 6, 5, 7]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
 
+    def test_40007_image_pattern_lines_minus1minus2_colors4(self):
+        # Act
+        actual = image_pattern_lines_slope(10, 5, -1, -2, [5, 0, 0, 0])
+        # Assert
+        expected = np.array([
+            [5, 0, 0, 0, 5, 0, 0, 0, 5, 0],
+            [0, 0, 0, 5, 0, 0, 0, 5, 0, 0],
+            [0, 0, 0, 5, 0, 0, 0, 5, 0, 0],
+            [0, 0, 5, 0, 0, 0, 5, 0, 0, 0],
+            [0, 0, 5, 0, 0, 0, 5, 0, 0, 0]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_40007_image_pattern_lines_minus2minus1_colors4(self):
+        # Act
+        actual = image_pattern_lines_slope(10, 5, -2, -1, [5, 0, 0, 0])
+        # Assert
+        expected = np.array([
+            [5, 0, 0, 0, 0, 0, 0, 5, 5, 0],
+            [0, 0, 0, 0, 0, 5, 5, 0, 0, 0],
+            [0, 0, 0, 5, 5, 0, 0, 0, 0, 0],
+            [0, 5, 5, 0, 0, 0, 0, 0, 0, 5],
+            [5, 0, 0, 0, 0, 0, 0, 5, 5, 0]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_40007_image_pattern_lines_minus2plus1_colors4(self):
+        # Act
+        actual = image_pattern_lines_slope(10, 5, -2, 1, [5, 0, 0, 0])
+        # Assert
+        expected = np.array([
+            [5, 0, 0, 0, 0, 0, 0, 5, 5, 0],
+            [0, 5, 5, 0, 0, 0, 0, 0, 0, 5],
+            [0, 0, 0, 5, 5, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 5, 5, 0, 0, 0],
+            [5, 0, 0, 0, 0, 0, 0, 5, 5, 0]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_40008_image_pattern_lines_plus2minus1_colors4(self):
+        # Act
+        actual = image_pattern_lines_slope(10, 5, 2, -1, [5, 0, 0, 0])
+        # Assert
+        expected = np.array([
+            [5, 5, 0, 0, 0, 0, 0, 0, 5, 5],
+            [0, 0, 5, 5, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 5, 5, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 5, 5, 0, 0],
+            [5, 5, 0, 0, 0, 0, 0, 0, 5, 5]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
