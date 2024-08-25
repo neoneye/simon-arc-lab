@@ -70,3 +70,51 @@ class TestImagePattern(unittest.TestCase):
             [2, 2, 0, 0, 1, 1, 2]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
 
+    def test_20000_lines_horizontal_colors2_size1_offset0(self):
+        # Act
+        actual = image_pattern_lines_horizontal(3, 5, 1, 0, [5, 6])
+        # Assert
+        expected = np.array([
+            [5, 5, 5],
+            [6, 6, 6],
+            [5, 5, 5],
+            [6, 6, 6],
+            [5, 5, 5]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_20001_lines_horizontal_colors2_size2_offset0(self):
+        # Act
+        actual = image_pattern_lines_horizontal(3, 5, 2, 0, [5, 6])
+        # Assert
+        expected = np.array([
+            [5, 5, 5],
+            [5, 5, 5],
+            [6, 6, 6],
+            [6, 6, 6],
+            [5, 5, 5]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_20002_lines_horizontal_colors3_size2_offset0(self):
+        # Act
+        actual = image_pattern_lines_horizontal(3, 5, 2, 0, [5, 6, 7])
+        # Assert
+        expected = np.array([
+            [5, 5, 5],
+            [5, 5, 5],
+            [6, 6, 6],
+            [6, 6, 6],
+            [7, 7, 7]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_20003_lines_horizontal_colors3_size2_offset1(self):
+        # Act
+        actual = image_pattern_lines_horizontal(3, 5, 2, 1, [5, 6, 7])
+        # Assert
+        expected = np.array([
+            [5, 5, 5],
+            [6, 6, 6],
+            [6, 6, 6],
+            [7, 7, 7],
+            [7, 7, 7]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
