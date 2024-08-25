@@ -1,19 +1,5 @@
 import numpy as np
 
-def image_pattern_checkerboard(width: int, height: int, square_size: int, offsetx: int, offsety: int, colors: list[int]) -> np.array:
-    """
-    Create a checkerboard pattern image.
-
-    :param width: The width of the image
-    :param height: The height of the image
-    :param square_size: The size of each square in the checkerboard
-    :param offsetx: Displacement in x direction
-    :param offsety: Displacement in y direction
-    :param colors: The color of the squares
-    :return: The checkerboard pattern image
-    """
-    return image_pattern_lines_slope_advanced(width, height, 1, 1, square_size, offsetx, offsety, colors)
-
 def image_pattern_lines_horizontal(width: int, height: int, line_size: int, offsety: int, colors: list[int]) -> np.array:
     """
     Create a pattern with repeating horizontal lines.
@@ -39,6 +25,20 @@ def image_pattern_lines_vertical(width: int, height: int, line_size: int, offset
     :return: The generated pattern image
     """
     return image_pattern_lines_slope_advanced(width, height, 1, 0, line_size, offsetx, 0, colors)
+
+def image_pattern_checkerboard(width: int, height: int, square_size: int, offsetx: int, offsety: int, colors: list[int]) -> np.array:
+    """
+    Create a checkerboard pattern image.
+
+    :param width: The width of the image
+    :param height: The height of the image
+    :param square_size: The size of each square in the checkerboard
+    :param offsetx: Displacement in x direction
+    :param offsety: Displacement in y direction
+    :param colors: The color of the squares
+    :return: The checkerboard pattern image
+    """
+    return image_pattern_lines_slope_advanced(width, height, 1, 1, square_size, offsetx, offsety, colors)
 
 def image_pattern_lines_slope(width: int, height: int, dx: int, dy: int, colors: list[int]) -> np.array:
     """
