@@ -37,7 +37,7 @@ def generate_task_linepatterns_with_masked_areas(seed: int, transformation_id: s
     task = Task()
     task.metadata_task_id = transformation_id
     min_image_size = 4
-    max_image_size = 7
+    max_image_size = 10
 
     color_map_eliminate_mask_color = {
         0: 1,
@@ -167,7 +167,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=100033371,
+    seed=110033371,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
