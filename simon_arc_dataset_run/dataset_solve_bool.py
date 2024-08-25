@@ -13,6 +13,7 @@ sys.path.insert(0, PROJECT_ROOT)
 
 import random
 from simon_arc_lab.image_mix import *
+from simon_arc_lab.image_mask import *
 from simon_arc_lab.image_util import *
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.task import *
@@ -25,30 +26,6 @@ from simon_arc_dataset.dataset_generator import *
 DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_bool'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_bool.jsonl')
-
-def image_mask_and(image0: np.ndarray, image1: np.ndarray) -> np.ndarray:
-    mask = np.zeros_like(image0)
-    for y in range(image0.shape[0]):
-        for x in range(image0.shape[1]):
-            if image0[y, x] == 1 and image1[y, x] == 1:
-                mask[y, x] = 1
-    return mask
-
-def image_mask_or(image0: np.ndarray, image1: np.ndarray) -> np.ndarray:
-    mask = np.zeros_like(image0)
-    for y in range(image0.shape[0]):
-        for x in range(image0.shape[1]):
-            if image0[y, x] == 1 or image1[y, x] == 1:
-                mask[y, x] = 1
-    return mask
-
-def image_mask_xor(image0: np.ndarray, image1: np.ndarray) -> np.ndarray:
-    mask = np.zeros_like(image0)
-    for y in range(image0.shape[0]):
-        for x in range(image0.shape[1]):
-            if image0[y, x] != image1[y, x]:
-                mask[y, x] = 1
-    return mask
 
 def generate_task_bool_transformation(seed: int, transformation_id: str) -> Task:
     """
