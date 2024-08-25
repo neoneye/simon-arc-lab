@@ -1,7 +1,6 @@
 # Repair the masked area.
-#
-# IDEA: identify where the mask is located.
-# IDEA: Generate a pattern, where the input gets masked, and the output has been repaired
+# - identify where the mask is located.
+# - repair the masked area.
 #
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
@@ -15,9 +14,9 @@ import random
 from simon_arc_lab.image_mix import *
 from simon_arc_lab.image_mask import *
 from simon_arc_lab.image_util import *
+from simon_arc_lab.image_pattern import image_pattern_lines_slope_advanced
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.task import *
-from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.benchmark import *
 from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
@@ -28,9 +27,9 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_mask'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_mask.jsonl')
 
-def generate_task_identify_the_masked_area(seed: int, transformation_id: str) -> Task:
+def generate_task_linepatterns_with_masked_areas(seed: int, transformation_id: str) -> Task:
     """
-    Generate a pattern, where the input gets masked, and the output is the identified mask.
+    Generate line patterns, where the input gets masked, and the output is the identified mask, or repair the mask.
     """
     count_example = random.Random(seed + 1).randint(2, 4)
     count_test = random.Random(seed + 2).randint(1, 2)
@@ -57,6 +56,22 @@ def generate_task_identify_the_masked_area(seed: int, transformation_id: str) ->
         1: output_colors[1],
     }
 
+    for i in range(100):
+        iteration_seed = seed + i * 1000000
+        dx = random.Random(iteration_seed + 1).randint(-2, 2)
+        dy = random.Random(iteration_seed + 2).randint(-2, 2)
+        if dx != 0 or dy != 0:
+            break
+    if dx == 0 and dy == 0:
+        raise Exception("Failed to find a dx, dy that are non-zero.")
+    
+    line_colors = []
+    color_count = random.Random(seed + 20).randint(2, 4)
+    for i in range(color_count):
+        line_colors.append(input_colors[i])
+
+    square_size = random.Random(seed + 20).randint(1, 2)
+
     for i in range(count_example+count_test):
         is_example = i < count_example
         input_image = None
@@ -67,7 +82,11 @@ def generate_task_identify_the_masked_area(seed: int, transformation_id: str) ->
             width = random.Random(iteration_seed + 1).randint(min_image_size, max_image_size)
             height = random.Random(iteration_seed + 2).randint(min_image_size, max_image_size)
 
-            random_a_image_raw = image_create_random_advanced(iteration_seed + 3, width, width, height, height)
+            offsetx = random.Random(iteration_seed + 3).randint(0, 2)
+            offsety = random.Random(iteration_seed + 4).randint(0, 2)
+
+            random_a_image_raw = image_pattern_lines_slope_advanced(width, height, dx, dy, square_size, offsetx, offsety, line_colors)
+
             random_a_image = image_replace_colors(random_a_image_raw, color_map_eliminate_mask_color)
             histogram_a = Histogram.create_with_image(random_a_image)
             if histogram_a.number_of_unique_colors() < 2:
@@ -94,7 +113,12 @@ def generate_task_identify_the_masked_area(seed: int, transformation_id: str) ->
                 continue
 
             input_image = image_replace_colors(image_with_masked_areas, color_map_input)
-            output_image = image_replace_colors(random_b_image, color_map_output)
+            if transformation_id == 'identify_the_masked_area':
+                output_image = image_replace_colors(random_b_image, color_map_output)
+            elif transformation_id == 'repair_the_masked_area':
+                output_image = image_replace_colors(random_a_image, color_map_input)
+            else:
+                raise Exception(f"Unknown transformation_id: {transformation_id}")
             break
         if (input_image is None) or (output_image is None):
             raise Exception("Failed to find a candidate images.")
@@ -104,7 +128,7 @@ def generate_task_identify_the_masked_area(seed: int, transformation_id: str) ->
 
 def demo_generate_task():
     for i in range(5):
-        task = generate_task_identify_the_masked_area(i, 'identify_the_masked_area')
+        task = generate_task_linepatterns_with_masked_areas(i, 'identify_the_masked_area')
         task.show()
 
 # demo_generate_task()
@@ -116,11 +140,15 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    transformation_id = 'identify_the_masked_area'
-    task = generate_task_identify_the_masked_area(seed, transformation_id)
-    task.show()
-    dataset_items = generate_dataset_item_list_inner(seed * 99 + 1010101015, task, transformation_id)
-    return dataset_items
+    transformation_ids = ['identify_the_masked_area', 'repair_the_masked_area']
+    accumulated_dataset_items = []
+    for index, transformation_id in enumerate(transformation_ids):
+        iteration_seed = seed * 1000000 + index
+        task = generate_task_linepatterns_with_masked_areas(iteration_seed + 1, transformation_id)
+        dataset_items = generate_dataset_item_list_inner(iteration_seed + 2, task, transformation_id)
+        task.show()
+        accumulated_dataset_items.extend(dataset_items)
+    return accumulated_dataset_items
 
 generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
