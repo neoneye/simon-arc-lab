@@ -56,7 +56,8 @@ def generate_task_boundingbox(seed: int, transformation_id: str) -> Task:
         1: input_colors[3],
     }
 
-    connectivity = PixelConnectivity.ALL8
+    # connectivity = PixelConnectivity.ALL8
+    connectivity = PixelConnectivity.NEAREST4
 
     output_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 5).shuffle(output_colors)
@@ -65,6 +66,11 @@ def generate_task_boundingbox(seed: int, transformation_id: str) -> Task:
     color_map_output = {
         0: output_color0,
         1: output_color1,
+    }
+
+    color_map_swap_01 = {
+        0: 1,
+        1: 0,
     }
 
     task.metadata_task_id = f'{transformation_id}'
@@ -105,7 +111,10 @@ def generate_task_boundingbox(seed: int, transformation_id: str) -> Task:
             # multiply the mask with the object image
             mixed_image = image_mix(mask_a, background_image, random_b_image)
 
-            component_list = ConnectedComponent.find_objects_with_ignore_mask_inner(connectivity, mixed_image, background_image)
+            ignore_mask = image_replace_colors(random_b_image, color_map_swap_01)
+
+            # component_list = ConnectedComponent.find_objects_with_ignore_mask_inner(connectivity, mixed_image, background_image)
+            component_list = ConnectedComponent.find_objects_with_ignore_mask_inner(connectivity, random_b_image, ignore_mask)
             # print(f"component_list: {component_list}")
             if len(component_list) == 0:
                 continue
@@ -116,7 +125,6 @@ def generate_task_boundingbox(seed: int, transformation_id: str) -> Task:
                 if component.mass > found_mass:
                     found_mass = component.mass
                     found_component = component
-                    break
 
             if found_component is None:
                 continue
@@ -131,8 +139,11 @@ def generate_task_boundingbox(seed: int, transformation_id: str) -> Task:
             # input_image = mixed_image
             # input_image = image_replace_colors(mixed_image, color_map_output)
             input_image = found_component.mask
+            input_image = mixed_image
+            input_image = random_b_image
             # output_image = image_replace_colors(mask_a, color_map_output)
             output_image = mask_b
+            output_image = found_component.mask
             break
         if (input_image is None) or (output_image is None):
             raise Exception("Failed to find a candidate images.")
