@@ -1,8 +1,8 @@
 # Identify the bounding boxes of objects in the image.
 # - Extract one bounding box from multiple lonely pixels. Where it's filled with 1s.
+# - Extract one bounding box from multiple lonely pixels. Where it's hollow with the border set to 1s.
 #
-# IDEA: draw a box around the object, where it's hollow inside.
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e7639916
+# IDEA: draw a box around the object, where it's a hollow box that surrounds the bounding box.
 #
 # IDEA: show multiple bounding boxes, from different objects
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=56ff96f3
@@ -36,6 +36,9 @@ SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_bounding
 def generate_task_boundingbox_of_lonely_pixels(seed: int, transformation_id: str) -> Task:
     """
     Show a few lonely pixels, and identify the bounding box.
+
+    Example of hollow bounding box:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e7639916
     """
     count_example = random.Random(seed + 1).randint(2, 4)
     count_test = random.Random(seed + 2).randint(1, 2)
