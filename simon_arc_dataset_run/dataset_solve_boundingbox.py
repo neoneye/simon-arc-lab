@@ -2,10 +2,15 @@
 # - Extract one bounding box from multiple lonely pixels. Where it's filled with 1s.
 # - Extract one bounding box from multiple lonely pixels. Where it's hollow with the border set to 1s.
 #
+# IDEA: extend the bounding box, so it draws the top/bottom/left/right border of the box all the way to the edge of the image.
+#
 # IDEA: draw a box around the object, where it's a hollow box that surrounds the bounding box.
 #
-# IDEA: show multiple bounding boxes, from different objects
+# IDEA: show multiple bounding boxes, from different objects, grouped by color
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=56ff96f3
+#
+# IDEA: show multiple bounding boxes, from different objects, grouped by connected components
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=60b61512
 #
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
