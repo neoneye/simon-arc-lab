@@ -21,6 +21,8 @@ from simon_arc_lab.rectangle import Rectangle
 from simon_arc_lab.image_rect import image_rect
 from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.image_trim import outer_bounding_box_after_trim_with_color
+from simon_arc_lab.pixel_connectivity import *
+from simon_arc_lab.connected_component import *
 from simon_arc_lab.benchmark import *
 from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
 from simon_arc_dataset.generate_solve import *
@@ -53,6 +55,8 @@ def generate_task_boundingbox(seed: int, transformation_id: str) -> Task:
         0: input_colors[2],
         1: input_colors[3],
     }
+
+    connectivity = PixelConnectivity.ALL8
 
     output_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 5).shuffle(output_colors)
@@ -93,18 +97,42 @@ def generate_task_boundingbox(seed: int, transformation_id: str) -> Task:
 
             # object A, with two colors
             ratio_b = random.Random(iteration_seed + 7).choice(ratios)
-            random_b_image = image_create_random_with_two_colors(width, height, 2, 3, ratio_b, iteration_seed + 8)
+            random_b_image = image_create_random_with_two_colors(width, height, 0, 1, ratio_b, iteration_seed + 8)
 
             mask_a = image_create(width, height, 0)
             mask_a = image_rect(mask_a, object_a_rect, 1)
 
             # multiply the mask with the object image
             mixed_image = image_mix(mask_a, background_image, random_b_image)
-            
+
+            component_list = ConnectedComponent.find_objects_with_ignore_mask_inner(connectivity, mixed_image, background_image)
+            # print(f"component_list: {component_list}")
+            if len(component_list) == 0:
+                continue
+
+            found_component = None
+            found_mass = 0
+            for component in component_list:
+                if component.mass > found_mass:
+                    found_mass = component.mass
+                    found_component = component
+                    break
+
+            if found_component is None:
+                continue
+
+            if found_mass < 2:
+                continue
+
+            bounding_box = outer_bounding_box_after_trim_with_color(found_component.mask, 1)
+            mask_b = image_create(width, height, 0)
+            mask_b = image_rect(mask_b, bounding_box, 1)
 
             # input_image = mixed_image
-            input_image = image_replace_colors(mixed_image, color_map_output)
-            output_image = image_replace_colors(mask_a, color_map_output)
+            # input_image = image_replace_colors(mixed_image, color_map_output)
+            input_image = found_component.mask
+            # output_image = image_replace_colors(mask_a, color_map_output)
+            output_image = mask_b
             break
         if (input_image is None) or (output_image is None):
             raise Exception("Failed to find a candidate images.")
