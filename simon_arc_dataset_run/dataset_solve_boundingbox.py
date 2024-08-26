@@ -15,14 +15,11 @@ import random
 from simon_arc_lab.image_mix import *
 from simon_arc_lab.image_mask import *
 from simon_arc_lab.image_util import *
-from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.task import *
 from simon_arc_lab.rectangle import Rectangle
 from simon_arc_lab.image_rect import image_rect
 from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.image_trim import outer_bounding_box_after_trim_with_color
-from simon_arc_lab.pixel_connectivity import *
-from simon_arc_lab.connected_component import *
 from simon_arc_lab.benchmark import *
 from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
 from simon_arc_dataset.generate_solve import *
@@ -32,32 +29,23 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_boundingbox'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_boundingbox.jsonl')
 
-def generate_task_boundingbox(seed: int, transformation_id: str) -> Task:
+def generate_task_boundingbox_of_lonely_pixels(seed: int) -> Task:
     """
-    Show one object in the image, and identify the bounding box of the object.
+    Show a few lonely pixels, and identify the bounding box.
     """
     count_example = random.Random(seed + 1).randint(2, 4)
     count_test = random.Random(seed + 2).randint(1, 2)
     # count_test = 1
     task = Task()
-    task.metadata_task_id = transformation_id
     min_image_size = 3
-    max_image_size = 5
+    max_image_size = 8
 
     input_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(input_colors)
 
-    color_map_input_a = {
-        0: input_colors[0],
-        1: input_colors[1],
-    }
-    color_map_input_b = {
-        0: input_colors[2],
-        1: input_colors[3],
-    }
-
-    # connectivity = PixelConnectivity.ALL8
-    connectivity = PixelConnectivity.NEAREST4
+    color_map_input = {}
+    for i in range(10):
+        color_map_input[i] = input_colors[i]
 
     output_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 5).shuffle(output_colors)
@@ -68,13 +56,7 @@ def generate_task_boundingbox(seed: int, transformation_id: str) -> Task:
         1: output_color1,
     }
 
-    color_map_swap_01 = {
-        0: 1,
-        1: 0,
-    }
-
-    task.metadata_task_id = f'{transformation_id}'
-    ratios = [0.1, 0.2, 0.3, 0.4, 0.5]
+    task.metadata_task_id = 'boundingbox_of_lonely_pixels'
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -83,67 +65,37 @@ def generate_task_boundingbox(seed: int, transformation_id: str) -> Task:
         for retry_index in range(100):
             iteration_seed = (retry_index * 10000) + (seed * 37) + (i * 9932342) + 101
 
+            number_of_positions = random.Random(iteration_seed + 1).randint(2, 4)
+
             width = random.Random(iteration_seed + 1).randint(min_image_size, max_image_size)
             height = random.Random(iteration_seed + 2).randint(min_image_size, max_image_size)
 
-            parent_rect = Rectangle(0, 0, width, height)
-            object_a_rect = parent_rect.random_child_rectangle(iteration_seed + 3)
-            if object_a_rect.mass() < 2:
-                # We are not interested in empty or 1px images
-                continue
+            positions = []
+            for i in range(number_of_positions):
+                x = random.Random(iteration_seed + 3 + i * 2).randint(0, width - 1)
+                y = random.Random(iteration_seed + 4 + i * 2).randint(0, height - 1)
+                xy = (x, y)
+                if xy in positions:
+                    continue
+                positions.append(xy)
 
-            # background image with two colors
-            # ratio_background = random.Random(iteration_seed + 5).choice(ratios)
-            # background_image = image_create_random_with_two_colors(width, height, 0, 1, ratio_background, iteration_seed + 6)
             background_image = image_create(width, height, 0)
-            # histogram_background = Histogram.create_with_image(background_image)
-            # if histogram_background.number_of_unique_colors() < 2:
-            #     # We are not interested in empty images
-            #     continue
+            input_image_raw = background_image.copy()
+            input_mask = background_image.copy()
+            for x, y in positions:
+                input_image_raw[y, x] = random.Random(iteration_seed + 5 + x + y).randint(1, 9)
+                input_mask[y, x] = 1
 
-            # object A, with two colors
-            ratio_b = random.Random(iteration_seed + 7).choice(ratios)
-            random_b_image = image_create_random_with_two_colors(width, height, 0, 1, ratio_b, iteration_seed + 8)
-
-            mask_a = image_create(width, height, 0)
-            mask_a = image_rect(mask_a, object_a_rect, 1)
-
-            # multiply the mask with the object image
-            mixed_image = image_mix(mask_a, background_image, random_b_image)
-
-            ignore_mask = image_replace_colors(random_b_image, color_map_swap_01)
-
-            # component_list = ConnectedComponent.find_objects_with_ignore_mask_inner(connectivity, mixed_image, background_image)
-            component_list = ConnectedComponent.find_objects_with_ignore_mask_inner(connectivity, random_b_image, ignore_mask)
-            # print(f"component_list: {component_list}")
-            if len(component_list) == 0:
+            bounding_box = outer_bounding_box_after_trim_with_color(input_mask, 0)
+            if bounding_box.mass() < 1:
                 continue
-
-            found_component = None
-            found_mass = 0
-            for component in component_list:
-                if component.mass > found_mass:
-                    found_mass = component.mass
-                    found_component = component
-
-            if found_component is None:
+            if bounding_box.width == width and bounding_box.height == height:
                 continue
+            output_image_raw = image_rect(background_image, bounding_box, 1)
 
-            if found_mass < 2:
-                continue
+            input_image = image_replace_colors(input_image_raw, color_map_input)
+            output_image = image_replace_colors(output_image_raw, color_map_output)
 
-            bounding_box = outer_bounding_box_after_trim_with_color(found_component.mask, 1)
-            mask_b = image_create(width, height, 0)
-            mask_b = image_rect(mask_b, bounding_box, 1)
-
-            # input_image = mixed_image
-            # input_image = image_replace_colors(mixed_image, color_map_output)
-            input_image = found_component.mask
-            input_image = mixed_image
-            input_image = random_b_image
-            # output_image = image_replace_colors(mask_a, color_map_output)
-            output_image = mask_b
-            output_image = found_component.mask
             break
         if (input_image is None) or (output_image is None):
             raise Exception("Failed to find a candidate images.")
@@ -153,7 +105,7 @@ def generate_task_boundingbox(seed: int, transformation_id: str) -> Task:
 
 def demo_generate_task():
     for i in range(5):
-        task = generate_task_boundingbox(i, 'one_object')
+        task = generate_task_boundingbox_of_lonely_pixels(i)
         task.show()
 
 # demo_generate_task()
@@ -165,22 +117,17 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    transformation_ids = [
-        'one_object',
-    ]
-    accumulated_dataset_items = []
-    for index, transformation_id in enumerate(transformation_ids):
-        task = generate_task_boundingbox(seed + index * 100338383, transformation_id)
-        task.show()
-        dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
-        accumulated_dataset_items.extend(dataset_items)
+    transformation_id = 'boundingbox_of_lonely_pixels'
+    task = generate_task_boundingbox_of_lonely_pixels(seed)
+    # task.show()
+    dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
 
 generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=220000771,
+    seed=120000913,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
