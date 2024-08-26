@@ -89,8 +89,8 @@ def generate_task_pattern_to_fractal(seed: int) -> Task:
     task = Task()
     task.metadata_task_id = f"pattern_to_fractal in={scale_input} out={scale_output} inv={is_inverse_mask} empty={empty_color} pad={is_padded}"
     min_image_size = 2
-    max_image_size = 4
-    max_pad_count = 5
+    max_image_size = 5
+    max_pad_count = 8
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 13).shuffle(colors)
@@ -169,8 +169,8 @@ def generate_task_fractal_to_pattern(seed: int) -> Task:
     task = Task()
     task.metadata_task_id = f"fractal_to_pattern in={scale_input} out={scale_output} inv={is_inverse_mask} empty={empty_color} pad={is_padded}"
     min_image_size = 2
-    max_image_size = 4
-    max_pad_count = 5
+    max_image_size = 5
+    max_pad_count = 8
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 13).shuffle(colors)
@@ -263,9 +263,9 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=12001103031,
+    seed=13001103031,
     max_num_samples=100000,
-    max_byte_size=1024*1024*100
+    max_byte_size=1024*1024*150
 )
 # generator.inspect()
 generator.save(SAVE_FILE_PATH)
