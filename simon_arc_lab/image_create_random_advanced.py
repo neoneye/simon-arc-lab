@@ -3,7 +3,7 @@ from .image_util import *
 from .image_create_random_simple import *
 from .image_bresenham_line import *
 
-def image_create_random_advanced(seed, min_width, max_width, min_height, max_height):
+def image_create_random_advanced(seed: int, min_width: int, max_width: int, min_height: int, max_height: int) -> np.array:
     """
     Generate a random image.
 
