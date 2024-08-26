@@ -1,7 +1,11 @@
 # Identify the bounding boxes of objects in the image.
+# - Extract one bounding box from multiple lonely pixels. Where it's filled with 1s.
 #
-# IDEA: show one object
-# IDEA: show multiple objects
+# IDEA: draw a box around the object, where it's hollow inside.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e7639916
+#
+# IDEA: show multiple bounding boxes, from different objects
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=56ff96f3
 #
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
@@ -17,7 +21,7 @@ from simon_arc_lab.image_mask import *
 from simon_arc_lab.image_util import *
 from simon_arc_lab.task import *
 from simon_arc_lab.rectangle import Rectangle
-from simon_arc_lab.image_rect import image_rect
+from simon_arc_lab.image_rect import image_rect, image_rect_hollow
 from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.image_trim import outer_bounding_box_after_trim_with_color
 from simon_arc_lab.benchmark import *
@@ -29,7 +33,7 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_boundingbox'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_boundingbox.jsonl')
 
-def generate_task_boundingbox_of_lonely_pixels(seed: int) -> Task:
+def generate_task_boundingbox_of_lonely_pixels(seed: int, transformation_id: str) -> Task:
     """
     Show a few lonely pixels, and identify the bounding box.
     """
@@ -56,7 +60,9 @@ def generate_task_boundingbox_of_lonely_pixels(seed: int) -> Task:
         1: output_color1,
     }
 
-    task.metadata_task_id = 'boundingbox_of_lonely_pixels'
+    task.metadata_task_id = f'boundingbox_of_lonely_pixels {transformation_id}'
+
+    border_size = 1
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -91,7 +97,17 @@ def generate_task_boundingbox_of_lonely_pixels(seed: int) -> Task:
                 continue
             if bounding_box.width == width and bounding_box.height == height:
                 continue
-            output_image_raw = image_rect(background_image, bounding_box, 1)
+
+            if transformation_id == 'hollow':
+                if bounding_box.width <= 2 or bounding_box.height <= 2:
+                    continue
+
+            if transformation_id == 'filled':
+                output_image_raw = image_rect(background_image, bounding_box, 1)
+            elif transformation_id == 'hollow':
+                output_image_raw = image_rect_hollow(background_image, bounding_box, 1, border_size)
+            else:
+                raise Exception(f"Unknown transformation_id: {transformation_id}")
 
             input_image = image_replace_colors(input_image_raw, color_map_input)
             output_image = image_replace_colors(output_image_raw, color_map_output)
@@ -105,7 +121,7 @@ def generate_task_boundingbox_of_lonely_pixels(seed: int) -> Task:
 
 def demo_generate_task():
     for i in range(5):
-        task = generate_task_boundingbox_of_lonely_pixels(i)
+        task = generate_task_boundingbox_of_lonely_pixels(i, 'filled')
         task.show()
 
 # demo_generate_task()
@@ -117,8 +133,12 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    transformation_id = 'boundingbox_of_lonely_pixels'
-    task = generate_task_boundingbox_of_lonely_pixels(seed)
+    if seed % 2 == 0:
+        transformation_id = 'boundingbox_of_lonely_pixels_filled'
+        task = generate_task_boundingbox_of_lonely_pixels(seed, 'filled')
+    else:
+        transformation_id = 'boundingbox_of_lonely_pixels_hollow'
+        task = generate_task_boundingbox_of_lonely_pixels(seed, 'hollow')
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
@@ -127,7 +147,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=130000913,
+    seed=140000913,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
