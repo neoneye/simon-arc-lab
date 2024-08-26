@@ -1,3 +1,5 @@
+import random
+
 class Rectangle:
     @staticmethod
     def empty():
@@ -37,3 +39,13 @@ class Rectangle:
         if x0 >= x1 or y0 >= y1:
             return Rectangle.empty()
         return Rectangle(x0, y0, x1 - x0, y1 - y0)
+
+    def random_child_rectangle(self, seed: int) -> 'Rectangle':
+        """
+        Create a rectangle that is inside the current rectangle.
+        """
+        width = random.Random(seed + 1).randint(1, self.width)
+        height = random.Random(seed + 2).randint(1, self.height)
+        x = random.Random(seed + 3).randint(self.x, self.x + self.width - width)
+        y = random.Random(seed + 4).randint(self.y, self.y + self.height - height)
+        return Rectangle(x, y, width, height)

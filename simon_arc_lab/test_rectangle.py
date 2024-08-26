@@ -31,3 +31,21 @@ class TestRectangle(unittest.TestCase):
         # Assert
         expected = Rectangle.empty()
         self.assertEqual(actual, expected)
+
+    def test_20000_random_child_rectangle(self):
+        # Arrange
+        a = Rectangle(0, 100, 10, 10)
+        # Act
+        actual = a.random_child_rectangle(0)
+        # Assert
+        expected = Rectangle(3, 103, 3, 1)
+        self.assertEqual(actual, expected)
+
+    def test_20001_random_child_rectangle(self):
+        # Arrange
+        a = Rectangle(0, 100, 10, 10)
+        # Act
+        actual = a.random_child_rectangle(1)
+        # Assert
+        expected = Rectangle(3, 104, 1, 4)
+        self.assertEqual(actual, expected)
