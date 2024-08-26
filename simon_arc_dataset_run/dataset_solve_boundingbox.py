@@ -42,7 +42,11 @@ def generate_task_boundingbox_of_lonely_pixels(seed: int, transformation_id: str
     """
     Show a few lonely pixels, and identify the bounding box.
 
+    Example of filled bounding box:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6d75e8bb
+
     Example of hollow bounding box:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=4347f46a
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e7639916
     """
     count_example = random.Random(seed + 1).randint(2, 4)
@@ -50,7 +54,7 @@ def generate_task_boundingbox_of_lonely_pixels(seed: int, transformation_id: str
     # count_test = 1
     task = Task()
     min_image_size = 3
-    max_image_size = 20
+    max_image_size = 30
 
     input_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(input_colors)
@@ -79,7 +83,7 @@ def generate_task_boundingbox_of_lonely_pixels(seed: int, transformation_id: str
         for retry_index in range(100):
             iteration_seed = (retry_index * 10000) + (seed * 37) + (i * 9932342) + 101
 
-            number_of_positions = random.Random(iteration_seed + 1).randint(2, 4)
+            number_of_positions = random.Random(iteration_seed + 1).randint(2, 5)
 
             width = random.Random(iteration_seed + 1).randint(min_image_size, max_image_size)
             height = random.Random(iteration_seed + 2).randint(min_image_size, max_image_size)
@@ -155,7 +159,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=160000913,
+    seed=170000913,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
