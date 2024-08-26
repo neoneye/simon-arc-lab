@@ -38,7 +38,7 @@ def generate_task_boundingbox_of_lonely_pixels(seed: int) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 3
-    max_image_size = 8
+    max_image_size = 15
 
     input_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(input_colors)
@@ -127,7 +127,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=120000913,
+    seed=130000913,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
