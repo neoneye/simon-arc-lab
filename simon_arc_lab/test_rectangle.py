@@ -49,3 +49,9 @@ class TestRectangle(unittest.TestCase):
         # Assert
         expected = Rectangle(3, 104, 1, 4)
         self.assertEqual(actual, expected)
+
+    def test_30000_mass(self):
+        self.assertEqual(Rectangle(1, 2, 3, 4).mass(), 12)
+        self.assertEqual(Rectangle(100, 200, 5, 5).mass(), 25)
+        self.assertEqual(Rectangle(0, 0, 0, 10).mass(), 0)
+        self.assertEqual(Rectangle(0, 0, 10, 0).mass(), 0)

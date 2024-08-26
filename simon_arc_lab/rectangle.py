@@ -49,3 +49,6 @@ class Rectangle:
         x = random.Random(seed + 3).randint(self.x, self.x + self.width - width)
         y = random.Random(seed + 4).randint(self.y, self.y + self.height - height)
         return Rectangle(x, y, width, height)
+
+    def mass(self) -> int:
+        return self.width * self.height

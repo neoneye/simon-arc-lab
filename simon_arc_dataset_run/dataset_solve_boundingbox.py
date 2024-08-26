@@ -78,11 +78,8 @@ def generate_task_boundingbox(seed: int, transformation_id: str) -> Task:
 
             parent_rect = Rectangle(0, 0, width, height)
             object_a_rect = parent_rect.random_child_rectangle(iteration_seed + 3)
-            if object_a_rect.is_empty():
-                # We are not interested in empty images
-                continue
-            if object_a_rect.width == 1 and object_a_rect.height == 1:
-                # We are not interested in 1 pixel images
+            if object_a_rect.mass() < 2:
+                # We are not interested in empty or 1px images
                 continue
 
             # background image with two colors
