@@ -30,6 +30,9 @@ SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_mask.jso
 def generate_task_linepatterns_with_masked_areas(seed: int, transformation_id: str) -> Task:
     """
     Generate line patterns, where the input gets masked, and the output is the identified mask, or repair the mask.
+
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=1e97544e
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=4aab4007
     """
     count_example = random.Random(seed + 1).randint(2, 4)
     count_test = random.Random(seed + 2).randint(1, 2)
