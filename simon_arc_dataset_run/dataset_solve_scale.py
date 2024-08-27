@@ -6,6 +6,7 @@
 # Model has been trained with max_scale_factor: 1-7. Model needs to be train with max_scale_factor greater than 7.
 #
 # IDEA: padding around the input images, that have to be removed by the model.
+# IDEA: scale factor that corresponds to the number of unique colors.
 #
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
@@ -101,7 +102,7 @@ def generate_task(seed: int, x_up_down, x_scale, y_up_down, y_scale) -> Task:
     # don't always add noise
     if can_add_noise:
         percent = random.Random(seed + 3).randint(0, 100)
-        if percent > 70:
+        if percent > 90:
             # print(f"suppressing noise. Perfect down scaling")
             can_add_noise = False
 
@@ -178,7 +179,6 @@ def format_scalexy_identifier(x_up_down: str, x_scale: int, y_up_down: str, y_sc
 def generate_dataset_item_list(seed: int) -> list[dict]:
     max_scale_factor = 7
     up_down = ['up', 'down']
-    up_down = ['down']
     config_list = []
     for x_up_down in up_down:
         for y_up_down in up_down:
@@ -211,7 +211,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=71000019,
+    seed=81000019,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
