@@ -1,10 +1,11 @@
 # Scale the image up/down by x/y factor.
+# - Images that are scaled down, get some noise added to the input, so the model learns to deal with the noise.
+# - Images that are scaled up, does not get any noise added to them, otherwise it wouldn't be possible to up scale them.
 #
 # Model has been trained with max_image_size: 1-20. Model needs to be train with max_image_size greater than 20.
 # Model has been trained with max_scale_factor: 1-7. Model needs to be train with max_scale_factor greater than 7.
 #
-# IDEA: add noise to the image being down scaled.
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=5614dbcf
+# IDEA: padding around the input images, that have to be removed by the model.
 #
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
@@ -74,6 +75,17 @@ def scale_up_and_add_noise(unscaled_image: np.array, seed: int, scale_x: int, sc
     return result_image
 
 def generate_task(seed: int, x_up_down, x_scale, y_up_down, y_scale) -> Task:
+    """
+    Create a task, where the job is to scale the image up or down.
+    And in some cases compensate for noise.
+    
+    Example of task with noise and scale down:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=5614dbcf
+
+    Example of task with scale up:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9172f3a0
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=c59eb873
+    """
     count_example = random.Random(seed + 1).randint(2, 4)
     count_test = random.Random(seed + 2).randint(1, 2)
     # count_test = 1
@@ -95,8 +107,8 @@ def generate_task(seed: int, x_up_down, x_scale, y_up_down, y_scale) -> Task:
 
     noise_color = None
     if can_add_noise:
-        # half of the time the same color is used
-        # half of the time, it's a random color
+        # 0-9:  half of the time the same color is used
+        # None: half of the time, it's a random color
         noise_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, None, None, None, None, None, None, None, None, None, None]
         noise_color = random.Random(seed + 4).choice(noise_colors)
 
