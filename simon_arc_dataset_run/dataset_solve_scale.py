@@ -55,11 +55,14 @@ def scale_up_and_add_noise(unscaled_image: np.array, seed: int, scale_x: int, sc
         for x_offset in range(scale_x):
             positions.append((x_offset, y_offset))
 
+    max_random_positions = (scale_x * scale_y) // 2 - 1
+    if max_random_positions < 1:
+        max_random_positions = 1
     for y in range(height):
         for x in range(width):
             positions_copy = positions.copy()
             random.Random(seed + y * 100 + x).shuffle(positions_copy)
-            count_positions = random.Random(seed + y * 100 + x + 1).randint(0, 1)
+            count_positions = random.Random(seed + y * 100 + x + 1).randint(0, max_random_positions)
             for i in range(count_positions):
                 x_offset, y_offset = positions_copy[i]
                 if noise_color is None:
@@ -76,19 +79,26 @@ def generate_task(seed: int, x_up_down, x_scale, y_up_down, y_scale) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 1
-    max_image_size = 10
+    max_image_size = 12
 
     can_add_noise = False
     if x_up_down == 'down' and y_up_down == 'down':
         if x_scale > 1 and y_scale > 1:
             can_add_noise = True
 
+    # don't always add noise
+    if can_add_noise:
+        percent = random.Random(seed + 3).randint(0, 100)
+        if percent > 70:
+            # print(f"suppressing noise. Perfect down scaling")
+            can_add_noise = False
+
     noise_color = None
     if can_add_noise:
         # half of the time the same color is used
         # half of the time, it's a random color
         noise_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, None, None, None, None, None, None, None, None, None, None]
-        noise_color = random.Random(seed + 3).choice(noise_colors)
+        noise_color = random.Random(seed + 4).choice(noise_colors)
 
     if can_add_noise:
         if noise_color is None:
@@ -154,12 +164,8 @@ def format_scalexy_identifier(x_up_down: str, x_scale: int, y_up_down: str, y_sc
     return f'x{x_scale}{x_suffix}_y{y_scale}{y_suffix}'
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    random.seed(seed)
-
-    seed_task = seed
-
     max_scale_factor = 7
-    # up_down = ['up', 'down']
+    up_down = ['up', 'down']
     up_down = ['down']
     config_list = []
     for x_up_down in up_down:
@@ -175,15 +181,16 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     random.Random(seed + 1).shuffle(config_list)
 
     # truncate the parameters to a few
-    truncate_length = random.randint(2, 5)
+    truncate_length = random.Random(seed + 2).randint(2, 5)
     config_list_truncated = config_list[:truncate_length]
 
     all_dataset_items = []
-    for config_list in config_list_truncated:
+    for index, config_list in enumerate(config_list_truncated):
+        iteration_seed = seed + index * 1000000
         x_up_down, x_scale, y_up_down, y_scale, transformation_id = config_list
-        task = generate_task(seed_task, x_up_down, x_scale, y_up_down, y_scale)
+        task = generate_task(iteration_seed, x_up_down, x_scale, y_up_down, y_scale)
         # task.show()
-        dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
+        dataset_items = generate_dataset_item_list_inner(iteration_seed + 1, task, transformation_id)
         all_dataset_items.extend(dataset_items)
 
     return all_dataset_items
@@ -192,7 +199,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=61000019,
+    seed=71000019,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
