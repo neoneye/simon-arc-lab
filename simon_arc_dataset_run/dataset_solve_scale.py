@@ -45,7 +45,9 @@ def generate_task(seed: int, x_up_down, x_scale, y_up_down, y_scale) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 1
-    max_image_size = 20
+    max_image_size = 30
+
+    task.metadata_task_id = f'scale_x{x_up_down}{x_scale}_y{y_up_down}{y_scale}'
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -62,8 +64,8 @@ def generate_task(seed: int, x_up_down, x_scale, y_up_down, y_scale) -> Task:
 def demo_generate_task():
     for i in range(3):
         seed = i
-        x_scale = random.Random(seed + 3).randint(1, 4)
-        y_scale = random.Random(seed + 4).randint(1, 4)
+        x_scale = random.Random(seed + 3).randint(1, 6)
+        y_scale = random.Random(seed + 4).randint(1, 6)
         if x_scale == 1 and y_scale == 1:
             x_scale = 2
             y_scale = 2
@@ -79,8 +81,6 @@ def demo_generate_task():
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    # builder.append_height()
-    # builder.append_pixels()
     builder.append_image()
     return builder.dataset_items()
 
@@ -127,7 +127,6 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     for config_list in config_list_truncated:
         x_up_down, x_scale, y_up_down, y_scale, transformation_id = config_list
         task = generate_task(seed_task, x_up_down, x_scale, y_up_down, y_scale)
-        # print(transformation_id)
         # task.show()
         dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
         all_dataset_items.extend(dataset_items)
@@ -138,7 +137,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=41000019,
+    seed=51000019,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
