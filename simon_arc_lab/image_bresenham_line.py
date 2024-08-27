@@ -6,6 +6,8 @@ def image_bresenham_line(image: np.array, x0: int, y0: int, x1: int, y1: int, co
 
     https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 
+    The x and y coordinates can be outside the image bounds.
+
     :param image: The image to draw the line on
     :param x0: The x-coordinate of the start point
     :param y0: The y-coordinate of the start point
@@ -15,10 +17,6 @@ def image_bresenham_line(image: np.array, x0: int, y0: int, x1: int, y1: int, co
     :return: The image with the line drawn on it
     """
     height, width = image.shape
-
-    # Check if the coordinates are outside the image bounds
-    if not (0 <= x0 < width and 0 <= y0 < height and 0 <= x1 < width and 0 <= y1 < height):
-        raise ValueError(f"Coordinates ({x0}, {y0}), ({x1}, {y1}) are outside the image bounds of width {width} and height {height}")
 
     # Clone the image to avoid mutating the original
     new_image = np.copy(image)
@@ -30,7 +28,8 @@ def image_bresenham_line(image: np.array, x0: int, y0: int, x1: int, y1: int, co
     err = dx - dy
 
     while True:
-        new_image[y0, x0] = color
+        if 0 <= x0 < width and 0 <= y0 < height:
+            new_image[y0, x0] = color
         if x0 == x1 and y0 == y1:
             break
         e2 = err * 2
