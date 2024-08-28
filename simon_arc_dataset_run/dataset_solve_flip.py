@@ -14,6 +14,7 @@ from simon_arc_lab.image_mask import *
 from simon_arc_lab.image_util import *
 from simon_arc_lab.task import *
 from simon_arc_lab.rectangle import Rectangle
+from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_rect import image_rect, image_rect_hollow
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.image_trim import outer_bounding_box_after_trim_with_color
@@ -36,7 +37,7 @@ def generate_task(seed: int, transformation_id: str) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 2
-    max_image_size = 8
+    max_image_size = 12
     max_pad_count = 5
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -60,6 +61,16 @@ def generate_task(seed: int, transformation_id: str) -> Task:
         for retry_index in range(100):
             iteration_seed = (retry_index * 10000) + (seed * 37) + (i * 9932342) + 101
             random_image = image_create_random_advanced(iteration_seed, min_image_size, max_image_size, min_image_size, max_image_size)
+            histogram = Histogram.create_with_image(random_image)
+            color_count = histogram.number_of_unique_colors()
+            if color_count < 2:
+                # We are not interested in empty images
+                continue
+            if color_count > 4:
+                # We are not interested in images with too many colors
+                # print("Skipping image due to too many colors.")
+                continue
+
             height, width = random_image.shape
 
             if is_padded:
@@ -125,7 +136,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=190035117,
+    seed=200035117,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
