@@ -125,13 +125,16 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 2
+    j = seed % 3
     if j == 0:
         transformation_id = 'mass1_all8'
         task = generate_task_specific_mass(seed, 1, PixelConnectivity.ALL8)
     elif j == 1:
         transformation_id = 'mass2_all8'
         task = generate_task_specific_mass(seed, 2, PixelConnectivity.ALL8)
+    elif j == 2:
+        transformation_id = 'mass3_all8'
+        task = generate_task_specific_mass(seed, 3, PixelConnectivity.ALL8)
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
@@ -140,7 +143,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=130000777,
+    seed=140000777,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
