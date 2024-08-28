@@ -5,7 +5,7 @@ import random
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
-seed = 126
+seed = 127
 random.seed(seed)
 
 # Define the input file paths
@@ -30,6 +30,7 @@ file_names = [
     'dataset_solve_fractal.jsonl',
     'dataset_solve_grid.jsonl',
     'dataset_solve_half.jsonl',
+    'dataset_solve_halfplane.jsonl',
     'dataset_solve_mask.jsonl',
     'dataset_solve_mass.jsonl',
     'dataset_solve_outline.jsonl',
