@@ -27,6 +27,7 @@ from simon_arc_lab.image_util import *
 from simon_arc_lab.task import *
 from simon_arc_lab.rectangle import Rectangle
 from simon_arc_lab.image_rect import image_rect, image_rect_hollow
+from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.image_trim import outer_bounding_box_after_trim_with_color
 from simon_arc_lab.benchmark import *
@@ -49,7 +50,7 @@ def generate_task_boundingbox_of_lonely_pixels(seed: int, transformation_id: str
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=4347f46a
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e7639916
     """
-    count_example = random.Random(seed + 1).randint(2, 4)
+    count_example = random.Random(seed + 1).randint(3, 4)
     count_test = random.Random(seed + 2).randint(1, 2)
     # count_test = 1
     task = Task()
@@ -110,16 +111,39 @@ def generate_task_boundingbox_of_lonely_pixels(seed: int, transformation_id: str
             if bounding_box.width == width and bounding_box.height == height:
                 continue
 
-            if transformation_id == 'hollow':
-                if bounding_box.width <= 2 or bounding_box.height <= 2:
-                    continue
-
             if transformation_id == 'filled':
                 output_image_raw = image_rect(background_image, bounding_box, 1)
             elif transformation_id == 'hollow':
+                if bounding_box.width <= 2 or bounding_box.height <= 2:
+                    continue
                 output_image_raw = image_rect_hollow(background_image, bounding_box, 1, border_size)
+            elif transformation_id == 'filled_inner':
+                rect2 = Rectangle(bounding_box.x + border_size, bounding_box.y + border_size, bounding_box.width - border_size * 2, bounding_box.height - border_size * 2)
+                if rect2.mass() < 1:
+                    continue
+                output_image_raw = image_rect(background_image, rect2, 1)
+            elif transformation_id == 'hollow_inner':
+                rect2 = Rectangle(bounding_box.x + border_size, bounding_box.y + border_size, bounding_box.width - border_size * 2, bounding_box.height - border_size * 2)
+                if rect2.mass() < 1:
+                    continue
+                output_image_raw = image_rect_hollow(background_image, rect2, 1, border_size)
+            elif transformation_id == 'filled_outer':
+                rect2 = Rectangle(bounding_box.x - border_size, bounding_box.y - border_size, bounding_box.width + border_size * 2, bounding_box.height + border_size * 2)
+                if rect2.mass() < 1:
+                    continue
+                output_image_raw = image_rect(background_image, rect2, 1)
+            elif transformation_id == 'hollow_outer':
+                rect2 = Rectangle(bounding_box.x - border_size, bounding_box.y - border_size, bounding_box.width + border_size * 2, bounding_box.height + border_size * 2)
+                if rect2.mass() < 1:
+                    continue
+                output_image_raw = image_rect_hollow(background_image, rect2, 1, border_size)
             else:
                 raise Exception(f"Unknown transformation_id: {transformation_id}")
+
+            # We are not interested in images with zero lonely pixels
+            histogram = Histogram.create_with_image(output_image_raw)
+            if histogram.number_of_unique_colors() < 2:
+                continue
 
             input_image = image_replace_colors(input_image_raw, color_map_input)
             output_image = image_replace_colors(output_image_raw, color_map_output)
@@ -145,12 +169,25 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    if seed % 2 == 0:
+    j = seed % 6
+    if j == 0:
         transformation_id = 'boundingbox_of_lonely_pixels_filled'
         task = generate_task_boundingbox_of_lonely_pixels(seed, 'filled')
-    else:
+    elif j == 1:
         transformation_id = 'boundingbox_of_lonely_pixels_hollow'
         task = generate_task_boundingbox_of_lonely_pixels(seed, 'hollow')
+    elif j == 2:
+        transformation_id = 'boundingbox_of_lonely_pixels_filled_inner'
+        task = generate_task_boundingbox_of_lonely_pixels(seed, 'filled_inner')
+    elif j == 3:
+        transformation_id = 'boundingbox_of_lonely_pixels_hollow_inner'
+        task = generate_task_boundingbox_of_lonely_pixels(seed, 'hollow_inner')
+    elif j == 4:
+        transformation_id = 'boundingbox_of_lonely_pixels_filled_outer'
+        task = generate_task_boundingbox_of_lonely_pixels(seed, 'filled_outer')
+    elif j == 5:
+        transformation_id = 'boundingbox_of_lonely_pixels_hollow_outer'
+        task = generate_task_boundingbox_of_lonely_pixels(seed, 'hollow_outer')
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
@@ -159,7 +196,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=180000913,
+    seed=200000913,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
