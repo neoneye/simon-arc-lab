@@ -37,6 +37,7 @@ def generate_task_emit_rays_from_lonely_pixels(seed: int) -> Task:
     task = Task()
     min_image_size = 5
     max_image_size = 15
+    max_number_of_positions = 4
 
     input_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(input_colors)
@@ -81,7 +82,7 @@ def generate_task_emit_rays_from_lonely_pixels(seed: int) -> Task:
         for retry_index in range(100):
             iteration_seed = (retry_index * 10000) + (seed * 37) + (i * 9932342) + 101
 
-            number_of_positions = random.Random(iteration_seed + 1).randint(1, 3)
+            number_of_positions = random.Random(iteration_seed + 1).randint(1, max_number_of_positions)
 
             width = random.Random(iteration_seed + 1).randint(min_image_size, max_image_size)
             height = random.Random(iteration_seed + 2).randint(min_image_size, max_image_size)
@@ -154,7 +155,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=130055117,
+    seed=140055117,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
