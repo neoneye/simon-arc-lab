@@ -1,4 +1,9 @@
 # Identify areas with a particular mass.
+# - Find the areas with the same color that has a mass of N units. Connectivity ALL8.
+# - Compare adjacent rows/columns and determine if the mass is the same, greater or less.
+#
+# IDEA: diagonal mass compare
+# Currently does mass_compare_adjacent_rows and mass_compare_adjacent_columns.
 #
 # IDEA: train with other connectitivity types, than ALL8, so that a task like this can be solved.
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=aedd82e4
