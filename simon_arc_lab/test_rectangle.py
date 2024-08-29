@@ -55,3 +55,4 @@ class TestRectangle(unittest.TestCase):
         self.assertEqual(Rectangle(100, 200, 5, 5).mass(), 25)
         self.assertEqual(Rectangle(0, 0, 0, 10).mass(), 0)
         self.assertEqual(Rectangle(0, 0, 10, 0).mass(), 0)
+        self.assertEqual(Rectangle(0, 0, -10, -10).mass(), 0)

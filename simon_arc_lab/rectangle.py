@@ -51,4 +51,6 @@ class Rectangle:
         return Rectangle(x, y, width, height)
 
     def mass(self) -> int:
+        if self.width < 1 or self.height < 1:
+            return 0
         return self.width * self.height
