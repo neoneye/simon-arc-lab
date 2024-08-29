@@ -61,7 +61,7 @@ def generate_task_specific_mass(seed: int, find_mass_size: int, connectivity: Pi
     task = Task()
     task.metadata_task_id = f'mass{find_mass_size}_{connectivity.name.lower()}'
     min_image_size = 1
-    max_image_size = 15
+    max_image_size = 8
 
     connectivity = PixelConnectivity.ALL8
 
@@ -125,7 +125,7 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 3
+    j = seed % 4
     if j == 0:
         transformation_id = 'mass1_all8'
         task = generate_task_specific_mass(seed, 1, PixelConnectivity.ALL8)
@@ -135,6 +135,9 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     elif j == 2:
         transformation_id = 'mass3_all8'
         task = generate_task_specific_mass(seed, 3, PixelConnectivity.ALL8)
+    elif j == 3:
+        transformation_id = 'mass4_all8'
+        task = generate_task_specific_mass(seed, 4, PixelConnectivity.ALL8)
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
@@ -143,7 +146,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=140000777,
+    seed=150000777,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
