@@ -5,6 +5,9 @@
 # IDEA: Gravity with objects
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=5ffb2104
 #
+# IDEA: Gravity with multiple non-moving objects
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9c56f360
+#
 # IDEA: Gravity with objects towards an attractor
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6ad5bdfd
 #

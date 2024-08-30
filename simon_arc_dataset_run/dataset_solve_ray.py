@@ -1,5 +1,8 @@
 # Send out rays from objects.
 #
+# IDEA: Emit the same color of the pixel in all directions.
+# Currently it's the mask of where the rays have been.
+#
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
 import os
