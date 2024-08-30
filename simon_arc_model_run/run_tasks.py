@@ -62,4 +62,5 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
     wm.process_all_work_items(save_dir=save_dir)
     # wm.process_all_work_items(show=True)
     wm.summary()
+    # IDEA: save an index_html file with images
     # wm.save_arcprize2024_submission_file('submission.json')
