@@ -142,6 +142,7 @@ def generate_task_comparing_adjacent_rowcolumn(seed: int, transformation_id: str
     output_color2 = output_colors[2]
 
     color_mode = random.Random(seed + 12).randint(0, 2)
+    color_mode = 0
     use_two_colors = color_mode == 0
     use_three_colors = color_mode == 1
     use_all_colors = color_mode == 2
@@ -207,6 +208,7 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 6
     j = (seed % 2) + 4
+    j = 4
     if j == 0:
         transformation_id = 'mass1_all8'
         task = generate_task_specific_mass(seed, 1, PixelConnectivity.ALL8)
@@ -233,7 +235,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=180000777,
+    seed=190000777,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
