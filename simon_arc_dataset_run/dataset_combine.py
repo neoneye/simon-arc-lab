@@ -5,7 +5,7 @@ import random
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
-seed = 132
+seed = 133
 random.seed(seed)
 
 # Define the input file paths
@@ -46,7 +46,7 @@ file_names = [
 ]
 
 # Number of rows in the output file
-output_rows = 300000
+output_rows = 10000
 
 # Calculate the number of rows to sample from each file
 rows_per_file = output_rows // len(file_names)
