@@ -39,6 +39,28 @@ class TestImageMassCompare(unittest.TestCase):
             [2, 2, 2, 2, 2]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
 
+    def test_10002_image_mass_compare_adjacent_rows(self):
+        # Arrange
+        image = np.array([
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 3, 3, 0, 0, 0],
+            [0, 0, 3, 3, 3, 3, 0, 0],
+            [0, 5, 5, 5, 5, 5, 5, 0],
+            [0, 0, 3, 3, 3, 3, 0, 0],
+            [0, 0, 0, 3, 3, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        # Act
+        actual = image_mass_compare_adjacent_rows(image, 0, 1, 2)
+        # Assert
+        expected = np.array([
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 2, 2, 2, 2, 1, 1],
+            [1, 2, 2, 2, 2, 2, 2, 1],
+            [2, 1, 1, 1, 1, 1, 1, 2],
+            [2, 2, 1, 1, 1, 1, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
     def test_20000_image_mass_compare_adjacent_columns(self):
         # Arrange
         image = np.array([
