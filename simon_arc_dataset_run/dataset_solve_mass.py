@@ -127,25 +127,54 @@ def generate_task_comparing_adjacent_rowcolumn(seed: int, transformation_id: str
     task = Task()
     task.metadata_task_id = f'mass_compare_{transformation_id}'
     min_image_size = 4
-    max_image_size = 7
+    max_image_size = 6
 
-    colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    random.shuffle(colors)
-    color0 = colors[0]
-    color1 = colors[1]
-    color2 = colors[2]
+    input_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    random.Random(seed + 11).shuffle(input_colors)
+    input_color0 = input_colors[0]
+    input_color1 = input_colors[1]
+    input_color2 = input_colors[2]
+
+    output_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    random.Random(seed + 12).shuffle(output_colors)
+    output_color0 = output_colors[0]
+    output_color1 = output_colors[1]
+    output_color2 = output_colors[2]
+
+    color_mode = random.Random(seed + 12).randint(0, 2)
+    use_two_colors = color_mode == 0
+    use_three_colors = color_mode == 1
+    use_all_colors = color_mode == 2
+
     for i in range(count_example+count_test):
         is_example = i < count_example
         input_image = None
         output_image = None
         for retry_index in range(100):
             iteration_seed = (retry_index * 10000) + (seed * 37) + (i * 9932342) + 101
-            random_image = image_create_random_advanced(iteration_seed, min_image_size, max_image_size, min_image_size, max_image_size)
+
+            width = random.Random(iteration_seed + 1).randint(min_image_size, max_image_size)
+            height = random.Random(iteration_seed + 2).randint(min_image_size, max_image_size)
+
+            random_image = None
+            if use_two_colors:
+                ratios = [0.1, 0.2, 0.3, 0.4]
+                ratio = random.Random(iteration_seed + 3).choice(ratios)
+                random_image = image_create_random_with_two_colors(width, height, input_color0, input_color1, ratio, iteration_seed + 4)
+            if use_three_colors:
+                weights = [1, 1, 1, 2, 3, 4, 7, 11]
+                random.Random(iteration_seed + 3).shuffle(weights)
+                weight0 = weights[0]
+                weight1 = weights[1]
+                weight2 = weights[2]
+                random_image = image_create_random_with_three_colors(width, height, input_color0, input_color1, input_color2, weight0, weight1, weight2, iteration_seed + 4)
+            if use_all_colors:
+                random_image = image_create_random_advanced(iteration_seed + 3, width, width, height, height)
 
             if transformation_id == 'adjacent_rows':
-                output_image = image_mass_compare_adjacent_rows(random_image, color0, color1, color2)
+                output_image = image_mass_compare_adjacent_rows(random_image, output_color0, output_color1, output_color2)
             elif transformation_id == 'adjacent_columns':
-                output_image = image_mass_compare_adjacent_columns(random_image, color0, color1, color2)
+                output_image = image_mass_compare_adjacent_columns(random_image, output_color0, output_color1, output_color2)
             else:
                 raise ValueError(f'Unknown transformation_id: {transformation_id}')
 
@@ -177,6 +206,7 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 6
+    j = (seed % 2) + 4
     if j == 0:
         transformation_id = 'mass1_all8'
         task = generate_task_specific_mass(seed, 1, PixelConnectivity.ALL8)
@@ -203,7 +233,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=170000777,
+    seed=180000777,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
