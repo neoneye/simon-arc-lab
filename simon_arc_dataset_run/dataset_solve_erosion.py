@@ -1,6 +1,8 @@
 # Erosion transformations.
 # - remove the outer most pixel from objects, and return a mask with what remains.
 #
+# IDEA: Extrude object in different directions up/down/left/right with a background color indicating the mask of available space.
+#
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
 import os

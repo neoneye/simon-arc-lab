@@ -1,4 +1,19 @@
 # Apply gravity to the input images in various directions.
+# - row-wise gravity
+# - column-wise gravity
+#
+# IDEA: Gravity with objects
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=5ffb2104
+#
+# IDEA: Gravity with objects towards an attractor
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6ad5bdfd
+#
+# IDEA: Alignment of objects
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=67636eac
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=1caeab9d
+#
+# IDEA: Gravity into a hole with a particular shape
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=67c52801
 #
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
