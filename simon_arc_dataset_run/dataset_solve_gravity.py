@@ -54,7 +54,7 @@ def generate_task_gravity_with_a_few_lonely_pixels(seed: int, transformation_id:
     # count_test = 1
     task = Task()
     min_image_size = 3
-    max_image_size = 10
+    max_image_size = 20
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(colors)
@@ -156,7 +156,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=10000194,
+    seed=20000194,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
