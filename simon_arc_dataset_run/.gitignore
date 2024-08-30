@@ -21,6 +21,7 @@ dataset_solve_edge.jsonl
 dataset_solve_erosion.jsonl
 dataset_solve_flip.jsonl
 dataset_solve_fractal.jsonl
+dataset_solve_gravity.jsonl
 dataset_solve_grid.jsonl
 dataset_solve_half.jsonl
 dataset_solve_halfplane.jsonl
