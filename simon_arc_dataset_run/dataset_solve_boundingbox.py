@@ -6,11 +6,17 @@
 #
 # IDEA: draw a box around the object, where it's a hollow box that surrounds the bounding box.
 #
+# IDEA: preserve the original object inside the bounding box, but fill the bounding box with a different color.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6d75e8bb
+#
 # IDEA: show multiple bounding boxes, from different objects, grouped by color
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=56ff96f3
 #
 # IDEA: show multiple bounding boxes, from different objects, grouped by connected components
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=60b61512
+#
+# IDEA: bounding boxes of multiple objects ignoring noisy pixels
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=7f4411dc
 #
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
