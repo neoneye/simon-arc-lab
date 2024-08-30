@@ -8,6 +8,9 @@
 # IDEA: Gravity with objects towards an attractor
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6ad5bdfd
 #
+# IDEA: Gravity following a ruler
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=98cf29f8
+#
 # IDEA: Alignment of objects
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=67636eac
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=1caeab9d
