@@ -156,13 +156,13 @@ def generate_task_gravity_draw(seed: int, transformation_id: str) -> Task:
     task.metadata_task_id = f'gravity_draw {transformation_id}'
 
     if transformation_id == 'down':
-        direction = GravityDrawDirection.DOWN
+        direction = GravityDrawDirection.TOP_TO_BOTTOM
     elif transformation_id == 'up':
-        direction = GravityDrawDirection.UP
+        direction = GravityDrawDirection.BOTTOM_TO_TOP
     elif transformation_id == 'left':
-        direction = GravityDrawDirection.LEFT
+        direction = GravityDrawDirection.RIGHT_TO_LEFT
     elif transformation_id == 'right':
-        direction = GravityDrawDirection.RIGHT
+        direction = GravityDrawDirection.LEFT_TO_RIGHT
     else:
         raise Exception(f"Unknown transformation_id: {transformation_id}")
 
