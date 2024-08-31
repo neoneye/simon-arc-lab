@@ -2,12 +2,16 @@
 # - Extract one bounding box from multiple lonely pixels. Where it's filled with 1s.
 # - Extract one bounding box from multiple lonely pixels. Where it's hollow with the border set to 1s.
 #
+# IDEA: preserve the original object inside the bounding box, but fill the bounding box with a different color.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6d75e8bb
+#
+# IDEA: draw the center line/point of the bounding box.
+#
+# IDEA: draw the bounding box where the border is 1s and the inside is 2s, and the outside is 0s.
+#
 # IDEA: extend the bounding box, so it draws the top/bottom/left/right border of the box all the way to the edge of the image.
 #
 # IDEA: draw a box around the object, where it's a hollow box that surrounds the bounding box.
-#
-# IDEA: preserve the original object inside the bounding box, but fill the bounding box with a different color.
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6d75e8bb
 #
 # IDEA: show multiple bounding boxes, from different objects, grouped by color
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=56ff96f3
