@@ -50,7 +50,7 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_gravity'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_gravity.jsonl')
 
-def generate_task_gravity_move(seed: int, transformation_id: str) -> Task:
+def generate_task_gravity_move(seed: int, direction: GravityMoveDirection) -> Task:
     """
     Show a few lonely pixels, and apply gravity move.
 
@@ -62,7 +62,7 @@ def generate_task_gravity_move(seed: int, transformation_id: str) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 3
-    max_image_size = 30
+    max_image_size = 10
     max_number_of_positions = 7
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -72,18 +72,7 @@ def generate_task_gravity_move(seed: int, transformation_id: str) -> Task:
     for i in range(10):
         color_map[i] = colors[i]
 
-    task.metadata_task_id = f'gravity_move {transformation_id}'
-
-    if transformation_id == 'down':
-        direction = GravityMoveDirection.DOWN
-    elif transformation_id == 'up':
-        direction = GravityMoveDirection.UP
-    elif transformation_id == 'left':
-        direction = GravityMoveDirection.LEFT
-    elif transformation_id == 'right':
-        direction = GravityMoveDirection.RIGHT
-    else:
-        raise Exception(f"Unknown transformation_id: {transformation_id}")
+    task.metadata_task_id = f'gravity_move {direction.name.lower()}'
 
     use_two_colors = random.Random(seed + 4).randint(0, 1) == 1
 
@@ -236,29 +225,43 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 8
+    j = seed % 12
+    # j = seed % 4
+    j = (seed % 4) + 4
     if j == 0:
-        transformation_id = 'gravity_move_up'
-        task = generate_task_gravity_move(seed, 'up')
+        transformation_id = 'gravity_move_top_to_bottom'
+        task = generate_task_gravity_move(seed, GravityMoveDirection.TOP_TO_BOTTOM)
     elif j == 1:
-        transformation_id = 'gravity_move_down'
-        task = generate_task_gravity_move(seed, 'down')
+        transformation_id = 'gravity_move_bottom_to_top'
+        task = generate_task_gravity_move(seed, GravityMoveDirection.BOTTOM_TO_TOP)
     elif j == 2:
-        transformation_id = 'gravity_move_left'
-        task = generate_task_gravity_move(seed, 'left')
+        transformation_id = 'gravity_move_left_to_right'
+        task = generate_task_gravity_move(seed, GravityMoveDirection.LEFT_TO_RIGHT)
     elif j == 3:
-        transformation_id = 'gravity_move_right'
-        task = generate_task_gravity_move(seed, 'right')
+        transformation_id = 'gravity_move_right_to_left'
+        task = generate_task_gravity_move(seed, GravityMoveDirection.RIGHT_TO_LEFT)
     elif j == 4:
+        transformation_id = 'gravity_move_topleft_to_bottomright'
+        task = generate_task_gravity_move(seed, GravityMoveDirection.TOPLEFT_TO_BOTTOMRIGHT)
+    elif j == 5:
+        transformation_id = 'gravity_move_bottomright_to_topleft'
+        task = generate_task_gravity_move(seed, GravityMoveDirection.BOTTOMRIGHT_TO_TOPLEFT)
+    elif j == 6:
+        transformation_id = 'gravity_move_topright_to_bottomleft'
+        task = generate_task_gravity_move(seed, GravityMoveDirection.TOPRIGHT_TO_BOTTOMLEFT)
+    elif j == 7:
+        transformation_id = 'gravity_move_bottomleft_to_topright'
+        task = generate_task_gravity_move(seed, GravityMoveDirection.BOTTOMLEFT_TO_TOPRIGHT)
+    elif j == 8:
         transformation_id = 'gravity_draw_up'
         task = generate_task_gravity_draw(seed, 'up')
-    elif j == 5:
+    elif j == 9:
         transformation_id = 'gravity_draw_down'
         task = generate_task_gravity_draw(seed, 'down')
-    elif j == 6:
+    elif j == 10:
         transformation_id = 'gravity_draw_left'
         task = generate_task_gravity_draw(seed, 'left')
-    elif j == 7:
+    elif j == 11:
         transformation_id = 'gravity_draw_right'
         task = generate_task_gravity_draw(seed, 'right')
     # task.show()
@@ -269,7 +272,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=25000194,
+    seed=26000194,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
