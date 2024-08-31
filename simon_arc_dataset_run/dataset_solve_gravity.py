@@ -38,7 +38,7 @@ from simon_arc_lab.rectangle import Rectangle
 from simon_arc_lab.image_rect import image_rect, image_rect_hollow
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_create_random_simple import *
-from simon_arc_lab.image_gravity import *
+from simon_arc_lab.image_gravity_move import *
 from simon_arc_lab.benchmark import *
 from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
 from simon_arc_dataset.generate_solve import *
@@ -72,13 +72,13 @@ def generate_task_gravity_with_a_few_lonely_pixels(seed: int, transformation_id:
     task.metadata_task_id = f'gravity {transformation_id}'
 
     if transformation_id == 'down':
-        direction = GravityDirection.DOWN
+        direction = GravityMoveDirection.DOWN
     elif transformation_id == 'up':
-        direction = GravityDirection.UP
+        direction = GravityMoveDirection.UP
     elif transformation_id == 'left':
-        direction = GravityDirection.LEFT
+        direction = GravityMoveDirection.LEFT
     elif transformation_id == 'right':
-        direction = GravityDirection.RIGHT
+        direction = GravityMoveDirection.RIGHT
     else:
         raise Exception(f"Unknown transformation_id: {transformation_id}")
 
@@ -114,7 +114,7 @@ def generate_task_gravity_with_a_few_lonely_pixels(seed: int, transformation_id:
                     color = random.Random(iteration_seed + 5 + x + y).randint(1, 9)
                 input_image_raw[y, x] = color
 
-            output_image_raw = image_gravity(input_image_raw, 0, direction)
+            output_image_raw = image_gravity_move(input_image_raw, 0, direction)
 
             # We are not interested in images with zero lonely pixels
             histogram = Histogram.create_with_image(output_image_raw)

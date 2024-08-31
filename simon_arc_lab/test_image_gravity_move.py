@@ -1,8 +1,8 @@
 import unittest
 import numpy as np
-from .image_gravity import *
+from .image_gravity_move import *
 
-class TestImageGravity(unittest.TestCase):
+class TestImageGravityMove(unittest.TestCase):
     def test_10000_image_gravity_left(self):
         # Arrange
         input = np.array([
@@ -12,7 +12,7 @@ class TestImageGravity(unittest.TestCase):
             [0, 0, 0, 0, 5],
             [0, 7, 7, 0, 0]], dtype=np.uint8)
         # Act
-        actual = image_gravity(input, 0, GravityDirection.LEFT)
+        actual = image_gravity_move(input, 0, GravityMoveDirection.LEFT)
         # Assert
         expected = np.array([
             [5, 0, 0, 0, 0],
@@ -31,7 +31,7 @@ class TestImageGravity(unittest.TestCase):
             [0, 0, 0, 0, 5],
             [0, 7, 7, 0, 0]], dtype=np.uint8)
         # Act
-        actual = image_gravity(input, 0, GravityDirection.UP)
+        actual = image_gravity_move(input, 0, GravityMoveDirection.UP)
         # Assert
         expected = np.array([
             [5, 7, 7, 4, 5],
@@ -50,7 +50,7 @@ class TestImageGravity(unittest.TestCase):
             [0, 0, 0, 0, 5],
             [0, 7, 7, 0, 0]], dtype=np.uint8)
         # Act
-        actual = image_gravity(input, 0, GravityDirection.DOWN)
+        actual = image_gravity_move(input, 0, GravityMoveDirection.DOWN)
         # Assert
         expected = np.array([
             [0, 0, 0, 0, 0],
@@ -69,7 +69,7 @@ class TestImageGravity(unittest.TestCase):
             [0, 0, 0, 0, 5],
             [0, 7, 7, 0, 0]], dtype=np.uint8)
         # Act
-        actual = image_gravity(input, 0, GravityDirection.RIGHT)
+        actual = image_gravity_move(input, 0, GravityMoveDirection.RIGHT)
         # Assert
         expected = np.array([
             [0, 0, 0, 0, 5],
