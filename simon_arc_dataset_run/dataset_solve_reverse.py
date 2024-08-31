@@ -30,6 +30,10 @@ SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_reverse.
 def generate_task_reverse_chunks(seed: int, transformation_id: str) -> Task:
     """
     Reverse chunks of pixels in the specified direction.
+
+    Exampe of topbottom direction:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=25d487eb
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=3618c87e
     """
     count_example = random.Random(seed + 9).randint(3, 4)
     count_test = random.Random(seed + 10).randint(1, 2)
