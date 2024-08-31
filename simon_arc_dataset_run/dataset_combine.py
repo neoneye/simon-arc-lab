@@ -5,7 +5,7 @@ import random
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
-seed = 145
+seed = 146
 random.seed(seed)
 
 # Define the input file paths
@@ -28,17 +28,17 @@ file_names = [
     # 'dataset_solve_erosion.jsonl',
     # 'dataset_solve_flip.jsonl',
     # 'dataset_solve_fractal.jsonl',
-    # 'dataset_solve_gravity.jsonl',
-    # 'dataset_solve_grid.jsonl',
-    # 'dataset_solve_half.jsonl',
-    # 'dataset_solve_halfplane.jsonl',
-    # 'dataset_solve_mask.jsonl',
-    # 'dataset_solve_mass.jsonl',
-    # 'dataset_solve_outline.jsonl',
-    'dataset_solve_probecolor.jsonl',
-    'dataset_solve_ray.jsonl',
-    'dataset_solve_reverse.jsonl',
-    'dataset_solve_rotate.jsonl',
+    'dataset_solve_gravity.jsonl',
+    'dataset_solve_grid.jsonl',
+    'dataset_solve_half.jsonl',
+    'dataset_solve_halfplane.jsonl',
+    'dataset_solve_mask.jsonl',
+    'dataset_solve_mass.jsonl',
+    'dataset_solve_outline.jsonl',
+    # 'dataset_solve_probecolor.jsonl',
+    # 'dataset_solve_ray.jsonl',
+    # 'dataset_solve_reverse.jsonl',
+    # 'dataset_solve_rotate.jsonl',
     # 'dataset_solve_scale.jsonl',
     # 'dataset_solve_symmetry.jsonl',
     # 'dataset_solve_translate.jsonl',
