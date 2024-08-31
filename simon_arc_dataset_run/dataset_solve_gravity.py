@@ -6,6 +6,7 @@
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=5ffb2104
 #
 # IDEA: Gravity with multiple non-moving objects
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=05f2a901
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9c56f360
 #
 # IDEA: Gravity with objects towards an attractor
@@ -236,7 +237,6 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 8
-    # j = (seed % 4) + 4
     if j == 0:
         transformation_id = 'gravity_move_up'
         task = generate_task_gravity_move(seed, 'up')
@@ -269,7 +269,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=24000194,
+    seed=25000194,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
