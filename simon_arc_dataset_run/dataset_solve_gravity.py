@@ -62,6 +62,7 @@ def generate_task_gravity_move(seed: int, transformation_id: str) -> Task:
     task = Task()
     min_image_size = 3
     max_image_size = 20
+    max_number_of_positions = 8
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(colors)
@@ -92,7 +93,7 @@ def generate_task_gravity_move(seed: int, transformation_id: str) -> Task:
         for retry_index in range(100):
             iteration_seed = (retry_index * 10000) + (seed * 37) + (i * 9932342) + 101
 
-            number_of_positions = random.Random(iteration_seed + 1).randint(2, 5)
+            number_of_positions = random.Random(iteration_seed + 1).randint(2, max_number_of_positions)
 
             width = random.Random(iteration_seed + 1).randint(min_image_size, max_image_size)
             height = random.Random(iteration_seed + 2).randint(min_image_size, max_image_size)
@@ -141,10 +142,11 @@ def generate_task_gravity_draw(seed: int, transformation_id: str) -> Task:
     Show a few lonely pixels, and apply gravity draw.
 
     Examples:
-    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=97999447
-    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=90f3ed37
-    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=99fa7670
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=673ef223
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=82819916
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=90f3ed37
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=97999447
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=99fa7670
     """
     count_example = random.Random(seed + 1).randint(3, 4)
     count_test = random.Random(seed + 2).randint(1, 2)
@@ -152,6 +154,7 @@ def generate_task_gravity_draw(seed: int, transformation_id: str) -> Task:
     task = Task()
     min_image_size = 3
     max_image_size = 20
+    max_number_of_positions = 8
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(colors)
@@ -182,7 +185,7 @@ def generate_task_gravity_draw(seed: int, transformation_id: str) -> Task:
         for retry_index in range(100):
             iteration_seed = (retry_index * 10000) + (seed * 37) + (i * 9932342) + 101
 
-            number_of_positions = random.Random(iteration_seed + 1).randint(2, 5)
+            number_of_positions = random.Random(iteration_seed + 1).randint(2, max_number_of_positions)
 
             width = random.Random(iteration_seed + 1).randint(min_image_size, max_image_size)
             height = random.Random(iteration_seed + 2).randint(min_image_size, max_image_size)
@@ -233,7 +236,7 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 8
-    j = (seed % 4) + 4
+    # j = (seed % 4) + 4
     if j == 0:
         transformation_id = 'gravity_move_up'
         task = generate_task_gravity_move(seed, 'up')
@@ -266,7 +269,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=21000194,
+    seed=22000194,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
