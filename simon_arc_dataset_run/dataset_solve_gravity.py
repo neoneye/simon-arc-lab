@@ -62,8 +62,8 @@ def generate_task_gravity_move(seed: int, direction: GravityMoveDirection) -> Ta
     # count_test = 1
     task = Task()
     min_image_size = 3
-    max_image_size = 10
-    max_number_of_positions = 7
+    max_image_size = 20
+    max_number_of_positions = 5
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(colors)
@@ -272,7 +272,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=26000194,
+    seed=27000194,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
