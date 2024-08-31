@@ -1,5 +1,28 @@
 import numpy as np
 
+def image_skew_left(image: np.array, padding_color: int) -> np.array:
+    """
+    Displace each row to the left by the row index.
+    """
+    height, width = image.shape
+    skewed_image = np.full((height, height + width - 1), padding_color, dtype=np.uint8)
+    for y in range(height):
+        for x in range(width):
+            skewed_image[y, height-1-y+x] = image[y, x]
+    return skewed_image
+
+def image_unskew_left(image: np.array) -> np.array:
+    """
+    Displace each row to the right by the row index. Remove the padding.
+    """
+    height, width = image.shape
+    width_unskewed = width - height + 1
+    unskewed_image = np.zeros((height, width_unskewed), dtype=np.uint8)
+    for y in range(height):
+        for x in range(width_unskewed):
+            unskewed_image[y, x] = image[y, height-1-y+x]
+    return unskewed_image
+
 def image_skew_right(image: np.array, padding_color: int) -> np.array:
     """
     Displace each row to the right by the row index.
