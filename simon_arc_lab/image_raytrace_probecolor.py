@@ -1,5 +1,6 @@
 import numpy as np
 from enum import Enum
+from .image_skew import *
 
 def probe_color_inner(pixel_list: list[int], edge_color: int) -> list[int]:
     """
@@ -75,72 +76,36 @@ def image_raytrace_probecolor_direction_topleft(image: np.array, edge_color: int
     """
     Raytrace in the upleft-direction, and determine what color is there.
     """
-    height, width = image.shape
-    skewed_image = np.full((height, height + width - 1), edge_color, dtype=np.uint8)
-    for y in range(height):
-        for x in range(width):
-            skewed_image[y, height-1-y+x] = image[y, x]
-
+    skewed_image = image_skew_left(image, edge_color)
     skewed_image = image_raytrace_probecolor_direction_top(skewed_image, edge_color)
-
-    unskewed_image = np.zeros_like(image)
-    for y in range(height):
-        for x in range(width):
-            unskewed_image[y, x] = skewed_image[y, height-1-y+x]
+    unskewed_image = image_unskew_left(skewed_image)
     return unskewed_image
 
 def image_raytrace_probecolor_direction_topright(image: np.array, edge_color: int) -> np.array:
     """
     Raytrace in the upright-direction, and determine what color is there.
     """
-    height, width = image.shape
-    skewed_image = np.full((height, height + width - 1), edge_color, dtype=np.uint8)
-    for y in range(height):
-        for x in range(width):
-            skewed_image[y, y+x] = image[y, x]
-
+    skewed_image = image_skew_right(image, edge_color)
     skewed_image = image_raytrace_probecolor_direction_top(skewed_image, edge_color)
-
-    unskewed_image = np.zeros_like(image)
-    for y in range(height):
-        for x in range(width):
-            unskewed_image[y, x] = skewed_image[y, y+x]
+    unskewed_image = image_unskew_right(skewed_image)
     return unskewed_image
 
 def image_raytrace_probecolor_direction_bottomleft(image: np.array, edge_color: int) -> np.array:
     """
     Raytrace in the downleft-direction, and determine what color is there.
     """
-    height, width = image.shape
-    skewed_image = np.full((height, height + width - 1), edge_color, dtype=np.uint8)
-    for y in range(height):
-        for x in range(width):
-            skewed_image[y, y+x] = image[y, x]
-
+    skewed_image = image_skew_right(image, edge_color)
     skewed_image = image_raytrace_probecolor_direction_bottom(skewed_image, edge_color)
-
-    unskewed_image = np.zeros_like(image)
-    for y in range(height):
-        for x in range(width):
-            unskewed_image[y, x] = skewed_image[y, y+x]
+    unskewed_image = image_unskew_right(skewed_image)
     return unskewed_image
 
 def image_raytrace_probecolor_direction_bottomright(image: np.array, edge_color: int) -> np.array:
     """
     Raytrace in the downright-direction, and determine what color is there.
     """
-    height, width = image.shape
-    skewed_image = np.full((height, height + width - 1), edge_color, dtype=np.uint8)
-    for y in range(height):
-        for x in range(width):
-            skewed_image[y, height-1-y+x] = image[y, x]
-
+    skewed_image = image_skew_left(image, edge_color)
     skewed_image = image_raytrace_probecolor_direction_bottom(skewed_image, edge_color)
-
-    unskewed_image = np.zeros_like(image)
-    for y in range(height):
-        for x in range(width):
-            unskewed_image[y, x] = skewed_image[y, height-1-y+x]
+    unskewed_image = image_unskew_left(skewed_image)
     return unskewed_image
 
 class ImageRaytraceProbeColorDirection(Enum):
