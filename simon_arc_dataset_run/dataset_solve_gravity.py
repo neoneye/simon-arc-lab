@@ -75,13 +75,13 @@ def generate_task_gravity_move(seed: int, transformation_id: str) -> Task:
     task.metadata_task_id = f'gravity_move {transformation_id}'
 
     if transformation_id == 'down':
-        direction = GravityMoveDirection.DOWN
+        direction = GravityMoveDirection.TOP_TO_BOTTOM
     elif transformation_id == 'up':
-        direction = GravityMoveDirection.UP
+        direction = GravityMoveDirection.BOTTOM_TO_TOP
     elif transformation_id == 'left':
-        direction = GravityMoveDirection.LEFT
+        direction = GravityMoveDirection.RIGHT_TO_LEFT
     elif transformation_id == 'right':
-        direction = GravityMoveDirection.RIGHT
+        direction = GravityMoveDirection.LEFT_TO_RIGHT
     else:
         raise Exception(f"Unknown transformation_id: {transformation_id}")
 
