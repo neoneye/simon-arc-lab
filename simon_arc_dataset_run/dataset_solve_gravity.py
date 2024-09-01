@@ -127,7 +127,7 @@ def generate_task_gravity_move(seed: int, direction: GravityMoveDirection) -> Ta
 
     return task
 
-def generate_task_gravity_draw(seed: int, transformation_id: str) -> Task:
+def generate_task_gravity_draw(seed: int, direction: GravityDrawDirection) -> Task:
     """
     Show a few lonely pixels, and apply gravity draw.
 
@@ -153,18 +153,7 @@ def generate_task_gravity_draw(seed: int, transformation_id: str) -> Task:
     for i in range(10):
         color_map[i] = colors[i]
 
-    task.metadata_task_id = f'gravity_draw {transformation_id}'
-
-    if transformation_id == 'down':
-        direction = GravityDrawDirection.TOP_TO_BOTTOM
-    elif transformation_id == 'up':
-        direction = GravityDrawDirection.BOTTOM_TO_TOP
-    elif transformation_id == 'left':
-        direction = GravityDrawDirection.RIGHT_TO_LEFT
-    elif transformation_id == 'right':
-        direction = GravityDrawDirection.LEFT_TO_RIGHT
-    else:
-        raise Exception(f"Unknown transformation_id: {transformation_id}")
+    task.metadata_task_id = f'gravity_draw {direction.name.lower()}'
 
     use_two_colors = random.Random(seed + 4).randint(0, 1) == 1
 
@@ -253,17 +242,17 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
         transformation_id = 'gravity_move_bottomleft_to_topright'
         task = generate_task_gravity_move(seed, GravityMoveDirection.BOTTOMLEFT_TO_TOPRIGHT)
     elif j == 8:
-        transformation_id = 'gravity_draw_up'
-        task = generate_task_gravity_draw(seed, 'up')
+        transformation_id = 'gravity_draw_bottom_to_top'
+        task = generate_task_gravity_draw(seed, GravityDrawDirection.BOTTOM_TO_TOP)
     elif j == 9:
-        transformation_id = 'gravity_draw_down'
-        task = generate_task_gravity_draw(seed, 'down')
+        transformation_id = 'gravity_draw_top_to_bottom'
+        task = generate_task_gravity_draw(seed, GravityDrawDirection.TOP_TO_BOTTOM)
     elif j == 10:
-        transformation_id = 'gravity_draw_left'
-        task = generate_task_gravity_draw(seed, 'left')
+        transformation_id = 'gravity_draw_right_to_left'
+        task = generate_task_gravity_draw(seed, GravityDrawDirection.RIGHT_TO_LEFT)
     elif j == 11:
-        transformation_id = 'gravity_draw_right'
-        task = generate_task_gravity_draw(seed, 'right')
+        transformation_id = 'gravity_draw_left_to_right'
+        task = generate_task_gravity_draw(seed, GravityDrawDirection.LEFT_TO_RIGHT)
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
