@@ -31,7 +31,6 @@ def gallery_generator_run(image_dir: str, title: str = 'Gallery') -> None:
     count_correct = sum(1 for status in classification.values() if status == 'correct')
     count_incorrect = sum(1 for status in classification.values() if status == 'incorrect')
     count_other = sum(1 for status in classification.values() if status == 'other')
-    summary = f'Correct: {count_correct}, Incorrect: {count_incorrect}, Other: {count_other}'
 
     # Generate the image cards HTML
     image_cards = ""
@@ -44,7 +43,9 @@ def gallery_generator_run(image_dir: str, title: str = 'Gallery') -> None:
 
     # Replace the placeholders in the template with actual values
     html_content = template_content.replace('{{ title }}', title)
-    html_content = html_content.replace('{{ summary }}', summary)
+    html_content = html_content.replace('{{ button_correct_title }}', f'Correct {count_correct}')
+    html_content = html_content.replace('{{ button_incorrect_title }}', f'Incorrect {count_incorrect}')
+    html_content = html_content.replace('{{ button_other_title }}', f'Other {count_other}')
     html_content = html_content.replace('{{ image_cards }}', image_cards)
 
     # Write the final HTML content to the output file

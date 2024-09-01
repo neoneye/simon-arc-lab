@@ -19,11 +19,11 @@
 </head>
 <body>
     <h1>{{ title }}</h1>
-    <h2>{{ summary }}</h2>
 
     <div class="button-group">
-        <button id="correct-btn" onclick="filterImages('correct')">Correct</button>
-        <button id="incorrect-btn" onclick="filterImages('incorrect')">Incorrect</button>
+        <button id="correct-btn" onclick="filterImages('correct')">{{ button_correct_title }}</button>
+        <button id="incorrect-btn" onclick="filterImages('incorrect')">{{ button_incorrect_title }}</button>
+        <button id="other-btn" onclick="filterImages('other')">{{ button_other_title }}</button>
     </div>
 
     <div class="container">
@@ -38,6 +38,7 @@
             const selectedImages = document.querySelectorAll(`.${type}`);
             const correctBtn = document.getElementById('correct-btn');
             const incorrectBtn = document.getElementById('incorrect-btn');
+            const otherBtn = document.getElementById('other-btn');
 
             if (currentFilter === type) {
                 // If the filter is already active, reset to show all images
@@ -47,6 +48,7 @@
                 currentFilter = null;
                 correctBtn.classList.remove('active');
                 incorrectBtn.classList.remove('active');
+                otherBtn.classList.remove('active');
             } else {
                 // Hide all images, then show only the selected type
                 allImages.forEach(image => {
@@ -60,10 +62,13 @@
                 // Update button styles
                 correctBtn.classList.remove('active');
                 incorrectBtn.classList.remove('active');
+                otherBtn.classList.remove('active');
                 if (type === 'correct') {
                     correctBtn.classList.add('active');
                 } else if (type === 'incorrect') {
                     incorrectBtn.classList.add('active');
+                } else if (type === 'other') {
+                    otherBtn.classList.add('active');
                 }
             }
         }
