@@ -5,6 +5,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
 from simon_arc_lab.taskset import TaskSet
+from simon_arc_lab.gallery_generator import gallery_generator_run
 from simon_arc_model.model import Model
 from simon_arc_model.work_manager import WorkManager
 
@@ -62,5 +63,8 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
     wm.process_all_work_items(save_dir=save_dir)
     # wm.process_all_work_items(show=True)
     wm.summary()
-    # IDEA: save an index_html file with images
+
+    gallery_title = f'{groupname}, model {model_iteration}'
+    gallery_generator_run(save_dir, title=gallery_title)
+
     # wm.save_arcprize2024_submission_file('submission.json')
