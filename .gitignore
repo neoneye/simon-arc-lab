@@ -4,3 +4,4 @@ __pycache__/
 
 submission.json
 run_tasks_result/**/*.png
+run_tasks_result/**/*.html

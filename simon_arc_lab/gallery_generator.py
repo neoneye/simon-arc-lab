@@ -42,7 +42,7 @@ def gallery_generator_run(image_dir: str, title: str = 'Gallery') -> None:
         f.write('        .container { display: flex; flex-wrap: wrap; gap: 1px; }\n')
         f.write('        .image-card { padding: 10px; text-align: center; width: 250px; }\n')
         f.write('        .image-card img { max-width: 100%; height: auto; }\n')
-        f.write('        .correct { background-color: #999; }\n')
+        f.write('        .correct { background-color: #999; color: #333; }\n')
         f.write('        .incorrect { background-color: #111; }\n')
         f.write('        .other { background-color: black; }\n')
         f.write('    </style>\n')
@@ -55,7 +55,8 @@ def gallery_generator_run(image_dir: str, title: str = 'Gallery') -> None:
             status = classification[filename]
             f.write(f'        <div class="image-card {status}">\n')
             f.write(f'            <img src="{filename}" alt="{filename}">\n')
-            f.write(f'            <p>{status.capitalize()}</p>\n')
+            if status == 'correct':
+                f.write(f'            <p>Correct</p>\n')
             f.write('        </div>\n')
 
         f.write('    </div>\n')
