@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #333; color: #fff; }
+        .container { display: flex; flex-wrap: wrap; gap: 1px; }
+        .image-card { padding: 10px; text-align: center; width: 250px; }
+        .image-card img { max-width: 100%; height: auto; }
+        .correct { background-color: #999; color: #333; }
+        .incorrect { background-color: #111; }
+        .other { background-color: black; }
+        .button-group { margin-bottom: 20px; }
+        .button-group button { padding: 10px; margin-right: 10px; cursor: pointer; }
+        .button-group button.active { background-color: #555; color: #fff; } /* Active button style */
+    </style>
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <h2>{{ summary }}</h2>
+
+    <div class="button-group">
+        <button id="correct-btn" onclick="filterImages('correct')">Correct</button>
+        <button id="incorrect-btn" onclick="filterImages('incorrect')">Incorrect</button>
+    </div>
+
+    <div class="container">
+        {{ image_cards }}
+    </div>
+
+    <script>
+        let currentFilter = null;
+
+        function filterImages(type) {
+            const allImages = document.querySelectorAll('.image-card');
+            const selectedImages = document.querySelectorAll(`.${type}`);
+            const correctBtn = document.getElementById('correct-btn');
+            const incorrectBtn = document.getElementById('incorrect-btn');
+
+            if (currentFilter === type) {
+                // If the filter is already active, reset to show all images
+                allImages.forEach(image => {
+                    image.style.display = 'block';
+                });
+                currentFilter = null;
+                correctBtn.classList.remove('active');
+                incorrectBtn.classList.remove('active');
+            } else {
+                // Hide all images, then show only the selected type
+                allImages.forEach(image => {
+                    image.style.display = 'none';
+                });
+                selectedImages.forEach(image => {
+                    image.style.display = 'block';
+                });
+                currentFilter = type;
+
+                // Update button styles
+                correctBtn.classList.remove('active');
+                incorrectBtn.classList.remove('active');
+                if (type === 'correct') {
+                    correctBtn.classList.add('active');
+                } else if (type === 'incorrect') {
+                    incorrectBtn.classList.add('active');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
