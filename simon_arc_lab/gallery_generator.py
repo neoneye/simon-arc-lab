@@ -1,6 +1,6 @@
 import os
 
-def gallery_generator_run(image_dir):
+def gallery_generator_run(image_dir: str, title: str = 'Gallery') -> None:
     # File where the HTML will be written, same dir as the image_dir
     output_file = os.path.join(image_dir, 'index.html')
 
@@ -36,18 +36,18 @@ def gallery_generator_run(image_dir):
         f.write('<!DOCTYPE html>\n<html lang="en">\n<head>\n')
         f.write('    <meta charset="UTF-8">\n')
         f.write('    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n')
-        f.write('    <title>ARC Predictions</title>\n')
+        f.write(f'    <title>{title}</title>\n')
         f.write('    <style>\n')
-        f.write('        body { font-family: Arial, sans-serif; }\n')
-        f.write('        .container { display: flex; flex-wrap: wrap; gap: 10px; }\n')
-        f.write('        .image-card { border: 1px solid #ccc; padding: 10px; text-align: center; width: 150px; }\n')
+        f.write('        body { font-family: Arial, sans-serif; background-color: #333; color: #fff; }\n')
+        f.write('        .container { display: flex; flex-wrap: wrap; gap: 1px; }\n')
+        f.write('        .image-card { padding: 10px; text-align: center; width: 250px; }\n')
         f.write('        .image-card img { max-width: 100%; height: auto; }\n')
-        f.write('        .correct { border-color: green; }\n')
-        f.write('        .incorrect { border-color: red; }\n')
-        f.write('        .other { border-color: red; }\n')
+        f.write('        .correct { background-color: #999; }\n')
+        f.write('        .incorrect { background-color: #111; }\n')
+        f.write('        .other { background-color: black; }\n')
         f.write('    </style>\n')
         f.write('</head>\n<body>\n')
-        f.write('    <h1>ARC Predictions</h1>\n')
+        f.write(f'    <h1>{title}</h1>\n')
         f.write(f'    <h2>{summary}</h2>\n')
         f.write('    <div class="container">\n')
 
