@@ -1,11 +1,12 @@
 import os
 import sys
 import random
+import json
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
-seed = 149
+seed = 150
 random.seed(seed)
 
 # Define the input file paths
@@ -49,19 +50,32 @@ file_names = [
 # Number of rows in the output file
 output_rows = 300000
 
+INPUT_BYTE_LIMIT = 512 - 50
+
 # Calculate the number of rows to sample from each file
 rows_per_file = output_rows // len(file_names)
 
 # List to hold the sampled rows
 sampled_rows = []
 
+# Function to check if the input field's byte length is within the limit
+def is_within_byte_limit(input_text, byte_limit=512):
+    # Encode the input text to UTF-8 and check its byte length
+    return len(input_text.encode('utf-8')) <= byte_limit
+
 # Function to read and sample rows from a JSONL file
 def sample_rows(file_path, num_rows):
     print(f"Sampling {num_rows} rows from {file_path}")
     with open(file_path, 'r') as file:
         lines = file.readlines()
-        sampled = random.sample(lines, num_rows)
-        return sampled
+        valid_lines = []
+        for line in lines:
+            data = json.loads(line)
+            if is_within_byte_limit(data.get("input", ""), byte_limit=INPUT_BYTE_LIMIT):
+                valid_lines.append(line)
+        percent_valid = len(valid_lines) * 100 // len(lines)
+        print(f"Valid rows: {len(valid_lines)} ({percent_valid}%)")
+        return random.sample(valid_lines, min(num_rows, len(valid_lines)))
 
 # Sample rows from each file
 for filename in file_names:
