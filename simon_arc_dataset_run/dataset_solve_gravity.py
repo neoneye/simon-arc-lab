@@ -143,7 +143,7 @@ def generate_task_gravity_draw(seed: int, direction: GravityDrawDirection) -> Ta
     # count_test = 1
     task = Task()
     min_image_size = 3
-    max_image_size = 30
+    max_image_size = 10
     max_number_of_positions = 5
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -214,9 +214,9 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 12
+    j = seed % 16
     # j = seed % 4
-    # j = (seed % 4) + 4
+    j = (seed % 4) + 12
     if j == 0:
         transformation_id = 'gravity_move_top_to_bottom'
         task = generate_task_gravity_move(seed, GravityMoveDirection.TOP_TO_BOTTOM)
@@ -253,6 +253,18 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     elif j == 11:
         transformation_id = 'gravity_draw_left_to_right'
         task = generate_task_gravity_draw(seed, GravityDrawDirection.LEFT_TO_RIGHT)
+    elif j == 12:
+        transformation_id = 'gravity_draw_topleft_to_bottomright'
+        task = generate_task_gravity_draw(seed, GravityDrawDirection.TOPLEFT_TO_BOTTOMRIGHT)
+    elif j == 13:
+        transformation_id = 'gravity_draw_bottomright_to_topleft'
+        task = generate_task_gravity_draw(seed, GravityDrawDirection.BOTTOMRIGHT_TO_TOPLEFT)
+    elif j == 14:
+        transformation_id = 'gravity_draw_topright_to_bottomleft'
+        task = generate_task_gravity_draw(seed, GravityDrawDirection.TOPRIGHT_TO_BOTTOMLEFT)
+    elif j == 15:
+        transformation_id = 'gravity_draw_bottomleft_to_topright'
+        task = generate_task_gravity_draw(seed, GravityDrawDirection.BOTTOMLEFT_TO_TOPRIGHT)
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
@@ -261,7 +273,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=30000194,
+    seed=31000194,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
