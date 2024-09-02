@@ -15,6 +15,7 @@ from simon_arc_lab.image_create_random_advanced import image_create_random_advan
 from simon_arc_lab.task import *
 from simon_arc_lab.image_bresenham_line import *
 from simon_arc_lab.image_mask import *
+from simon_arc_lab.image_scale import *
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.benchmark import *
 from simon_arc_lab.taskset import TaskSet
@@ -25,6 +26,61 @@ from simon_arc_dataset.dataset_generator import *
 DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_augment'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_augment.jsonl')
+
+class BaseNode:
+    def __init__(self):
+        print("BaseNode.__init__")
+
+    def apply(self, image: np.ndarray) -> np.ndarray:
+        raise Exception("Not implemented")
+
+class NodeDoNothing(BaseNode):
+    def __init__(self):
+        print("NodeDoNothing.__init__")
+
+    def apply(self, image: np.ndarray) -> np.ndarray:
+        return image.copy()
+
+class NodeChain(BaseNode):
+    def __init__(self, nodes: list[BaseNode]):
+        self.nodes = nodes
+
+    def apply(self, image: np.ndarray) -> np.ndarray:
+        for node in self.nodes:
+            image = node.apply(image)
+        return image
+
+class NodeShuffleColors(BaseNode):
+    def __init__(self, seed: int):
+        print("NodeShuffleColors.__init__")
+        colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        random.Random(seed + 3).shuffle(colors)
+        color_map = {}
+        for i, color in enumerate(colors):
+            color_map[i] = color
+        self.color_map = color_map
+
+    def apply(self, image: np.ndarray) -> np.ndarray:
+        return image_replace_colors(image, self.color_map)
+
+class NodeRotateCW(BaseNode):
+    def __init__(self):
+        print("NodeRotateCW.__init__")
+
+    def apply(self, image: np.ndarray) -> np.ndarray:
+        return image_rotate_cw(image)
+
+class NodeScale(BaseNode):
+    def __init__(self, x_up_down: str, x_scale: int, y_up_down: str, y_scale: int):
+        print("NodeScale.__init__")
+        self.x_up_down = x_up_down
+        self.x_scale = x_scale
+        self.y_up_down = y_up_down
+        self.y_scale = y_scale
+
+    def apply(self, image: np.ndarray) -> np.ndarray:
+        input_image, output_image = image_scale(image, self.x_up_down, self.x_scale, self.y_up_down, self.y_scale)
+        return output_image
 
 def generate_task_augmented(seed: int) -> Task:
     """
@@ -221,6 +277,13 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
 
 for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
     taskset = TaskSet.load_directory(path_to_task_dir)
+
+    # node_palette = NodeShuffleColors(123)
+    node_palette = NodeDoNothing()
+    node_rotate = NodeRotateCW()
+    node_scale = NodeScale('up', 2, 'up', 2)
+    node = NodeChain([node_rotate, node_scale])
+
     for task in taskset.tasks:
         print(f"Task: {task.metadata_task_id} augmenting inputs")
         # task.show()
@@ -229,12 +292,14 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
         new_task.metadata_task_id = f'{task.metadata_task_id}_augmented_input_rotate_cw'
 
         for i in range(task.count_examples):
-            input_image = task.example_input(i)
-            output_image = image_rotate_cw(input_image)
+            input_image0 = task.example_input(i)
+            input_image = node_palette.apply(input_image0)
+            output_image = node.apply(input_image)
             new_task.append_pair(input_image, output_image, True)
         for i in range(task.count_tests):
-            input_image = task.test_input(i)
-            output_image = image_rotate_cw(input_image)
+            input_image0 = task.test_input(i)
+            input_image = node_palette.apply(input_image0)
+            output_image = node.apply(input_image)
             new_task.append_pair(input_image, output_image, False)
         new_task.show()
         break
@@ -251,8 +316,9 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
 
         for i in range(task_clone.count_examples):
             is_example = i < task_clone.count_examples - 1
-            input_image = task_clone.example_input(i)
-            output_image = image_rotate_cw(input_image)
+            input_image0 = task_clone.example_input(i)
+            input_image = node_palette.apply(input_image0)
+            output_image = node.apply(input_image)
             new_task.append_pair(input_image, output_image, is_example)
         new_task.show()
         break
