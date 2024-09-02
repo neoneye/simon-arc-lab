@@ -31,6 +31,9 @@ class BaseNode:
     def __init__(self):
         print("BaseNode.__init__")
 
+    def apply_many(self, images: list[np.array]) -> list[np.array]:
+        return [self.apply(image) for image in images]
+    
     def apply(self, image: np.array) -> np.array:
         raise Exception("Not implemented")
     
@@ -51,10 +54,13 @@ class NodeChain(BaseNode):
     def __init__(self, nodes: list[BaseNode]):
         self.nodes = nodes
 
-    def apply(self, image: np.array) -> np.array:
+    def apply_many(self, images: list[np.array]) -> list[np.array]:
         for node in self.nodes:
-            image = node.apply(image)
-        return image
+            images = node.apply_many(images)
+        return images
+
+    def apply(self, image: np.array) -> np.array:
+        raise Exception("Not implemented for NodeChain")
 
     def name(self) -> str:
         names = [node.name() for node in self.nodes]
@@ -336,18 +342,25 @@ def create_augmented_tasks(input_output: str, node_pre: BaseNode, node_transform
     # Process groups of images
     augmented_tasks = []    
     for group_index, group_images in enumerate(groups):
-        # Process images
-        pairs = []
-        for image in group_images:
-            input_image = node_pre.apply(image)
-            output_image = node_transform.apply(input_image)
-            pairs.append((input_image, output_image))
+        pair_count = len(group_images)
+
+        # Preprocess images
+        input_images = node_pre.apply_many(group_images)
+        assert len(input_images) == pair_count
+
+        # Transform images
+        output_images = node_transform.apply_many(input_images)
+        assert len(output_images) == pair_count
 
         # Create new task
         new_task = Task()
         new_task.metadata_task_id = f'{task.metadata_task_id} {input_output} group{group_index} pre_{name_pre} transform_{name_transform}'
-        for pair_index, (input_image, output_image) in enumerate(pairs):
-            new_task.append_pair(input_image, output_image, pair_index < len(pairs) - 1)
+        for pair_index in range(len(group_images)):
+            input_image = input_images[pair_index]
+            output_image = output_images[pair_index]
+            new_task.append_pair(input_image, output_image, pair_index < pair_count - 1)
+            
+        new_task.shuffle_examples(seed + group_index)
         augmented_tasks.append(new_task)
     return augmented_tasks
 
