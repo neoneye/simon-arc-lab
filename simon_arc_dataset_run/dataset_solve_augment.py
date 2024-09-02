@@ -278,29 +278,34 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
 for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
     taskset = TaskSet.load_directory(path_to_task_dir)
 
-    # node_palette = NodeShuffleColors(123)
-    node_palette = NodeDoNothing()
+    # node_pre = NodeShuffleColors(123)
+    node_pre = NodeDoNothing()
     node_rotate = NodeRotateCW()
     node_scale = NodeScale('up', 2, 'up', 2)
-    node = NodeChain([node_rotate, node_scale])
+    node_transform = NodeChain([node_rotate, node_scale])
 
     for task in taskset.tasks:
         print(f"Task: {task.metadata_task_id} augmenting inputs")
         # task.show()
 
+        images = []
+        for i in range(task.count_examples):
+            images.append(task.example_input(i))
+        for i in range(task.count_tests):
+            images.append(task.test_input(i))
+
+        image_pairs = []
+        for image in images:
+            input_image = node_pre.apply(image)
+            output_image = node_transform.apply(input_image)
+            image_pairs.append((input_image, output_image))
+
+        random.Random(123).shuffle(image_pairs)
+        
         new_task = Task()
         new_task.metadata_task_id = f'{task.metadata_task_id}_augmented_input_rotate_cw'
-
-        for i in range(task.count_examples):
-            input_image0 = task.example_input(i)
-            input_image = node_palette.apply(input_image0)
-            output_image = node.apply(input_image)
-            new_task.append_pair(input_image, output_image, True)
-        for i in range(task.count_tests):
-            input_image0 = task.test_input(i)
-            input_image = node_palette.apply(input_image0)
-            output_image = node.apply(input_image)
-            new_task.append_pair(input_image, output_image, False)
+        for pair_index, (input_image, output_image) in enumerate(image_pairs):
+            new_task.append_pair(input_image, output_image, pair_index < len(image_pairs) - 1)
         new_task.show()
         break
 
@@ -308,18 +313,22 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
         print(f"Task: {task.metadata_task_id} augmenting outputs")
         # task.show()
 
-        task_clone = task.clone()
-        task_clone.shuffle_examples(123)
+        images = []
+        for i in range(task.count_examples):
+            images.append(task.example_input(i))
 
+        image_pairs = []
+        for image in images:
+            input_image = node_pre.apply(image)
+            output_image = node_transform.apply(input_image)
+            image_pairs.append((input_image, output_image))
+
+        random.Random(123).shuffle(image_pairs)
+        
         new_task = Task()
         new_task.metadata_task_id = f'{task.metadata_task_id}_augmented_output_rotate_cw'
-
-        for i in range(task_clone.count_examples):
-            is_example = i < task_clone.count_examples - 1
-            input_image0 = task_clone.example_input(i)
-            input_image = node_palette.apply(input_image0)
-            output_image = node.apply(input_image)
-            new_task.append_pair(input_image, output_image, is_example)
+        for pair_index, (input_image, output_image) in enumerate(image_pairs):
+            new_task.append_pair(input_image, output_image, pair_index < len(image_pairs) - 1)
         new_task.show()
         break
 
