@@ -31,24 +31,34 @@ class BaseNode:
     def __init__(self):
         print("BaseNode.__init__")
 
-    def apply(self, image: np.ndarray) -> np.ndarray:
+    def apply(self, image: np.array) -> np.array:
+        raise Exception("Not implemented")
+    
+    def name(self) -> str:
         raise Exception("Not implemented")
 
 class NodeDoNothing(BaseNode):
     def __init__(self):
         print("NodeDoNothing.__init__")
 
-    def apply(self, image: np.ndarray) -> np.ndarray:
+    def apply(self, image: np.array) -> np.array:
         return image.copy()
+
+    def name(self) -> str:
+        return 'nop'
 
 class NodeChain(BaseNode):
     def __init__(self, nodes: list[BaseNode]):
         self.nodes = nodes
 
-    def apply(self, image: np.ndarray) -> np.ndarray:
+    def apply(self, image: np.array) -> np.array:
         for node in self.nodes:
             image = node.apply(image)
         return image
+
+    def name(self) -> str:
+        names = [node.name() for node in self.nodes]
+        return ','.join(names)
 
 class NodeShuffleColors(BaseNode):
     def __init__(self, seed: int):
@@ -60,15 +70,21 @@ class NodeShuffleColors(BaseNode):
             color_map[i] = color
         self.color_map = color_map
 
-    def apply(self, image: np.ndarray) -> np.ndarray:
+    def apply(self, image: np.array) -> np.array:
         return image_replace_colors(image, self.color_map)
+
+    def name(self) -> str:
+        return 'shuffle_colors'
 
 class NodeRotateCW(BaseNode):
     def __init__(self):
         print("NodeRotateCW.__init__")
 
-    def apply(self, image: np.ndarray) -> np.ndarray:
+    def apply(self, image: np.array) -> np.array:
         return image_rotate_cw(image)
+
+    def name(self) -> str:
+        return 'rotate_cw'
 
 class NodeScale(BaseNode):
     def __init__(self, x_up_down: str, x_scale: int, y_up_down: str, y_scale: int):
@@ -78,9 +94,12 @@ class NodeScale(BaseNode):
         self.y_up_down = y_up_down
         self.y_scale = y_scale
 
-    def apply(self, image: np.ndarray) -> np.ndarray:
+    def apply(self, image: np.array) -> np.array:
         input_image, output_image = image_scale(image, self.x_up_down, self.x_scale, self.y_up_down, self.y_scale)
         return output_image
+
+    def name(self) -> str:
+        return 'scale'
 
 def generate_task_augmented(seed: int) -> Task:
     """
@@ -275,7 +294,39 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
 
-for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
+def create_augmented_task(input_output: str, node_pre: BaseNode, node_transform: BaseNode, seed: int, task: Task) -> Task:
+    images = []
+    if input_output == 'input':
+        for i in range(task.count_examples):
+            images.append(task.example_input(i))
+        for i in range(task.count_tests):
+            images.append(task.test_input(i))
+    elif input_output == 'output':
+        for i in range(task.count_examples):
+            images.append(task.example_output(i))
+    else:
+        raise Exception(f"Unknown input_output: {input_output}")
+
+    image_pairs = []
+    for image in images:
+        input_image = node_pre.apply(image)
+        output_image = node_transform.apply(input_image)
+        image_pairs.append((input_image, output_image))
+
+    name_pre = node_pre.name()
+    name_transform = node_transform.name()
+
+    random.Random(seed + 1).shuffle(image_pairs)
+    # IDEA: split up many pairs into smaller tasks
+    
+    new_task = Task()
+    new_task.metadata_task_id = f'{task.metadata_task_id} {input_output} pre_{name_pre} transform_{name_transform}'
+    for pair_index, (input_image, output_image) in enumerate(image_pairs):
+        new_task.append_pair(input_image, output_image, pair_index < len(image_pairs) - 1)
+    return new_task
+
+augmented_tasks = []
+for group_index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
     taskset = TaskSet.load_directory(path_to_task_dir)
 
     # node_pre = NodeShuffleColors(123)
@@ -284,53 +335,15 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
     node_scale = NodeScale('up', 2, 'up', 2)
     node_transform = NodeChain([node_rotate, node_scale])
 
-    for task in taskset.tasks:
-        print(f"Task: {task.metadata_task_id} augmenting inputs")
-        # task.show()
+    for task_index, task in enumerate(taskset.tasks):
+        iteration_seed = group_index * 1000000 + task_index * 1000
+        new_task = create_augmented_task('input', node_pre, node_transform, iteration_seed + 1, task)
+        augmented_tasks.append(new_task)
+        new_task = create_augmented_task('output', node_pre, node_transform, iteration_seed + 2, task)
+        augmented_tasks.append(new_task)
 
-        images = []
-        for i in range(task.count_examples):
-            images.append(task.example_input(i))
-        for i in range(task.count_tests):
-            images.append(task.test_input(i))
-
-        image_pairs = []
-        for image in images:
-            input_image = node_pre.apply(image)
-            output_image = node_transform.apply(input_image)
-            image_pairs.append((input_image, output_image))
-
-        random.Random(123).shuffle(image_pairs)
-        
-        new_task = Task()
-        new_task.metadata_task_id = f'{task.metadata_task_id}_augmented_input_rotate_cw'
-        for pair_index, (input_image, output_image) in enumerate(image_pairs):
-            new_task.append_pair(input_image, output_image, pair_index < len(image_pairs) - 1)
-        new_task.show()
-        break
-
-    for task in taskset.tasks:
-        print(f"Task: {task.metadata_task_id} augmenting outputs")
-        # task.show()
-
-        images = []
-        for i in range(task.count_examples):
-            images.append(task.example_input(i))
-
-        image_pairs = []
-        for image in images:
-            input_image = node_pre.apply(image)
-            output_image = node_transform.apply(input_image)
-            image_pairs.append((input_image, output_image))
-
-        random.Random(123).shuffle(image_pairs)
-        
-        new_task = Task()
-        new_task.metadata_task_id = f'{task.metadata_task_id}_augmented_output_rotate_cw'
-        for pair_index, (input_image, output_image) in enumerate(image_pairs):
-            new_task.append_pair(input_image, output_image, pair_index < len(image_pairs) - 1)
-        new_task.show()
-        break
+for task in augmented_tasks:
+    task.show()
 
 # generator = DatasetGenerator(
 #     generate_dataset_item_list_fn=generate_dataset_item_list
