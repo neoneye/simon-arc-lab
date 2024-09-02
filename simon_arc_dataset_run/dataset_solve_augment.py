@@ -16,7 +16,7 @@ from simon_arc_lab.task import *
 from simon_arc_lab.image_bresenham_line import *
 from simon_arc_lab.image_mask import *
 from simon_arc_lab.image_scale import *
-from simon_arc_lab.histogram import Histogram
+from simon_arc_lab.histogram import *
 from simon_arc_lab.benchmark import *
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
@@ -26,6 +26,12 @@ from simon_arc_dataset.dataset_generator import *
 DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_augment'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_augment.jsonl')
+
+class ApplyManyError(ValueError):
+    """Exception raised for errors in Node apply_many."""
+    def __init__(self, message: str, details: Optional[str] = None):
+        super().__init__(message)
+        self.details = details
 
 class BaseNode:
     def __init__(self):
@@ -106,6 +112,41 @@ class NodeScale(BaseNode):
 
     def name(self) -> str:
         return 'scale'
+
+class NodeSwapColors(BaseNode):
+    def __init__(self):
+        print("NodeSwapColors.__init__")
+
+    def apply_many(self, images: list[np.array]) -> list[np.array]:
+        histogram_union = Histogram.empty()
+        for image in images:
+            histogram = Histogram.create_with_image(image)
+            if histogram.number_of_unique_colors() != 2:
+                raise ApplyManyError("Not all images are two color images")
+            histogram_union = histogram_union.add(histogram)
+        # print(f"Union of histograms: {histogram_union.pretty()}")
+
+        if histogram_union.number_of_unique_colors() != 2:
+            raise ApplyManyError("Not all images have the same two colors")
+
+        color_count_list = histogram_union.sorted_color_count_list()
+        color0 = color_count_list[0][0]
+        color1 = color_count_list[1][0]
+
+        color_map = {
+            color0: color1,
+            color1: color0,
+        }
+        # print("swapping colors")
+        result_images = []
+        for image in images:
+            new_image = image_replace_colors(image, color_map)
+            result_images.append(new_image)
+
+        return result_images
+
+    def name(self) -> str:
+        return 'swap_colors'
 
 def generate_task_augmented(seed: int) -> Task:
     """
@@ -339,30 +380,34 @@ def create_augmented_tasks(input_output: str, node_pre: BaseNode, node_transform
         groups.append(group1)
         groups.append(group2)
 
-    # Process groups of images
-    augmented_tasks = []    
-    for group_index, group_images in enumerate(groups):
-        pair_count = len(group_images)
+    try:
+        # Process groups of images
+        augmented_tasks = []    
+        for group_index, group_images in enumerate(groups):
+            pair_count = len(group_images)
 
-        # Preprocess images
-        input_images = node_pre.apply_many(group_images)
-        assert len(input_images) == pair_count
+            # Preprocess images
+            input_images = node_pre.apply_many(group_images)
+            assert len(input_images) == pair_count
 
-        # Transform images
-        output_images = node_transform.apply_many(input_images)
-        assert len(output_images) == pair_count
+            # Transform images
+            output_images = node_transform.apply_many(input_images)
+            assert len(output_images) == pair_count
 
-        # Create new task
-        new_task = Task()
-        new_task.metadata_task_id = f'{task.metadata_task_id} {input_output} group{group_index} pre_{name_pre} transform_{name_transform}'
-        for pair_index in range(len(group_images)):
-            input_image = input_images[pair_index]
-            output_image = output_images[pair_index]
-            new_task.append_pair(input_image, output_image, pair_index < pair_count - 1)
-            
-        new_task.shuffle_examples(seed + group_index)
-        augmented_tasks.append(new_task)
-    return augmented_tasks
+            # Create new task
+            new_task = Task()
+            new_task.metadata_task_id = f'{task.metadata_task_id} {input_output} group{group_index} pre_{name_pre} transform_{name_transform}'
+            for pair_index in range(len(group_images)):
+                input_image = input_images[pair_index]
+                output_image = output_images[pair_index]
+                new_task.append_pair(input_image, output_image, pair_index < pair_count - 1)
+
+            new_task.shuffle_examples(seed + group_index)
+            augmented_tasks.append(new_task)
+        return augmented_tasks
+    except ApplyManyError as e:
+        # print(f"Error: {e}")
+        return []
 
 augmented_tasks = []
 for group_index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
@@ -370,9 +415,10 @@ for group_index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotask
 
     # node_pre = NodeShuffleColors(123)
     node_pre = NodeDoNothing()
+    node_swap_colors = NodeSwapColors()
     node_rotate = NodeRotateCW()
     node_scale = NodeScale('up', 2, 'up', 2)
-    node_transform = NodeChain([node_rotate, node_scale])
+    node_transform = NodeChain([node_swap_colors, node_rotate, node_scale])
 
     for task_index, task in enumerate(taskset.tasks):
         iteration_seed = group_index * 1000000 + task_index * 1000
