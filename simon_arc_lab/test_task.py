@@ -47,6 +47,25 @@ class TestTask(unittest.TestCase):
         expected = '{"train":[{"input":[[0]],"output":[[0]]}],"test":[{"input":[[0]]}]}'
         self.assertEqual(actual, expected)
 
+    def test_task_shuffle(self):
+        task = Task()
+        input0  = np.array([[0, 0]], dtype=np.uint8)
+        output0 = np.array([[0, 1]], dtype=np.uint8)
+        input1  = np.array([[1, 0]], dtype=np.uint8)
+        output1 = np.array([[1, 1]], dtype=np.uint8)
+        input2  = np.array([[2, 0]], dtype=np.uint8)
+        output2 = np.array([[2, 1]], dtype=np.uint8)
+        input3  = np.array([[3, 0]], dtype=np.uint8)
+        output3 = np.array([[3, 1]], dtype=np.uint8)
+        task.append_pair(input0, output0, True)
+        task.append_pair(input1, output1, True)
+        task.append_pair(input2, output2, True)
+        task.append_pair(input3, output3, False)
+        task.shuffle_examples(4)
+        actual = task.to_arcagi1_json(compact=False)
+        expected = '{"train": [{"input": [[2, 0]], "output": [[2, 1]]}, {"input": [[1, 0]], "output": [[1, 1]]}, {"input": [[0, 0]], "output": [[0, 1]]}], "test": [{"input": [[3, 0]], "output": [[3, 1]]}]}'
+        self.assertEqual(actual, expected)
+
     def test_set_all_test_outputs_to_none(self):
         task = Task()
         image = np.array([[0]], dtype=np.uint8)

@@ -1,6 +1,7 @@
 import numpy as np
 import json
 from typing import Optional
+import random
 
 class Task:
     def __init__(self):
@@ -62,6 +63,17 @@ class Task:
         else:
             self.count_tests += 1
         self.assert_count()
+
+    def shuffle_examples(self, seed: int):
+        """
+        Shuffle the order of the examples.
+        """
+        new_indices = list(range(self.count_examples))
+        random.Random(seed).shuffle(new_indices)
+        new_input_images = [self.input_images[i] for i in new_indices]
+        new_output_images = [self.output_images[i] for i in new_indices]
+        self.input_images[:self.count_examples] = new_input_images
+        self.output_images[:self.count_examples] = new_output_images
 
     def count(self) -> int:
         self.assert_count()
