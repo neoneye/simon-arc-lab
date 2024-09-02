@@ -90,6 +90,6 @@ def _image_gravity_draw_topleft_to_bottomright(image: np.array, background_color
     :param background_color: The color that is non-solid
     :return: The result image with the gravity applied
     """
-    skewed_image = image_skew_up(image, GRAVITY_DRAW_SKEW_PADDING_COLOR)
+    skewed_image = image_skew(image, GRAVITY_DRAW_SKEW_PADDING_COLOR, SkewDirection.UP)
     transformed_image = _image_gravity_draw_right(skewed_image, background_color)
-    return image_unskew_up(transformed_image)
+    return image_unskew(transformed_image, SkewDirection.UP)

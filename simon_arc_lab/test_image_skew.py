@@ -10,7 +10,7 @@ class TestImageSkew(unittest.TestCase):
             [2, 5],
             [3, 6]], dtype=np.uint8)
         # Act
-        actual = image_skew_up(input, 255)
+        actual = image_skew(input, 255, SkewDirection.UP)
         # Assert
         expected = np.array([
             [255, 4],
@@ -27,7 +27,7 @@ class TestImageSkew(unittest.TestCase):
             [2, 6],
             [3, 255]], dtype=np.uint8)
         # Act
-        actual = image_unskew_up(input)
+        actual = image_unskew(input, SkewDirection.UP)
         # Assert
         expected = np.array([
             [1, 4],
@@ -42,7 +42,7 @@ class TestImageSkew(unittest.TestCase):
             [2, 5],
             [3, 6]], dtype=np.uint8)
         # Act
-        actual = image_skew_down(input, 255)
+        actual = image_skew(input, 255, SkewDirection.DOWN)
         # Assert
         expected = np.array([
             [1, 255],
@@ -59,7 +59,7 @@ class TestImageSkew(unittest.TestCase):
             [3, 5],
             [255, 6]], dtype=np.uint8)
         # Act
-        actual = image_unskew_down(input)
+        actual = image_unskew(input, SkewDirection.DOWN)
         # Assert
         expected = np.array([
             [1, 4],
@@ -73,7 +73,7 @@ class TestImageSkew(unittest.TestCase):
             [1, 2, 3],
             [4, 5, 6]], dtype=np.uint8)
         # Act
-        actual = image_skew_left(input, 255)
+        actual = image_skew(input, 255, SkewDirection.LEFT)
         # Assert
         expected = np.array([
             [255, 1, 2, 3],
@@ -86,7 +86,7 @@ class TestImageSkew(unittest.TestCase):
             [255, 1, 2, 3],
             [4, 5, 6, 255]], dtype=np.uint8)
         # Act
-        actual = image_unskew_left(input)
+        actual = image_unskew(input, SkewDirection.LEFT)
         # Assert
         expected = np.array([
             [1, 2, 3],
@@ -99,7 +99,7 @@ class TestImageSkew(unittest.TestCase):
             [1, 2, 3],
             [4, 5, 6]], dtype=np.uint8)
         # Act
-        actual = image_skew_right(input, 255)
+        actual = image_skew(input, 255, SkewDirection.RIGHT)
         # Assert
         expected = np.array([
             [1, 2, 3, 255],
@@ -112,7 +112,7 @@ class TestImageSkew(unittest.TestCase):
             [1, 2, 3, 255],
             [255, 4, 5, 6]], dtype=np.uint8)
         # Act
-        actual = image_unskew_right(input)
+        actual = image_unskew(input, SkewDirection.RIGHT)
         # Assert
         expected = np.array([
             [1, 2, 3],

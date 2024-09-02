@@ -1,6 +1,52 @@
 import numpy as np
+from enum import Enum
 
-def image_skew_up(image: np.array, padding_color: int) -> np.array:
+class SkewDirection(Enum):
+    UP = 0
+    DOWN = 1
+    LEFT = 2
+    RIGHT = 3
+
+def image_skew(image: np.array, padding_color: int, direction: SkewDirection) -> np.array:
+    """
+    Skew the image in the specified direction.
+
+    :param image: The image to skew
+    :param padding_color: The color to use for padding
+    :param direction: The direction to skew the image
+    :return: The skewed image
+    """
+    if direction == SkewDirection.UP:
+        return _image_skew_up(image, padding_color)
+    elif direction == SkewDirection.DOWN:
+        return _image_skew_down(image, padding_color)
+    elif direction == SkewDirection.LEFT:
+        return _image_skew_left(image, padding_color)
+    elif direction == SkewDirection.RIGHT:
+        return _image_skew_right(image, padding_color)
+    else:
+        raise ValueError("Invalid direction")
+
+def image_unskew(image: np.array, direction: SkewDirection) -> np.array:
+    """
+    Unskew the image in the specified direction.
+
+    :param image: The image to unskew
+    :param direction: The direction to unskew the image
+    :return: The unskewed image
+    """
+    if direction == SkewDirection.UP:
+        return _image_unskew_up(image)
+    elif direction == SkewDirection.DOWN:
+        return _image_unskew_down(image)
+    elif direction == SkewDirection.LEFT:
+        return _image_unskew_left(image)
+    elif direction == SkewDirection.RIGHT:
+        return _image_unskew_right(image)
+    else:
+        raise ValueError("Invalid direction")
+
+def _image_skew_up(image: np.array, padding_color: int) -> np.array:
     """
     Displace each column up by the column index.
     """
@@ -11,7 +57,7 @@ def image_skew_up(image: np.array, padding_color: int) -> np.array:
             skewed_image[width-1-x+y, x] = image[y, x]
     return skewed_image
 
-def image_unskew_up(image: np.array) -> np.array:
+def _image_unskew_up(image: np.array) -> np.array:
     """
     Displace each column down by the column index. Remove the padding.
     """
@@ -23,7 +69,7 @@ def image_unskew_up(image: np.array) -> np.array:
             unskewed_image[y, x] = image[width-1-x+y, x]
     return unskewed_image
 
-def image_skew_down(image: np.array, padding_color: int) -> np.array:
+def _image_skew_down(image: np.array, padding_color: int) -> np.array:
     """
     Displace each column down by the column index.
     """
@@ -34,7 +80,7 @@ def image_skew_down(image: np.array, padding_color: int) -> np.array:
             skewed_image[y+x, x] = image[y, x]
     return skewed_image
 
-def image_unskew_down(image: np.array) -> np.array:
+def _image_unskew_down(image: np.array) -> np.array:
     """
     Displace each column up by the column index. Remove the padding.
     """
@@ -46,7 +92,7 @@ def image_unskew_down(image: np.array) -> np.array:
             unskewed_image[y, x] = image[y+x, x]
     return unskewed_image
 
-def image_skew_left(image: np.array, padding_color: int) -> np.array:
+def _image_skew_left(image: np.array, padding_color: int) -> np.array:
     """
     Displace each row to the left by the row index.
     """
@@ -57,7 +103,7 @@ def image_skew_left(image: np.array, padding_color: int) -> np.array:
             skewed_image[y, height-1-y+x] = image[y, x]
     return skewed_image
 
-def image_unskew_left(image: np.array) -> np.array:
+def _image_unskew_left(image: np.array) -> np.array:
     """
     Displace each row to the right by the row index. Remove the padding.
     """
@@ -69,7 +115,7 @@ def image_unskew_left(image: np.array) -> np.array:
             unskewed_image[y, x] = image[y, height-1-y+x]
     return unskewed_image
 
-def image_skew_right(image: np.array, padding_color: int) -> np.array:
+def _image_skew_right(image: np.array, padding_color: int) -> np.array:
     """
     Displace each row to the right by the row index.
     """
@@ -80,7 +126,7 @@ def image_skew_right(image: np.array, padding_color: int) -> np.array:
             skewed_image[y, y+x] = image[y, x]
     return skewed_image
 
-def image_unskew_right(image: np.array) -> np.array:
+def _image_unskew_right(image: np.array) -> np.array:
     """
     Displace each row to the left by the row index. Remove the padding.
     """

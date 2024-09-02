@@ -76,36 +76,36 @@ def image_raytrace_probecolor_direction_topleft(image: np.array, edge_color: int
     """
     Raytrace in the upleft-direction, and determine what color is there.
     """
-    skewed_image = image_skew_left(image, edge_color)
+    skewed_image = image_skew(image, edge_color, SkewDirection.LEFT)
     skewed_image = image_raytrace_probecolor_direction_top(skewed_image, edge_color)
-    unskewed_image = image_unskew_left(skewed_image)
+    unskewed_image = image_unskew(skewed_image, SkewDirection.LEFT)
     return unskewed_image
 
 def image_raytrace_probecolor_direction_topright(image: np.array, edge_color: int) -> np.array:
     """
     Raytrace in the upright-direction, and determine what color is there.
     """
-    skewed_image = image_skew_right(image, edge_color)
+    skewed_image = image_skew(image, edge_color, SkewDirection.RIGHT)
     skewed_image = image_raytrace_probecolor_direction_top(skewed_image, edge_color)
-    unskewed_image = image_unskew_right(skewed_image)
+    unskewed_image = image_unskew(skewed_image, SkewDirection.RIGHT)
     return unskewed_image
 
 def image_raytrace_probecolor_direction_bottomleft(image: np.array, edge_color: int) -> np.array:
     """
     Raytrace in the downleft-direction, and determine what color is there.
     """
-    skewed_image = image_skew_right(image, edge_color)
+    skewed_image = image_skew(image, edge_color, SkewDirection.RIGHT)
     skewed_image = image_raytrace_probecolor_direction_bottom(skewed_image, edge_color)
-    unskewed_image = image_unskew_right(skewed_image)
+    unskewed_image = image_unskew(skewed_image, SkewDirection.RIGHT)
     return unskewed_image
 
 def image_raytrace_probecolor_direction_bottomright(image: np.array, edge_color: int) -> np.array:
     """
     Raytrace in the downright-direction, and determine what color is there.
     """
-    skewed_image = image_skew_left(image, edge_color)
+    skewed_image = image_skew(image, edge_color, SkewDirection.LEFT)
     skewed_image = image_raytrace_probecolor_direction_bottom(skewed_image, edge_color)
-    unskewed_image = image_unskew_left(skewed_image)
+    unskewed_image = image_unskew(skewed_image, SkewDirection.LEFT)
     return unskewed_image
 
 class ImageRaytraceProbeColorDirection(Enum):
