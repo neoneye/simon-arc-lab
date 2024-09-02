@@ -294,36 +294,62 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
 
-def create_augmented_task(input_output: str, node_pre: BaseNode, node_transform: BaseNode, seed: int, task: Task) -> Task:
-    images = []
+def create_augmented_tasks(input_output: str, node_pre: BaseNode, node_transform: BaseNode, seed: int, task: Task) -> list[Task]:
+    # Collect images for processing
+    all_images = []
     if input_output == 'input':
         for i in range(task.count_examples):
-            images.append(task.example_input(i))
+            all_images.append(task.example_input(i))
         for i in range(task.count_tests):
-            images.append(task.test_input(i))
+            all_images.append(task.test_input(i))
     elif input_output == 'output':
         for i in range(task.count_examples):
-            images.append(task.example_output(i))
+            all_images.append(task.example_output(i))
     else:
         raise Exception(f"Unknown input_output: {input_output}")
 
-    image_pairs = []
-    for image in images:
-        input_image = node_pre.apply(image)
-        output_image = node_transform.apply(input_image)
-        image_pairs.append((input_image, output_image))
-
+    # Human readable name of the transformation
     name_pre = node_pre.name()
     name_transform = node_transform.name()
 
-    random.Random(seed + 1).shuffle(image_pairs)
-    # IDEA: split up many pairs into smaller tasks
-    
-    new_task = Task()
-    new_task.metadata_task_id = f'{task.metadata_task_id} {input_output} pre_{name_pre} transform_{name_transform}'
-    for pair_index, (input_image, output_image) in enumerate(image_pairs):
-        new_task.append_pair(input_image, output_image, pair_index < len(image_pairs) - 1)
-    return new_task
+    # Split up many images into smaller chunks.
+    random.Random(seed + 1).shuffle(all_images)
+    groups = []
+    count_images = len(all_images)
+    if count_images <= 4:
+        groups.append(all_images)
+    elif count_images == 5:
+        image0, image1, image2, image3, image4 = all_images
+        group0 = [image0, image1, image2, image3]
+        group1 = [image0, image1, image2, image4]
+        groups.append(group0)
+        groups.append(group1)
+    elif count_images >= 6:
+        image0, image1, image2, image3, image4, image5 = all_images[:6]
+        group0 = [image0, image1, image2, image3]
+        group1 = [image0, image1, image2, image4]
+        group2 = [image0, image1, image2, image5]
+        groups.append(group0)
+        groups.append(group1)
+        groups.append(group2)
+
+    # Process groups of images
+    augmented_tasks = []    
+    for group_index, group_images in enumerate(groups):
+        # Process images
+        pairs = []
+        for image in group_images:
+            input_image = node_pre.apply(image)
+            output_image = node_transform.apply(input_image)
+            pairs.append((input_image, output_image))
+
+        # Create new task
+        new_task = Task()
+        new_task.metadata_task_id = f'{task.metadata_task_id} {input_output} group{group_index} pre_{name_pre} transform_{name_transform}'
+        for pair_index, (input_image, output_image) in enumerate(pairs):
+            new_task.append_pair(input_image, output_image, pair_index < len(pairs) - 1)
+        augmented_tasks.append(new_task)
+    return augmented_tasks
 
 augmented_tasks = []
 for group_index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
@@ -337,10 +363,12 @@ for group_index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotask
 
     for task_index, task in enumerate(taskset.tasks):
         iteration_seed = group_index * 1000000 + task_index * 1000
-        new_task = create_augmented_task('input', node_pre, node_transform, iteration_seed + 1, task)
-        augmented_tasks.append(new_task)
-        new_task = create_augmented_task('output', node_pre, node_transform, iteration_seed + 2, task)
-        augmented_tasks.append(new_task)
+        new_tasks = create_augmented_tasks('input', node_pre, node_transform, iteration_seed + 1, task)
+        augmented_tasks.extend(new_tasks)
+        new_tasks = create_augmented_tasks('output', node_pre, node_transform, iteration_seed + 2, task)
+        augmented_tasks.extend(new_tasks)
+
+print(f"Number of augmented tasks: {len(augmented_tasks)}")
 
 for task in augmented_tasks:
     task.show()
