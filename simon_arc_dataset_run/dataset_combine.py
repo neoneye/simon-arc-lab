@@ -6,22 +6,22 @@ import json
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
-seed = 153
+seed = 154
 random.seed(seed)
 
 # Define the input file paths
 dataset_dir = os.path.dirname(__file__)
 file_names = [
-    'dataset_cellular_automaton.jsonl',
-    'dataset_dilation.jsonl',
-    'dataset_erosion.jsonl',
-    'dataset_histogram.jsonl',
-    'dataset_image.jsonl',
-    'dataset_image_pair.jsonl',
-    'dataset_mass.jsonl',
-    'dataset_scale.jsonl',
-    'dataset_shape.jsonl',
-    'dataset_solve_bool.jsonl',
+    # 'dataset_cellular_automaton.jsonl',
+    # 'dataset_dilation.jsonl',
+    # 'dataset_erosion.jsonl',
+    # 'dataset_histogram.jsonl',
+    # 'dataset_image.jsonl',
+    # 'dataset_image_pair.jsonl',
+    # 'dataset_mass.jsonl',
+    # 'dataset_scale.jsonl',
+    # 'dataset_shape.jsonl',
+    # 'dataset_solve_bool.jsonl',
     'dataset_solve_boundingbox.jsonl',
     'dataset_solve_color.jsonl',
     'dataset_solve_compress.jsonl',
@@ -32,20 +32,20 @@ file_names = [
     'dataset_solve_gravity.jsonl',
     'dataset_solve_grid.jsonl',
     'dataset_solve_half.jsonl',
-    'dataset_solve_halfplane.jsonl',
+    # 'dataset_solve_halfplane.jsonl',
     'dataset_solve_mask.jsonl',
     'dataset_solve_mass.jsonl',
     'dataset_solve_outline.jsonl',
     'dataset_solve_probecolor.jsonl',
-    'dataset_solve_ray.jsonl',
-    'dataset_solve_reverse.jsonl',
+    # 'dataset_solve_ray.jsonl',
+    # 'dataset_solve_reverse.jsonl',
     'dataset_solve_rotate.jsonl',
     'dataset_solve_scale.jsonl',
-    'dataset_solve_skew.jsonl',
+    # 'dataset_solve_skew.jsonl',
     'dataset_solve_symmetry.jsonl',
     'dataset_solve_translate.jsonl',
     'dataset_solve_zindex.jsonl',
-    'dataset_symmetry.jsonl',
+    # 'dataset_symmetry.jsonl',
 ]
 
 # Number of rows in the output file
