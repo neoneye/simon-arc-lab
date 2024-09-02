@@ -12,7 +12,6 @@ import random
 from simon_arc_lab.image_mix import *
 from simon_arc_lab.image_util import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
-from simon_arc_lab.image_create_random_simple import image_create_random_with_two_colors
 from simon_arc_lab.task import *
 from simon_arc_lab.image_skew import *
 from simon_arc_lab.histogram import Histogram
@@ -43,6 +42,7 @@ def generate_task_skew(seed: int, direction: SkewDirection) -> Task:
     for i, color in enumerate(colors):
         color_map[i] = color
     skew_padding_color = 0
+    is_ambiguous = True
     for i in range(count_example+count_test):
         is_example = i < count_example
         input_image = None
@@ -60,6 +60,14 @@ def generate_task_skew(seed: int, direction: SkewDirection) -> Task:
             if np.array_equal(random_image, skewed_image):
                 continue
 
+            # If the the height is 1 or the width is 1, then it's ambiguous what kind of skew it is.
+            height, width = random_image.shape
+            if height > 1 and width > 1:
+                is_ambiguous = False
+            if is_ambiguous:
+                # print("Skip ambiguous pair")
+                continue
+
             input_image = image_replace_colors(random_image, color_map)
             output_image = image_replace_colors(skewed_image, color_map)
             break
@@ -67,6 +75,7 @@ def generate_task_skew(seed: int, direction: SkewDirection) -> Task:
             raise Exception("Failed to find a candidate images.")
         task.append_pair(input_image, output_image, is_example)
 
+    task.shuffle_examples(seed + 100)
     return task
 
 def generate_task_unskew(seed: int, direction: SkewDirection) -> Task:
@@ -87,6 +96,7 @@ def generate_task_unskew(seed: int, direction: SkewDirection) -> Task:
     for i, color in enumerate(colors):
         color_map[i] = color
     skew_padding_color = 0
+    is_ambiguous = True
     for i in range(count_example+count_test):
         is_example = i < count_example
         input_image = None
@@ -104,6 +114,14 @@ def generate_task_unskew(seed: int, direction: SkewDirection) -> Task:
             if np.array_equal(random_image, skewed_image):
                 continue
 
+            # If the the height is 1 or the width is 1, then it's ambiguous what kind of skew it is.
+            height, width = random_image.shape
+            if height > 1 and width > 1:
+                is_ambiguous = False
+            if is_ambiguous:
+                # print("Skip ambiguous pair")
+                continue
+
             input_image = image_replace_colors(skewed_image, color_map)
             output_image = image_replace_colors(random_image, color_map)
             break
@@ -111,6 +129,7 @@ def generate_task_unskew(seed: int, direction: SkewDirection) -> Task:
             raise Exception("Failed to find a candidate images.")
         task.append_pair(input_image, output_image, is_example)
 
+    task.shuffle_examples(seed + 100)
     return task
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
@@ -144,7 +163,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     elif j == 7:
         transformation_id = 'unskew_right'
         task = generate_task_unskew(seed, SkewDirection.RIGHT)
-    task.show()
+    # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
 
