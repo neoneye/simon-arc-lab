@@ -66,9 +66,22 @@ def deserialize(input_str: str) -> np.array:
     if count_parts != 3:
         raise DecodeRLEError("Expected 3 parts", details=f"But got {count_parts} parts")
 
-    width = int(parts[0])
-    height = int(parts[1])
-    rows = parts[2].split(',')
+    width_str, height_str, rows_str = parts
+    rows = rows_str.split(',')
+
+    # Validate width and height strings
+    try:
+        width = int(width_str)
+        height = int(height_str)
+    except ValueError as e:
+        raise DecodeRLEError(
+            "Cannot parse width and height",
+            details=str(e)
+        )
+
+    # Images with negative dimensions cannot be created
+    if width < 0 or height < 0:
+        raise DecodeRLEError("Width and height must non-negative")
 
     count_rows = len(rows)
     if count_rows != height:

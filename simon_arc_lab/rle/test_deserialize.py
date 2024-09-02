@@ -72,6 +72,30 @@ class TestDeserialize(unittest.TestCase):
             deserialize(junk)
         self.assertTrue("Expected 3 parts" in str(context.exception))
 
+    def test_deserialize_exception_junk_width(self):
+        junk = "x 12 0,0c2e0,02a12e0,,,,,,0c2e0,0,,"
+        with self.assertRaises(DecodeRLEError) as context:
+            deserialize(junk)
+        self.assertTrue("Cannot parse width and height" in str(context.exception))
+
+    def test_deserialize_exception_junk_height(self):
+        junk = "11 x 0,0c2e0,02a12e0,,,,,,0c2e0,0,,"
+        with self.assertRaises(DecodeRLEError) as context:
+            deserialize(junk)
+        self.assertTrue("Cannot parse width and height" in str(context.exception))
+
+    def test_deserialize_exception_negative_width(self):
+        junk = "-11 12 0,0c2e0,02a12e0,,,,,,0c2e0,0,,"
+        with self.assertRaises(DecodeRLEError) as context:
+            deserialize(junk)
+        self.assertTrue("Width and height must non-negative" in str(context.exception))
+
+    def test_deserialize_exception_negative_height(self):
+        junk = "11 -12 0,0c2e0,02a12e0,,,,,,0c2e0,0,,"
+        with self.assertRaises(DecodeRLEError) as context:
+            deserialize(junk)
+        self.assertTrue("Width and height must non-negative" in str(context.exception))
+
     def test_deserialize_exception_heightmismatch(self):
         junk = "1 5 0,,,,,,,,,,,"
         with self.assertRaises(DecodeRLEError) as context:
