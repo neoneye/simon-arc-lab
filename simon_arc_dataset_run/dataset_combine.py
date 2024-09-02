@@ -6,7 +6,7 @@ import json
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
-seed = 152
+seed = 153
 random.seed(seed)
 
 # Define the input file paths
@@ -41,6 +41,7 @@ file_names = [
     'dataset_solve_reverse.jsonl',
     'dataset_solve_rotate.jsonl',
     'dataset_solve_scale.jsonl',
+    'dataset_solve_skew.jsonl',
     'dataset_solve_symmetry.jsonl',
     'dataset_solve_translate.jsonl',
     'dataset_solve_zindex.jsonl',
