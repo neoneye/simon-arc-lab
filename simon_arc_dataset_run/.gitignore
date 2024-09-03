@@ -13,6 +13,7 @@ dataset_rle.jsonl
 dataset_scale.jsonl
 dataset_shape.jsonl
 dataset_task.jsonl
+dataset_solve_augment.jsonl
 dataset_solve_bool.jsonl
 dataset_solve_boundingbox.jsonl
 dataset_solve_color.jsonl
