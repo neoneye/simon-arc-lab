@@ -34,9 +34,6 @@ class ApplyManyError(ValueError):
         self.details = details
 
 class BaseNode:
-    def __init__(self):
-        print("BaseNode.__init__")
-
     def apply_many(self, images: list[np.array]) -> list[np.array]:
         return [self.apply(image) for image in images]
     
@@ -47,9 +44,6 @@ class BaseNode:
         raise Exception("Not implemented")
 
 class NodeDoNothing(BaseNode):
-    def __init__(self):
-        print("NodeDoNothing.__init__")
-
     def apply(self, image: np.array) -> np.array:
         return image.copy()
 
@@ -74,7 +68,6 @@ class NodeChain(BaseNode):
 
 class NodeShuffleColors(BaseNode):
     def __init__(self, seed: int):
-        print("NodeShuffleColors.__init__")
         colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         random.Random(seed + 3).shuffle(colors)
         color_map = {}
@@ -89,18 +82,57 @@ class NodeShuffleColors(BaseNode):
         return 'shuffle_colors'
 
 class NodeRotateCW(BaseNode):
-    def __init__(self):
-        print("NodeRotateCW.__init__")
-
     def apply(self, image: np.array) -> np.array:
+        # IDEA: if the output is identical to the input, then raise an exception.
         return image_rotate_cw(image)
 
     def name(self) -> str:
         return 'rotate_cw'
 
+class NodeRotateCCW(BaseNode):
+    def apply(self, image: np.array) -> np.array:
+        return image_rotate_ccw(image)
+
+    def name(self) -> str:
+        return 'rotate_ccw'
+
+class NodeRotate180(BaseNode):
+    def apply(self, image: np.array) -> np.array:
+        return image_rotate_ccw(image)
+
+    def name(self) -> str:
+        return 'rotate_180'
+
+class NodeFlipX(BaseNode):
+    def apply(self, image: np.array) -> np.array:
+        return image_flipx(image)
+
+    def name(self) -> str:
+        return 'flipx'
+
+class NodeFlipY(BaseNode):
+    def apply(self, image: np.array) -> np.array:
+        return image_flipy(image)
+
+    def name(self) -> str:
+        return 'flipy'
+
+class NodeFlipA(BaseNode):
+    def apply(self, image: np.array) -> np.array:
+        return image_flip_diagonal_a(image)
+
+    def name(self) -> str:
+        return 'flipa'
+
+class NodeFlipB(BaseNode):
+    def apply(self, image: np.array) -> np.array:
+        return image_flip_diagonal_b(image)
+
+    def name(self) -> str:
+        return 'flipb'
+
 class NodeScale(BaseNode):
     def __init__(self, x_up_down: str, x_scale: int, y_up_down: str, y_scale: int):
-        print("NodeScale.__init__")
         self.x_up_down = x_up_down
         self.x_scale = x_scale
         self.y_up_down = y_up_down
@@ -114,9 +146,6 @@ class NodeScale(BaseNode):
         return 'scale'
 
 class NodeSwapColors(BaseNode):
-    def __init__(self):
-        print("NodeSwapColors.__init__")
-
     def apply_many(self, images: list[np.array]) -> list[np.array]:
         histogram_union = Histogram.empty()
         for image in images:
@@ -267,7 +296,7 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 def generate_dataset_item_list(seed: int) -> list[dict]:
     task = augmented_tasks[seed % count_augmented_tasks]
     transformation_id = task.metadata_task_id
-    # task.show()
+    task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
 
