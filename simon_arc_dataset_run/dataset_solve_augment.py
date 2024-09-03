@@ -270,10 +270,26 @@ def create_augmented_tasks(input_output: str, node_pre: BaseNode, node_transform
         # print(f"Error: {e}")
         return []
 
+NUMBER_OF_PERMUTATIONS_PRE = 2
 NUMBER_OF_PERMUTATIONS_TRANSFORM = 2 * 8 * 4 * 5
 NUMBER_OF_PERMUTATIONS_INPUT_POST = 8
 NUMBER_OF_PERMUTATIONS_INPUT_OUTPUT = 2
-NUMBER_OF_PERMUTATIONS_TOTAL = NUMBER_OF_PERMUTATIONS_TRANSFORM * NUMBER_OF_PERMUTATIONS_INPUT_POST * NUMBER_OF_PERMUTATIONS_INPUT_OUTPUT
+NUMBER_OF_PERMUTATIONS_TOTAL = NUMBER_OF_PERMUTATIONS_PRE * NUMBER_OF_PERMUTATIONS_TRANSFORM * NUMBER_OF_PERMUTATIONS_INPUT_POST * NUMBER_OF_PERMUTATIONS_INPUT_OUTPUT
+
+def permuted_node_pre(permutation: int) -> BaseNode:
+    j = permutation % 2
+    permutation = permutation // 2
+    if j == 0:
+        node_shuffle_colors = NodeShuffleColors(permutation % 100)
+    else:
+        node_shuffle_colors = None
+
+    node_list_with_optionals = [node_shuffle_colors]
+    # Remove the node's that are None
+    node_list = [node for node in node_list_with_optionals if node is not None]
+
+    node_transform = NodeChain(node_list)
+    return node_transform
 
 def permuted_node_transform(permutation: int) -> BaseNode:
     j = permutation % 2
@@ -388,8 +404,8 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     permutation = permutation // count_original_tasks
     task = original_tasks[task_index]
 
-    # node_pre = NodeShuffleColors(123)
-    node_pre = NodeDoNothing()
+    node_pre = permuted_node_pre(permutation)
+    permutation = permutation // NUMBER_OF_PERMUTATIONS_PRE
 
     node_transform = permuted_node_transform(permutation)
     permutation = permutation // NUMBER_OF_PERMUTATIONS_TRANSFORM
@@ -415,7 +431,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
         accumulated_dataset_items.extend(dataset_items)
     return accumulated_dataset_items
 
-max_num_samples = min(10000, count_original_tasks * NUMBER_OF_PERMUTATIONS_TOTAL)
+max_num_samples = min(100000, count_original_tasks * NUMBER_OF_PERMUTATIONS_TOTAL)
 print(f"count_original_tasks: {count_original_tasks}")
 print(f"NUMBER_OF_PERMUTATIONS_TRANSFORM: {NUMBER_OF_PERMUTATIONS_TRANSFORM}")
 print(f"NUMBER_OF_PERMUTATIONS_INPUT_POST: {NUMBER_OF_PERMUTATIONS_INPUT_POST}")
