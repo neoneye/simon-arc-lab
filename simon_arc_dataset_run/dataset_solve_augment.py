@@ -1,5 +1,8 @@
 # Augment existing ARC-AGI tasks
 #
+# Work in progress. I have not yet found the secret sauce to augment the ARC-AGI tasks in a way that the model can learn from it.
+# The model seems to gotten severely dumber after training with this.
+#
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
 import os
@@ -27,6 +30,8 @@ from simon_arc_dataset.dataset_generator import *
 DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_augment'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_augment.jsonl')
+
+raise Exception("This is highly experimental code, and not ready for use. It's worsening the model severely at the moment. I may return to this code later.")
 
 class ApplyManyError(ValueError):
     """Exception raised for errors in Node apply_many."""
