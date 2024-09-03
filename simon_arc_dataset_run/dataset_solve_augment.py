@@ -272,6 +272,17 @@ for group_index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotask
     node_swap_colors = NodeSwapColors()
     node_rotate = NodeRotateCW()
     node_scale = NodeScale('up', 2, 'up', 2)
+    j = 0
+    if j == 0:
+        node_flip = NodeFlipX()
+    elif j == 1:
+        node_flip = NodeFlipY()
+    elif j == 2:
+        node_flip = NodeFlipA()
+    elif j == 3:
+        node_flip = NodeFlipB()
+    else:
+        node_flip = NodeDoNothing()
     # node_transform = NodeChain([node_swap_colors, node_rotate, node_scale])
     node_transform = NodeChain([node_rotate])
 
