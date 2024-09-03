@@ -3,6 +3,8 @@
 # Work in progress. I have not yet found the secret sauce to augment the ARC-AGI tasks in a way that the model can learn from it.
 # The model seems to gotten severely dumber after training with this.
 #
+# IDEA: what if I train the model for a shorter times, so there is less catastrophic forgetting. Would that help?
+#
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
 import os
