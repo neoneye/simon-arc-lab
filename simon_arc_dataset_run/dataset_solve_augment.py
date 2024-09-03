@@ -382,7 +382,7 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    permutation = seed
+    permutation = seed * 103483827531
 
     task_index = permutation % count_original_tasks
     permutation = permutation // count_original_tasks
@@ -390,26 +390,27 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     # node_pre = NodeShuffleColors(123)
     node_pre = NodeDoNothing()
+
     node_transform = permuted_node_transform(permutation)
     permutation = permutation // NUMBER_OF_PERMUTATIONS_TRANSFORM
 
-    node_input_post = NodeScale('up', 2, 'up', 2)
     node_input_post = permuted_node_input_post(permutation)
     permutation = permutation // NUMBER_OF_PERMUTATIONS_INPUT_POST
 
-    iteration_seed = permutation
+    new_tasks_input = create_augmented_tasks('input', node_pre, node_transform, node_input_post, permutation, task)
     permutation = permutation // 2
 
-    accumulated_new_tasks = []
-    new_tasks = create_augmented_tasks('input', node_pre, node_transform, node_input_post, iteration_seed + 1, task)
-    accumulated_new_tasks.extend(new_tasks)
-    new_tasks = create_augmented_tasks('output', node_pre, node_transform, node_input_post, iteration_seed + 2, task)
-    accumulated_new_tasks.extend(new_tasks)
+    new_tasks_output = create_augmented_tasks('output', node_pre, node_transform, node_input_post, permutation, task)
+    permutation = permutation // 2
+
+    accumulated_new_tasks = new_tasks_input + new_tasks_output
 
     accumulated_dataset_items = []
     for task_index, task in enumerate(accumulated_new_tasks):
+        if task.total_pixel_count() > 1000:
+            continue
         transformation_id = task.metadata_task_id
-        task.show()
+        # task.show()
         dataset_items = generate_dataset_item_list_inner(permutation + task_index * 1000, task, transformation_id)
         accumulated_dataset_items.extend(dataset_items)
     return accumulated_dataset_items
