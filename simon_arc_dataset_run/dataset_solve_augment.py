@@ -263,16 +263,48 @@ def create_augmented_tasks(input_output: str, node_pre: BaseNode, node_transform
         # print(f"Error: {e}")
         return []
 
-augmented_tasks = []
-for group_index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
-    taskset = TaskSet.load_directory(path_to_task_dir)
+def permuted_node_transform(permutation: int) -> BaseNode:
+    j = permutation % 2
+    permutation = permutation // 2
+    if j == 0:
+        node_swap_colors = NodeSwapColors()
+    else:
+        node_swap_colors = None
 
-    # node_pre = NodeShuffleColors(123)
-    node_pre = NodeDoNothing()
-    node_swap_colors = NodeSwapColors()
-    node_rotate = NodeRotateCW()
-    node_scale = NodeScale('up', 2, 'up', 2)
-    j = 0
+    j = permutation % 8
+    permutation = permutation // 8
+    if j == 0:
+        node_scale = NodeScale('up', 2, 'up', 2)
+    elif j == 1:
+        node_scale = NodeScale('up', 3, 'up', 3)
+    elif j == 2:
+        node_scale = NodeScale('up', 1, 'up', 2)
+    elif j == 3:
+        node_scale = NodeScale('up', 2, 'up', 1)
+    elif j == 4:
+        node_scale = NodeScale('up', 1, 'up', 3)
+    elif j == 5:
+        node_scale = NodeScale('up', 3, 'up', 1)
+    elif j == 6:
+        node_scale = NodeScale('up', 2, 'up', 3)
+    elif j == 7:
+        node_scale = NodeScale('up', 3, 'up', 2)
+    else:
+        node_scale = None
+
+    j = permutation % 4
+    permutation = permutation // 4
+    if j == 0:
+        node_rotate = NodeRotateCW()
+    elif j == 1:
+        node_rotate = NodeRotateCCW()
+    elif j == 2:
+        node_rotate = NodeRotate180()
+    elif j == 3:
+        node_rotate = None
+
+    j = permutation % 5
+    permutation = permutation // 5
     if j == 0:
         node_flip = NodeFlipX()
     elif j == 1:
@@ -282,9 +314,22 @@ for group_index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotask
     elif j == 3:
         node_flip = NodeFlipB()
     else:
-        node_flip = NodeDoNothing()
-    # node_transform = NodeChain([node_swap_colors, node_rotate, node_scale])
-    node_transform = NodeChain([node_rotate])
+        node_flip = None
+    
+    node_list_with_optionals = [node_swap_colors, node_rotate, node_scale, node_flip]
+    # Remove the node's that are None
+    node_list = [node for node in node_list_with_optionals if node is not None]
+
+    node_transform = NodeChain(node_list)
+    return node_transform
+
+augmented_tasks = []
+for group_index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
+    taskset = TaskSet.load_directory(path_to_task_dir)
+
+    # node_pre = NodeShuffleColors(123)
+    node_pre = NodeDoNothing()
+    node_transform = permuted_node_transform(group_index)
 
     for task_index, task in enumerate(taskset.tasks):
         iteration_seed = group_index * 1000000 + task_index * 1000
