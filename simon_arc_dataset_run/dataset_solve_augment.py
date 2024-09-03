@@ -256,12 +256,16 @@ def create_augmented_tasks(input_output: str, node_pre: BaseNode, node_transform
                 output_image = output_images[pair_index]
                 new_task.append_pair(input_image, output_image, pair_index < pair_count - 1)
 
+            # IDEA: Check that all outputs are different than inputs. If it's all the same, then it's not interesting.
+
             new_task.shuffle_examples(seed + group_index)
             augmented_tasks.append(new_task)
         return augmented_tasks
     except ApplyManyError as e:
         # print(f"Error: {e}")
         return []
+
+NUMBER_OF_PERMUTATIONS = 2 * 8 * 4 * 5
 
 def permuted_node_transform(permutation: int) -> BaseNode:
     j = permutation % 2
@@ -323,25 +327,16 @@ def permuted_node_transform(permutation: int) -> BaseNode:
     node_transform = NodeChain(node_list)
     return node_transform
 
-augmented_tasks = []
+original_tasks = []
 for group_index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
     taskset = TaskSet.load_directory(path_to_task_dir)
+    for task in taskset.tasks:
+        original_tasks.append(task)
 
-    # node_pre = NodeShuffleColors(123)
-    node_pre = NodeDoNothing()
-    node_transform = permuted_node_transform(group_index)
+count_original_tasks = len(original_tasks)
+print(f"Number of original tasks: {count_original_tasks}")
 
-    for task_index, task in enumerate(taskset.tasks):
-        iteration_seed = group_index * 1000000 + task_index * 1000
-        new_tasks = create_augmented_tasks('input', node_pre, node_transform, iteration_seed + 1, task)
-        augmented_tasks.extend(new_tasks)
-        new_tasks = create_augmented_tasks('output', node_pre, node_transform, iteration_seed + 2, task)
-        augmented_tasks.extend(new_tasks)
-
-count_augmented_tasks = len(augmented_tasks)
-print(f"Number of augmented tasks: {count_augmented_tasks}")
-
-# for task in augmented_tasks:
+# for task in original_tasks:
 #     task.show()
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
@@ -350,13 +345,38 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    task = augmented_tasks[seed % count_augmented_tasks]
-    transformation_id = task.metadata_task_id
-    task.show()
-    dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
-    return dataset_items
+    permutation = seed
 
-max_num_samples = min(1000, count_augmented_tasks)
+    task_index = permutation % count_original_tasks
+    permutation = permutation // count_original_tasks
+    task = original_tasks[task_index]
+
+    # node_pre = NodeShuffleColors(123)
+    node_pre = NodeDoNothing()
+    node_transform = permuted_node_transform(permutation)
+
+
+    iteration_seed = permutation
+    permutation = permutation // 2
+
+    accumulated_new_tasks = []
+    new_tasks = create_augmented_tasks('input', node_pre, node_transform, iteration_seed + 1, task)
+    accumulated_new_tasks.extend(new_tasks)
+    new_tasks = create_augmented_tasks('output', node_pre, node_transform, iteration_seed + 2, task)
+    accumulated_new_tasks.extend(new_tasks)
+
+    accumulated_dataset_items = []
+    for task_index, task in enumerate(accumulated_new_tasks):
+        # task.metadata_task_id = f'{task.metadata_task_id} {task_index}'
+        transformation_id = task.metadata_task_id
+        task.show()
+        dataset_items = generate_dataset_item_list_inner(permutation + task_index * 1000, task, transformation_id)
+        accumulated_dataset_items.extend(dataset_items)
+    return accumulated_dataset_items
+
+max_num_samples = min(1000, count_original_tasks * NUMBER_OF_PERMUTATIONS)
+print(f"count_original_tasks: {count_original_tasks}")
+print(f"NUMBER_OF_PERMUTATIONS: {NUMBER_OF_PERMUTATIONS}")
 print(f"max_num_samples: {max_num_samples}")
 
 generator = DatasetGenerator(
