@@ -16,6 +16,7 @@ from simon_arc_lab.task import *
 from simon_arc_lab.image_bresenham_line import *
 from simon_arc_lab.image_mask import *
 from simon_arc_lab.image_scale import *
+from simon_arc_lab.image_skew import *
 from simon_arc_lab.histogram import *
 from simon_arc_lab.benchmark import *
 from simon_arc_lab.taskset import TaskSet
@@ -177,6 +178,18 @@ class NodeSwapColors(BaseNode):
     def name(self) -> str:
         return 'swap_colors'
 
+class NodeSkew(BaseNode):
+    def __init__(self, padding_color: int, direction: SkewDirection) -> None:
+        super().__init__()
+        self.padding_color = padding_color
+        self.direction = direction
+
+    def apply(self, image: np.array) -> np.array:
+        return image_skew(image, self.padding_color, self.direction)
+
+    def name(self) -> str:
+        return 'skew'
+
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
 if not os.path.isdir(path_to_arc_dataset_collection_dataset):
     print(f"ARC dataset collection directory '{path_to_arc_dataset_collection_dataset}' does not exist.")
@@ -271,8 +284,9 @@ def create_augmented_tasks(input_output: str, node_pre: BaseNode, node_transform
         return []
 
 NUMBER_OF_PERMUTATIONS_PRE = 2
-NUMBER_OF_PERMUTATIONS_TRANSFORM = 2 * 8 * 4 * 5
-NUMBER_OF_PERMUTATIONS_INPUT_POST = 8
+# NUMBER_OF_PERMUTATIONS_TRANSFORM = 2 * 9 * 4 * 5 * 5
+NUMBER_OF_PERMUTATIONS_TRANSFORM = 5
+NUMBER_OF_PERMUTATIONS_INPUT_POST = 9
 NUMBER_OF_PERMUTATIONS_INPUT_OUTPUT = 2
 NUMBER_OF_PERMUTATIONS_TOTAL = NUMBER_OF_PERMUTATIONS_PRE * NUMBER_OF_PERMUTATIONS_TRANSFORM * NUMBER_OF_PERMUTATIONS_INPUT_POST * NUMBER_OF_PERMUTATIONS_INPUT_OUTPUT
 
@@ -294,13 +308,15 @@ def permuted_node_pre(permutation: int) -> BaseNode:
 def permuted_node_transform(permutation: int) -> BaseNode:
     j = permutation % 2
     permutation = permutation // 2
+    j = 1
     if j == 0:
         node_swap_colors = NodeSwapColors()
     else:
         node_swap_colors = None
 
-    j = permutation % 8
+    j = permutation % 9
     permutation = permutation // 8
+    j = 8
     if j == 0:
         node_scale = NodeScale('up', 2, 'up', 2)
     elif j == 1:
@@ -321,6 +337,7 @@ def permuted_node_transform(permutation: int) -> BaseNode:
         node_scale = None
 
     j = permutation % 4
+    j = 3
     permutation = permutation // 4
     if j == 0:
         node_rotate = NodeRotateCW()
@@ -332,6 +349,7 @@ def permuted_node_transform(permutation: int) -> BaseNode:
         node_rotate = None
 
     j = permutation % 5
+    j = 4
     permutation = permutation // 5
     if j == 0:
         node_flip = NodeFlipX()
@@ -343,8 +361,23 @@ def permuted_node_transform(permutation: int) -> BaseNode:
         node_flip = NodeFlipB()
     else:
         node_flip = None
+
+    j = permutation % 5
+    permutation = permutation // 5
+    skew_color = permutation % 10
+    permutation = permutation // 10
+    if j == 0:
+        node_skew = NodeSkew(skew_color, SkewDirection.UP)
+    elif j == 1:
+        node_skew = NodeSkew(skew_color, SkewDirection.DOWN)
+    elif j == 2:
+        node_skew = NodeSkew(skew_color, SkewDirection.LEFT)
+    elif j == 3:
+        node_skew = NodeSkew(skew_color, SkewDirection.RIGHT)
+    else:
+        node_skew = None
     
-    node_list_with_optionals = [node_swap_colors, node_rotate, node_scale, node_flip]
+    node_list_with_optionals = [node_swap_colors, node_rotate, node_scale, node_flip, node_skew]
     # Remove the node's that are None
     node_list = [node for node in node_list_with_optionals if node is not None]
 
@@ -352,8 +385,9 @@ def permuted_node_transform(permutation: int) -> BaseNode:
     return node_transform
 
 def permuted_node_input_post(permutation: int) -> BaseNode:
-    j = permutation % 8
-    permutation = permutation // 8
+    j = permutation % 9
+    j = 8
+    permutation = permutation // 9
     if j == 0:
         node_scale = NodeScale('up', 2, 'up', 2)
     elif j == 1:
