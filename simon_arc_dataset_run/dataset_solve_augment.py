@@ -195,7 +195,7 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
 
-def create_augmented_tasks(input_output: str, node_pre: BaseNode, node_transform: BaseNode, seed: int, task: Task) -> list[Task]:
+def create_augmented_tasks(input_output: str, node_pre: BaseNode, node_transform: BaseNode, node_post_input: BaseNode, seed: int, task: Task) -> list[Task]:
     # Collect images for processing
     all_images = []
     if input_output == 'input':
@@ -212,6 +212,7 @@ def create_augmented_tasks(input_output: str, node_pre: BaseNode, node_transform
     # Human readable name of the transformation
     name_pre = node_pre.name()
     name_transform = node_transform.name()
+    name_post_input = node_post_input.name()
 
     # Split up many images into smaller chunks.
     random.Random(seed + 1).shuffle(all_images)
@@ -240,17 +241,21 @@ def create_augmented_tasks(input_output: str, node_pre: BaseNode, node_transform
         for group_index, group_images in enumerate(groups):
             pair_count = len(group_images)
 
-            # Preprocess images
-            input_images = node_pre.apply_many(group_images)
-            assert len(input_images) == pair_count
+            # Prepare input images
+            prepared_input_images = node_pre.apply_many(group_images)
+            assert len(prepared_input_images) == pair_count
 
             # Transform images
-            output_images = node_transform.apply_many(input_images)
+            output_images = node_transform.apply_many(prepared_input_images)
             assert len(output_images) == pair_count
+
+            # Post process input images, such as scaling up, padding, adding noise
+            input_images = node_post_input.apply_many(prepared_input_images)
+            assert len(input_images) == pair_count
 
             # Create new task
             new_task = Task()
-            new_task.metadata_task_id = f'{task.metadata_task_id} {input_output} group{group_index} pre_{name_pre} transform_{name_transform}'
+            new_task.metadata_task_id = f'{task.metadata_task_id} {input_output} group{group_index} pre_{name_pre} post_{name_post_input} trans_{name_transform}'
             for pair_index in range(len(group_images)):
                 input_image = input_images[pair_index]
                 output_image = output_images[pair_index]
@@ -265,7 +270,10 @@ def create_augmented_tasks(input_output: str, node_pre: BaseNode, node_transform
         # print(f"Error: {e}")
         return []
 
-NUMBER_OF_PERMUTATIONS = 2 * 8 * 4 * 5
+NUMBER_OF_PERMUTATIONS_TRANSFORM = 2 * 8 * 4 * 5
+NUMBER_OF_PERMUTATIONS_INPUT_POST = 8
+NUMBER_OF_PERMUTATIONS_INPUT_OUTPUT = 2
+NUMBER_OF_PERMUTATIONS_TOTAL = NUMBER_OF_PERMUTATIONS_TRANSFORM * NUMBER_OF_PERMUTATIONS_INPUT_POST * NUMBER_OF_PERMUTATIONS_INPUT_OUTPUT
 
 def permuted_node_transform(permutation: int) -> BaseNode:
     j = permutation % 2
@@ -327,6 +335,35 @@ def permuted_node_transform(permutation: int) -> BaseNode:
     node_transform = NodeChain(node_list)
     return node_transform
 
+def permuted_node_input_post(permutation: int) -> BaseNode:
+    j = permutation % 8
+    permutation = permutation // 8
+    if j == 0:
+        node_scale = NodeScale('up', 2, 'up', 2)
+    elif j == 1:
+        node_scale = NodeScale('up', 3, 'up', 3)
+    elif j == 2:
+        node_scale = NodeScale('up', 1, 'up', 2)
+    elif j == 3:
+        node_scale = NodeScale('up', 2, 'up', 1)
+    elif j == 4:
+        node_scale = NodeScale('up', 1, 'up', 3)
+    elif j == 5:
+        node_scale = NodeScale('up', 3, 'up', 1)
+    elif j == 6:
+        node_scale = NodeScale('up', 2, 'up', 3)
+    elif j == 7:
+        node_scale = NodeScale('up', 3, 'up', 2)
+    else:
+        node_scale = None
+
+    node_list_with_optionals = [node_scale]
+    # Remove the node's that are None
+    node_list = [node for node in node_list_with_optionals if node is not None]
+
+    node_transform = NodeChain(node_list)
+    return node_transform
+
 original_tasks = []
 for group_index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
     taskset = TaskSet.load_directory(path_to_task_dir)
@@ -354,29 +391,34 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     # node_pre = NodeShuffleColors(123)
     node_pre = NodeDoNothing()
     node_transform = permuted_node_transform(permutation)
+    permutation = permutation // NUMBER_OF_PERMUTATIONS_TRANSFORM
 
+    node_input_post = NodeScale('up', 2, 'up', 2)
+    node_input_post = permuted_node_input_post(permutation)
+    permutation = permutation // NUMBER_OF_PERMUTATIONS_INPUT_POST
 
     iteration_seed = permutation
     permutation = permutation // 2
 
     accumulated_new_tasks = []
-    new_tasks = create_augmented_tasks('input', node_pre, node_transform, iteration_seed + 1, task)
+    new_tasks = create_augmented_tasks('input', node_pre, node_transform, node_input_post, iteration_seed + 1, task)
     accumulated_new_tasks.extend(new_tasks)
-    new_tasks = create_augmented_tasks('output', node_pre, node_transform, iteration_seed + 2, task)
+    new_tasks = create_augmented_tasks('output', node_pre, node_transform, node_input_post, iteration_seed + 2, task)
     accumulated_new_tasks.extend(new_tasks)
 
     accumulated_dataset_items = []
     for task_index, task in enumerate(accumulated_new_tasks):
-        # task.metadata_task_id = f'{task.metadata_task_id} {task_index}'
         transformation_id = task.metadata_task_id
         task.show()
         dataset_items = generate_dataset_item_list_inner(permutation + task_index * 1000, task, transformation_id)
         accumulated_dataset_items.extend(dataset_items)
     return accumulated_dataset_items
 
-max_num_samples = min(1000, count_original_tasks * NUMBER_OF_PERMUTATIONS)
+max_num_samples = min(10000, count_original_tasks * NUMBER_OF_PERMUTATIONS_TOTAL)
 print(f"count_original_tasks: {count_original_tasks}")
-print(f"NUMBER_OF_PERMUTATIONS: {NUMBER_OF_PERMUTATIONS}")
+print(f"NUMBER_OF_PERMUTATIONS_TRANSFORM: {NUMBER_OF_PERMUTATIONS_TRANSFORM}")
+print(f"NUMBER_OF_PERMUTATIONS_INPUT_POST: {NUMBER_OF_PERMUTATIONS_INPUT_POST}")
+print(f"NUMBER_OF_PERMUTATIONS_TOTAL: {NUMBER_OF_PERMUTATIONS_TOTAL}")
 print(f"max_num_samples: {max_num_samples}")
 
 generator = DatasetGenerator(
