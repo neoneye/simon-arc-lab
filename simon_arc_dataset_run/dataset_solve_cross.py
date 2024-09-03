@@ -38,7 +38,7 @@ def generate_task_two_crossing_lines(seed: int) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 3
-    max_image_size = 10
+    max_image_size = 15
 
     input_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(input_colors)
@@ -52,16 +52,18 @@ def generate_task_two_crossing_lines(seed: int) -> Task:
     for i, color in enumerate(output_colors):
         color_map_output[i] = color
 
+    # Decide what the input should be
+    available_input_ids = ['mask', 'color', 'intersection']
+    input_id = random.Random(seed + 7).choice(available_input_ids)
+
+    # Decide what the output should be
     available_line_ids = ['left_right', 'top_bottom', 'topleft_bottomright', 'topright_bottomleft']
     # pick two unique elements
     line_ids = random.Random(seed + 5).sample(available_line_ids, 2)
-
-    # pick one of the line_ids as the output, or take the intersection
     available_output_ids = ['intersection'] + line_ids
     output_id = random.Random(seed + 6).choice(available_output_ids)
-
-    available_input_ids = ['mask', 'color']
-    input_id = random.Random(seed + 7).choice(available_input_ids)
+    if input_id == 'intersection':
+        output_id = 'bothlines'
 
     intersection_variant = random.Random(seed + 8).randint(0, 2)
     hide_intersection_point = intersection_variant == 1
@@ -157,6 +159,8 @@ def generate_task_two_crossing_lines(seed: int) -> Task:
                 input_image_raw = accumulated_image_xor
             elif input_id == 'color':
                 input_image_raw = drawing_image
+            elif input_id == 'intersection':
+                input_image_raw = accumulated_image_intersection
             input_image = image_replace_colors(input_image_raw, color_map_input)
 
             # We are not interested in an empty image
@@ -176,6 +180,8 @@ def generate_task_two_crossing_lines(seed: int) -> Task:
                 output_image_raw = accumulated_image_trbl
             elif output_id == 'intersection':
                 output_image_raw = accumulated_image_intersection
+            elif output_id == 'bothlines':
+                output_image_raw = accumulated_image_or
             output_image = image_replace_colors(output_image_raw, color_map_output)
 
             # We are not interested in an empty image
