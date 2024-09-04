@@ -331,6 +331,7 @@ def generate_task_with_symmetry_line(seed: int) -> Task:
 
     Similar tasks:
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2b01abd0
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=47c1f68c
     """
     count_example = random.Random(seed + 1).randint(3, 4)
     count_test = random.Random(seed + 2).randint(1, 2)
@@ -338,9 +339,9 @@ def generate_task_with_symmetry_line(seed: int) -> Task:
     task = Task()
     task.metadata_task_id = 'symmetry_line'
     min_image_size = 2
-    max_image_size = 4
+    max_image_size = 5
     min_pad_count = 0
-    max_pad_count = 3
+    max_pad_count = 4
 
     is_inverted = random.Random(seed + 3).choice([False, True])
     is_flipped = random.Random(seed + 4).choice([False, True])
@@ -482,7 +483,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=2018000410,
+    seed=2118000410,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
