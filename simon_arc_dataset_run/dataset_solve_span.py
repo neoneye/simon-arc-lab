@@ -40,6 +40,7 @@ def generate_task_with_intersecting_spans(seed: int, transformation_id: str) -> 
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=a406ac07
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2281f1f4
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=c7d4e6ad
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=c9f8e694
     """
     count_example = random.Random(seed + 1).randint(2, 3)
     count_test = random.Random(seed + 2).randint(1, 2)
