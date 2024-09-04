@@ -337,13 +337,16 @@ def generate_task_with_symmetry_line(seed: int) -> Task:
     count_test = random.Random(seed + 2).randint(1, 2)
     # count_test = 1
     task = Task()
-    task.metadata_task_id = 'symmetry_line'
     min_image_size = 2
     max_image_size = 5
     min_pad_count = 0
     max_pad_count = 4
 
-    is_inverted = random.Random(seed + 3).choice([False, True])
+    invert_variant = random.Random(seed + 3).randint(0, 7)
+    is_inverted_left_input = (invert_variant & 1) > 0
+    is_inverted_left_output = (invert_variant & 2) > 0
+    is_inverted_right_output = (invert_variant & 4) > 0
+
     is_flipped = random.Random(seed + 4).choice([False, True])
     
     color_map_swap01 = {
@@ -359,6 +362,13 @@ def generate_task_with_symmetry_line(seed: int) -> Task:
     for i in range(10):
         color_mapping[i] = colors[i]
 
+    # Swap the wall and background colors in the output image.
+    swap_wall_background_colors = random.Random(seed + 6).choice([False, True])
+    color_map_swap23 = {
+        2: 3,
+        3: 2,
+    }
+
     # What kind of rotation to use. Same for all images, or different for each image.
     rotation_n_global = random.Random(seed + 6).randint(0, 3)
     use_individual_rotation = random.Random(seed + 7).choice([False, True])
@@ -371,6 +381,8 @@ def generate_task_with_symmetry_line(seed: int) -> Task:
         rotate_n_list.append(rotate_n)
 
     random.Random(seed + 8).shuffle(rotate_n_list)
+
+    task.metadata_task_id = f'symmetry_line invert={invert_variant} flip={is_flipped} swapwallbackground={swap_wall_background_colors}'
 
     for i in range(count_example+count_test):
         rotate_n = rotate_n_list[i]
@@ -404,8 +416,6 @@ def generate_task_with_symmetry_line(seed: int) -> Task:
                 right_inner = left_inner_flipx
             else:
                 right_inner = left_inner.copy()
-            if is_inverted:
-                right_inner = image_replace_colors(right_inner, color_map_swap01)
 
             # Add variable padding around the left image and right images.
             # The left/right are swapped for left/right symmetry.
@@ -419,14 +429,29 @@ def generate_task_with_symmetry_line(seed: int) -> Task:
             left_side = np.pad(left_inner, ((top, bottom), (left, distance_to_wall)), mode='constant', constant_values=color_background)
             right_side = np.pad(right_inner, ((top, bottom), (distance_to_wall, right)), mode='constant', constant_values=color_background)
 
-            height, width = left_side.shape
+            height, right_side_width = right_side.shape
 
-            right_side_empty = image_create(width, height, color_background)
+            right_side_input = image_create(right_side_width, height, color_background)
 
             wall = image_create(1, height, color_wall)
 
-            input_image_raw = np.hstack([left_side, wall, right_side_empty])
-            output_image_raw = np.hstack([left_side, wall, right_side])
+            # Keep the pattern as it is, or invert the pattern
+            left_side_input = left_side.copy()
+            if is_inverted_left_input:
+                left_side_input = image_replace_colors(left_side_input, color_map_swap01)
+            left_side_output = left_side.copy()
+            if is_inverted_left_output:
+                left_side_output = image_replace_colors(left_side_output, color_map_swap01)
+            right_side_output = right_side.copy()
+            if is_inverted_right_output:
+                right_side_output = image_replace_colors(right_side_output, color_map_swap01)
+
+            input_image_raw = np.hstack([left_side_input, wall, right_side_input])
+            output_image_raw = np.hstack([left_side_output, wall, right_side_output])
+
+            # Swap the wall and background colors
+            if swap_wall_background_colors:
+                output_image_raw = image_replace_colors(output_image_raw, color_map_swap23)
 
             # Change palette
             input_image_raw = image_replace_colors(input_image_raw, color_mapping)
@@ -483,7 +508,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=2118000410,
+    seed=2218000410,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
