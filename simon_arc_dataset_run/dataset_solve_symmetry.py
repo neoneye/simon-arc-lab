@@ -364,9 +364,9 @@ def generate_task_with_symmetry_line(seed: int) -> Task:
 
     # Swap the wall and background colors in the output image.
     swap_wall_background_colors = random.Random(seed + 6).choice([False, True])
-    color_map_swap23 = {
-        2: 3,
-        3: 2,
+    color_map_swap_wall_background = {
+        color_background: color_wall,
+        color_wall: color_background,
     }
 
     # What kind of rotation to use. Same for all images, or different for each image.
@@ -400,8 +400,18 @@ def generate_task_with_symmetry_line(seed: int) -> Task:
             ratios = [0.1, 0.2, 0.3, 0.4, 0.5]
             ratio = random.Random(iteration_seed + 3).choice(ratios)
             random_image = image_create_random_with_two_colors(random_image_width, random_image_height, 0, 1, ratio, iteration_seed + 4)
+
+            # Instert a tricky decoy pixel with the same color as the background or wall.
+            set_x = random.Random(iteration_seed + 5).randint(0, random_image_width - 1)
+            set_y = random.Random(iteration_seed + 6).randint(0, random_image_height - 1)
+            set_variant = random.Random(iteration_seed + 7).randint(0, 2)
+            set_color = [None, color_background, color_wall][set_variant]
+            if set_color is not None:
+                random_image[set_y, set_x] = set_color
+
+            # Ensure the pattern contains both color 0 and color 1.
             histogram = Histogram.create_with_image(random_image)
-            if histogram.number_of_unique_colors() < 2:
+            if histogram.get_count_for_color(0) == 0 or histogram.get_count_for_color(1) == 0:
                 continue
 
             # Create the left side of the image
@@ -433,7 +443,9 @@ def generate_task_with_symmetry_line(seed: int) -> Task:
 
             right_side_input = image_create(right_side_width, height, color_background)
 
-            wall = image_create(1, height, color_wall)
+            # The wall between left and right
+            wall_size = random.Random(iteration_seed + 10).randint(1, 2)
+            wall = image_create(wall_size, height, color_wall)
 
             # Keep the pattern as it is, or invert the pattern
             left_side_input = left_side.copy()
@@ -451,7 +463,7 @@ def generate_task_with_symmetry_line(seed: int) -> Task:
 
             # Swap the wall and background colors
             if swap_wall_background_colors:
-                output_image_raw = image_replace_colors(output_image_raw, color_map_swap23)
+                output_image_raw = image_replace_colors(output_image_raw, color_map_swap_wall_background)
 
             # Change palette
             input_image_raw = image_replace_colors(input_image_raw, color_mapping)
@@ -508,7 +520,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=2218000410,
+    seed=2418000410,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
