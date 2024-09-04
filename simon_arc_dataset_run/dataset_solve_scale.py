@@ -138,24 +138,6 @@ def generate_task(seed: int, x_up_down, x_scale, y_up_down, y_scale) -> Task:
 
     return task
 
-def demo_generate_task():
-    for i in range(3):
-        seed = i
-        x_scale = random.Random(seed + 3).randint(1, 6)
-        y_scale = random.Random(seed + 4).randint(1, 6)
-        if x_scale == 1 and y_scale == 1:
-            x_scale = 2
-            y_scale = 2
-
-        up_down = ['up', 'down']
-        x_up_down = random.Random(seed + 5).choice(up_down)
-        y_up_down = random.Random(seed + 6).choice(up_down)
-        task = generate_task(i, x_up_down, x_scale, y_up_down, y_scale)
-        task.show()
-
-# demo_generate_task()
-# exit()
-
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
     builder.append_image()

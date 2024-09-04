@@ -325,22 +325,6 @@ def generate_task_with_symmetry_square_input_image_and_extract_a_particular_tile
 
     return task
 
-def demo_generate_task():
-    for i in range(5):
-        j = i % 4
-        if j == 0:
-            task = generate_task_with_input_image_create_output_symmetry_rect(i)
-        elif j == 1:
-            task = generate_task_with_symmetry_rect_input_image_and_extract_a_particular_tile(i)
-        elif j == 2:
-            task = generate_task_with_input_image_create_output_symmetry_square(i)
-        elif j == 3:
-            task = generate_task_with_symmetry_square_input_image_and_extract_a_particular_tile(i)
-        task.show()
-
-# demo_generate_task()
-# exit()
-
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
     builder.append_image()

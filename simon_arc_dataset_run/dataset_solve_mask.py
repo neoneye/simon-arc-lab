@@ -142,14 +142,6 @@ def generate_task_linepatterns_with_masked_areas(seed: int, transformation_id: s
 
     return task
 
-def demo_generate_task():
-    for i in range(5):
-        task = generate_task_linepatterns_with_masked_areas(i, 'identify_the_masked_area')
-        task.show()
-
-# demo_generate_task()
-# exit()
-
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
     builder.append_image()

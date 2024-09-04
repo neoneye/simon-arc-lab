@@ -243,22 +243,6 @@ def generate_task_mutate_content_inside_grid(seed: int, transformation_id: str) 
 
     return task
 
-def demo_generate_task():
-    for i in range(100):
-        j = i % 4
-        if j == 0:
-            task = generate_task_extract_content_from_grid(i, 'original')
-        elif j == 1:
-            task = generate_task_mutate_content_inside_grid(i, 'flipx')
-        elif j == 2:
-            task = generate_task_mutate_content_inside_grid(i, 'flipy')
-        elif j == 3:
-            task = generate_task_mutate_content_inside_grid(i, '180')
-        task.show()
-
-# demo_generate_task()
-# exit()
-
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
     builder.append_image()

@@ -172,14 +172,6 @@ def generate_task_bool_transformation(seed: int, transformation_id: str) -> Task
 
     return task
 
-def demo_generate_task():
-    for i in range(5):
-        task = generate_task_bool_transformation(i, 'xor')
-        task.show()
-
-# demo_generate_task()
-# exit()
-
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
     builder.append_image()

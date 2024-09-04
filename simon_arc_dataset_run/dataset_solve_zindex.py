@@ -447,22 +447,6 @@ def generate_task_move_obscured_rectangle_to_top(seed: int) -> Task:
 
     return task
 
-def demo_generate_task():
-    for i in range(100):
-        j = i % 4
-        if j == 0:
-            task = generate_task_mask_of_primary_rectangle(i)
-        elif j == 1:
-            task = generate_task_mask_of_obscured_rectangle(i)
-        elif j == 2:
-            task = generate_task_mask_of_intersection_rectangle(i)
-        elif j == 3:
-            task = generate_task_move_obscured_rectangle_to_top(i)
-        task.show()
-
-# demo_generate_task()
-# exit()
-
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
     builder.append_image()

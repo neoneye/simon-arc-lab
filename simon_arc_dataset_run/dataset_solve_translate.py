@@ -49,13 +49,6 @@ def generate_task(seed: int, dx: int, dy: int, percent_noise: float) -> Task:
 
     return task
 
-def demo_generate_task():
-    ratios = [0.0, 0.33, 0.5]
-    for i in range(3):
-        ratio = ratios[i]
-        task = generate_task(0, 0, 1, ratio)
-        task.show()
-
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
     # builder.append_height()
