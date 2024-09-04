@@ -338,9 +338,9 @@ def generate_task_with_symmetry_line(seed: int) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 2
-    max_image_size = 5
+    max_image_size = 4
     min_pad_count = 0
-    max_pad_count = 4
+    max_pad_count = 5
 
     invert_variant = random.Random(seed + 3).randint(0, 7)
     is_inverted_left_input = (invert_variant & 1) > 0
@@ -491,7 +491,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 5
     # j = (seed % 2) + 2
     # j = (seed % 2)
-    j = 4
+    # j = 4
     if j == 0:
         task = generate_task_with_input_image_create_output_symmetry_rect(seed)
         task_id = task.metadata_task_id
@@ -520,7 +520,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=2418000410,
+    seed=2518000410,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
