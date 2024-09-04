@@ -325,15 +325,135 @@ def generate_task_with_symmetry_square_input_image_and_extract_a_particular_tile
 
     return task
 
+def generate_task_with_symmetry_line(seed: int) -> Task:
+    """
+    Symmetric pattern on both sides of the line.
+
+    Similar tasks:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2b01abd0
+    """
+    count_example = random.Random(seed + 1).randint(3, 4)
+    count_test = random.Random(seed + 2).randint(1, 2)
+    # count_test = 1
+    task = Task()
+    task.metadata_task_id = 'symmetry_line'
+    min_image_size = 2
+    max_image_size = 4
+    min_pad_count = 0
+    max_pad_count = 3
+
+    is_inverted = random.Random(seed + 3).choice([False, True])
+    is_flipped = random.Random(seed + 4).choice([False, True])
+    
+    color_map_swap01 = {
+        0: 1,
+        1: 0,
+    }
+    color_background = 2
+    color_wall = 3
+
+    colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    random.Random(seed + 5).shuffle(colors)
+    color_mapping = {}
+    for i in range(10):
+        color_mapping[i] = colors[i]
+
+    # What kind of rotation to use. Same for all images, or different for each image.
+    rotation_n_global = random.Random(seed + 6).randint(0, 3)
+    use_individual_rotation = random.Random(seed + 7).choice([False, True])
+    rotate_n_list = []
+    for i in range(count_example+count_test):
+        if use_individual_rotation:
+            rotate_n = i % 4
+        else:
+            rotate_n = rotation_n_global
+        rotate_n_list.append(rotate_n)
+
+    random.Random(seed + 8).shuffle(rotate_n_list)
+
+    for i in range(count_example+count_test):
+        rotate_n = rotate_n_list[i]
+        is_example = i < count_example
+        output_image = None
+        input_image = None
+        for retry_index in range(100):
+            iteration_seed = seed * 5 + retry_index * 133 + i * 1000
+
+            # Size of the random pattern
+            random_image_width = random.Random(iteration_seed + 1).randint(min_image_size, max_image_size)
+            random_image_height = random.Random(iteration_seed + 2).randint(min_image_size, max_image_size)
+
+            # Create a two color random pattern
+            ratios = [0.1, 0.2, 0.3, 0.4, 0.5]
+            ratio = random.Random(iteration_seed + 3).choice(ratios)
+            random_image = image_create_random_with_two_colors(random_image_width, random_image_height, 0, 1, ratio, iteration_seed + 4)
+            histogram = Histogram.create_with_image(random_image)
+            if histogram.number_of_unique_colors() < 2:
+                continue
+
+            # Create the left side of the image
+            left_inner = random_image.copy()
+
+            left_inner_flipx = image_flipx(left_inner)
+            if np.array_equal(left_inner, left_inner_flipx):
+                continue
+
+            # Create the right side of the image, that is a mirrored version of the left side.
+            if is_flipped:
+                right_inner = left_inner_flipx
+            else:
+                right_inner = left_inner.copy()
+            if is_inverted:
+                right_inner = image_replace_colors(right_inner, color_map_swap01)
+
+            # Add variable padding around the left image and right images.
+            # The left/right are swapped for left/right symmetry.
+            # The top/bottom padding are the same for the two images.
+            seed_padding = iteration_seed + 5
+            top = random.Random(seed_padding + 0).randint(min_pad_count, max_pad_count)
+            bottom = random.Random(seed_padding + 1).randint(min_pad_count, max_pad_count)
+            left = random.Random(seed_padding + 2).randint(min_pad_count, max_pad_count)
+            distance_to_wall = random.Random(seed_padding + 3).randint(min_pad_count, max_pad_count)
+            right = random.Random(seed_padding + 4).randint(min_pad_count, max_pad_count)
+            left_side = np.pad(left_inner, ((top, bottom), (left, distance_to_wall)), mode='constant', constant_values=color_background)
+            right_side = np.pad(right_inner, ((top, bottom), (distance_to_wall, right)), mode='constant', constant_values=color_background)
+
+            height, width = left_side.shape
+
+            right_side_empty = image_create(width, height, color_background)
+
+            wall = image_create(1, height, color_wall)
+
+            input_image_raw = np.hstack([left_side, wall, right_side_empty])
+            output_image_raw = np.hstack([left_side, wall, right_side])
+
+            # Change palette
+            input_image_raw = image_replace_colors(input_image_raw, color_mapping)
+            output_image_raw = image_replace_colors(output_image_raw, color_mapping)
+
+            # Rotate the images, so the model have to learn to detect the orientation.
+            input_image = np.rot90(input_image_raw, rotate_n)
+            output_image = np.rot90(output_image_raw, rotate_n)
+
+            break
+        if input_image is None:
+            raise Exception("Failed to create image")
+        if output_image is None:
+            raise Exception("Failed to create image")
+        task.append_pair(input_image, output_image, is_example)
+
+    return task
+
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
     builder.append_image()
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 4
+    j = seed % 5
     # j = (seed % 2) + 2
     # j = (seed % 2)
+    j = 4
     if j == 0:
         task = generate_task_with_input_image_create_output_symmetry_rect(seed)
         task_id = task.metadata_task_id
@@ -350,6 +470,10 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
         task = generate_task_with_symmetry_square_input_image_and_extract_a_particular_tile(seed)
         task_id = task.metadata_task_id
         transformation_id = f"'extract_square_tile {task_id}'"
+    elif j == 4:
+        task = generate_task_with_symmetry_line(seed)
+        task_id = task.metadata_task_id
+        transformation_id = f"'symmetry_line {task_id}'"
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
@@ -358,7 +482,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=1918000410,
+    seed=2018000410,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
