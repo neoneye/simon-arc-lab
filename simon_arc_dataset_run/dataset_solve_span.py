@@ -299,7 +299,7 @@ def generate_task_with_alternate(seed: int, transformation_id: str) -> Task:
     task = Task()
     min_span_count = 5
     max_span_count = 7
-    max_image_size = 10
+    max_image_size = 12
 
     color_background = 9
     color_indicator = 8
@@ -505,7 +505,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=2018000410,
+    seed=2118000410,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
