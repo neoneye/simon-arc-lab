@@ -47,8 +47,8 @@ def generate_task_with_intersecting_spans(seed: int, transformation_id: str) -> 
     # count_test = 1
     task = Task()
     min_span_count = 3
-    max_span_count = 6
-    max_image_size = 10
+    max_span_count = 7
+    max_image_size = 12
 
     color_background = 9
     color_template = 8
@@ -184,7 +184,7 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 6
+    j = seed % 5
     if j == 0:
         task = generate_task_with_intersecting_spans(seed, 'empty_primary_area')
         transformation_id = 'intersecting_spans empty_primary_area'
@@ -200,9 +200,10 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     elif j == 4:
         task = generate_task_with_intersecting_spans(seed, 'colored_primary_area_extract_horizontal')
         transformation_id = 'intersecting_spans colored_primary_area_extract_horizontal'
-    elif j == 5:
-        task = generate_task_with_intersecting_spans(seed, 'colored_primary_area_extract_vertical')
-        transformation_id = 'intersecting_spans colored_primary_area_extract_vertical'
+    # elif j == 5:
+    #     # This is identical to 'colored_primary_area_extract_horizontal', due to rotation of the tasks.
+    #     task = generate_task_with_intersecting_spans(seed, 'colored_primary_area_extract_vertical')
+    #     transformation_id = 'intersecting_spans colored_primary_area_extract_vertical'
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
@@ -211,7 +212,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=1218000410,
+    seed=1318000410,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
