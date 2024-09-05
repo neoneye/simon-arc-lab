@@ -189,9 +189,9 @@ def generate_task_with_template_lines(seed: int, transformation_id: str) -> Task
     count_test = random.Random(seed + 2).randint(1, 2)
     # count_test = 1
     task = Task()
-    min_span_count = 4
-    max_span_count = 5
-    max_image_size = 8
+    min_span_count = 3
+    max_span_count = 7
+    max_image_size = 12
 
     color_background = 9
     color_template = 8
@@ -453,9 +453,8 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 6
-    j = 5
-    j = (seed % 2) + 5
+    j = seed % 7
+    # j = (seed % 2) + 5
     j = 7
     if j == 0:
         task = generate_task_with_intersecting_spans(seed, 'empty_primary_area')
@@ -470,12 +469,9 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
         task = generate_task_with_intersecting_spans(seed, 'colored_primary_area_fill_template_border')
         transformation_id = 'intersecting_spans colored_primary_area_fill_template_border'
     elif j == 4:
+        # This is identical to 'colored_primary_area_extract_horizontal', due to rotation of the tasks.
         task = generate_task_with_intersecting_spans(seed, 'colored_primary_area_extract_horizontal')
         transformation_id = 'intersecting_spans colored_primary_area_extract_horizontal'
-    # elif j == 5:
-    #     # This is identical to 'colored_primary_area_extract_horizontal', due to rotation of the tasks.
-    #     task = generate_task_with_intersecting_spans(seed, 'colored_primary_area_extract_vertical')
-    #     transformation_id = 'intersecting_spans colored_primary_area_extract_vertical'
     elif j == 5:
         task = generate_task_with_template_lines(seed, 'output_with_border')
         transformation_id = 'template_lines output_with_border'
@@ -493,7 +489,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=1518000410,
+    seed=1718000410,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
