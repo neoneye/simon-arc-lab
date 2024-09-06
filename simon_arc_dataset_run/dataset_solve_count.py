@@ -1,5 +1,7 @@
 # Count number of lonely pixels, and draw a pattern N times in the output.
 #
+# IDEA: Add random padding around the input.
+#
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
 import os
@@ -154,7 +156,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=14000003,
+    seed=15000003,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
