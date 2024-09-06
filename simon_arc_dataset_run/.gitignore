@@ -18,6 +18,7 @@ dataset_solve_bool.jsonl
 dataset_solve_boundingbox.jsonl
 dataset_solve_color.jsonl
 dataset_solve_compress.jsonl
+dataset_solve_count.jsonl
 dataset_solve_cross.jsonl
 dataset_solve_edge.jsonl
 dataset_solve_erosion.jsonl
