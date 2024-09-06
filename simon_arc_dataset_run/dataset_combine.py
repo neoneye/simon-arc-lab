@@ -6,7 +6,7 @@ import json
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
-seed = 163
+seed = 164
 random.seed(seed)
 
 # Define the input file paths
@@ -25,6 +25,7 @@ file_names = [
     'dataset_solve_boundingbox.jsonl',
     'dataset_solve_color.jsonl',
     'dataset_solve_compress.jsonl',
+    'dataset_solve_count.jsonl',
     'dataset_solve_cross.jsonl',
     'dataset_solve_edge.jsonl',
     'dataset_solve_erosion.jsonl',
