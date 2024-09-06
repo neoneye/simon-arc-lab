@@ -462,7 +462,7 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 11
-    j = (seed % 4) + 7
+    # j = (seed % 4) + 7
     if j == 0:
         task = generate_task_with_intersecting_spans(seed, 'empty_primary_area')
         transformation_id = 'intersecting_spans empty_primary_area'
@@ -505,7 +505,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=2118000410,
+    seed=2218000410,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
