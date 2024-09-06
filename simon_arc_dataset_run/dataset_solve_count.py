@@ -13,6 +13,8 @@ sys.path.insert(0, PROJECT_ROOT)
 import random
 from simon_arc_lab.image_util import *
 from simon_arc_lab.task import *
+from simon_arc_lab.histogram import Histogram
+from simon_arc_lab.image_paste import image_paste_random
 from simon_arc_lab.image_create_random_advanced import *
 from simon_arc_lab.benchmark import *
 from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
@@ -135,6 +137,132 @@ def generate_task_count_pixels_and_repeat_output_pattern(seed: int, transformati
 
     return task
 
+def generate_task_count_pixels_and_repeat_input_pattern(seed: int, transformation_id: str) -> Task:
+    """
+    The input images shows N lonely pixels, and a pattern area.
+
+    The output images repeats N times the input pattern.
+
+    Example:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=4852f2fa_v2
+    """
+    count_example = random.Random(seed + 1).randint(3, 4)
+    count_test = random.Random(seed + 2).randint(1, 2)
+    # count_test = 1
+    task = Task()
+    min_image_size = 4
+    max_image_size = 8
+    min_pattern_size = 2
+    max_pattern_size = 2
+    min_count = 1
+    max_count = 3
+
+    color_background = 0
+    color_indicator = 1
+
+    # Ensures the pattern doesn't have the same colors as the background or the indicators.
+    color_map_pattern = {
+        color_background: 2,
+        color_indicator: 3,
+    }
+
+    # The colors used in the input and output images.
+    colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    random.Random(seed + 3).shuffle(colors)
+    color_map = {}
+    for i in range(10):
+        color_map[i] = colors[i]
+
+    task.metadata_task_id = f'count_pixels_and_repeat_input_pattern {transformation_id}'
+
+    # Ensure the number of positions vary among the examples, so it's not all just the same.
+    count_list = None
+    for retry_index in range(100):
+        candidate_count_list = []
+        for i in range(count_example+count_test):
+            count = random.Random(seed + retry_index * 102344 + i * 83832 + 2).randint(min_count, max_count)
+            candidate_count_list.append(count)
+
+        # count the number of unique values among the examples pairs
+        count_list_examples = candidate_count_list[:count_example]
+        unique_count = len(set(count_list_examples))
+        if unique_count < 3:
+            # Failed to find enough unique values.
+            continue
+
+        count_list = candidate_count_list
+        break
+
+    if count_list is None:
+        raise Exception("Failed to find count_list with enough unique values.")
+
+    for i in range(count_example+count_test):
+        is_example = i < count_example
+        number_of_positions = count_list[i]
+
+        input_image = None
+        output_image = None
+        for retry_index in range(100):
+            iteration_seed = (retry_index * 10000) + (seed * 37) + (i * 9932342) + 101
+
+            # Generate a random pattern image that doesn't have the background color nor the indicator color.
+            pattern_image = image_create_random_advanced(iteration_seed + 3, min_pattern_size, max_pattern_size, min_pattern_size, max_pattern_size)
+            pattern_image = image_replace_colors(pattern_image, color_map_pattern)
+            histogram = Histogram.create_with_image(pattern_image)
+            if histogram.number_of_unique_colors() < 3:
+                # Too few colors in the pattern. Skip this.
+                continue
+
+            pattern_height, pattern_width = pattern_image.shape
+
+            # Make sure the image is large enough to contain the pattern
+            image_width = random.Random(iteration_seed + 1).randint(min_image_size, max_image_size)
+            image_width = max(image_width, pattern_width)
+            image_height = random.Random(iteration_seed + 2).randint(min_image_size, max_image_size)
+            image_height = max(image_height, pattern_height)
+
+            solid_background_image = image_create(image_width, image_height, color_background)
+            background_image = image_paste_random(pattern_image, solid_background_image, iteration_seed + 3)
+
+            positions = []
+            for i in range(100):
+                if len(positions) == number_of_positions:
+                    break
+                x = random.Random(iteration_seed + 4 + i * 2).randint(0, image_width - 1)
+                y = random.Random(iteration_seed + 5 + i * 2).randint(0, image_height - 1)
+                xy = (x, y)
+                if xy in positions:
+                    continue
+                if background_image[y, x] != color_background:
+                    continue
+                positions.append(xy)
+            if len(positions) != number_of_positions:
+                # One or more coordinate collisions. Skip this.
+                continue
+
+            input_mask = background_image.copy()
+            for x, y in positions:
+                input_mask[y, x] = color_indicator
+
+            if transformation_id == 'repeat_x':
+                input_image_raw = input_mask
+                output_image_raw = np.tile(pattern_image, (1, number_of_positions))
+            elif transformation_id == 'repeat_y':
+                input_image_raw = input_mask
+                output_image_raw = np.tile(pattern_image, (number_of_positions, 1))
+            else:
+                raise Exception(f"Unknown transformation_id: {transformation_id}")
+
+            input_image = image_replace_colors(input_image_raw, color_map)
+            output_image = image_replace_colors(output_image_raw, color_map)
+
+            break
+        if (input_image is None) or (output_image is None):
+            raise Exception("Failed to find a candidate images.")
+        task.append_pair(input_image, output_image, is_example)
+
+    return task
+
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
     builder.append_image()
@@ -142,12 +270,20 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 2
+    # j = seed % 4
+    j = (seed % 2) + 2
     if j == 0:
         transformation_id = 'count_pixels_and_repeat_output_pattern_x'
         task = generate_task_count_pixels_and_repeat_output_pattern(seed, 'repeat_x')
     elif j == 1:
         transformation_id = 'count_pixels_and_repeat_output_pattern_y'
         task = generate_task_count_pixels_and_repeat_output_pattern(seed, 'repeat_y')
+    elif j == 2:
+        transformation_id = 'count_pixels_and_repeat_input_pattern_x'
+        task = generate_task_count_pixels_and_repeat_input_pattern(seed, 'repeat_x')
+    elif j == 3:
+        transformation_id = 'count_pixels_and_repeat_input_pattern_y'
+        task = generate_task_count_pixels_and_repeat_input_pattern(seed, 'repeat_y')
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
@@ -156,7 +292,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=15000003,
+    seed=16000003,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
