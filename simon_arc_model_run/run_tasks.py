@@ -24,7 +24,8 @@ CONTEXT_SIZE_LIMIT = (512, 500)
 # iteration=309 training=24 evaluation=6 total=30 <-- best total
 # iteration=351 training=20 evaluation=7 total=27 <-- best evaluation
 # iteration=364 training=20 evaluation=7 total=27 <-- best evaluation
-model_iteration = 421
+# iteration=460 training=21 evaluation=4 total=25
+model_iteration = 462
 model_name = f'simon-arc-lab-model{model_iteration}'
 model_directory = f'/Users/neoneye/nobackup/git/{model_name}'
 
