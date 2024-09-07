@@ -1,3 +1,6 @@
+# IDEA: Reject dataset items that are too big to fit inside the context length limit, 1024 tokens.
+#
+# IDEA: Retry mechanism, if the model fails to generate a response, then retry with a different seed.
 import random
 import json
 import os
