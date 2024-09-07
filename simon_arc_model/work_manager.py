@@ -111,6 +111,20 @@ class WorkManager:
         self.work_items = filtered_work_items
         print(f'Removed {count_before - count_after} work items with too long prompt. Remaining are {count_after} work items.')
 
+    def discard_items_with_too_short_prompts(self, min_prompt_length: int):
+        """
+        Ignore those where the prompt shorter than N tokens.
+        """
+        count_before = len(self.work_items)
+        filtered_work_items = []
+        for work_item in self.work_items:
+            prompt_length = len(work_item.predictor.prompt())
+            if prompt_length >= min_prompt_length:
+                filtered_work_items.append(work_item)
+        count_after = len(filtered_work_items)
+        self.work_items = filtered_work_items
+        print(f'Removed {count_before - count_after} work items with too short prompt. Remaining are {count_after} work items.')
+
     def process_all_work_items(self, show: bool = False, save_dir: Optional[str] = None):
         if save_dir is not None:
             print(f'Saving images to directory: {save_dir}')
