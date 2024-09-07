@@ -104,7 +104,8 @@ class WorkManager:
         count_before = len(self.work_items)
         filtered_work_items = []
         for work_item in self.work_items:
-            if len(work_item.predictor.prompt()) <= max_prompt_length:
+            prompt_length = len(work_item.predictor.prompt())
+            if prompt_length <= max_prompt_length:
                 filtered_work_items.append(work_item)
         count_after = len(filtered_work_items)
         self.work_items = filtered_work_items
