@@ -139,11 +139,13 @@ class WorkManager:
             os.makedirs(save_dir, exist_ok=True)
 
         correct_count = 0
+        correct_task_id_set = set()
         pbar = tqdm(self.work_items, desc="Processing work items")
         for work_item in pbar:
             work_item.process(self.model)
             if work_item.status == WorkItemStatus.CORRECT:
-                correct_count += 1
+                correct_task_id_set.add(work_item.task.metadata_task_id)
+                correct_count = len(correct_task_id_set)
             pbar.set_postfix({'correct': correct_count})
             if show:
                 work_item.show()
@@ -151,15 +153,25 @@ class WorkManager:
                 work_item.show(save_dir)
 
     def summary(self):
+        correct_task_id_set = set()
+        for work_item in self.work_items:
+            if work_item.status == WorkItemStatus.CORRECT:
+                correct_task_id_set.add(work_item.task.metadata_task_id)
+        correct_count = len(correct_task_id_set)
+        print(f'Number of correct solutions: {correct_count}')
+
         counters = {}
         for work_item in self.work_items:
-            status = work_item.status
-            if status in counters:
-                counters[status] += 1
+            mutator_name = work_item.mutator_name
+            status_name = work_item.status.name
+            key = f'{mutator_name}_{status_name}'
+            if key in counters:
+                counters[key] += 1
             else:
-                counters[status] = 1
-        for status, count in counters.items():
-            print(f'{status.name}: {count}')
+                counters[key] = 1
+        for key, count in counters.items():
+            print(f'{key}: {count}')
+
 
     def collect_predictions_as_arcprize2024_submission_dict(self) -> dict:
         result_dict = {}
