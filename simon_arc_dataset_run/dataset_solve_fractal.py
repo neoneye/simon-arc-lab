@@ -64,6 +64,7 @@ from simon_arc_lab.image_fractal import *
 from simon_arc_lab.image_pad import *
 from simon_arc_lab.image_scale import *
 from simon_arc_lab.benchmark import *
+from simon_arc_lab.task_formatter_rle_compact import TaskFormatterRLECompact
 from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
 from simon_arc_dataset.generate_solve import *
 from simon_arc_dataset.dataset_generator import *
@@ -79,8 +80,8 @@ def generate_task_pattern_to_fractal(seed: int) -> Task:
     count_example = random.Random(seed + 9).randint(2, 4)
     count_test = random.Random(seed + 10).randint(1, 2)
 
-    scale_input = random.Random(seed + 11).randint(1, 4)
-    scale_output = random.Random(seed + 12).randint(1, 4)
+    scale_input = random.Random(seed + 11).randint(1, 5)
+    scale_output = random.Random(seed + 12).randint(1, 5)
     is_inverse_mask = random.Random(seed + 14).choice([False, True])
     is_padded = random.Random(seed + 16).choice([False, True])
     empty_color = random.Random(seed + 15).choice([0, 1])
@@ -159,8 +160,8 @@ def generate_task_fractal_to_pattern(seed: int) -> Task:
     count_example = random.Random(seed + 9).randint(2, 4)
     count_test = random.Random(seed + 10).randint(1, 2)
 
-    scale_input = random.Random(seed + 11).randint(1, 4)
-    scale_output = random.Random(seed + 12).randint(1, 4)
+    scale_input = random.Random(seed + 11).randint(1, 5)
+    scale_output = random.Random(seed + 12).randint(1, 5)
     is_inverse_mask = random.Random(seed + 14).choice([False, True])
     is_padded = random.Random(seed + 16).choice([False, True])
     empty_color = random.Random(seed + 15).choice([0, 1])
@@ -237,13 +238,29 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     builder.append_image()
     return builder.dataset_items()
 
+def can_fit_inside_context_length(task: Task) -> bool:
+    task_formatter = TaskFormatterRLECompact(task)
+    s = task_formatter.to_string()
+    return len(s) < 1000
+
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    if seed % 2 == 0:
-        transformation_id = 'pattern_to_fractal'
-        task = generate_task_pattern_to_fractal(seed)
-    else:
-        transformation_id = 'fractal_to_pattern'
-        task = generate_task_fractal_to_pattern(seed)
+    j = seed % 2
+    task = None
+    for retry_index in range(100):
+        iteration_seed = seed + retry_index * 100324
+        if j == 0:
+            transformation_id = 'pattern_to_fractal'
+            task = generate_task_pattern_to_fractal(iteration_seed)
+        else:
+            transformation_id = 'fractal_to_pattern'
+            task = generate_task_fractal_to_pattern(iteration_seed)
+        
+        if can_fit_inside_context_length(task):
+            # Bingo, we found a task that fits inside the context length of the LLM.
+            break
+
+        # Task is too long to fit inside the context length of LLM. Try again.
+
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
@@ -252,7 +269,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=14001103031,
+    seed=15001103031,
     max_num_samples=100000,
     max_byte_size=1024*1024*150
 )
