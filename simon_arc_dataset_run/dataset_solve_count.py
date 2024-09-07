@@ -269,9 +269,8 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 2
-    # j = seed % 4
-    j = (seed % 2) + 2
+    j = seed % 4
+    # j = (seed % 2) + 2
     if j == 0:
         transformation_id = 'count_pixels_and_repeat_output_pattern_x'
         task = generate_task_count_pixels_and_repeat_output_pattern(seed, 'repeat_x')
@@ -292,7 +291,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=18000003,
+    seed=19000003,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
