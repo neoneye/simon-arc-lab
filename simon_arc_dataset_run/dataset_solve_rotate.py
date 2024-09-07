@@ -1,6 +1,9 @@
 # Rotate the image by 90 degrees, clockwise, counterclockwise, 180 degrees.
 # Does flipx, flipy, flip_diagonal_a, flip_diagonal_b.
 #
+# IDEA: Add some noise to the example pairs, but not to the test pairs.
+# This way the model have to recognize the transformation despite the noise.
+#
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
 import os
@@ -31,14 +34,13 @@ def generate_task(seed: int, transformation_id: str, percent_noise: float) -> Ta
     count_test = random.Random(seed + 10).randint(1, 2)
     # count_test = 1
     task = Task()
-    min_width = 1
-    max_width = 10
-    min_height = 1
-    max_height = 10
+    min_size = 1
+    max_size = 13
+    task.metadata_task_id = f'rotate_flip {transformation_id}'
 
     for i in range(count_example+count_test):
         is_example = i < count_example
-        input_image = image_create_random_advanced(seed + 1002 + i, min_width, max_width, min_height, max_height)
+        input_image = image_create_random_advanced(seed + 1002 + i, min_size, max_size, min_size, max_size)
 
         transformed_image = None
         if transformation_id == 'rotate_cw':
@@ -70,8 +72,6 @@ def generate_task(seed: int, transformation_id: str, percent_noise: float) -> Ta
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    # builder.append_height()
-    # builder.append_pixels()
     builder.append_image()
     return builder.dataset_items()
 
@@ -94,6 +94,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     for transformation_id in transformation_ids:
         percent_noise = 0.0
         task = generate_task(seed_task, transformation_id, percent_noise)
+        # task.show()
         dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
         all_dataset_items.extend(dataset_items)
 
@@ -103,7 +104,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=115000235,
+    seed=125000235,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
