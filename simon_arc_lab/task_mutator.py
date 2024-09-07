@@ -18,6 +18,10 @@ class TaskMutatorBase:
     def __init__(self, task: Task):
         raise NotImplementedError()
 
+    @classmethod
+    def name(cls) -> str:
+        raise NotImplementedError()
+
     def transformed_task(self) -> Task:
         raise NotImplementedError()
 
@@ -29,10 +33,14 @@ class TaskMutatorBase:
         """
         raise NotImplementedError()
 
-class TaskMutatorDoNothing(TaskMutatorBase):
+class TaskMutatorOriginal(TaskMutatorBase):
     def __init__(self, task: Task):
         self.task = task.clone()
 
+    @classmethod
+    def name(cls) -> str:
+        return 'original'
+    
     def transformed_task(self) -> Task:
         return self.task.clone()
     
@@ -50,8 +58,12 @@ class TaskMutatorTranspose(TaskMutatorBase):
             new_task.output_images[i] = np.transpose(output_image)
         self.task = new_task
 
+    @classmethod
+    def name(cls) -> str:
+        return 'transpose'
+    
     def transformed_task(self) -> Task:
-        return self.task.copy()
+        return self.task.clone()
     
     def reverse_transformation(self, transformed_image: np.array, pair_index: int) -> np.array:
         return np.transpose(transformed_image)
@@ -88,6 +100,10 @@ class TaskMutatorTransposeSoInputIsMostCompact(TaskMutatorBase):
         self.istransposed_list = istransposed_list
         self.task = new_task
 
+    @classmethod
+    def name(cls) -> str:
+        return 'mostcompact'
+    
     def transformed_task(self) -> Task:
         return self.task.clone()
     

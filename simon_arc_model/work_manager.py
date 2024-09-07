@@ -7,6 +7,7 @@ import numpy as np
 from typing import Optional
 from simon_arc_lab.rle.deserialize import DecodeRLEError
 from simon_arc_lab.task import Task
+from simon_arc_lab.task_mutator import *
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.show_prediction_result import show_prediction_result
 from .model import Model
@@ -28,10 +29,15 @@ class WorkItemStatus(Enum):
         return self.name.lower()
 
 class WorkItem:
-    def __init__(self, task: Task, test_index: int):
+    def __init__(self, task: Task, test_index: int, task_mutator_class: type):
+        if not issubclass(task_mutator_class, TaskMutatorBase):
+            raise TypeError(f"{task_mutator_class.__name__} must be a subclass of TaskMutatorBase")
+
+        self.mutator_name = task_mutator_class.name()
+        # print(f'WorkItem: task={task.metadata_task_id} test={test_index} mutator={class_name}')
         self.task = task
         self.test_index = test_index
-        self.predictor = PredictOutputV1(task, test_index)
+        self.predictor = PredictOutputV1(task, test_index, task_mutator_class)
         self.predicted_output_image = None
         self.status = WorkItemStatus.UNASSIGNED
 
@@ -69,12 +75,12 @@ class WorkItem:
         input_image = task.test_input(test_index)
         task_id = task.metadata_task_id
         status_string = self.status.to_string()
-        title = f'{task_id} test={test_index} {status_string}'
+        title = f'{task_id} test={test_index} {self.mutator_name} {status_string}'
 
         expected_output_image = task.test_output(test_index)
         predicted_output_image = self.predicted_output_image
 
-        filename = f'{task_id}_test{test_index}_{status_string}.png'
+        filename = f'{task_id}_test{test_index}_{self.mutator_name}_{status_string}.png'
         if save_dir_path is not None:
             save_path = os.path.join(save_dir_path, filename)
         else:
@@ -86,14 +92,16 @@ class WorkManager:
     def __init__(self, model: Model, taskset: TaskSet):
         self.model = model
         self.taskset = taskset
-        self.work_items = WorkManager.create_work_items(taskset)
+        items0 = WorkManager.create_work_items(taskset, TaskMutatorOriginal)
+        items1 = WorkManager.create_work_items(taskset, TaskMutatorTranspose)
+        self.work_items = items0 + items1
 
     @classmethod
-    def create_work_items(cls, taskset: TaskSet) -> list['WorkItem']:
+    def create_work_items(cls, taskset: TaskSet, task_mutator_class: type) -> list['WorkItem']:
         work_items = []
         for task in taskset.tasks:
             for test_index in range(task.count_tests):
-                work_item = WorkItem(task, test_index)
+                work_item = WorkItem(task, test_index, task_mutator_class)
                 work_items.append(work_item)
         return work_items
 

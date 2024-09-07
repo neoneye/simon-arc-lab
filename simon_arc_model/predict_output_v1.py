@@ -5,10 +5,14 @@ from simon_arc_lab.rle.deserialize import *
 from simon_arc_model.model import Model
 
 class PredictOutputV1:
-    def __init__(self, task: Task, test_index: int):
+    def __init__(self, task: Task, test_index: int, task_mutator_class: type):
+        if not issubclass(task_mutator_class, TaskMutatorBase):
+            raise TypeError(f"{task_mutator_class.__name__} must be a subclass of TaskMutatorBase")
+        
         self.task = task
         self.test_index = test_index
-        self.task_mutator = TaskMutatorDoNothing(task)
+        self.task_mutator = task_mutator_class(task)
+        # self.task_mutator = TaskMutatorDoNothing(task)
         # self.task_mutator = TaskMutatorTranspose(task)
         # self.task_mutator = TaskMutatorTransposeSoInputIsMostCompact(task)
         self.cached_prompt = None
