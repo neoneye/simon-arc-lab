@@ -151,11 +151,11 @@ def generate_task_count_pixels_and_repeat_input_pattern(seed: int, transformatio
     # count_test = 1
     task = Task()
     min_image_size = 4
-    max_image_size = 8
+    max_image_size = 12
     min_pattern_size = 2
-    max_pattern_size = 2
+    max_pattern_size = 3
     min_count = 1
-    max_count = 3
+    max_count = 4
 
     color_background = 0
     color_indicator = 1
@@ -292,7 +292,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=16000003,
+    seed=17000003,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
