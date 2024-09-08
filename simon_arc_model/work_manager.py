@@ -209,14 +209,22 @@ class WorkManager:
             result_dict[task_id] = test_list
                 
         # Update the result_dict with the predicted images
+        attempt1_set = set()
         for work_item in self.work_items:
             if work_item.predicted_output_image is None:
                 continue
             task_id = work_item.task.metadata_task_id
 
+            if task_id in attempt1_set:
+                attempt_1or2 = 'attempt_2'
+                print(f'Found multiple predictions for task {task_id}. Using attempt_2.')
+            else:
+                attempt_1or2 = 'attempt_1'
+                attempt1_set.add(task_id)
+
             # Update the existing entry in the result_dict with the predicted image
             image = work_item.predicted_output_image.tolist()
-            result_dict[task_id][work_item.test_index]['attempt_1'] = image
+            result_dict[task_id][work_item.test_index][attempt_1or2] = image
         return result_dict
     
     def save_arcprize2024_submission_file(self, path_to_json_file: str):
