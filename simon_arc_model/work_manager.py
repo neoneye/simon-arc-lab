@@ -7,10 +7,11 @@ import numpy as np
 from typing import Optional
 from simon_arc_lab.rle.deserialize import DecodeRLEError
 from simon_arc_lab.task import Task
+from simon_arc_lab.task_mutator import *
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.show_prediction_result import show_prediction_result
 from .model import Model
-from .predict_output_v1 import PredictOutputV1
+from .predict_output_v1 import *
 
 class WorkItemStatus(Enum):
     UNASSIGNED = 0
@@ -28,10 +29,12 @@ class WorkItemStatus(Enum):
         return self.name.lower()
 
 class WorkItem:
-    def __init__(self, task: Task, test_index: int):
+    def __init__(self, task: Task, test_index: int, predictor: PredictOutputBase):
+        self.predictor_name = predictor.name()
+        # print(f'WorkItem: task={task.metadata_task_id} test={test_index} predictor={self.predictor_name}')
         self.task = task
         self.test_index = test_index
-        self.predictor = PredictOutputV1(task, test_index)
+        self.predictor = predictor
         self.predicted_output_image = None
         self.status = WorkItemStatus.UNASSIGNED
 
@@ -69,12 +72,12 @@ class WorkItem:
         input_image = task.test_input(test_index)
         task_id = task.metadata_task_id
         status_string = self.status.to_string()
-        title = f'{task_id} test={test_index} {status_string}'
+        title = f'{task_id} test={test_index} {self.predictor_name} {status_string}'
 
         expected_output_image = task.test_output(test_index)
         predicted_output_image = self.predicted_output_image
 
-        filename = f'{task_id}_test{test_index}_{status_string}.png'
+        filename = f'{task_id}_test{test_index}_{self.predictor_name}_{status_string}.png'
         if save_dir_path is not None:
             save_path = os.path.join(save_dir_path, filename)
         else:
@@ -90,11 +93,14 @@ class WorkManager:
 
     @classmethod
     def create_work_items(cls, taskset: TaskSet) -> list['WorkItem']:
+        task_mutator_class_list = [TaskMutatorOriginal, TaskMutatorTranspose]
         work_items = []
         for task in taskset.tasks:
             for test_index in range(task.count_tests):
-                work_item = WorkItem(task, test_index)
-                work_items.append(work_item)
+                for task_mutator_class in task_mutator_class_list:
+                    predictor = PredictOutputV1(task, test_index, task_mutator_class)
+                    work_item = WorkItem(task, test_index, predictor)
+                    work_items.append(work_item)
         return work_items
 
     def discard_items_with_too_long_prompts(self, max_prompt_length: int):
@@ -131,11 +137,13 @@ class WorkManager:
             os.makedirs(save_dir, exist_ok=True)
 
         correct_count = 0
+        correct_task_id_set = set()
         pbar = tqdm(self.work_items, desc="Processing work items")
         for work_item in pbar:
             work_item.process(self.model)
             if work_item.status == WorkItemStatus.CORRECT:
-                correct_count += 1
+                correct_task_id_set.add(work_item.task.metadata_task_id)
+                correct_count = len(correct_task_id_set)
             pbar.set_postfix({'correct': correct_count})
             if show:
                 work_item.show()
@@ -143,15 +151,45 @@ class WorkManager:
                 work_item.show(save_dir)
 
     def summary(self):
+        correct_task_id_set = set()
+        for work_item in self.work_items:
+            if work_item.status == WorkItemStatus.CORRECT:
+                correct_task_id_set.add(work_item.task.metadata_task_id)
+        correct_count = len(correct_task_id_set)
+        print(f'Number of correct solutions: {correct_count}')
+
         counters = {}
         for work_item in self.work_items:
-            status = work_item.status
-            if status in counters:
-                counters[status] += 1
+            predictor_name = work_item.predictor_name
+            status_name = work_item.status.name
+            key = f'{predictor_name}_{status_name}'
+            if key in counters:
+                counters[key] += 1
             else:
-                counters[status] = 1
-        for status, count in counters.items():
-            print(f'{status.name}: {count}')
+                counters[key] = 1
+        for key, count in counters.items():
+            print(f'{key}: {count}')
+
+    def discard_items_where_predicted_output_is_identical_to_the_input(self):
+        """
+        Usually in ARC-AGI the predicted output image is supposed to be different from the input image.
+        There are ARC like datasets where the input and output may be the same, but it's rare.
+        It's likely a mistake when input and output is the same.
+        """
+        count_before = len(self.work_items)
+        filtered_work_items = []
+        for work_item in self.work_items:
+            if work_item.predicted_output_image is None:
+                filtered_work_items.append(work_item)
+                continue
+            input_image = work_item.task.test_input(work_item.test_index)
+            predicted_image = work_item.predicted_output_image
+            is_identical = np.array_equal(input_image, predicted_image)
+            if not is_identical:
+                filtered_work_items.append(work_item)
+        count_after = len(filtered_work_items)
+        self.work_items = filtered_work_items
+        print(f'Removed {count_before - count_after} work items where the input and output is identical. Remaining are {count_after} work items.')
 
     def collect_predictions_as_arcprize2024_submission_dict(self) -> dict:
         result_dict = {}
@@ -171,14 +209,22 @@ class WorkManager:
             result_dict[task_id] = test_list
                 
         # Update the result_dict with the predicted images
+        attempt1_set = set()
         for work_item in self.work_items:
             if work_item.predicted_output_image is None:
                 continue
             task_id = work_item.task.metadata_task_id
 
+            if task_id in attempt1_set:
+                attempt_1or2 = 'attempt_2'
+                print(f'Found multiple predictions for task {task_id}. Using attempt_2.')
+            else:
+                attempt_1or2 = 'attempt_1'
+                attempt1_set.add(task_id)
+
             # Update the existing entry in the result_dict with the predicted image
             image = work_item.predicted_output_image.tolist()
-            result_dict[task_id][work_item.test_index]['attempt_1'] = image
+            result_dict[task_id][work_item.test_index][attempt_1or2] = image
         return result_dict
     
     def save_arcprize2024_submission_file(self, path_to_json_file: str):
