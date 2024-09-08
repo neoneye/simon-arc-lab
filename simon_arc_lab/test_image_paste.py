@@ -3,7 +3,51 @@ import numpy as np
 from .image_paste import *
 
 class TestImagePaste(unittest.TestCase):
-    def test_10000_image_paste_random_perfect_fit_no_space_remaining(self):
+    def test_10000_image_paste_at_perfect_fit_no_space_remaining(self):
+        # Arrange
+        paste_image = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        background_image = np.zeros((2, 3), dtype=np.uint8)
+        # Act
+        actual = image_paste_at(paste_image, background_image, 0, 0)
+        # Assert
+        expected = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_20001_image_paste_at_too_big_cannot_fit_inside(self):
+        # Arrange
+        paste_image = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        background_image = np.zeros((2, 2), dtype=np.uint8)
+        # Act
+        with self.assertRaises(ValueError):
+            image_paste_at(paste_image, background_image, 0, 0)
+
+    def test_20002_image_paste_at_coordinate_outside(self):
+        # Arrange
+        paste_image = np.array([
+            [1, 2],
+            [3, 4]], dtype=np.uint8)
+        background_image = np.zeros((2, 3), dtype=np.uint8)
+        # Act
+        with self.assertRaises(ValueError):
+            image_paste_at(paste_image, background_image, 2, 0)
+
+    def test_20003_image_paste_at_coordinate_outside(self):
+        # Arrange
+        paste_image = np.array([
+            [1, 2],
+            [3, 4]], dtype=np.uint8)
+        background_image = np.zeros((3, 2), dtype=np.uint8)
+        # Act
+        with self.assertRaises(ValueError):
+            image_paste_at(paste_image, background_image, 0, 2)
+
+    def test_20000_image_paste_random_perfect_fit_no_space_remaining(self):
         # Arrange
         paste_image = np.array([
             [1, 2, 3],
@@ -17,7 +61,7 @@ class TestImagePaste(unittest.TestCase):
             [4, 5, 6]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_10001_image_paste_random_too_big_cannot_fit_inside(self):
+    def test_20001_image_paste_random_too_big_cannot_fit_inside(self):
         # Arrange
         paste_image = np.array([
             [1, 2, 3],
@@ -27,7 +71,7 @@ class TestImagePaste(unittest.TestCase):
         with self.assertRaises(ValueError):
             image_paste_random(paste_image, background_image, 0)
 
-    def test_10002_image_paste_random_too_big_cannot_fit_inside(self):
+    def test_20002_image_paste_random_too_big_cannot_fit_inside(self):
         # Arrange
         paste_image = np.array([
             [1, 2, 3],
@@ -37,7 +81,7 @@ class TestImagePaste(unittest.TestCase):
         with self.assertRaises(ValueError):
             image_paste_random(paste_image, background_image, 0)
 
-    def test_11001_image_paste_random_one_x_space(self):
+    def test_21001_image_paste_random_one_x_space(self):
         # Arrange
         paste_image = np.array([
             [1, 2, 3],
@@ -51,7 +95,7 @@ class TestImagePaste(unittest.TestCase):
             [4, 5, 6, 0]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_11002_image_paste_random_one_x_space(self):
+    def test_21002_image_paste_random_one_x_space(self):
         # Arrange
         paste_image = np.array([
             [1, 2, 3],
@@ -65,7 +109,7 @@ class TestImagePaste(unittest.TestCase):
             [0, 4, 5, 6]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_11003_image_paste_random_two_x_spaces(self):
+    def test_21003_image_paste_random_two_x_spaces(self):
         # Arrange
         paste_image = np.array([
             [1, 2, 3],
@@ -79,7 +123,7 @@ class TestImagePaste(unittest.TestCase):
             [0, 4, 5, 6, 0]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_12001_image_paste_random_one_y_space(self):
+    def test_22001_image_paste_random_one_y_space(self):
         # Arrange
         paste_image = np.array([
             [1, 2, 3],
@@ -94,7 +138,7 @@ class TestImagePaste(unittest.TestCase):
             [4, 5, 6]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_12002_image_paste_random_one_y_space(self):
+    def test_22002_image_paste_random_one_y_space(self):
         # Arrange
         paste_image = np.array([
             [1, 2, 3],
@@ -109,7 +153,7 @@ class TestImagePaste(unittest.TestCase):
             [0, 0, 0]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_12003_image_paste_random_two_y_spaces(self):
+    def test_22003_image_paste_random_two_y_spaces(self):
         # Arrange
         paste_image = np.array([
             [1, 2, 3],
