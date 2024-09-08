@@ -30,8 +30,8 @@ class WorkItemStatus(Enum):
 
 class WorkItem:
     def __init__(self, task: Task, test_index: int, predictor: PredictOutputBase):
-        self.mutator_name = predictor.name()
-        # print(f'WorkItem: task={task.metadata_task_id} test={test_index} mutator={self.mutator_name}')
+        self.predictor_name = predictor.name()
+        # print(f'WorkItem: task={task.metadata_task_id} test={test_index} predictor={self.predictor_name}')
         self.task = task
         self.test_index = test_index
         self.predictor = predictor
@@ -72,12 +72,12 @@ class WorkItem:
         input_image = task.test_input(test_index)
         task_id = task.metadata_task_id
         status_string = self.status.to_string()
-        title = f'{task_id} test={test_index} {self.mutator_name} {status_string}'
+        title = f'{task_id} test={test_index} {self.predictor_name} {status_string}'
 
         expected_output_image = task.test_output(test_index)
         predicted_output_image = self.predicted_output_image
 
-        filename = f'{task_id}_test{test_index}_{self.mutator_name}_{status_string}.png'
+        filename = f'{task_id}_test{test_index}_{self.predictor_name}_{status_string}.png'
         if save_dir_path is not None:
             save_path = os.path.join(save_dir_path, filename)
         else:
@@ -89,18 +89,18 @@ class WorkManager:
     def __init__(self, model: Model, taskset: TaskSet):
         self.model = model
         self.taskset = taskset
-        items0 = WorkManager.create_work_items(taskset, TaskMutatorOriginal)
-        items1 = WorkManager.create_work_items(taskset, TaskMutatorTranspose)
-        self.work_items = items0 + items1
+        self.work_items = WorkManager.create_work_items(taskset)
 
     @classmethod
-    def create_work_items(cls, taskset: TaskSet, task_mutator_class: type) -> list['WorkItem']:
+    def create_work_items(cls, taskset: TaskSet) -> list['WorkItem']:
+        task_mutator_class_list = [TaskMutatorOriginal, TaskMutatorTranspose]
         work_items = []
         for task in taskset.tasks:
             for test_index in range(task.count_tests):
-                predictor = PredictOutputV1(task, test_index, task_mutator_class)
-                work_item = WorkItem(task, test_index, predictor)
-                work_items.append(work_item)
+                for task_mutator_class in task_mutator_class_list:
+                    predictor = PredictOutputV1(task, test_index, task_mutator_class)
+                    work_item = WorkItem(task, test_index, predictor)
+                    work_items.append(work_item)
         return work_items
 
     def discard_items_with_too_long_prompts(self, max_prompt_length: int):
@@ -160,9 +160,9 @@ class WorkManager:
 
         counters = {}
         for work_item in self.work_items:
-            mutator_name = work_item.mutator_name
+            predictor_name = work_item.predictor_name
             status_name = work_item.status.name
-            key = f'{mutator_name}_{status_name}'
+            key = f'{predictor_name}_{status_name}'
             if key in counters:
                 counters[key] += 1
             else:
