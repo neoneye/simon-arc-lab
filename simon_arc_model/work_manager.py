@@ -172,8 +172,9 @@ class WorkManager:
 
     def discard_items_where_predicted_output_is_identical_to_the_input(self):
         """
-        Usually the predicted image is supposed to be different from the input image.
-        It's likely a mistake when it's identical as the input.
+        Usually in ARC-AGI the predicted output image is supposed to be different from the input image.
+        There are ARC like datasets where the input and output may be the same, but it's rare.
+        It's likely a mistake when input and output is the same.
         """
         count_before = len(self.work_items)
         filtered_work_items = []
