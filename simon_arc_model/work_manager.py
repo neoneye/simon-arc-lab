@@ -94,6 +94,7 @@ class WorkManager:
     @classmethod
     def create_work_items(cls, taskset: TaskSet) -> list['WorkItem']:
         task_mutator_class_list = [TaskMutatorOriginal, TaskMutatorTranspose]
+        # task_mutator_class_list = [TaskMutatorOriginal, TaskMutatorTranspose, TaskMutatorInputRotateCW, TaskMutatorInputRotateCCW, TaskMutatorInputRotate180, TaskMutatorTransposeSoInputIsMostCompact]
         work_items = []
         for task in taskset.tasks:
             for test_index in range(task.count_tests):

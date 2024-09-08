@@ -116,3 +116,58 @@ class TaskMutatorTransposeSoInputIsMostCompact(TaskMutatorBase):
             return np.transpose(transformed_image)
         else:
             return transformed_image.copy()
+
+class TaskMutatorInputRotateCW(TaskMutatorBase):
+    def __init__(self, task: Task):
+        new_task = task.clone()
+        for i in range(task.count()):
+            new_task.input_images[i] = image_rotate_cw(task.input_images[i])
+            new_task.output_images[i] = task.output_images[i].copy()
+        self.task = new_task
+
+    @classmethod
+    def name(cls) -> str:
+        return 'input_cw'
+    
+    def transformed_task(self) -> Task:
+        return self.task.clone()
+    
+    def reverse_transformation(self, transformed_image: np.array, pair_index: int) -> np.array:
+        return transformed_image.copy()
+
+class TaskMutatorInputRotateCCW(TaskMutatorBase):
+    def __init__(self, task: Task):
+        new_task = task.clone()
+        for i in range(task.count()):
+            new_task.input_images[i] = image_rotate_ccw(task.input_images[i])
+            new_task.output_images[i] = task.output_images[i].copy()
+        self.task = new_task
+
+    @classmethod
+    def name(cls) -> str:
+        return 'input_ccw'
+    
+    def transformed_task(self) -> Task:
+        return self.task.clone()
+    
+    def reverse_transformation(self, transformed_image: np.array, pair_index: int) -> np.array:
+        return transformed_image.copy()
+
+class TaskMutatorInputRotate180(TaskMutatorBase):
+    def __init__(self, task: Task):
+        new_task = task.clone()
+        for i in range(task.count()):
+            new_task.input_images[i] = image_rotate_180(task.input_images[i])
+            new_task.output_images[i] = task.output_images[i].copy()
+        self.task = new_task
+
+    @classmethod
+    def name(cls) -> str:
+        return 'input_180'
+    
+    def transformed_task(self) -> Task:
+        return self.task.clone()
+    
+    def reverse_transformation(self, transformed_image: np.array, pair_index: int) -> np.array:
+        return transformed_image.copy()
+
