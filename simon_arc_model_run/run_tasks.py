@@ -71,6 +71,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
     # wm.process_all_work_items()
     wm.process_all_work_items(save_dir=save_dir)
     # wm.process_all_work_items(show=True)
+    wm.discard_items_where_predicted_output_is_identical_to_the_input()
     wm.summary()
 
     gallery_title = f'{groupname}, model {model_iteration}'

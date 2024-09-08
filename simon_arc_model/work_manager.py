@@ -170,6 +170,25 @@ class WorkManager:
         for key, count in counters.items():
             print(f'{key}: {count}')
 
+    def discard_items_where_predicted_output_is_identical_to_the_input(self):
+        """
+        Usually the predicted image is supposed to be different from the input image.
+        It's likely a mistake when it's identical as the input.
+        """
+        count_before = len(self.work_items)
+        filtered_work_items = []
+        for work_item in self.work_items:
+            if work_item.predicted_output_image is None:
+                filtered_work_items.append(work_item)
+                continue
+            input_image = work_item.task.test_input(work_item.test_index)
+            predicted_image = work_item.predicted_output_image
+            is_identical = np.array_equal(input_image, predicted_image)
+            if not is_identical:
+                filtered_work_items.append(work_item)
+        count_after = len(filtered_work_items)
+        self.work_items = filtered_work_items
+        print(f'Removed {count_before - count_after} work items where the input and output is identical. Remaining are {count_after} work items.')
 
     def collect_predictions_as_arcprize2024_submission_dict(self) -> dict:
         result_dict = {}

@@ -7,6 +7,9 @@
 # IDEA: Skew only the input images, don't touch the output images
 # IDEA: Skew only the output images, don't touch the input images
 #
+# IDEA: Rotate45 only the input images, don't touch the output images
+# IDEA: Rotate45 only the output images, don't touch the input images
+#
 # IDEA: Shuffle the order of pairs. It may impact the model's ability to solve the task.
 #
 # IDEA: Tasks with 2 colors, normalize so they use the same color
