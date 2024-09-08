@@ -217,7 +217,7 @@ class WorkManager:
 
             if task_id in attempt1_set:
                 attempt_1or2 = 'attempt_2'
-                print(f'Found multiple predictions for task {task_id}. Using attempt_2.')
+                # print(f'Found multiple predictions for task {task_id}. Using attempt_2.')
             else:
                 attempt_1or2 = 'attempt_1'
                 attempt1_set.add(task_id)
