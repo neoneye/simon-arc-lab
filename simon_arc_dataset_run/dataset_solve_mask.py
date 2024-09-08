@@ -148,15 +148,17 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    transformation_ids = ['identify_the_masked_area', 'repair_the_masked_area']
-    accumulated_dataset_items = []
-    for index, transformation_id in enumerate(transformation_ids):
-        iteration_seed = seed * 1000000 + index
-        task = generate_task_linepatterns_with_masked_areas(iteration_seed + 1, transformation_id)
-        dataset_items = generate_dataset_item_list_inner(iteration_seed + 2, task, transformation_id)
-        # task.show()
-        accumulated_dataset_items.extend(dataset_items)
-    return accumulated_dataset_items
+    j = seed % 2
+    if j == 0:
+        transformation_id = 'identify_the_masked_area'
+        task = generate_task_linepatterns_with_masked_areas(seed, transformation_id)
+    elif j == 1:
+        transformation_id = 'repair_the_masked_area'
+        task = generate_task_linepatterns_with_masked_areas(seed, transformation_id)
+
+    dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
+    # task.show()
+    return dataset_items
 
 generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
