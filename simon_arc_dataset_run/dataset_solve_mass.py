@@ -201,7 +201,7 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 6
+    j = seed % 8
     # j = (seed % 2) + 4
     if j == 0:
         transformation_id = 'mass1_all8'
@@ -216,9 +216,15 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
         transformation_id = 'mass4_all8'
         task = generate_task_specific_mass(seed, 4, PixelConnectivity.ALL8)
     elif j == 4:
+        transformation_id = 'mass5_all8'
+        task = generate_task_specific_mass(seed, 5, PixelConnectivity.ALL8)
+    elif j == 5:
+        transformation_id = 'mass6_all8'
+        task = generate_task_specific_mass(seed, 6, PixelConnectivity.ALL8)
+    elif j == 6:
         transformation_id = 'mass_compare_adjacent_rows'
         task = generate_task_comparing_adjacent_rowcolumn(seed, 'adjacent_rows')
-    elif j == 5:
+    elif j == 7:
         transformation_id = 'mass_compare_adjacent_columns'
         task = generate_task_comparing_adjacent_rowcolumn(seed, 'adjacent_columns')
     # task.show()
@@ -229,9 +235,9 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=240000777,
+    seed=250000777,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
-# generator.inspect()
+generator.inspect()
 generator.save(SAVE_FILE_PATH)
