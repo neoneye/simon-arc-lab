@@ -11,7 +11,7 @@ from simon_arc_lab.task_mutator import *
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.show_prediction_result import show_prediction_result
 from .model import Model
-from .predict_output_v1 import PredictOutputV1
+from .predict_output_v1 import *
 
 class WorkItemStatus(Enum):
     UNASSIGNED = 0
@@ -29,15 +29,12 @@ class WorkItemStatus(Enum):
         return self.name.lower()
 
 class WorkItem:
-    def __init__(self, task: Task, test_index: int, task_mutator_class: type):
-        if not issubclass(task_mutator_class, TaskMutatorBase):
-            raise TypeError(f"{task_mutator_class.__name__} must be a subclass of TaskMutatorBase")
-
-        self.mutator_name = task_mutator_class.name()
-        # print(f'WorkItem: task={task.metadata_task_id} test={test_index} mutator={class_name}')
+    def __init__(self, task: Task, test_index: int, predictor: PredictOutputBase):
+        self.mutator_name = predictor.name()
+        # print(f'WorkItem: task={task.metadata_task_id} test={test_index} mutator={self.mutator_name}')
         self.task = task
         self.test_index = test_index
-        self.predictor = PredictOutputV1(task, test_index, task_mutator_class)
+        self.predictor = predictor
         self.predicted_output_image = None
         self.status = WorkItemStatus.UNASSIGNED
 
@@ -101,7 +98,8 @@ class WorkManager:
         work_items = []
         for task in taskset.tasks:
             for test_index in range(task.count_tests):
-                work_item = WorkItem(task, test_index, task_mutator_class)
+                predictor = PredictOutputV1(task, test_index, task_mutator_class)
+                work_item = WorkItem(task, test_index, predictor)
                 work_items.append(work_item)
         return work_items
 

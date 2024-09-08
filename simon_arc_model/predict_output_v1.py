@@ -4,7 +4,20 @@ from simon_arc_lab.task_mutator import *
 from simon_arc_lab.rle.deserialize import *
 from simon_arc_model.model import Model
 
-class PredictOutputV1:
+class PredictOutputBase:
+    def prompt(self) -> str:
+        raise NotImplementedError()
+
+    def execute(self, model: Model):
+        raise NotImplementedError()
+
+    def predicted_image(self) -> np.array:
+        raise NotImplementedError()
+    
+    def name(self) -> str:
+        raise NotImplementedError()
+
+class PredictOutputV1(PredictOutputBase):
     def __init__(self, task: Task, test_index: int, task_mutator_class: type):
         if not issubclass(task_mutator_class, TaskMutatorBase):
             raise TypeError(f"{task_mutator_class.__name__} must be a subclass of TaskMutatorBase")
@@ -46,3 +59,6 @@ class PredictOutputV1:
         pair_index = self.task.count_examples + self.test_index
         image1 = self.task_mutator.reverse_transformation(image0, pair_index)
         return image1
+
+    def name(self) -> str:
+        return self.task_mutator.name()
