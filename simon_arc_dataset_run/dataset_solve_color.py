@@ -118,6 +118,7 @@ def generate_task_replace_color_pairs_with_different_palettes(seed: int, transfo
     The pairs doesn't use the same palette.
 
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f76d97a5
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=b94a9452
     """
     count_example = random.Random(seed + 1).randint(2, 4)
     count_test = random.Random(seed + 2).randint(1, 2)
@@ -149,7 +150,7 @@ def generate_task_replace_color_pairs_with_different_palettes(seed: int, transfo
     if transformation_id == 'no_padding':
         available_palette_transformations = ['a', 'b']
     elif transformation_id == 'crop':
-        available_palette_transformations = ['a', 'b']
+        available_palette_transformations = ['donothing', 'a', 'b', 'h']
     elif transformation_id == 'padding':
         available_palette_transformations = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
     else:
@@ -194,6 +195,7 @@ def generate_task_replace_color_pairs_with_different_palettes(seed: int, transfo
             raise ValueError(f"Unknown transformation_id: {transformation_id}")
 
         # Mess with the colors of the output image
+        color_map_replace_donothing = {}
         color_map_replace_a = {
             pair_color: color_replace_to,
         }
@@ -221,7 +223,13 @@ def generate_task_replace_color_pairs_with_different_palettes(seed: int, transfo
         color_map_replace_g = {
             color_background: 0,
         }
-        if palette_transformation == 'a':
+        color_map_replace_h = {
+            color_background: pair_color,
+            pair_color: color_background,
+        }
+        if palette_transformation == 'donothing':
+            color_map_replace = color_map_replace_donothing
+        elif palette_transformation == 'a':
             color_map_replace = color_map_replace_a
         elif palette_transformation == 'b':
             color_map_replace = color_map_replace_b
@@ -235,6 +243,8 @@ def generate_task_replace_color_pairs_with_different_palettes(seed: int, transfo
             color_map_replace = color_map_replace_f
         elif palette_transformation == 'g':
             color_map_replace = color_map_replace_g
+        elif palette_transformation == 'h':
+            color_map_replace = color_map_replace_h
         else:
             raise ValueError(f"Unknown palette_transformation: {palette_transformation}")
         output_image_with_replaced_colors = image_replace_colors(output_image_raw, color_map_replace)
