@@ -98,10 +98,8 @@ def generate_task_swap_colors(seed: int) -> Task:
     return task
 
 def generate_task_mostleast_popular_color(seed: int, find_id: str, output_size_id: str) -> Task:
-    random.seed(seed)
-
-    count_example = random.randint(2, 4)
-    count_test = random.randint(1, 2)
+    count_example = random.Random(seed + 1).randint(2, 4)
+    count_test = random.Random(seed + 2).randint(1, 2)
     # count_test = 1
     task = Task()
     task.metadata_task_id = f'mostleast_popular_color {find_id}'
@@ -117,6 +115,7 @@ def generate_task_mostleast_popular_color(seed: int, find_id: str, output_size_i
         found_color = None
         number_of_retries = 0
         for retry_index in range(100):
+            iteration_seed = seed + 1000 + i + retry_index * 100033
             use_min_width = min_width
             use_min_height = min_height
             if retry_index == 1:
@@ -125,7 +124,7 @@ def generate_task_mostleast_popular_color(seed: int, find_id: str, output_size_i
             if retry_index >= 2:
                 use_min_width = 3
                 use_min_height = 3
-            random_image = image_create_random_advanced(seed + i + retry_index, use_min_width, max_width, use_min_height, max_height)
+            random_image = image_create_random_advanced(iteration_seed, use_min_width, max_width, use_min_height, max_height)
             histogram = Histogram.create_with_image(random_image)
             found_color = None
             if find_id == 'most_popular':
@@ -167,8 +166,6 @@ def generate_task_mostleast_popular_color(seed: int, find_id: str, output_size_i
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    # builder.append_height()
-    # builder.append_pixels()
     builder.append_image()
     return builder.dataset_items()
 
