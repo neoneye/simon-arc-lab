@@ -243,8 +243,7 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 3
-    # j = 0
+    j = seed % 8
     if j == 0:
         transformation_id = 'replace_color no_padding'
         task = generate_task_replace_color(seed, 'no_padding')
@@ -279,7 +278,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=15600232,
+    seed=16600232,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
