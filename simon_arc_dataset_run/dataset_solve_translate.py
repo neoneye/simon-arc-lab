@@ -1,5 +1,8 @@
 # Translate the image by -2..+2 pixel, up/down/left/right.
 #
+# IDEA: Move over the edge without wrapping around.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=32e9702f
+#
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
 import os

@@ -2,11 +2,42 @@
 # - Extract content from an grid with irregular sized cells.
 # - Mutate the content inside the grid: flipx, flipy, rotate 180 degrees.
 # 
+# IDEA: count the number of cells x and y
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=1190e5a7
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=7039b2d7_v2
+#
+# IDEA: Identify what is the topleft, topmid, topright, leftmid, center, rightmid, bottomleft, bottommid, bottomright cell in the grid
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=272f95fa
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=941d9a10
+#
+# IDEA: Remember what input cell is associated with what output cell.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=54d9e175
+#
+# IDEA: Continue pattern
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=695367ec
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9ddd00f0
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=cbded52d
+#
+# IDEA: Mirror pattern in cell inside grid. Remove the grid from the output.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=47c1f68c
+#
+# IDEA: Sort the cells in the grid
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=42a15761
+#
+# IDEA: copy color from one cell to another
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ef26cbf6
+#
+# IDEA: The most popular color in the cell, becomes the output pixel.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=af24b4cc
+#
+# IDEA: Reverse order of cells in the x-axis, y-axis, or both.
+# IDEA: Rotate the content of each cell by 90, 180, 270 degrees.
+# IDEA: Rotate the position of each cell by 90, 180, 270 degrees, preserving the content of the cell as it is.
 # IDEA: Add noise to the input grid cells. Either the most/least popular color of the cell, becomes the output color.
 # IDEA: Convert the input to a grid.
 # IDEA: different colors for grid horizontal/vertical lines, and grid line intersections.
 # IDEA: varying grid line sizes.
-# 
+#
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
 import os
