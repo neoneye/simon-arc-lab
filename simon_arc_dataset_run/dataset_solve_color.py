@@ -124,9 +124,9 @@ def generate_task_replace_color_pairs_with_different_palettes(seed: int, transfo
     # count_test = 1
     task = Task()
     min_image_size = 3
-    max_image_size = 8
+    max_image_size = 10
     min_padding = 1
-    max_padding = 10
+    max_padding = 20
 
     color_padding = 0
     color_background = 1
@@ -414,7 +414,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=19600232,
+    seed=20600232,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
