@@ -42,6 +42,7 @@ SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_color.js
 def generate_task_replace_color_same_palette_for_all_pairs(seed: int, transformation_id: str) -> Task:
     """
     Replace one color with another color.
+    The pairs use the same palette.
 
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=b1948b0a
     """
@@ -69,7 +70,7 @@ def generate_task_replace_color_same_palette_for_all_pairs(seed: int, transforma
     for i in range(10):
         color_map[i] = colors[i]
 
-    task.metadata_task_id = f'replace_color {transformation_id}'
+    task.metadata_task_id = f'replace_color_same_palette {transformation_id}'
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -105,6 +106,140 @@ def generate_task_replace_color_same_palette_for_all_pairs(seed: int, transforma
             raise ValueError(f"Unknown transformation_id: {transformation_id}")
 
         output_image_with_replaced_colors = image_replace_colors(output_image_raw, color_map_replace)
+        input_image = image_replace_colors(input_image_raw, color_map)
+        output_image = image_replace_colors(output_image_with_replaced_colors, color_map)
+        task.append_pair(input_image, output_image, is_example)
+
+    return task
+
+def generate_task_replace_color_pairs_with_different_palettes(seed: int, transformation_id: str) -> Task:
+    """
+    Replace one color with another color.
+    The pairs doesn't use the same palette.
+
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f76d97a5
+    """
+    count_example = random.Random(seed + 1).randint(2, 4)
+    count_test = random.Random(seed + 2).randint(1, 2)
+    # count_test = 1
+    task = Task()
+    min_image_size = 3
+    max_image_size = 5
+    min_padding = 1
+    max_padding = 4
+
+    color_padding = 0
+    color_background = 1
+    color_replace_to = 2
+
+    colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    random.Random(seed + 3).shuffle(colors)
+    color_map = {}
+    for i in range(10):
+        color_map[i] = colors[i]
+
+    available_colors = [3, 4, 5, 6, 7, 8, 9]
+    random.Random(seed + 4).shuffle(available_colors)
+    pair_colors = []
+    for i in range(count_example+count_test):
+        pair_color = available_colors[i % len(available_colors)]
+        pair_colors.append(pair_color)
+
+    available_palette_transformations = []
+    if transformation_id == 'no_padding':
+        available_palette_transformations = ['a', 'b']
+    elif transformation_id == 'crop':
+        available_palette_transformations = ['a', 'b']
+    elif transformation_id == 'padding':
+        available_palette_transformations = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+    else:
+        raise ValueError(f"Unknown transformation_id: {transformation_id}")
+    palette_transformation = random.Random(seed + 5).choice(available_palette_transformations)
+
+    task.metadata_task_id = f'replace_color_different_palettes {transformation_id} palette_{palette_transformation}'
+
+    for i in range(count_example+count_test):
+        is_example = i < count_example
+
+        pair_color = pair_colors[i]
+
+        mask_image = None
+        for retry_index in range(10):
+            iteration_seed = seed + 1000 + retry_index * 100033 + i
+            width = random.Random(iteration_seed + 1).randint(min_image_size, max_image_size)
+            height = random.Random(iteration_seed + 2).randint(min_image_size, max_image_size)
+            ratios = [0.2, 0.3, 0.4, 0.5]
+            ratio = random.Random(iteration_seed + 3).choice(ratios)
+            mask_image = image_create_random_with_two_colors(width, height, color_background, pair_color, ratio, iteration_seed + 4)
+            histogram = Histogram.create_with_image(mask_image)
+            if histogram.number_of_unique_colors() == 2:
+                # print(f"retry_index: {retry_index}")
+                break
+
+        if mask_image is None:
+            raise ValueError(f"Failed to create mask_image with 2 colors")
+        
+        mask_image_with_padding = image_pad_random(mask_image, seed + 1000 + i * 133, color_padding, min_padding, max_padding)
+
+        if transformation_id == 'no_padding':
+            input_image_raw = mask_image.copy()
+            output_image_raw = mask_image.copy()
+        elif transformation_id == 'crop':
+            input_image_raw = mask_image_with_padding.copy()
+            output_image_raw = mask_image.copy()
+        elif transformation_id == 'padding':
+            input_image_raw = mask_image_with_padding.copy()
+            output_image_raw = mask_image_with_padding.copy()
+        else:
+            raise ValueError(f"Unknown transformation_id: {transformation_id}")
+
+        # Mess with the colors of the output image
+        color_map_replace_a = {
+            pair_color: color_replace_to,
+        }
+        color_map_replace_b = {
+            color_background: pair_color,
+            pair_color: color_replace_to,
+        }
+        color_map_replace_c = {
+            color_padding: pair_color,
+            pair_color: color_padding,
+        }
+        color_map_replace_d = {
+            color_padding: pair_color,
+            color_background: color_padding,
+            pair_color: color_background,
+        }
+        color_map_replace_e = {
+            color_background: 0,
+            pair_color: 1,
+        }
+        color_map_replace_f = {
+            color_background: 1,
+            pair_color: 0,
+        }
+        color_map_replace_g = {
+            color_background: 0,
+        }
+        if palette_transformation == 'a':
+            color_map_replace = color_map_replace_a
+        elif palette_transformation == 'b':
+            color_map_replace = color_map_replace_b
+        elif palette_transformation == 'c':
+            color_map_replace = color_map_replace_c
+        elif palette_transformation == 'd':
+            color_map_replace = color_map_replace_d
+        elif palette_transformation == 'e':
+            color_map_replace = color_map_replace_e
+        elif palette_transformation == 'f':
+            color_map_replace = color_map_replace_f
+        elif palette_transformation == 'g':
+            color_map_replace = color_map_replace_g
+        else:
+            raise ValueError(f"Unknown palette_transformation: {palette_transformation}")
+        output_image_with_replaced_colors = image_replace_colors(output_image_raw, color_map_replace)
+
+        # Assign the final colors to input/output images
         input_image = image_replace_colors(input_image_raw, color_map)
         output_image = image_replace_colors(output_image_with_replaced_colors, color_map)
         task.append_pair(input_image, output_image, is_example)
@@ -243,7 +378,9 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 8
+    j = seed % 11
+    j = (seed % 3) + 3
+    # j = 5
     if j == 0:
         task = generate_task_replace_color_same_palette_for_all_pairs(seed, 'no_padding')
     elif j == 1:
@@ -251,14 +388,20 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     elif j == 2:
         task = generate_task_replace_color_same_palette_for_all_pairs(seed, 'padding')
     elif j == 3:
-        task = generate_task_swap_colors(seed)
+        task = generate_task_replace_color_pairs_with_different_palettes(seed, 'no_padding')
     elif j == 4:
-        task = generate_task_mostleast_popular_color(seed, 'most_popular', '1x1')
+        task = generate_task_replace_color_pairs_with_different_palettes(seed, 'crop')
     elif j == 5:
-        task = generate_task_mostleast_popular_color(seed, 'least_popular', '1x1')
+        task = generate_task_replace_color_pairs_with_different_palettes(seed, 'padding')
     elif j == 6:
-        task = generate_task_mostleast_popular_color(seed, 'most_popular', 'same')
+        task = generate_task_swap_colors(seed)
     elif j == 7:
+        task = generate_task_mostleast_popular_color(seed, 'most_popular', '1x1')
+    elif j == 8:
+        task = generate_task_mostleast_popular_color(seed, 'least_popular', '1x1')
+    elif j == 9:
+        task = generate_task_mostleast_popular_color(seed, 'most_popular', 'same')
+    elif j == 10:
         task = generate_task_mostleast_popular_color(seed, 'least_popular', 'same')
     else:
         raise ValueError(f"Unknown j: {j}")
@@ -271,7 +414,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=17600232,
+    seed=18600232,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
