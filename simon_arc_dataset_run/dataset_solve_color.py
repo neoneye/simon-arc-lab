@@ -39,12 +39,11 @@ BENCHMARK_DATASET_NAME = 'solve_color'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_color.jsonl')
 
 def generate_task_swap_colors(seed: int) -> Task:
-    random.seed(seed)
-
-    count_example = random.randint(2, 4)
-    count_test = random.randint(1, 2)
+    count_example = random.Random(seed + 1).randint(2, 4)
+    count_test = random.Random(seed + 1).randint(1, 2)
     # count_test = 1
     task = Task()
+    task.metadata_task_id = 'swap_colors'
     min_width = 1
     max_width = 14
     min_height = 1
@@ -55,6 +54,7 @@ def generate_task_swap_colors(seed: int) -> Task:
 
         mask_image = None
         for retry_index in range(10):
+            iteration_seed = seed + 1000 + i
             use_min_width = min_width
             use_min_height = min_height
             if retry_index == 1:
@@ -63,11 +63,11 @@ def generate_task_swap_colors(seed: int) -> Task:
             if retry_index >= 2:
                 use_min_width = 3
                 use_min_height = 3
-            width = random.randint(use_min_width, max_width)
-            height = random.randint(use_min_height, max_height)
+            width = random.Random(iteration_seed + 1).randint(use_min_width, max_width)
+            height = random.Random(iteration_seed + 2).randint(use_min_height, max_height)
             ratios = [0.2, 0.3, 0.4, 0.5]
-            ratio = random.choice(ratios)
-            mask_image = image_create_random_with_two_colors(width, height, 0, 1, ratio, seed + 1060 + i)
+            ratio = random.Random(iteration_seed + 3).choice(ratios)
+            mask_image = image_create_random_with_two_colors(width, height, 0, 1, ratio, iteration_seed + 4)
             histogram = Histogram.create_with_image(mask_image)
             if histogram.number_of_unique_colors() == 2:
                 # print(f"retry_index: {retry_index}")
@@ -77,7 +77,7 @@ def generate_task_swap_colors(seed: int) -> Task:
             raise ValueError(f"Failed to create mask_image with 2 colors")
 
         colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-        random.shuffle(colors)
+        random.Random(seed + 1000 + i).shuffle(colors)
         color0 = colors[0]
         color1 = colors[1]
 
@@ -104,6 +104,7 @@ def generate_task_mostleast_popular_color(seed: int, find_id: str, output_size_i
     count_test = random.randint(1, 2)
     # count_test = 1
     task = Task()
+    task.metadata_task_id = f'mostleast_popular_color {find_id}'
     min_width = 1
     max_width = 14
     min_height = 1
