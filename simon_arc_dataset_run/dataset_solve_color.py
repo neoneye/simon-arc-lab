@@ -23,6 +23,7 @@ sys.path.insert(0, PROJECT_ROOT)
 import random
 from simon_arc_lab.image_mix import *
 from simon_arc_lab.image_util import *
+from simon_arc_lab.image_pad import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.task import *
 from simon_arc_lab.task_formatter_rle_verbose import *
@@ -37,6 +38,78 @@ from simon_arc_dataset.dataset_generator import *
 DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_color'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_color.jsonl')
+
+def generate_task_replace_color(seed: int, transformation_id: str) -> Task:
+    """
+    Replace one color with another color.
+
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=b1948b0a
+    """
+    count_example = random.Random(seed + 1).randint(2, 4)
+    count_test = random.Random(seed + 2).randint(1, 2)
+    # count_test = 1
+    task = Task()
+    min_image_size = 3
+    max_image_size = 6
+    min_padding = 1
+    max_padding = 5
+
+    color_padding = 0
+    color_background = 1
+    color_replace_from = 2
+    color_replace_to = 3
+
+    color_map_replace = {
+        color_replace_from: color_replace_to,
+    }
+
+    colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    random.Random(seed + 3).shuffle(colors)
+    color_map = {}
+    for i in range(10):
+        color_map[i] = colors[i]
+
+    task.metadata_task_id = f'replace_color {transformation_id}'
+
+    for i in range(count_example+count_test):
+        is_example = i < count_example
+
+        mask_image = None
+        for retry_index in range(10):
+            iteration_seed = seed + 1000 + retry_index * 100033 + i
+            width = random.Random(iteration_seed + 1).randint(min_image_size, max_image_size)
+            height = random.Random(iteration_seed + 2).randint(min_image_size, max_image_size)
+            ratios = [0.2, 0.3, 0.4, 0.5]
+            ratio = random.Random(iteration_seed + 3).choice(ratios)
+            mask_image = image_create_random_with_two_colors(width, height, color_background, color_replace_from, ratio, iteration_seed + 4)
+            histogram = Histogram.create_with_image(mask_image)
+            if histogram.number_of_unique_colors() == 2:
+                # print(f"retry_index: {retry_index}")
+                break
+
+        if mask_image is None:
+            raise ValueError(f"Failed to create mask_image with 2 colors")
+        
+        mask_image_with_padding = image_pad_random(mask_image, seed + 1000 + i * 133, color_padding, min_padding, max_padding)
+
+        if transformation_id == 'no_padding':
+            input_image_raw = mask_image.copy()
+            output_image_raw = mask_image.copy()
+        elif transformation_id == 'crop':
+            input_image_raw = mask_image_with_padding.copy()
+            output_image_raw = mask_image.copy()
+        elif transformation_id == 'padding':
+            input_image_raw = mask_image_with_padding.copy()
+            output_image_raw = mask_image_with_padding.copy()
+        else:
+            raise ValueError(f"Unknown transformation_id: {transformation_id}")
+
+        output_image_with_replaced_colors = image_replace_colors(output_image_raw, color_map_replace)
+        input_image = image_replace_colors(input_image_raw, color_map)
+        output_image = image_replace_colors(output_image_with_replaced_colors, color_map)
+        task.append_pair(input_image, output_image, is_example)
+
+    return task
 
 def generate_task_swap_colors(seed: int) -> Task:
     count_example = random.Random(seed + 1).randint(2, 4)
@@ -170,20 +243,30 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 5
+    j = seed % 3
+    # j = 0
     if j == 0:
+        transformation_id = 'replace_color no_padding'
+        task = generate_task_replace_color(seed, 'no_padding')
+    elif j == 1:
+        transformation_id = 'replace_color crop'
+        task = generate_task_replace_color(seed, 'crop')
+    elif j == 2:
+        transformation_id = 'replace_color padding'
+        task = generate_task_replace_color(seed, 'padding')
+    elif j == 3:
         transformation_id = 'swap_colors'
         task = generate_task_swap_colors(seed)
-    elif j == 1:
+    elif j == 4:
         transformation_id = 'most_popular_color_1x1'
         task = generate_task_mostleast_popular_color(seed, 'most_popular', '1x1')
-    elif j == 2:
+    elif j == 5:
         transformation_id = 'least_popular_color_1x1'
         task = generate_task_mostleast_popular_color(seed, 'least_popular', '1x1')
-    elif j == 3:
+    elif j == 6:
         transformation_id = 'most_popular_color_same'
         task = generate_task_mostleast_popular_color(seed, 'most_popular', 'same')
-    elif j == 4:
+    elif j == 7:
         transformation_id = 'least_popular_color_same'
         task = generate_task_mostleast_popular_color(seed, 'least_popular', 'same')
     else:
@@ -196,7 +279,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=12600232,
+    seed=13600232,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
