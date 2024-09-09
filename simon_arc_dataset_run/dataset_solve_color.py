@@ -39,7 +39,7 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_color'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_color.jsonl')
 
-def generate_task_replace_color(seed: int, transformation_id: str) -> Task:
+def generate_task_replace_color_same_palette_for_all_pairs(seed: int, transformation_id: str) -> Task:
     """
     Replace one color with another color.
 
@@ -245,33 +245,26 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 8
     if j == 0:
-        transformation_id = 'replace_color no_padding'
-        task = generate_task_replace_color(seed, 'no_padding')
+        task = generate_task_replace_color_same_palette_for_all_pairs(seed, 'no_padding')
     elif j == 1:
-        transformation_id = 'replace_color crop'
-        task = generate_task_replace_color(seed, 'crop')
+        task = generate_task_replace_color_same_palette_for_all_pairs(seed, 'crop')
     elif j == 2:
-        transformation_id = 'replace_color padding'
-        task = generate_task_replace_color(seed, 'padding')
+        task = generate_task_replace_color_same_palette_for_all_pairs(seed, 'padding')
     elif j == 3:
-        transformation_id = 'swap_colors'
         task = generate_task_swap_colors(seed)
     elif j == 4:
-        transformation_id = 'most_popular_color_1x1'
         task = generate_task_mostleast_popular_color(seed, 'most_popular', '1x1')
     elif j == 5:
-        transformation_id = 'least_popular_color_1x1'
         task = generate_task_mostleast_popular_color(seed, 'least_popular', '1x1')
     elif j == 6:
-        transformation_id = 'most_popular_color_same'
         task = generate_task_mostleast_popular_color(seed, 'most_popular', 'same')
     elif j == 7:
-        transformation_id = 'least_popular_color_same'
         task = generate_task_mostleast_popular_color(seed, 'least_popular', 'same')
     else:
         raise ValueError(f"Unknown j: {j}")
     
     # task.show()
+    transformation_id = task.metadata_task_id
     return generate_dataset_item_list_inner(seed, task, transformation_id)
 
 generator = DatasetGenerator(
