@@ -1,10 +1,9 @@
 # color transformations:
+# - Replace one color with another color.
+# - Mask of where a particular color occurs in the input.
 # - Swap 2 colors.
 # - Identify the most popular color.
 # - Identify the least popular color.
-#
-# IDEA: Mask of where a particular color occurs in the input.
-# IDEA: Replace one color with another color.
 #
 # IDEA: Swap the most/lest popular colors with each other.
 #
@@ -389,8 +388,6 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 11
-    j = (seed % 3) + 3
-    # j = 5
     if j == 0:
         task = generate_task_replace_color_same_palette_for_all_pairs(seed, 'no_padding')
     elif j == 1:
@@ -424,7 +421,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=20600232,
+    seed=21600232,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
