@@ -42,7 +42,7 @@ def generate_task_linepatterns_with_masked_areas(seed: int, transformation_id: s
     task = Task()
     task.metadata_task_id = transformation_id
     min_image_size = 4
-    max_image_size = 13
+    max_image_size = 15
 
     color_map_eliminate_mask_color = {
         0: 1,
@@ -147,6 +147,11 @@ def generate_task_repair_rectangle_and_crop(seed: int, transformation_id: str) -
     Generate repeating patterns, where the input is masked with a rectangle, and the output is the masked rectangle repaired and cropped out.
 
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f9012d9b
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=de493100
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e66aafb8
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f4081712
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9ecd008a
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=1c786137
     """
     count_example = random.Random(seed + 1).randint(2, 4)
     count_test = random.Random(seed + 2).randint(1, 2)
@@ -154,9 +159,9 @@ def generate_task_repair_rectangle_and_crop(seed: int, transformation_id: str) -
     task = Task()
     task.metadata_task_id = transformation_id
     min_image_size = 4
-    max_image_size = 8
+    max_image_size = 10
     min_crop_size = 2
-    max_crop_size = 3
+    max_crop_size = 4
 
     color_map_eliminate_mask_color = {
         0: 1,
@@ -302,7 +307,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=140033371,
+    seed=150033371,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
