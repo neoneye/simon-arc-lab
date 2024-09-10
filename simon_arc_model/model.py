@@ -21,9 +21,9 @@ class Model:
         if torch.cuda.is_available():
             print("Model is using CUDA")
             self.device = torch.device("cuda")
-        # elif torch.backends.mps.is_available():
-        #     print("Model is using MPS. MPS is only available on Mac, and is it takes twice as long to do inference than cpu.")
-        #     self.device = torch.device("mps")
+        elif torch.backends.mps.is_available():
+            print("Model is using MPS")
+            self.device = torch.device("mps")
         else:
             print("Model is using CPU")
             self.device = torch.device("cpu")
@@ -40,21 +40,19 @@ class Model:
             truncation=True
         )
 
-        input_ids = inputs.input_ids.to(self.device, non_blocking=True)
-        attention_mask = inputs.attention_mask.to(self.device, non_blocking=True)
+        input_ids = inputs.input_ids.to(self.device)
+        attention_mask = inputs.attention_mask.to(self.device)  # Pass the attention mask
 
         # Tweaking these parameters, may yield better results:
         # num_beams=3,
         # do_sample=True,
         # temperature=0.7,
-        with torch.no_grad():
-            outputs = self.model.generate(
-                input_ids,
-                attention_mask=attention_mask,  # Include the attention mask
-                max_length=128,
-                num_beams=5,
-                early_stopping=True
-            )
-
+        outputs = self.model.generate(
+            input_ids,
+            attention_mask=attention_mask,  # Include the attention mask here
+            max_length=128,
+            num_beams=5,
+            early_stopping=True
+        )
         response = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         return response
