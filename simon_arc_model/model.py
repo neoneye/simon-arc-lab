@@ -1,8 +1,11 @@
+# When I'm using MPS on a M1 Mac, then inference is painfully slow. Around 40 minutes.
+# When I'm using CPU on a M1 Mac, then inference is fast. Around 20 minutes.
+# The difference is a factor of 2. I'm not sure why the difference is so large.
 from transformers import T5ForConditionalGeneration, RobertaTokenizer
 
 class Model:
     def __init__(self, pretrained_model_name_or_path: str, input_max_length: int):
-        good_input_max_length = input_max_length == 256 or input_max_length == 512 or input_max_length == 1024
+        good_input_max_length = input_max_length in {256, 512, 1024}
         if not good_input_max_length:
             # As of 2024-august-09, the model has been trained on both input_max_length 256 and 512.
             # As of 2024-september-03, the model has been trained on both input_max_length 1024.
