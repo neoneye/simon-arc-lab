@@ -3,6 +3,7 @@ from simon_arc_lab.image_util import *
 from simon_arc_lab.task import *
 from simon_arc_lab.task_formatter_rle_compact import *
 from simon_arc_lab.benchmark import *
+from simon_arc_lab.image_distort import *
 
 def generate_dataset_item_for_pixels_in_output_row(seed: int, dataset_names: list[str], benchmark_dataset_name: str, task: Task, test_index: int, test_output_y: int, pixel_list: list[int], transformation_id: str) -> dict:
     random.seed(seed)
@@ -123,6 +124,49 @@ def generate_dataset_item_for_output_image(seed: int, dataset_names: list[str], 
     }
     return result_dict
 
+def generate_dataset_item_for_output_image_with_earlier_prediction(seed: int, dataset_names: list[str], benchmark_dataset_name: str, task: Task, test_index: int, earlier_output_image: np.array, output_image: np.array, transformation_id: str, benchmark_earlier_prediction_id: str) -> dict:
+    random.seed(seed)
+    dataset_name = random.choice(dataset_names)
+
+    t2 = task.clone()
+    image_index = t2.count_examples + test_index
+    t2.output_images[image_index] = earlier_output_image
+
+    # t2.show()
+
+    task_formatter = TaskFormatterRLECompact(t2)
+
+    output_ids = task_formatter.output_ids()
+    test_output_id = output_ids[t2.count_examples + test_index]
+
+    instructions = [
+        f"{dataset_name}, {test_output_id}, predict image",
+        f"{dataset_name} '{test_output_id}' predict the image",
+        f"{dataset_name}, '{test_output_id}', predict the image",
+        f"{dataset_name} predict image for {test_output_id}",
+        f"{dataset_name} predict image for '{test_output_id}'",
+    ]
+    instruction = random.choice(instructions)
+
+    input = task_formatter.to_string()
+    # print(input)
+
+    output = serialize(output_image)
+
+    max_width, max_height = task.max_image_size()
+    benchmark_width = image_size1d_to_string(max_width)
+    benchmark_height = image_size1d_to_string(max_height)
+    benchmark_pixels = task_pixels_to_string(task.total_pixel_count())
+    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} predict=image earlier_prediction={benchmark_earlier_prediction_id} image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
+
+    result_dict = {
+        'instruction': instruction,
+        'input': input,
+        'output': output,
+        'benchmark': benchmark_id
+    }
+    return result_dict
+
 class DatasetItemListBuilder:
     def __init__(self, seed: int, task: Task, dataset_names: list[str], benchmark_dataset_name: str, transformation_id: str):
         self.seed = seed
@@ -191,6 +235,59 @@ class DatasetItemListBuilder:
                 self.transformation_id
             )
             self.accumulated_dataset_items.append(dataset_item)
+
+    def append_image_with_earlier_prediction_very_close_to_expected_output(self):
+        """
+        Predict the entire output image, with help from an earlier prediction that is very close to the expected output.
+        """
+        for test_index in range(self.task.count_tests):
+            output_image = self.task.test_output(test_index)
+            earlier_predicted_image = image_distort(output_image, 1, 10, self.seed + test_index * 100 + 1000)
+
+            dataset_item = generate_dataset_item_for_output_image_with_earlier_prediction(
+                self.seed + test_index * 100 + 2000, 
+                self.dataset_names, 
+                self.benchmark_dataset_name,
+                self.task_without_test_output, 
+                test_index, 
+                earlier_predicted_image,
+                output_image,
+                self.transformation_id,
+                'output_distort_1steps_10percent'
+            )
+            self.accumulated_dataset_items.append(dataset_item)
+
+    def append_image_with_earlier_prediction_similar_to_original_input(self):
+        """
+        Predict the entire output image.
+        With a distorted input image. No help from the expected output image.
+        """
+        for test_index in range(self.task.count_tests):
+            output_image = self.task.test_output(test_index)
+            input_image = self.task.test_input(test_index)
+            earlier_predicted_image = image_distort(input_image, 1, 10, self.seed + test_index * 100 + 1000)
+
+            dataset_item = generate_dataset_item_for_output_image_with_earlier_prediction(
+                self.seed + test_index * 100 + 2000, 
+                self.dataset_names, 
+                self.benchmark_dataset_name,
+                self.task_without_test_output, 
+                test_index, 
+                earlier_predicted_image,
+                output_image,
+                self.transformation_id,
+                'input_distort_1steps_10percent'
+            )
+            self.accumulated_dataset_items.append(dataset_item)
+
+    def append_image_randomized(self):
+        j = self.seed % 3
+        if j == 0:
+            self.append_image()
+        elif j == 1:
+            self.append_image_with_earlier_prediction_very_close_to_expected_output()
+        else:
+            self.append_image_with_earlier_prediction_similar_to_original_input()
 
     def dataset_items(self):
         return self.accumulated_dataset_items
