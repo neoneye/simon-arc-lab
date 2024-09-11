@@ -235,13 +235,13 @@ def generate_task_fractal_to_pattern(seed: int) -> Task:
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    builder.append_image()
+    builder.append_image_randomized()
     return builder.dataset_items()
 
 def can_fit_inside_context_length(task: Task) -> bool:
     task_formatter = TaskFormatterRLECompact(task)
     s = task_formatter.to_string()
-    return len(s) < 1000
+    return len(s) < 800
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 2
@@ -269,7 +269,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=15001103031,
+    seed=15011103031,
     max_num_samples=100000,
     max_byte_size=1024*1024*150
 )
