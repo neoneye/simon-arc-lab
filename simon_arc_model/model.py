@@ -40,8 +40,8 @@ class Model:
             max_length=128,
             num_beams=3,
             do_sample=True,
-            temperature=0.7,
-            early_stopping=True
+            temperature=4.4,
+            # early_stopping=True
         )
         response = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         return response

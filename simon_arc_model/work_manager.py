@@ -145,7 +145,7 @@ class WorkManager:
             print(f'Saving images to directory: {save_dir}')
             os.makedirs(save_dir, exist_ok=True)
 
-        number_of_refinement_steps = 3
+        number_of_refinement_steps = 5
         correct_count = 0
         correct_task_id_set = set()
         pbar = tqdm(self.work_items, desc="Processing work items")
