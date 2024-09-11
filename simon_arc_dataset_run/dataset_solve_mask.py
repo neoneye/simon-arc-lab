@@ -42,7 +42,7 @@ def generate_task_linepatterns_with_masked_areas(seed: int, transformation_id: s
     task = Task()
     task.metadata_task_id = transformation_id
     min_image_size = 4
-    max_image_size = 15
+    max_image_size = 12
 
     color_map_eliminate_mask_color = {
         0: 1,
@@ -159,7 +159,7 @@ def generate_task_repair_rectangle_and_crop(seed: int, transformation_id: str) -
     task = Task()
     task.metadata_task_id = transformation_id
     min_image_size = 4
-    max_image_size = 10
+    max_image_size = 8
     min_crop_size = 2
     max_crop_size = 4
 
@@ -277,7 +277,7 @@ def generate_task_repair_rectangle_and_crop(seed: int, transformation_id: str) -
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    builder.append_image()
+    builder.append_image_randomized()
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
@@ -307,7 +307,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=150033371,
+    seed=151033371,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
