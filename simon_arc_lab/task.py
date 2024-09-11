@@ -45,6 +45,8 @@ class Task:
         Create a deep copy of the task.
         """
         task = Task()
+        task.metadata_task_id = self.metadata_task_id
+        task.metadata_path = self.metadata_path
         for i in range(self.count()):
             task.append_pair(self.input_images[i], self.output_images[i], i < self.count_examples)
         return task
