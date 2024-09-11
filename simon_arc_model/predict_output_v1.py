@@ -18,7 +18,7 @@ class PredictOutputBase:
         raise NotImplementedError()
 
 class PredictOutputV1(PredictOutputBase):
-    def __init__(self, task: Task, test_index: int, task_mutator_class: type):
+    def __init__(self, task: Task, test_index: int, task_mutator_class: type, previous_predicted_image: np.array = None):
         if not issubclass(task_mutator_class, TaskMutatorBase):
             raise TypeError(f"{task_mutator_class.__name__} must be a subclass of TaskMutatorBase")
         
@@ -28,6 +28,7 @@ class PredictOutputV1(PredictOutputBase):
         # self.task_mutator = TaskMutatorDoNothing(task)
         # self.task_mutator = TaskMutatorTranspose(task)
         # self.task_mutator = TaskMutatorTransposeSoInputIsMostCompact(task)
+        self.previous_predicted_image = previous_predicted_image
         self.cached_prompt = None
         self.cached_response = None
 
@@ -37,6 +38,13 @@ class PredictOutputV1(PredictOutputBase):
 
         task_without_test_output = self.task_mutator.transformed_task()
         task_without_test_output.set_all_test_outputs_to_none()
+
+        if self.previous_predicted_image is not None:
+            image_index = self.task.count_examples + self.test_index
+            task_without_test_output.output_images[image_index] = self.previous_predicted_image
+
+        # TODO: insert the previous_predicted_image into the prompt with the transformation applied, eg. transpose/rotate
+
         task_formatter = TaskFormatterRLECompact(task_without_test_output)
         test_output_id = task_formatter.test_output_id(self.test_index)
         input = task_formatter.to_string()

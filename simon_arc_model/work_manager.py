@@ -29,11 +29,12 @@ class WorkItemStatus(Enum):
         return self.name.lower()
 
 class WorkItem:
-    def __init__(self, task: Task, test_index: int, predictor: PredictOutputBase):
+    def __init__(self, task: Task, test_index: int, refinement_step: int, predictor: PredictOutputBase):
         self.predictor_name = predictor.name()
         # print(f'WorkItem: task={task.metadata_task_id} test={test_index} predictor={self.predictor_name}')
         self.task = task
         self.test_index = test_index
+        self.refinement_step = refinement_step
         self.predictor = predictor
         self.predicted_output_image = None
         self.status = WorkItemStatus.UNASSIGNED
@@ -72,12 +73,12 @@ class WorkItem:
         input_image = task.test_input(test_index)
         task_id = task.metadata_task_id
         status_string = self.status.to_string()
-        title = f'{task_id} test={test_index} {self.predictor_name} {status_string}'
+        title = f'{task_id} test={test_index} {self.predictor_name} step={self.refinement_step} {status_string}'
 
         expected_output_image = task.test_output(test_index)
         predicted_output_image = self.predicted_output_image
 
-        filename = f'{task_id}_test{test_index}_{self.predictor_name}_{status_string}.png'
+        filename = f'{task_id}_test{test_index}_{self.predictor_name}_step{self.refinement_step}_{status_string}.png'
         if save_dir_path is not None:
             save_path = os.path.join(save_dir_path, filename)
         else:
@@ -90,18 +91,25 @@ class WorkManager:
         self.model = model
         self.taskset = taskset
         self.work_items = WorkManager.create_work_items(taskset)
+        self.work_items_finished = []
 
     @classmethod
     def create_work_items(cls, taskset: TaskSet) -> list['WorkItem']:
-        task_mutator_class_list = [TaskMutatorOriginal, TaskMutatorTranspose]
+        task_mutator_class_list = [TaskMutatorOriginal]
+        # task_mutator_class_list = [TaskMutatorOriginal, TaskMutatorTranspose]
         # task_mutator_class_list = [TaskMutatorOriginal, TaskMutatorTranspose, TaskMutatorInputRotateCW, TaskMutatorInputRotateCCW, TaskMutatorInputRotate180, TaskMutatorTransposeSoInputIsMostCompact]
+        refinement_step = 0
         work_items = []
         for task in taskset.tasks:
             for test_index in range(task.count_tests):
                 for task_mutator_class in task_mutator_class_list:
-                    predictor = PredictOutputV1(task, test_index, task_mutator_class)
-                    work_item = WorkItem(task, test_index, predictor)
+                    previous_predicted_image = None
+                    predictor = PredictOutputV1(task, test_index, task_mutator_class, previous_predicted_image)
+                    work_item = WorkItem(task, test_index, refinement_step, predictor)
                     work_items.append(work_item)
+        
+        # truncate to 3 items
+        work_items = work_items[:50]
         return work_items
 
     def discard_items_with_too_long_prompts(self, max_prompt_length: int):
@@ -137,30 +145,48 @@ class WorkManager:
             print(f'Saving images to directory: {save_dir}')
             os.makedirs(save_dir, exist_ok=True)
 
+        number_of_refinement_steps = 3
         correct_count = 0
         correct_task_id_set = set()
         pbar = tqdm(self.work_items, desc="Processing work items")
-        for work_item in pbar:
-            work_item.process(self.model)
-            if work_item.status == WorkItemStatus.CORRECT:
-                correct_task_id_set.add(work_item.task.metadata_task_id)
-                correct_count = len(correct_task_id_set)
-            pbar.set_postfix({'correct': correct_count})
-            if show:
-                work_item.show()
-            if save_dir is not None:
-                work_item.show(save_dir)
+        self.work_items_finished = []
+        for original_work_item in pbar:
+            work_item = original_work_item
+
+            for refinement_step in range(number_of_refinement_steps):
+                work_item.process(self.model)
+                self.work_items_finished.append(work_item)
+
+                if work_item.status == WorkItemStatus.CORRECT:
+                    correct_task_id_set.add(original_work_item.task.metadata_task_id)
+                    correct_count = len(correct_task_id_set)
+                pbar.set_postfix({'correct': correct_count})
+                if show:
+                    work_item.show()
+                if save_dir is not None:
+                    work_item.show(save_dir)
+
+                new_task = original_work_item.task.clone()
+                # image_index = new_task.count_examples + original_work_item.test_index
+                # new_task.output_images[image_index] = work_item.predicted_output_image
+
+                # IDEA: pick a random mutator
+                task_mutator_class = TaskMutatorOriginal
+                previous_predicted_image = work_item.predicted_output_image
+                predictor = PredictOutputV1(new_task, work_item.test_index, task_mutator_class, previous_predicted_image)
+                next_work_item = WorkItem(new_task, work_item.test_index, refinement_step+1, predictor)
+                work_item = next_work_item
 
     def summary(self):
         correct_task_id_set = set()
-        for work_item in self.work_items:
+        for work_item in self.work_items_finished:
             if work_item.status == WorkItemStatus.CORRECT:
                 correct_task_id_set.add(work_item.task.metadata_task_id)
         correct_count = len(correct_task_id_set)
         print(f'Number of correct solutions: {correct_count}')
 
         counters = {}
-        for work_item in self.work_items:
+        for work_item in self.work_items_finished:
             predictor_name = work_item.predictor_name
             status_name = work_item.status.name
             key = f'{predictor_name}_{status_name}'
@@ -177,9 +203,9 @@ class WorkManager:
         There are ARC like datasets where the input and output may be the same, but it's rare.
         It's likely a mistake when input and output is the same.
         """
-        count_before = len(self.work_items)
+        count_before = len(self.work_items_finished)
         filtered_work_items = []
-        for work_item in self.work_items:
+        for work_item in self.work_items_finished:
             if work_item.predicted_output_image is None:
                 filtered_work_items.append(work_item)
                 continue
@@ -189,10 +215,11 @@ class WorkManager:
             if not is_identical:
                 filtered_work_items.append(work_item)
         count_after = len(filtered_work_items)
-        self.work_items = filtered_work_items
+        self.work_items_finished = filtered_work_items
         print(f'Removed {count_before - count_after} work items where the input and output is identical. Remaining are {count_after} work items.')
 
     def collect_predictions_as_arcprize2024_submission_dict(self) -> dict:
+        # IDEA: Extract the best predictions from work_items_finished. How to determine the best?
         result_dict = {}
         # Kaggle requires all the original tasks to be present in the submission file.
         # Create empty entries in the result_dict, with empty images, with the correct number of test pairs.
