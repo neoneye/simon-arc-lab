@@ -38,7 +38,9 @@ class Model:
         outputs = self.model.generate(
             input_ids,
             max_length=128,
-            num_beams=5,
+            num_beams=3,
+            do_sample=True,
+            temperature=0.7,
             early_stopping=True
         )
         response = self.tokenizer.decode(outputs[0], skip_special_tokens=True)

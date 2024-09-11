@@ -107,10 +107,10 @@ class WorkManager:
                     predictor = PredictOutputV1(task, test_index, task_mutator_class, previous_predicted_image)
                     work_item = WorkItem(task, test_index, refinement_step, predictor)
                     work_items.append(work_item)
-        
-        # truncate to 3 items
-        work_items = work_items[:50]
         return work_items
+
+    def truncate_work_items(self, max_count: int):
+        self.work_items = self.work_items[:max_count]
 
     def discard_items_with_too_long_prompts(self, max_prompt_length: int):
         """
@@ -166,13 +166,22 @@ class WorkManager:
                 if save_dir is not None:
                     work_item.show(save_dir)
 
+                if work_item.status == WorkItemStatus.PROBLEM_DESERIALIZE:
+                    break
+                if work_item.status == WorkItemStatus.PROBLEM_MISSING_PREDICTION_IMAGE:
+                    break
+                
                 new_task = original_work_item.task.clone()
                 # image_index = new_task.count_examples + original_work_item.test_index
                 # new_task.output_images[image_index] = work_item.predicted_output_image
 
                 # IDEA: pick a random mutator
-                task_mutator_class = TaskMutatorOriginal
-                previous_predicted_image = work_item.predicted_output_image
+                if refinement_step % 2 == 0:
+                    task_mutator_class = TaskMutatorOriginal
+                    previous_predicted_image = work_item.predicted_output_image
+                else:
+                    task_mutator_class = TaskMutatorTranspose
+                    previous_predicted_image = np.transpose(work_item.predicted_output_image)
                 predictor = PredictOutputV1(new_task, work_item.test_index, task_mutator_class, previous_predicted_image)
                 next_work_item = WorkItem(new_task, work_item.test_index, refinement_step+1, predictor)
                 work_item = next_work_item
