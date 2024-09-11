@@ -147,13 +147,14 @@ class WorkManager:
 
         refinement_mode_list = [
             # ModelProcessMode.TEMPERATURE_HIGH,
-            ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
+            # ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
             # ModelProcessMode.TEMPERATURE_MEDIUM,
             ModelProcessMode.TEMPERATURE_LOW,
-            ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
+            ModelProcessMode.TEMPERATURE_LOW,
+            # ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
             # ModelProcessMode.TEMPERATURE_MEDIUM,
             ModelProcessMode.TEMPERATURE_LOW,
-            ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
+            # ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
             # ModelProcessMode.TEMPERATURE_MEDIUM,
             ModelProcessMode.TEMPERATURE_LOW,
             ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
