@@ -25,7 +25,7 @@ CONTEXT_SIZE_LIMIT = (512, 500)
 # iteration=351 training=20 evaluation=7 total=27 <-- best evaluation
 # iteration=364 training=20 evaluation=7 total=27 <-- best evaluation
 # iteration=460 original_training=21 original_evaluation=4, transpose_training=22 transpose_evaluation=3, total=36
-model_iteration = 508
+model_iteration = 511
 model_name = f'simon-arc-lab-model{model_iteration}'
 model_directory = f'/Users/neoneye/nobackup/git/{model_name}'
 
@@ -68,7 +68,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
     wm = WorkManager(model, taskset)
     # wm.discard_items_with_too_short_prompts(500)
     wm.discard_items_with_too_long_prompts(max_prompt_length)
-    wm.truncate_work_items(30)
+    wm.truncate_work_items(15)
     # wm.process_all_work_items()
     wm.process_all_work_items(save_dir=save_dir)
     # wm.process_all_work_items(show=True)

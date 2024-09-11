@@ -147,10 +147,15 @@ class WorkManager:
 
         refinement_mode_list = [
             # ModelProcessMode.TEMPERATURE_HIGH,
-            ModelProcessMode.TEMPERATURE_MEDIUM,
-            ModelProcessMode.TEMPERATURE_MEDIUM,
-            ModelProcessMode.TEMPERATURE_MEDIUM,
             ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
+            # ModelProcessMode.TEMPERATURE_MEDIUM,
+            ModelProcessMode.TEMPERATURE_LOW,
+            ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
+            # ModelProcessMode.TEMPERATURE_MEDIUM,
+            ModelProcessMode.TEMPERATURE_LOW,
+            ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
+            # ModelProcessMode.TEMPERATURE_MEDIUM,
+            ModelProcessMode.TEMPERATURE_LOW,
             ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
         ]
         number_of_refinement_steps = len(refinement_mode_list)

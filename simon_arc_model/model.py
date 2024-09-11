@@ -7,6 +7,7 @@ from enum import Enum
 
 class ModelProcessMode(Enum):
     TEMPERATURE_ZERO_BEAM5 = 'temperature_zero_beam5'
+    TEMPERATURE_LOW = 'temperature_low'
     TEMPERATURE_MEDIUM = 'temperature_medium'
     TEMPERATURE_HIGH = 'temperature_high'
 
@@ -43,6 +44,13 @@ class Model:
                 'num_beams': 5,
                 'early_stopping': True
             }
+        elif mode == ModelProcessMode.TEMPERATURE_LOW:
+            generate_options = {
+                'temperature': 0.1,
+                'num_beams': 5,
+                'do_sample': True,
+                'early_stopping': True
+            }
         elif mode == ModelProcessMode.TEMPERATURE_MEDIUM:
             generate_options = {
                 'temperature': 0.7,
@@ -55,6 +63,7 @@ class Model:
                 'temperature': 4.4,
                 'num_beams': 3,
                 'do_sample': True,
+                'early_stopping': True
             }
         else:
             raise ValueError(f"Unknown mode: {mode}")
