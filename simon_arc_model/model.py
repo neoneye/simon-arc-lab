@@ -3,6 +3,12 @@
 # The difference is a factor of 2. I'm not sure why the difference is so large.
 from transformers import T5ForConditionalGeneration, RobertaTokenizer
 import torch
+from enum import Enum
+
+class ModelProcessMode(Enum):
+    TEMPERATURE_ZERO_BEAM5 = 'temperature_zero_beam5'
+    TEMPERATURE_MEDIUM = 'temperature_medium'
+    TEMPERATURE_HIGH = 'temperature_high'
 
 class Model:
     def __init__(self, pretrained_model_name_or_path: str, input_max_length: int):
@@ -16,7 +22,7 @@ class Model:
         self.tokenizer = RobertaTokenizer.from_pretrained(pretrained_model_name_or_path)
         self.input_max_length = input_max_length
     
-    def process(self, prompt: str) -> str:
+    def process(self, prompt: str, mode: ModelProcessMode) -> str:
         input_ids = self.tokenizer(
             prompt, 
             return_tensors='pt',
@@ -31,17 +37,30 @@ class Model:
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
 
-        # Tweaking these parameters, may yield better results:
-        # num_beams=3,
-        # do_sample=True,
-        # temperature=0.7,
-        outputs = self.model.generate(
-            input_ids,
-            max_length=128,
-            num_beams=3,
-            do_sample=True,
-            temperature=4.4,
-            # early_stopping=True
-        )
+        generate_options = {}
+        if mode == ModelProcessMode.TEMPERATURE_ZERO_BEAM5:
+            generate_options = {
+                'num_beams': 5,
+                'early_stopping': True
+            }
+        elif mode == ModelProcessMode.TEMPERATURE_MEDIUM:
+            generate_options = {
+                'temperature': 0.7,
+                'num_beams': 3,
+                'do_sample': True,
+                'early_stopping': True
+            }
+        elif mode == ModelProcessMode.TEMPERATURE_HIGH:
+            generate_options = {
+                'temperature': 4.4,
+                'num_beams': 3,
+                'do_sample': True,
+            }
+        else:
+            raise ValueError(f"Unknown mode: {mode}")
+
+        generate_options['max_length'] = 128
+
+        outputs = self.model.generate(input_ids, **generate_options)
         response = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         return response

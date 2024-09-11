@@ -2,13 +2,13 @@ from simon_arc_lab.task import *
 from simon_arc_lab.task_formatter_rle_compact import *
 from simon_arc_lab.task_mutator import *
 from simon_arc_lab.rle.deserialize import *
-from simon_arc_model.model import Model
+from simon_arc_model.model import Model, ModelProcessMode
 
 class PredictOutputBase:
     def prompt(self) -> str:
         raise NotImplementedError()
 
-    def execute(self, model: Model):
+    def execute(self, model: Model, mode: ModelProcessMode):
         raise NotImplementedError()
 
     def predicted_image(self) -> np.array:
@@ -53,11 +53,11 @@ class PredictOutputV1(PredictOutputBase):
         self.cached_prompt = prompt
         return prompt
 
-    def execute(self, model: Model):
+    def execute(self, model: Model, mode: ModelProcessMode):
         if self.cached_response is not None:
             return
         prompt = self.prompt()
-        response = model.process(prompt)
+        response = model.process(prompt, mode)
         self.cached_response = response
 
     def predicted_image(self) -> np.array:

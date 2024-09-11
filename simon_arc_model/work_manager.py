@@ -10,7 +10,7 @@ from simon_arc_lab.task import Task
 from simon_arc_lab.task_mutator import *
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.show_prediction_result import show_prediction_result
-from .model import Model
+from .model import Model, ModelProcessMode
 from .predict_output_v1 import *
 
 class WorkItemStatus(Enum):
@@ -39,8 +39,8 @@ class WorkItem:
         self.predicted_output_image = None
         self.status = WorkItemStatus.UNASSIGNED
 
-    def process(self, model: Model):
-        self.predictor.execute(model)
+    def process(self, model: Model, mode: ModelProcessMode):
+        self.predictor.execute(model, mode)
 
         task = self.task
         test_index = self.test_index
@@ -73,12 +73,12 @@ class WorkItem:
         input_image = task.test_input(test_index)
         task_id = task.metadata_task_id
         status_string = self.status.to_string()
-        title = f'{task_id} test={test_index} {self.predictor_name} step={self.refinement_step} {status_string}'
+        title = f'{task_id} test={test_index} step={self.refinement_step} {self.predictor_name} {status_string}'
 
         expected_output_image = task.test_output(test_index)
         predicted_output_image = self.predicted_output_image
 
-        filename = f'{task_id}_test{test_index}_{self.predictor_name}_step{self.refinement_step}_{status_string}.png'
+        filename = f'{task_id}_test{test_index}_step{self.refinement_step}_{self.predictor_name}_{status_string}.png'
         if save_dir_path is not None:
             save_path = os.path.join(save_dir_path, filename)
         else:
@@ -145,7 +145,15 @@ class WorkManager:
             print(f'Saving images to directory: {save_dir}')
             os.makedirs(save_dir, exist_ok=True)
 
-        number_of_refinement_steps = 5
+        refinement_mode_list = [
+            # ModelProcessMode.TEMPERATURE_HIGH,
+            ModelProcessMode.TEMPERATURE_MEDIUM,
+            ModelProcessMode.TEMPERATURE_MEDIUM,
+            ModelProcessMode.TEMPERATURE_MEDIUM,
+            ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
+            ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
+        ]
+        number_of_refinement_steps = len(refinement_mode_list)
         correct_count = 0
         correct_task_id_set = set()
         pbar = tqdm(self.work_items, desc="Processing work items")
@@ -154,7 +162,14 @@ class WorkManager:
             work_item = original_work_item
 
             for refinement_step in range(number_of_refinement_steps):
-                work_item.process(self.model)
+                # if refinement_step == number_of_refinement_steps - 1:
+                #     mode = ModelProcessMode.TEMPERATURE_ZERO_BEAM5
+                # elif refinement_step > 2:
+                #     mode = ModelProcessMode.TEMPERATURE_MEDIUM
+                # else:
+                #     mode = ModelProcessMode.TEMPERATURE_HIGH
+                mode = refinement_mode_list[refinement_step]
+                work_item.process(self.model, mode)
                 self.work_items_finished.append(work_item)
 
                 if work_item.status == WorkItemStatus.CORRECT:
@@ -177,11 +192,11 @@ class WorkManager:
 
                 # IDEA: pick a random mutator
                 if refinement_step % 2 == 0:
-                    task_mutator_class = TaskMutatorOriginal
-                    previous_predicted_image = work_item.predicted_output_image
-                else:
                     task_mutator_class = TaskMutatorTranspose
                     previous_predicted_image = np.transpose(work_item.predicted_output_image)
+                else:
+                    task_mutator_class = TaskMutatorOriginal
+                    previous_predicted_image = work_item.predicted_output_image
                 predictor = PredictOutputV1(new_task, work_item.test_index, task_mutator_class, previous_predicted_image)
                 next_work_item = WorkItem(new_task, work_item.test_index, refinement_step+1, predictor)
                 work_item = next_work_item
