@@ -42,10 +42,8 @@ def generate_task_compress_xy(seed: int) -> Task:
     # count_test = 1
     task = Task()
     task.metadata_task_id = 'compress_xy'
-    min_width = 2
-    max_width = 6
-    min_height = 2
-    max_height = 6
+    min_image_size = 2
+    max_image_size = 8
 
     count_compress_x = 0
     count_compress_y = 0
@@ -55,7 +53,7 @@ def generate_task_compress_xy(seed: int) -> Task:
         input_image = None
         output_image = None
         for retry_index in range(100):
-            input_image = image_create_random_advanced((retry_index * 10000) + (seed * 37) + 101 + i, min_width, max_width, min_height, max_height)
+            input_image = image_create_random_advanced((retry_index * 10000) + (seed * 37) + 101 + i, min_image_size, max_image_size, min_image_size, max_image_size)
             image_xy = image_compress_xy(input_image)
             if np.array_equal(input_image, image_xy):
                 # The image is already compressed in both directions. Try again.
@@ -103,7 +101,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=603600313,
+    seed=703600313,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
