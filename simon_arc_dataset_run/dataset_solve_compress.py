@@ -43,7 +43,7 @@ def generate_task_compress_xy(seed: int) -> Task:
     task = Task()
     task.metadata_task_id = 'compress_xy'
     min_image_size = 2
-    max_image_size = 10
+    max_image_size = 12
 
     count_compress_x = 0
     count_compress_y = 0
@@ -101,7 +101,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=803600313,
+    seed=903600313,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
