@@ -1,5 +1,8 @@
 # Two crossing lines.
 #
+# IDEA: X marks the spot, where the lines intersect, and a 3x3 box around it.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=67a423a3
+#
 # IDEA: Parameter for line thickness. Currently lines are always 1 pixel thick.
 #
 # Present the same input images, but with different transformations.
