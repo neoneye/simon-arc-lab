@@ -2,6 +2,7 @@
 # When I'm using CPU on a M1 Mac, then inference is fast. Around 20 minutes.
 # The difference is a factor of 2. I'm not sure why the difference is so large.
 from transformers import T5ForConditionalGeneration, RobertaTokenizer
+import torch
 
 class Model:
     def __init__(self, pretrained_model_name_or_path: str, input_max_length: int):
@@ -23,6 +24,12 @@ class Model:
             padding='max_length',
             truncation=True
         ).input_ids
+
+        # Set random seed for deterministic behavior
+        seed = 42
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
 
         # Tweaking these parameters, may yield better results:
         # num_beams=3,
