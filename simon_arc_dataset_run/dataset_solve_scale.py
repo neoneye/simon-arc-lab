@@ -140,7 +140,7 @@ def generate_task(seed: int, x_up_down, x_scale, y_up_down, y_scale) -> Task:
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    builder.append_image()
+    builder.append_image_randomized()
     return builder.dataset_items()
 
 def format_scalexy_identifier(x_up_down: str, x_scale: int, y_up_down: str, y_scale: int) -> str:
@@ -193,7 +193,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=81000019,
+    seed=82000019,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
