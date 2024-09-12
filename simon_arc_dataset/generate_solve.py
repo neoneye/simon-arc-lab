@@ -1,5 +1,6 @@
 import random
 from simon_arc_lab.image_util import *
+from simon_arc_lab.image_noise import *
 from simon_arc_lab.task import *
 from simon_arc_lab.task_formatter_rle_compact import *
 from simon_arc_lab.benchmark import *
@@ -289,19 +290,7 @@ class DatasetItemListBuilder:
         for test_index in range(self.task.count_tests):
             iteration_seed = self.seed + test_index * 100 + 1000 + 38383231
             output_image = self.task.test_output(test_index)
-
-            height, width = output_image.shape
-            x = random.Random(iteration_seed + 1).randint(0, width - 1)
-            y = random.Random(iteration_seed + 2).randint(0, height - 1)
-
-            # pick a color that is not the original color
-            color = output_image[y, x]
-            available_colors = list(range(10))
-            available_colors.remove(color)
-            new_color = random.Random(iteration_seed + 3).choice(available_colors)
-
-            earlier_predicted_image = output_image.copy()
-            earlier_predicted_image[y, x] = new_color
+            earlier_predicted_image = image_noise_one_pixel(output_image, iteration_seed + 1)
 
             dataset_item = generate_dataset_item_for_output_image_with_earlier_prediction(
                 iteration_seed + 4, 
