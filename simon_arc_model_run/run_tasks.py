@@ -13,19 +13,7 @@ from simon_arc_model.work_manager import WorkManager
 CONTEXT_SIZE_LIMIT = (512, 500)
 # CONTEXT_SIZE_LIMIT = (1024, 1000)
 
-# iteration=229 training=21 evaluation=6 total=27
-# iteration=240 training=23 evaluation=4 total=27
-# iteration=254 training=23 evaluation=4 total=27
-# iteration=255 training=23 evaluation=4 total=27
-# iteration=256 training=22 evaluation=6 total=28
-# iteration=262 training=23 evaluation=5 total=28
-# iteration=289 training=24 evaluation=6 total=30 <-- best total
-# iteration=294 training=22 evaluation=6 total=28
-# iteration=309 training=24 evaluation=6 total=30 <-- best total
-# iteration=351 training=20 evaluation=7 total=27 <-- best evaluation
-# iteration=364 training=20 evaluation=7 total=27 <-- best evaluation
-# iteration=460 original_training=21 original_evaluation=4, transpose_training=22 transpose_evaluation=3, total=36
-model_iteration = 460
+model_iteration = 522
 model_name = f'simon-arc-lab-model{model_iteration}'
 model_directory = f'/Users/neoneye/nobackup/git/{model_name}'
 
