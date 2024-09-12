@@ -1,6 +1,7 @@
 from simon_arc_lab.task import *
 from simon_arc_lab.task_formatter_rle_compact import *
 from simon_arc_lab.task_mutator import *
+from simon_arc_lab.image_distort import *
 from simon_arc_lab.rle.deserialize import *
 from simon_arc_model.model import Model
 
@@ -37,6 +38,15 @@ class PredictOutputV1(PredictOutputBase):
 
         task_without_test_output = self.task_mutator.transformed_task()
         task_without_test_output.set_all_test_outputs_to_none()
+
+        # Provide an earlier predicted output, as part of the prompt.
+        # image_index = self.task.count_examples + self.test_index
+        # expected_output = self.task.output_images[image_index].copy()
+        # expected_output = image_distort(expected_output, 1, 5, 42)
+        # if isinstance(self.task_mutator, TaskMutatorTranspose):
+        #     expected_output = np.transpose(expected_output)
+        # task_without_test_output.output_images[image_index] = expected_output
+
         task_formatter = TaskFormatterRLECompact(task_without_test_output)
         test_output_id = task_formatter.test_output_id(self.test_index)
         input = task_formatter.to_string()
