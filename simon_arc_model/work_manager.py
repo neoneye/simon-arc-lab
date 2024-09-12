@@ -6,6 +6,8 @@ from enum import Enum
 import numpy as np
 from typing import Optional
 from simon_arc_lab.rle.deserialize import DecodeRLEError
+from simon_arc_lab.image_distort import *
+from simon_arc_lab.image_noise import *
 from simon_arc_lab.task import Task
 from simon_arc_lab.task_mutator import *
 from simon_arc_lab.taskset import TaskSet
@@ -146,18 +148,21 @@ class WorkManager:
             os.makedirs(save_dir, exist_ok=True)
 
         refinement_mode_list = [
-            # ModelProcessMode.TEMPERATURE_HIGH,
+            ModelProcessMode.TEMPERATURE_HIGH,
+            ModelProcessMode.TEMPERATURE_HIGH,
+            ModelProcessMode.TEMPERATURE_HIGH,
+            # ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
+            ModelProcessMode.TEMPERATURE_MEDIUM,
+            ModelProcessMode.TEMPERATURE_MEDIUM,
+            # ModelProcessMode.TEMPERATURE_LOW,
+            # ModelProcessMode.TEMPERATURE_LOW,
             # ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
             # ModelProcessMode.TEMPERATURE_MEDIUM,
-            ModelProcessMode.TEMPERATURE_LOW,
-            ModelProcessMode.TEMPERATURE_LOW,
+            # ModelProcessMode.TEMPERATURE_LOW,
             # ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
             # ModelProcessMode.TEMPERATURE_MEDIUM,
-            ModelProcessMode.TEMPERATURE_LOW,
+            # ModelProcessMode.TEMPERATURE_LOW,
             # ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
-            # ModelProcessMode.TEMPERATURE_MEDIUM,
-            ModelProcessMode.TEMPERATURE_LOW,
-            ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
         ]
         number_of_refinement_steps = len(refinement_mode_list)
         correct_count = 0
@@ -197,12 +202,18 @@ class WorkManager:
                 # new_task.output_images[image_index] = work_item.predicted_output_image
 
                 # IDEA: pick a random mutator
-                if refinement_step % 2 == 0:
-                    task_mutator_class = TaskMutatorTranspose
-                    previous_predicted_image = np.transpose(work_item.predicted_output_image)
-                else:
-                    task_mutator_class = TaskMutatorOriginal
-                    previous_predicted_image = work_item.predicted_output_image
+                # if refinement_step % 2 == 0:
+                #     task_mutator_class = TaskMutatorTranspose
+                #     previous_predicted_image = np.transpose(work_item.predicted_output_image)
+                # else:
+                #     task_mutator_class = TaskMutatorOriginal
+                #     previous_predicted_image = work_item.predicted_output_image
+                task_mutator_class = TaskMutatorOriginal
+                previous_predicted_image = work_item.predicted_output_image
+
+                iteration_seed = 42 + refinement_step
+                previous_predicted_image = image_distort(previous_predicted_image, 1, 10, iteration_seed + 1)
+                previous_predicted_image = image_noise_one_pixel(previous_predicted_image, iteration_seed + 2)
                 predictor = PredictOutputV1(new_task, work_item.test_index, task_mutator_class, previous_predicted_image)
                 next_work_item = WorkItem(new_task, work_item.test_index, refinement_step+1, predictor)
                 work_item = next_work_item
