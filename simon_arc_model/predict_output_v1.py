@@ -1,6 +1,8 @@
 from simon_arc_lab.task import *
 from simon_arc_lab.task_formatter_rle_compact import *
 from simon_arc_lab.task_mutator import *
+from simon_arc_lab.image_distort import *
+from simon_arc_lab.image_noise import *
 from simon_arc_lab.rle.deserialize import *
 from simon_arc_model.model import Model, ModelProcessMode
 
@@ -44,6 +46,15 @@ class PredictOutputV1(PredictOutputBase):
             task_without_test_output.output_images[image_index] = self.previous_predicted_image
 
         # TODO: insert the previous_predicted_image into the prompt with the transformation applied, eg. transpose/rotate
+
+        # Provide an earlier predicted output, as part of the prompt.
+        # image_index = self.task.count_examples + self.test_index
+        # expected_output = self.task.output_images[image_index].copy()
+        # expected_output = image_distort(expected_output, 1, 5, 42)
+        # expected_output = image_noise_one_pixel(expected_output, 0)
+        # if isinstance(self.task_mutator, TaskMutatorTranspose):
+        #     expected_output = np.transpose(expected_output)
+        # task_without_test_output.output_images[image_index] = expected_output
 
         task_formatter = TaskFormatterRLECompact(task_without_test_output)
         test_output_id = task_formatter.test_output_id(self.test_index)
