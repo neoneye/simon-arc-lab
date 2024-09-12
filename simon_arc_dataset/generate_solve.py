@@ -132,6 +132,7 @@ def generate_dataset_item_for_output_image_with_earlier_prediction(seed: int, da
     image_index = t2.count_examples + test_index
     t2.output_images[image_index] = earlier_output_image
 
+    t2.metadata_task_id = f'{t2.metadata_task_id} {benchmark_earlier_prediction_id}'
     # t2.show()
 
     task_formatter = TaskFormatterRLECompact(t2)
@@ -280,12 +281,49 @@ class DatasetItemListBuilder:
             )
             self.accumulated_dataset_items.append(dataset_item)
 
+    def append_image_with_earlier_prediction_original_output_with_1_bad_pixel(self):
+        """
+        Repair 1 bad pixel.
+        With the expected output image, but with one bad pixel.
+        """
+        for test_index in range(self.task.count_tests):
+            iteration_seed = self.seed + test_index * 100 + 1000 + 38383231
+            output_image = self.task.test_output(test_index)
+
+            height, width = output_image.shape
+            x = random.Random(iteration_seed + 1).randint(0, width - 1)
+            y = random.Random(iteration_seed + 2).randint(0, height - 1)
+
+            # pick a color that is not the original color
+            color = output_image[y, x]
+            available_colors = list(range(10))
+            available_colors.remove(color)
+            new_color = random.Random(iteration_seed + 3).choice(available_colors)
+
+            earlier_predicted_image = output_image.copy()
+            earlier_predicted_image[y, x] = new_color
+
+            dataset_item = generate_dataset_item_for_output_image_with_earlier_prediction(
+                iteration_seed + 4, 
+                self.dataset_names, 
+                self.benchmark_dataset_name,
+                self.task_without_test_output, 
+                test_index, 
+                earlier_predicted_image,
+                output_image,
+                self.transformation_id,
+                'repair_1_bad_pixel'
+            )
+            self.accumulated_dataset_items.append(dataset_item)
+
     def append_image_randomized(self):
-        j = self.seed % 3
+        j = self.seed % 4
         if j == 0:
             self.append_image()
         elif j == 1:
             self.append_image_with_earlier_prediction_very_close_to_expected_output()
+        elif j == 2:
+            self.append_image_with_earlier_prediction_original_output_with_1_bad_pixel()
         else:
             self.append_image_with_earlier_prediction_similar_to_original_input()
 
