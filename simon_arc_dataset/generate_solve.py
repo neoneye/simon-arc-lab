@@ -183,6 +183,26 @@ class DatasetItemListBuilder:
 
         self.accumulated_dataset_items = []
 
+    def append_arcagi1_json(self):
+        """
+        Export the entire Task to the original ARC-AGI version 1 JSON representation.
+
+        This adds a 'metadata' field with info about how the Task was generated.
+        """
+        task_dict = self.task.to_arcagi1_dict()
+        metadata = {}
+        if self.task.metadata_task_id is not None:
+            if len(self.task.metadata_task_id) > 0:
+                if self.task.metadata_task_id != self.transformation_id:
+                    metadata['task_id'] = self.task.metadata_task_id
+        
+        metadata['dataset_id'] = self.dataset_id
+        metadata['transformation_id'] = self.transformation_id
+        
+        if len(metadata) > 0:
+            task_dict['metadata'] = metadata
+        self.accumulated_dataset_items.append(task_dict)
+
     def append_pixels(self):
         """
         Predict the pixels of the output image
