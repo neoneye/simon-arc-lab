@@ -485,33 +485,24 @@ def generate_task_with_symmetry_line(seed: int) -> Task:
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    builder.append_image()
+    builder.append_image_randomized()
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 5
-    j = 4
+    # j = 4
     if j == 0:
         task = generate_task_with_input_image_create_output_symmetry_rect(seed)
-        task_id = task.metadata_task_id
-        transformation_id = f"'create_rect_symmetry {task_id}'"
     elif j == 1:
         task = generate_task_with_symmetry_rect_input_image_and_extract_a_particular_tile(seed)
-        task_id = task.metadata_task_id
-        transformation_id = f"'extract_rect_tile {task_id}'"
     elif j == 2:
         task = generate_task_with_input_image_create_output_symmetry_square(seed)
-        task_id = task.metadata_task_id
-        transformation_id = f"'create_square_symmetry {task_id}'"
     elif j == 3:
         task = generate_task_with_symmetry_square_input_image_and_extract_a_particular_tile(seed)
-        task_id = task.metadata_task_id
-        transformation_id = f"'extract_square_tile {task_id}'"
     elif j == 4:
         task = generate_task_with_symmetry_line(seed)
-        task_id = task.metadata_task_id
-        transformation_id = f"'symmetry_line {task_id}'"
     # task.show()
+    transformation_id = task.metadata_task_id
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
 
