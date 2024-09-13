@@ -460,49 +460,54 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     builder.append_image_randomized()
     return builder.dataset_items()
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 11
-    # j = (seed % 4) + 7
-    if j == 0:
-        task = generate_task_with_intersecting_spans(seed, 'empty_primary_area')
-        transformation_id = 'intersecting_spans empty_primary_area'
-    elif j == 1:
-        task = generate_task_with_intersecting_spans(seed, 'template_primary_area')
-        transformation_id = 'intersecting_spans template_primary_area'
-    elif j == 2:
-        task = generate_task_with_intersecting_spans(seed, 'template_primary_area_without_border')
-        transformation_id = 'intersecting_spans template_primary_area_without_border'
-    elif j == 3:
-        task = generate_task_with_intersecting_spans(seed, 'colored_primary_area_fill_template_border')
-        transformation_id = 'intersecting_spans colored_primary_area_fill_template_border'
-    elif j == 4:
+class TaskGenerator:
+    def __init__(self):
+        self.generators = []
+
+    def register(self, generator_fn):
+        """Register a new generator function if it's a callable, else raise a TypeError."""
+        if not callable(generator_fn):
+            raise TypeError(f"Expected a callable, but got {type(generator_fn).__name__}")
+
+        self.generators.append(generator_fn)
+
+    def generate_dataset_item_list(self, seed: int) -> list[dict]:
+        """Generate a dataset item list by cycling through the registered generators."""
+        if not self.generators:
+            raise Exception("No generators registered")
+
+        # Cycle through registered generators based on the seed value
+        generator_index = seed % len(self.generators)
+        task, transformation_id = self.generators[generator_index](seed)
+
+        # task.show()
+        # Assuming generate_dataset_item_list_inner is the function used to process the task
+        dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
+        return dataset_items
+
+def create_generator() -> TaskGenerator:
+    generator = TaskGenerator()
+    generator.register(lambda seed: (generate_task_with_intersecting_spans(seed, 'empty_primary_area'), 'intersecting_spans empty_primary_area'))
+    generator.register(lambda seed: (generate_task_with_intersecting_spans(seed, 'template_primary_area'), 'intersecting_spans template_primary_area'))
+    generator.register(lambda seed: (generate_task_with_intersecting_spans(seed, 'template_primary_area_without_border'), 'intersecting_spans template_primary_area'))
+    generator.register(lambda seed: (generate_task_with_intersecting_spans(seed, 'colored_primary_area_fill_template_border'), 'intersecting_spans colored_primary_area_fill_template_border'))
+
         # This is identical to 'colored_primary_area_extract_horizontal', due to rotation of the tasks.
-        task = generate_task_with_intersecting_spans(seed, 'colored_primary_area_extract_horizontal')
-        transformation_id = 'intersecting_spans colored_primary_area_extract_horizontal'
-    elif j == 5:
-        task = generate_task_with_template_lines(seed, 'output_with_border')
-        transformation_id = 'template_lines output_with_border'
-    elif j == 6:
-        task = generate_task_with_template_lines(seed, 'output_without_border')
-        transformation_id = 'template_lines output_without_border'
-    elif j == 7:
-        task = generate_task_with_alternate(seed, 'and')
-        transformation_id = 'alternate_and'
-    elif j == 8:
-        task = generate_task_with_alternate(seed, 'or')
-        transformation_id = 'alternate_or'
-    elif j == 9:
-        task = generate_task_with_alternate(seed, 'xor')
-        transformation_id = 'alternate_xor'
-    elif j == 10:
-        task = generate_task_with_alternate(seed, 'sum')
-        transformation_id = 'alternate_sum'
-    # task.show()
-    dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
-    return dataset_items
+    generator.register(lambda seed: (generate_task_with_intersecting_spans(seed, 'colored_primary_area_extract_horizontal'), 'intersecting_spans colored_primary_area_extract_horizontal'))
+
+    generator.register(lambda seed: (generate_task_with_template_lines(seed, 'output_with_border'), 'template_lines output_with_border'))
+    generator.register(lambda seed: (generate_task_with_template_lines(seed, 'output_without_border'), 'template_lines output_without_border'))
+
+    generator.register(lambda seed: (generate_task_with_alternate(seed, 'and'), 'alternate_and'))
+    generator.register(lambda seed: (generate_task_with_alternate(seed, 'or'), 'alternate_or'))
+    generator.register(lambda seed: (generate_task_with_alternate(seed, 'xor'), 'alternate_xor'))
+    generator.register(lambda seed: (generate_task_with_alternate(seed, 'sum'), 'alternate_sum'))
+    return generator
+
+my_generator = create_generator()
 
 generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
+    generate_dataset_item_list_fn=lambda seed: my_generator.generate_dataset_item_list(seed)
 )
 generator.generate(
     seed=2229000410,
