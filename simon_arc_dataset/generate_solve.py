@@ -6,7 +6,7 @@ from simon_arc_lab.task_formatter_rle_compact import *
 from simon_arc_lab.benchmark import *
 from simon_arc_lab.image_distort import *
 
-def generate_dataset_item_for_pixels_in_output_row(seed: int, dataset_names: list[str], benchmark_dataset_name: str, task: Task, test_index: int, test_output_y: int, pixel_list: list[int], transformation_id: str) -> dict:
+def generate_dataset_item_for_pixels_in_output_row(seed: int, dataset_names: list[str], dataset_id: str, task: Task, test_index: int, test_output_y: int, pixel_list: list[int], transformation_id: str) -> dict:
     random.seed(seed)
     dataset_name = random.choice(dataset_names)
 
@@ -36,7 +36,7 @@ def generate_dataset_item_for_pixels_in_output_row(seed: int, dataset_names: lis
     benchmark_width = image_size1d_to_string(max_width)
     benchmark_height = image_size1d_to_string(max_height)
     benchmark_pixels = task_pixels_to_string(task.total_pixel_count())
-    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} predict=pixels image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
+    benchmark_id = f'dataset={dataset_id} group={transformation_id} predict=pixels image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
 
     result_dict = {
         'instruction': instruction,
@@ -46,7 +46,7 @@ def generate_dataset_item_for_pixels_in_output_row(seed: int, dataset_names: lis
     }
     return result_dict
 
-def generate_dataset_item_for_number_of_output_rows(seed: int, dataset_names: list[str], benchmark_dataset_name: str, task: Task, test_index: int, output_image: np.array, transformation_id: str) -> dict:
+def generate_dataset_item_for_number_of_output_rows(seed: int, dataset_names: list[str], dataset_id: str, task: Task, test_index: int, output_image: np.array, transformation_id: str) -> dict:
     random.seed(seed)
     dataset_name = random.choice(dataset_names)
 
@@ -78,7 +78,7 @@ def generate_dataset_item_for_number_of_output_rows(seed: int, dataset_names: li
     benchmark_width = image_size1d_to_string(max_width)
     benchmark_height = image_size1d_to_string(max_height)
     benchmark_pixels = task_pixels_to_string(task.total_pixel_count())
-    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} predict=height image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
+    benchmark_id = f'dataset={dataset_id} group={transformation_id} predict=height image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
 
     result_dict = {
         'instruction': instruction,
@@ -88,7 +88,7 @@ def generate_dataset_item_for_number_of_output_rows(seed: int, dataset_names: li
     }
     return result_dict
 
-def generate_dataset_item_for_output_image(seed: int, dataset_names: list[str], benchmark_dataset_name: str, task: Task, test_index: int, output_image: np.array, transformation_id: str) -> dict:
+def generate_dataset_item_for_output_image(seed: int, dataset_names: list[str], dataset_id: str, task: Task, test_index: int, output_image: np.array, transformation_id: str) -> dict:
     random.seed(seed)
     dataset_name = random.choice(dataset_names)
 
@@ -115,7 +115,7 @@ def generate_dataset_item_for_output_image(seed: int, dataset_names: list[str], 
     benchmark_width = image_size1d_to_string(max_width)
     benchmark_height = image_size1d_to_string(max_height)
     benchmark_pixels = task_pixels_to_string(task.total_pixel_count())
-    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} predict=image image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
+    benchmark_id = f'dataset={dataset_id} group={transformation_id} predict=image image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
 
     result_dict = {
         'instruction': instruction,
@@ -125,7 +125,7 @@ def generate_dataset_item_for_output_image(seed: int, dataset_names: list[str], 
     }
     return result_dict
 
-def generate_dataset_item_for_output_image_with_earlier_prediction(seed: int, dataset_names: list[str], benchmark_dataset_name: str, task: Task, test_index: int, earlier_output_image: np.array, output_image: np.array, transformation_id: str, benchmark_earlier_prediction_id: str) -> dict:
+def generate_dataset_item_for_output_image_with_earlier_prediction(seed: int, dataset_names: list[str], dataset_id: str, task: Task, test_index: int, earlier_output_image: np.array, output_image: np.array, transformation_id: str, benchmark_earlier_prediction_id: str) -> dict:
     random.seed(seed)
     dataset_name = random.choice(dataset_names)
 
@@ -159,7 +159,7 @@ def generate_dataset_item_for_output_image_with_earlier_prediction(seed: int, da
     benchmark_width = image_size1d_to_string(max_width)
     benchmark_height = image_size1d_to_string(max_height)
     benchmark_pixels = task_pixels_to_string(task.total_pixel_count())
-    benchmark_id = f'dataset={benchmark_dataset_name} group={transformation_id} predict=image earlier_prediction={benchmark_earlier_prediction_id} image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
+    benchmark_id = f'dataset={dataset_id} group={transformation_id} predict=image earlier_prediction={benchmark_earlier_prediction_id} image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
 
     result_dict = {
         'instruction': instruction,
@@ -170,11 +170,11 @@ def generate_dataset_item_for_output_image_with_earlier_prediction(seed: int, da
     return result_dict
 
 class DatasetItemListBuilder:
-    def __init__(self, seed: int, task: Task, dataset_names: list[str], benchmark_dataset_name: str, transformation_id: str):
+    def __init__(self, seed: int, task: Task, dataset_names: list[str], dataset_id: str, transformation_id: str):
         self.seed = seed
         self.task = task
         self.dataset_names = dataset_names
-        self.benchmark_dataset_name = benchmark_dataset_name
+        self.dataset_id = dataset_id
         self.transformation_id = transformation_id
 
         task_without_test_output = task.clone()
@@ -182,6 +182,26 @@ class DatasetItemListBuilder:
         self.task_without_test_output = task_without_test_output
 
         self.accumulated_dataset_items = []
+
+    def append_arcagi1_json(self):
+        """
+        Export the entire Task to the original ARC-AGI version 1 JSON representation.
+
+        This adds a 'metadata' field with info about how the Task was generated.
+        """
+        task_dict = self.task.to_arcagi1_dict()
+        metadata = {}
+        if self.task.metadata_task_id is not None:
+            if len(self.task.metadata_task_id) > 0:
+                if self.task.metadata_task_id != self.transformation_id:
+                    metadata['task_id'] = self.task.metadata_task_id
+        
+        metadata['dataset_id'] = self.dataset_id
+        metadata['transformation_id'] = self.transformation_id
+        
+        if len(metadata) > 0:
+            task_dict['metadata'] = metadata
+        self.accumulated_dataset_items.append(task_dict)
 
     def append_pixels(self):
         """
@@ -195,7 +215,7 @@ class DatasetItemListBuilder:
                 dataset_item = generate_dataset_item_for_pixels_in_output_row(
                     self.seed + output_y + test_index * 100, 
                     self.dataset_names, 
-                    self.benchmark_dataset_name,
+                    self.dataset_id,
                     self.task_without_test_output, 
                     test_index, 
                     output_y, 
@@ -213,7 +233,7 @@ class DatasetItemListBuilder:
             dataset_item = generate_dataset_item_for_number_of_output_rows(
                 self.seed + test_index * 100 + 1000, 
                 self.dataset_names, 
-                self.benchmark_dataset_name,
+                self.dataset_id,
                 self.task_without_test_output, 
                 test_index, 
                 output_image,
@@ -230,7 +250,7 @@ class DatasetItemListBuilder:
             dataset_item = generate_dataset_item_for_output_image(
                 self.seed + test_index * 100 + 2000, 
                 self.dataset_names, 
-                self.benchmark_dataset_name,
+                self.dataset_id,
                 self.task_without_test_output, 
                 test_index, 
                 output_image,
@@ -249,7 +269,7 @@ class DatasetItemListBuilder:
             dataset_item = generate_dataset_item_for_output_image_with_earlier_prediction(
                 self.seed + test_index * 100 + 2000, 
                 self.dataset_names, 
-                self.benchmark_dataset_name,
+                self.dataset_id,
                 self.task_without_test_output, 
                 test_index, 
                 earlier_predicted_image,
@@ -272,7 +292,7 @@ class DatasetItemListBuilder:
             dataset_item = generate_dataset_item_for_output_image_with_earlier_prediction(
                 self.seed + test_index * 100 + 2000, 
                 self.dataset_names, 
-                self.benchmark_dataset_name,
+                self.dataset_id,
                 self.task_without_test_output, 
                 test_index, 
                 earlier_predicted_image,
@@ -295,7 +315,7 @@ class DatasetItemListBuilder:
             dataset_item = generate_dataset_item_for_output_image_with_earlier_prediction(
                 iteration_seed + 4, 
                 self.dataset_names, 
-                self.benchmark_dataset_name,
+                self.dataset_id,
                 self.task_without_test_output, 
                 test_index, 
                 earlier_predicted_image,

@@ -45,8 +45,8 @@ def generate_task_with_intersecting_spans(seed: int, transformation_id: str) -> 
     # count_test = 1
     task = Task()
     min_span_count = 3
-    max_span_count = 7
-    max_image_size = 12
+    max_span_count = 6
+    max_image_size = 8
 
     color_background = 9
     color_template = 8
@@ -189,8 +189,8 @@ def generate_task_with_template_lines(seed: int, transformation_id: str) -> Task
     # count_test = 1
     task = Task()
     min_span_count = 3
-    max_span_count = 7
-    max_image_size = 12
+    max_span_count = 6
+    max_image_size = 8
 
     color_background = 9
     color_template = 8
@@ -297,9 +297,9 @@ def generate_task_with_alternate(seed: int, transformation_id: str) -> Task:
     count_test = random.Random(seed + 2).randint(1, 2)
     # count_test = 1
     task = Task()
-    min_span_count = 5
-    max_span_count = 7
-    max_image_size = 12
+    min_span_count = 4
+    max_span_count = 5
+    max_image_size = 8
 
     color_background = 9
     color_indicator = 8
@@ -505,7 +505,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=2219000410,
+    seed=2229000410,
     max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
