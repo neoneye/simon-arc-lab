@@ -486,6 +486,7 @@ def generate_task_with_symmetry_line(seed: int) -> Task:
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
     builder.append_image_randomized()
+    # builder.append_arcagi1_json()
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
