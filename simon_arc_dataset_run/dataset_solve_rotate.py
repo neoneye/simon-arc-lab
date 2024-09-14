@@ -36,7 +36,7 @@ def generate_task(seed: int, transformation_id: str, percent_noise: float) -> Ta
     task = Task()
     min_size = 1
     max_size = 13
-    task.metadata_task_id = f'rotate_flip {transformation_id}'
+    task.metadata_task_id = transformation_id
 
     for i in range(count_example+count_test):
         is_example = i < count_example
