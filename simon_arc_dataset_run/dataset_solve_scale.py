@@ -75,6 +75,21 @@ def scale_up_and_add_noise(unscaled_image: np.array, seed: int, scale_x: int, sc
 
     return result_image
 
+def format_scalexy_identifier(x_up_down: str, x_scale: int, y_up_down: str, y_scale: int) -> str:
+    """
+    the x_up_down and y_up_down are either 'up' or 'down'
+    the x_scale and y_scale are positive integers in the range 1 to max_scale_factor
+    """
+    if x_scale == 1:
+        x_suffix = ''
+    else:
+        x_suffix = str(x_up_down)
+    if y_scale == 1:
+        y_suffix = ''
+    else:
+        y_suffix = str(y_up_down)
+    return f'x{x_scale}{x_suffix}_y{y_scale}{y_suffix}'
+
 def generate_task(seed: int, x_up_down, x_scale, y_up_down, y_scale) -> Task:
     """
     Create a task, where the job is to scale the image up or down.
@@ -121,7 +136,8 @@ def generate_task(seed: int, x_up_down, x_scale, y_up_down, y_scale) -> Task:
     else:
         noise_str = ''
 
-    task.metadata_task_id = f'scale_x{x_up_down}{x_scale}_y{y_up_down}{y_scale}{noise_str}'
+    scale_id = format_scalexy_identifier(x_up_down, x_scale, y_up_down, y_scale)
+    task.metadata_task_id = f'scale_{scale_id}{noise_str}'
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -143,21 +159,6 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     builder.append_image_randomized()
     return builder.dataset_items()
 
-def format_scalexy_identifier(x_up_down: str, x_scale: int, y_up_down: str, y_scale: int) -> str:
-    """
-    the x_up_down and y_up_down are either 'up' or 'down'
-    the x_scale and y_scale are positive integers in the range 1 to max_scale_factor
-    """
-    if x_scale == 1:
-        x_suffix = ''
-    else:
-        x_suffix = str(x_up_down)
-    if y_scale == 1:
-        y_suffix = ''
-    else:
-        y_suffix = str(y_up_down)
-    return f'x{x_scale}{x_suffix}_y{y_scale}{y_suffix}'
-
 def generate_dataset_item_list(seed: int) -> list[dict]:
     max_scale_factor = 7
     up_down = ['up', 'down']
@@ -168,8 +169,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
                 for x_scale in range(1, max_scale_factor + 1):
                     if x_scale == 1 and y_scale == 1:
                         continue
-                    transformation_id = format_scalexy_identifier(x_up_down, x_scale, y_up_down, y_scale)
-                    config_list.append((x_up_down, x_scale, y_up_down, y_scale, transformation_id))
+                    config_list.append((x_up_down, x_scale, y_up_down, y_scale))
 
     # shuffle the parameters
     random.Random(seed + 1).shuffle(config_list)
@@ -181,8 +181,9 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     all_dataset_items = []
     for index, config_list in enumerate(config_list_truncated):
         iteration_seed = seed + index * 1000000
-        x_up_down, x_scale, y_up_down, y_scale, transformation_id = config_list
+        x_up_down, x_scale, y_up_down, y_scale = config_list
         task = generate_task(iteration_seed, x_up_down, x_scale, y_up_down, y_scale)
+        transformation_id = task.metadata_task_id
         # task.show()
         dataset_items = generate_dataset_item_list_inner(iteration_seed + 1, task, transformation_id)
         all_dataset_items.extend(dataset_items)
