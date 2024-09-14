@@ -2,10 +2,10 @@ import json
 
 MAX_FILE_COUNT = 100
 
-FILENAME_PREFIX = 'symmetry_'
+FILENAME_PREFIX = 'alternating_intersection_sum'
 
 # File paths
-input_file = 'simon_arc_dataset_run/dataset_solve_symmetry.jsonl'
+input_file = 'simon_arc_dataset_run/dataset_solve_span.jsonl'
 output_folder = 'simon_arc_dataset_run/output_folder/'
 
 # Read the JSONL file and export each row as a separate JSON file
@@ -19,7 +19,7 @@ with open(input_file, 'r') as f:
         json_data = json.loads(line)
         
         # Define the output file name based on the row number
-        output_file = f"{output_folder}{FILENAME_PREFIX}{index}.json"
+        output_file = f"{output_folder}{FILENAME_PREFIX}_{index}.json"
         
         # Write the JSON object to a new file
         with open(output_file, 'w') as outfile:
