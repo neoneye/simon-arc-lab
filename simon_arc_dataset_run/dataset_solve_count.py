@@ -272,17 +272,14 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 4
     # j = (seed % 2) + 2
     if j == 0:
-        transformation_id = 'count_pixels_and_repeat_output_pattern_x'
         task = generate_task_count_pixels_and_repeat_output_pattern(seed, 'repeat_x')
     elif j == 1:
-        transformation_id = 'count_pixels_and_repeat_output_pattern_y'
         task = generate_task_count_pixels_and_repeat_output_pattern(seed, 'repeat_y')
     elif j == 2:
-        transformation_id = 'count_pixels_and_repeat_input_pattern_x'
         task = generate_task_count_pixels_and_repeat_input_pattern(seed, 'repeat_x')
     elif j == 3:
-        transformation_id = 'count_pixels_and_repeat_input_pattern_y'
         task = generate_task_count_pixels_and_repeat_input_pattern(seed, 'repeat_y')
+    transformation_id = task.metadata_task_id
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
