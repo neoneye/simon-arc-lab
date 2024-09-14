@@ -173,23 +173,18 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 6
     if j == 0:
-        transformation_id = 'boundingbox_of_lonely_pixels_filled'
         task = generate_task_boundingbox_of_lonely_pixels(seed, 'filled')
     elif j == 1:
-        transformation_id = 'boundingbox_of_lonely_pixels_hollow'
         task = generate_task_boundingbox_of_lonely_pixels(seed, 'hollow')
     elif j == 2:
-        transformation_id = 'boundingbox_of_lonely_pixels_filled_inner'
         task = generate_task_boundingbox_of_lonely_pixels(seed, 'filled_inner')
     elif j == 3:
-        transformation_id = 'boundingbox_of_lonely_pixels_hollow_inner'
         task = generate_task_boundingbox_of_lonely_pixels(seed, 'hollow_inner')
     elif j == 4:
-        transformation_id = 'boundingbox_of_lonely_pixels_filled_outer'
         task = generate_task_boundingbox_of_lonely_pixels(seed, 'filled_outer')
     elif j == 5:
-        transformation_id = 'boundingbox_of_lonely_pixels_hollow_outer'
         task = generate_task_boundingbox_of_lonely_pixels(seed, 'hollow_outer')
+    transformation_id = task.metadata_task_id
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
