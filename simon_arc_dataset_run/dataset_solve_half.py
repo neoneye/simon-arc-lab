@@ -126,12 +126,11 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     ]
     accumulated_dataset_items = []
     for index_connectivity, connectivity in enumerate(connectivity_list):
-        connectivity_name = connectivity.name.lower()
         for index_name, name in enumerate(name_list):
             iteration_seed = seed + 1000000 * index_name + 10000 * index_connectivity
             task = generate_task_half(iteration_seed + 1, name, connectivity)
+            transformation_id = task.metadata_task_id
             # task.show()
-            transformation_id = f'half_{name}_{connectivity_name}'
             dataset_items = generate_dataset_item_list_inner(iteration_seed + 2, task, transformation_id)
             accumulated_dataset_items.extend(dataset_items)
 
