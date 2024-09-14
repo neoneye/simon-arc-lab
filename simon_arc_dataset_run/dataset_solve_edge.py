@@ -120,8 +120,8 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     for index, name in enumerate(name_list):
         iteration_seed = seed + 1000000 * index
         task = generate_task_edge(iteration_seed + 1, name)
+        transformation_id = task.metadata_task_id
         # task.show()
-        transformation_id = f'edge_{name}'
         dataset_items = generate_dataset_item_list_inner(iteration_seed + 2, task, transformation_id)
         accumulated_dataset_items.extend(dataset_items)
 
