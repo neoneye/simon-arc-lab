@@ -465,38 +465,28 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     # j = (seed % 4) + 7
     if j == 0:
         task = generate_task_with_intersecting_spans(seed, 'empty_primary_area')
-        transformation_id = 'intersecting_spans empty_primary_area'
     elif j == 1:
         task = generate_task_with_intersecting_spans(seed, 'template_primary_area')
-        transformation_id = 'intersecting_spans template_primary_area'
     elif j == 2:
         task = generate_task_with_intersecting_spans(seed, 'template_primary_area_without_border')
-        transformation_id = 'intersecting_spans template_primary_area_without_border'
     elif j == 3:
         task = generate_task_with_intersecting_spans(seed, 'colored_primary_area_fill_template_border')
-        transformation_id = 'intersecting_spans colored_primary_area_fill_template_border'
     elif j == 4:
         # This is identical to 'colored_primary_area_extract_horizontal', due to rotation of the tasks.
         task = generate_task_with_intersecting_spans(seed, 'colored_primary_area_extract_horizontal')
-        transformation_id = 'intersecting_spans colored_primary_area_extract_horizontal'
     elif j == 5:
         task = generate_task_with_template_lines(seed, 'output_with_border')
-        transformation_id = 'template_lines output_with_border'
     elif j == 6:
         task = generate_task_with_template_lines(seed, 'output_without_border')
-        transformation_id = 'template_lines output_without_border'
     elif j == 7:
         task = generate_task_with_alternate(seed, 'and')
-        transformation_id = 'alternate_and'
     elif j == 8:
         task = generate_task_with_alternate(seed, 'or')
-        transformation_id = 'alternate_or'
     elif j == 9:
         task = generate_task_with_alternate(seed, 'xor')
-        transformation_id = 'alternate_xor'
     elif j == 10:
         task = generate_task_with_alternate(seed, 'sum')
-        transformation_id = 'alternate_sum'
+    transformation_id = task.metadata_task_id
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
