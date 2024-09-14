@@ -140,29 +140,22 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 8
     if j == 0:
-        transformation_id = 'skew_left'
         task = generate_task_skew(seed, SkewDirection.LEFT)
     elif j == 1:
-        transformation_id = 'skew_right'
         task = generate_task_skew(seed, SkewDirection.RIGHT)
     elif j == 2:
-        transformation_id = 'skew_up'
         task = generate_task_skew(seed, SkewDirection.UP)
     elif j == 3:
-        transformation_id = 'skew_down'
         task = generate_task_skew(seed, SkewDirection.DOWN)
     elif j == 4:
-        transformation_id = 'unskew_up'
         task = generate_task_unskew(seed, SkewDirection.UP)
     elif j == 5:
-        transformation_id = 'unskew_down'
         task = generate_task_unskew(seed, SkewDirection.DOWN)
     elif j == 6:
-        transformation_id = 'unskew_left'
         task = generate_task_unskew(seed, SkewDirection.LEFT)
     elif j == 7:
-        transformation_id = 'unskew_right'
         task = generate_task_unskew(seed, SkewDirection.RIGHT)
+    transformation_id = task.metadata_task_id
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items
