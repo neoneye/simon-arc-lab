@@ -25,6 +25,10 @@ class Model:
         self.input_max_length = input_max_length
     
     def process(self, prompt: str, mode: ModelProcessMode) -> str:
+        responses = self.process_multiple(prompt, mode, num_return_sequences=1)
+        return responses[0]
+    
+    def process_multiple(self, prompt: str, mode: ModelProcessMode, num_return_sequences: int) -> list[str]:
         input_ids = self.tokenizer(
             prompt, 
             return_tensors='pt',
@@ -79,7 +83,13 @@ class Model:
             raise ValueError(f"Unknown mode: {mode}")
 
         generate_options['max_length'] = 128
+        generate_options['num_return_sequences'] = num_return_sequences
 
         outputs = self.model.generate(input_ids, **generate_options)
-        response = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        return response
+
+        # Decode all the generated sequences
+        responses = [
+            self.tokenizer.decode(output, skip_special_tokens=True) 
+            for output in outputs
+        ]
+        return responses
