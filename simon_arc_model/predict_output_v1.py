@@ -68,6 +68,7 @@ class PredictOutputV1(PredictOutputBase):
         if self.cached_response is not None:
             return
         prompt = self.prompt()
+        # IDEA: Save multiple responses. Currently only saves 1 response.
         response = model.process(prompt, mode)
         self.cached_response = response
 
