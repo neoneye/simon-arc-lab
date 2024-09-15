@@ -30,6 +30,7 @@ if not os.path.isdir(path_to_arc_dataset_collection_dataset):
 groupname_pathtotaskdir_list = [
     ('arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
     ('arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
+    # ('tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
     # ('miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
     # ('conceptarc', os.path.join(path_to_arc_dataset_collection_dataset, 'ConceptARC/data')),
     # ('testdata', os.path.join(PROJECT_ROOT, 'testdata', 'simple_arc_tasks')),
