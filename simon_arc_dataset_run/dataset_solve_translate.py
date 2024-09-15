@@ -28,13 +28,14 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_translate'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_translate.jsonl')
 
-def generate_task(seed: int, dx: int, dy: int, percent_noise: float) -> Task:
+def generate_task(seed: int, dx: int, dy: int, percent_noise: float, transformation_id: str) -> Task:
     count_example = random.Random(seed + 1).randint(2, 4)
     count_test = random.Random(seed + 2).randint(1, 2)
     # count_test = 1
     task = Task()
     min_image_size = 1
     max_image_size = 12
+    task.metadata_task_id = transformation_id
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -54,9 +55,8 @@ def generate_task(seed: int, dx: int, dy: int, percent_noise: float) -> Task:
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    # builder.append_height()
-    # builder.append_pixels()
-    builder.append_image()
+    builder.append_image_randomized()
+    # builder.append_arcagi1_json()
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
@@ -108,8 +108,7 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     for config in config_list_truncated:
         dx, dy, transformation_id = config
         percent_noise = 0.0
-        task = generate_task(seed_task, dx, dy, percent_noise)
-        # task.metadata_task_id = transformation_id
+        task = generate_task(seed_task, dx, dy, percent_noise, transformation_id)
         # task.show()
         dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
         all_dataset_items.extend(dataset_items)

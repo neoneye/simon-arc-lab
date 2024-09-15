@@ -140,11 +140,10 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 2
     if j == 0:
-        transformation_id = 'reverse_chunk_leftright'
         task = generate_task_reverse_chunks(seed, 'leftright')
     elif j == 1:
-        transformation_id = 'reverse_chunk_topbottom'
         task = generate_task_reverse_chunks(seed, 'topbottom')
+    transformation_id = task.metadata_task_id
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items

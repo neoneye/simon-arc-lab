@@ -106,13 +106,11 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     ]
     accumulated_items = []
     for index, connectivity in enumerate(connectivity_list):
-        connectivity_name_lower = connectivity.name.lower()
-        transformation_id = f'apply_erosion_{connectivity_name_lower}'
-
         for retry_index in range(20):
             current_seed = seed + index * 10000 + 1333 * retry_index
             try:
                 task = generate_task_erosion(current_seed, connectivity)
+                transformation_id = task.metadata_task_id
                 # task.show()
                 items = generate_dataset_item_list_inner(seed, task, transformation_id)
                 accumulated_items.extend(items)

@@ -180,10 +180,9 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 2
     if j == 0:
         task = generate_task_halfplane_with_one_pixel(seed)
-        transformation_id = task.metadata_task_id
     elif j == 1:
-        transformation_id = 'halfplane_with_two_pixels'
         task = generate_task_halfplane_with_two_pixels(seed)
+    transformation_id = task.metadata_task_id
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
     return dataset_items

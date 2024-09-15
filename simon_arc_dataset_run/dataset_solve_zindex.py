@@ -66,7 +66,7 @@ def generate_task_mask_of_primary_rectangle(seed: int) -> Task:
         1: colors_output[1],
     }
 
-    task.metadata_task_id = f'mask_of_primary_rectangle'
+    task.metadata_task_id = 'mask_of_primary_rectangle'
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -138,7 +138,7 @@ def generate_task_mask_of_obscured_rectangle(seed: int) -> Task:
         1: colors_output[1],
     }
 
-    task.metadata_task_id = f'mask_of_obscured_rectangle'
+    task.metadata_task_id = 'mask_of_obscured_rectangle'
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -253,7 +253,7 @@ def generate_task_mask_of_intersection_rectangle(seed: int) -> Task:
         1: colors_output[1],
     }
 
-    task.metadata_task_id = f'mask_of_intersection_rectangle'
+    task.metadata_task_id = 'mask_of_intersection_rectangle'
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -360,7 +360,7 @@ def generate_task_move_obscured_rectangle_to_top(seed: int) -> Task:
         3: colors[3],
     }
 
-    task.metadata_task_id = f'move_obscured_rectangle_to_top'
+    task.metadata_task_id = 'move_obscured_rectangle_to_top'
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -449,7 +449,8 @@ def generate_task_move_obscured_rectangle_to_top(seed: int) -> Task:
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    builder.append_image()
+    builder.append_image_randomized()
+    # builder.append_arcagi1_json()
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
@@ -457,18 +458,15 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     # j = (seed % 2) + 2
     if j == 0:
         task = generate_task_mask_of_primary_rectangle(seed)
-        transformation_id = 'mask_of_primary_rectangle'
     elif j == 1:
         task = generate_task_mask_of_obscured_rectangle(seed)
-        transformation_id = 'mask_of_obscured_rectangle'
     elif j == 2:
         task = generate_task_mask_of_intersection_rectangle(seed)
-        transformation_id = 'mask_of_intersection_rectangle'
     elif j == 3:
         task = generate_task_move_obscured_rectangle_to_top(seed)
-        transformation_id = 'move_obscured_rectangle_to_top'
         
     # task.show()
+    transformation_id = task.metadata_task_id
     items = generate_dataset_item_list_inner((seed + 1) * 11, task, transformation_id)
     return items
 
