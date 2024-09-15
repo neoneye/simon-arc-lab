@@ -10,6 +10,7 @@ class ModelProcessMode(Enum):
     TEMPERATURE_LOW = 'temperature_low'
     TEMPERATURE_MEDIUM = 'temperature_medium'
     TEMPERATURE_HIGH = 'temperature_high'
+    TEMPERATURE_LAB1 = 'temperature_lab1'
 
 class Model:
     def __init__(self, pretrained_model_name_or_path: str, input_max_length: int):
@@ -64,6 +65,15 @@ class Model:
                 'num_beams': 3,
                 'do_sample': True,
                 'early_stopping': True
+            }
+        elif mode == ModelProcessMode.TEMPERATURE_LAB1:
+            generate_options = {
+                'temperature': 0.7,
+                'num_beams': 3,
+                'do_sample': True,
+                'early_stopping': True,
+                'top_k': 50,
+                'top_p': 0.95,
             }
         else:
             raise ValueError(f"Unknown mode: {mode}")
