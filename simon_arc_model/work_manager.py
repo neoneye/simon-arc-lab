@@ -8,6 +8,7 @@ from typing import Optional
 from simon_arc_lab.rle.deserialize import DecodeRLEError
 from simon_arc_lab.image_distort import *
 from simon_arc_lab.image_noise import *
+from simon_arc_lab.image_vote import *
 from simon_arc_lab.task import Task
 from simon_arc_lab.task_mutator import *
 from simon_arc_lab.taskset import TaskSet
@@ -148,15 +149,25 @@ class WorkManager:
             os.makedirs(save_dir, exist_ok=True)
 
         refinement_mode_list = [
-            ModelProcessMode.TEMPERATURE_HIGH,
+            ModelProcessMode.TEMPERATURE_LAB1,
+            # ModelProcessMode.TEMPERATURE_HIGH,
+            # ModelProcessMode.TEMPERATURE_MEDIUM,
+            ModelProcessMode.TEMPERATURE_LAB1,
+            ModelProcessMode.TEMPERATURE_LAB1,
+            ModelProcessMode.TEMPERATURE_LAB1,
+            # ModelProcessMode.TEMPERATURE_LAB1,
+            # ModelProcessMode.TEMPERATURE_LAB1,
+            # ModelProcessMode.TEMPERATURE_LAB1,
+            # ModelProcessMode.TEMPERATURE_LAB1,
+            # ModelProcessMode.TEMPERATURE_HIGH,
             # ModelProcessMode.TEMPERATURE_HIGH,
             # ModelProcessMode.TEMPERATURE_HIGH,
             # ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
-            ModelProcessMode.TEMPERATURE_MEDIUM,
             # ModelProcessMode.TEMPERATURE_MEDIUM,
-            ModelProcessMode.TEMPERATURE_LOW,
+            # ModelProcessMode.TEMPERATURE_MEDIUM,
             # ModelProcessMode.TEMPERATURE_LOW,
-            ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
+            # ModelProcessMode.TEMPERATURE_LOW,
+            # ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
             # ModelProcessMode.TEMPERATURE_MEDIUM,
             # ModelProcessMode.TEMPERATURE_LOW,
             # ModelProcessMode.TEMPERATURE_ZERO_BEAM5,
@@ -172,6 +183,7 @@ class WorkManager:
         for original_work_item in pbar:
             work_item = original_work_item
 
+            predicted_images = []
             for refinement_step in range(number_of_refinement_steps):
                 # if refinement_step == number_of_refinement_steps - 1:
                 #     mode = ModelProcessMode.TEMPERATURE_ZERO_BEAM5
@@ -210,6 +222,7 @@ class WorkManager:
                 #     previous_predicted_image = work_item.predicted_output_image
                 task_mutator_class = TaskMutatorOriginal
                 previous_predicted_image = work_item.predicted_output_image
+                predicted_images.append(previous_predicted_image)
 
                 iteration_seed = 42 + refinement_step
                 previous_predicted_image = image_distort(previous_predicted_image, 1, 10, iteration_seed + 1)
@@ -217,6 +230,32 @@ class WorkManager:
                 predictor = PredictOutputV1(new_task, work_item.test_index, task_mutator_class, previous_predicted_image)
                 next_work_item = WorkItem(new_task, work_item.test_index, refinement_step+1, predictor)
                 work_item = next_work_item
+
+            try:
+                the_image = image_vote(predicted_images)
+            except ValueError as e:
+                print(f'Error in image_vote: {e}')
+                break
+            if np.array_equal(the_image, original_work_item.task.test_output(original_work_item.test_index)):
+                status = 'correct'
+            else:
+                status = 'incorrect'
+            WorkManager.show_voted_image(original_work_item.task, original_work_item.test_index, the_image, status, save_dir)
+
+    @classmethod
+    def show_voted_image(cls, task: Task, test_index: int, predicted_output_image: np.array, status_string: str, save_dir_path: Optional[str]):
+        input_image = task.test_input(test_index)
+        task_id = task.metadata_task_id
+        title = f'{task_id} test={test_index} vote {status_string}'
+
+        expected_output_image = task.test_output(test_index)
+
+        filename = f'{task_id}_test{test_index}_vote_{status_string}.png'
+        if save_dir_path is not None:
+            save_path = os.path.join(save_dir_path, filename)
+        else:
+            save_path = None
+        show_prediction_result(input_image, predicted_output_image, expected_output_image, title, show_grid=True, save_path=save_path)
 
     def summary(self):
         correct_task_id_set = set()
