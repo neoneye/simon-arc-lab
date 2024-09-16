@@ -17,8 +17,8 @@ def image_vote(images: list[np.array]) -> np.array:
         if size_counters[size] != max_counter:
             del size_counters[size]
     
-    # if len(size_counters) != 1:
-    #     raise ValueError("Ambiguous what image size is the most popular.")
+    if len(size_counters) != 1:
+        raise ValueError("Ambiguous what image size is the most popular.")
     
     # The most popular image size
     size = list(size_counters.keys())[0]
