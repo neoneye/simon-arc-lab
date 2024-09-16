@@ -214,14 +214,14 @@ class WorkManager:
                 # new_task.output_images[image_index] = work_item.predicted_output_image
 
                 # IDEA: pick a random mutator
-                # if refinement_step % 2 == 0:
-                #     task_mutator_class = TaskMutatorTranspose
-                #     previous_predicted_image = np.transpose(work_item.predicted_output_image)
-                # else:
-                #     task_mutator_class = TaskMutatorOriginal
-                #     previous_predicted_image = work_item.predicted_output_image
-                task_mutator_class = TaskMutatorOriginal
-                previous_predicted_image = work_item.predicted_output_image
+                if refinement_step % 2 == 0:
+                    task_mutator_class = TaskMutatorTranspose
+                    previous_predicted_image = np.transpose(work_item.predicted_output_image)
+                else:
+                    task_mutator_class = TaskMutatorOriginal
+                    previous_predicted_image = work_item.predicted_output_image
+                # task_mutator_class = TaskMutatorOriginal
+                # previous_predicted_image = work_item.predicted_output_image
                 predicted_images.append(previous_predicted_image)
 
                 iteration_seed = 42 + refinement_step
@@ -235,12 +235,14 @@ class WorkManager:
                 the_image = image_vote(predicted_images)
             except ValueError as e:
                 print(f'Error in image_vote: {e}')
-                break
-            if np.array_equal(the_image, original_work_item.task.test_output(original_work_item.test_index)):
-                status = 'correct'
-            else:
-                status = 'incorrect'
-            WorkManager.show_voted_image(original_work_item.task, original_work_item.test_index, the_image, status, save_dir)
+                the_image = None
+                
+            if the_image is not None:
+                if np.array_equal(the_image, original_work_item.task.test_output(original_work_item.test_index)):
+                    status = 'correct'
+                else:
+                    status = 'incorrect'
+                WorkManager.show_voted_image(original_work_item.task, original_work_item.test_index, the_image, status, save_dir)
 
     @classmethod
     def show_voted_image(cls, task: Task, test_index: int, predicted_output_image: np.array, status_string: str, save_dir_path: Optional[str]):
