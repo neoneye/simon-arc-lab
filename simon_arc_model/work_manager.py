@@ -213,6 +213,8 @@ class WorkManager:
                 # image_index = new_task.count_examples + original_work_item.test_index
                 # new_task.output_images[image_index] = work_item.predicted_output_image
 
+                predicted_images.append(work_item.predicted_output_image.copy())
+
                 # IDEA: pick a random mutator
                 if refinement_step % 2 == 0:
                     task_mutator_class = TaskMutatorTranspose
@@ -222,7 +224,6 @@ class WorkManager:
                     previous_predicted_image = work_item.predicted_output_image
                 # task_mutator_class = TaskMutatorOriginal
                 # previous_predicted_image = work_item.predicted_output_image
-                predicted_images.append(previous_predicted_image)
 
                 iteration_seed = 42 + refinement_step
                 previous_predicted_image = image_distort(previous_predicted_image, 1, 10, iteration_seed + 1)
@@ -236,7 +237,7 @@ class WorkManager:
             except ValueError as e:
                 print(f'Error in image_vote: {e}')
                 the_image = None
-                
+
             if the_image is not None:
                 if np.array_equal(the_image, original_work_item.task.test_output(original_work_item.test_index)):
                     status = 'correct'
