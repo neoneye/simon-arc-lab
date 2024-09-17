@@ -207,6 +207,8 @@ groupname_pathtotaskdir_list = [
     ('arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
     # ('arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
     # ('miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
+    # ('tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
+    # ('diva', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-diva/data')),
     # ('conceptarc', os.path.join(path_to_arc_dataset_collection_dataset, 'ConceptARC/data')),
     # ('testdata', os.path.join(PROJECT_ROOT, 'testdata', 'simple_arc_tasks')),
 ]
@@ -218,6 +220,8 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
 
 def create_task_from_images(images: list[np.array], node_pre: BaseNode, node_transform: BaseNode, node_post_input: BaseNode, task_id_prefix: str) -> Task:
     pair_count = len(images)
+    if pair_count < 3:
+        raise ValueError("Need at least 3 images to create a task")
 
     # Prepare input images
     prepared_input_images = node_pre.apply_many(images)
