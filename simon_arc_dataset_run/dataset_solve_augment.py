@@ -253,7 +253,13 @@ def create_task_from_images(images: list[np.array], node_pre: BaseNode, node_tra
 
     return new_task
 
-def create_multiple_tasks_from_taskimages(input_output: str, node_pre: BaseNode, node_transform: BaseNode, node_post_input: BaseNode, seed: int, task: Task) -> list[Task]:
+def create_task_from_taskimages(input_output: str, seed: int, task: Task) -> Optional[Task]:
+    node_pre = permuted_node_pre(seed * 100101 + 5)
+    node_transform = permuted_node_transform(seed * 130131 + 1)
+    node_post_input = permuted_node_input_post(seed * 910177 + 5)
+
+    # print(f"node: {node_pre.name()} {node_transform.name()} {node_input_post.name()}")
+
     # Collect images for processing
     all_images = []
     if input_output == 'input':
@@ -269,40 +275,33 @@ def create_multiple_tasks_from_taskimages(input_output: str, node_pre: BaseNode,
 
     # Split up many images into smaller chunks.
     random.Random(seed + 1).shuffle(all_images)
-    groups = []
-    count_images = len(all_images)
-    if count_images <= 4:
-        groups.append(all_images)
-    elif count_images == 5:
-        image0, image1, image2, image3, image4 = all_images
-        group0 = [image0, image1, image2, image3]
-        group1 = [image0, image1, image2, image4]
-        groups.append(group0)
-        groups.append(group1)
-    elif count_images >= 6:
-        image0, image1, image2, image3, image4, image5 = all_images[:6]
-        group0 = [image0, image1, image2, image3]
-        group1 = [image0, image1, image2, image4]
-        group2 = [image0, image1, image2, image5]
-        groups.append(group0)
-        groups.append(group1)
-        groups.append(group2)
 
-    # Process groups of images
-    augmented_tasks = []    
-    for group_index, group_images in enumerate(groups):
-        task_id_prefix = f'{task.metadata_task_id} {input_output}'
-        try:
-            new_task = create_task_from_images(group_images, node_pre, node_transform, node_post_input, task_id_prefix)
-        except ApplyManyError as e:
-            print(f"create_task_from_images. Error: {e}")
-            continue
-        except ValueError as e:
-            print(f"create_task_from_images. ValueError: {e}")
-            continue
-        new_task.shuffle_examples(seed + group_index)
-        augmented_tasks.append(new_task)
-    return augmented_tasks
+    # Truncate to N images
+    max_pair_count = 4
+    truncated_images = all_images[:max_pair_count]
+
+    task_id_prefix = f'{task.metadata_task_id} {input_output}'
+    try:
+        new_task = create_task_from_images(truncated_images, node_pre, node_transform, node_post_input, task_id_prefix)
+    except ApplyManyError as e:
+        print(f"create_task_from_images. Error: {e}")
+        return None
+    except ValueError as e:
+        print(f"create_task_from_images. ValueError: {e}")
+        return None
+    new_task.shuffle_examples(seed + group_index)
+    return new_task
+
+def create_multiple_tasks_from_taskimages(input_output: str, seed: int, task: Task, number_of_permutation: int) -> list[Task]:
+    task_list = []
+    for i in range(number_of_permutation):
+        for retry_index in range(100):
+            new_task = create_task_from_taskimages(input_output, seed + i * 10383838 + retry_index * 38919923, task)
+            if new_task is None:
+                continue
+            task_list.append(new_task)
+            break
+    return task_list
 
 def create_augmented_task(task: Task, node_input: BaseNode, node_output: BaseNode) -> Task:
     """
@@ -470,19 +469,13 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def mutated_tasks_from_task(task: Task, seed: int) -> list[Task]:
-    node_pre = permuted_node_pre(seed * 100101 + 5)
-    node_transform = permuted_node_transform(seed * 130131 + 1)
-    node_input_post = permuted_node_input_post(seed * 910177 + 5)
 
-    # print(f"node: {node_pre.name()} {node_transform.name()} {node_input_post.name()}")
+    number_of_permutations = 3
 
-    new_tasks_input = create_multiple_tasks_from_taskimages('input', node_pre, node_transform, node_input_post, seed, task)
-    # IDEA: This currently creates just 1 task. Create more than 1 task, N permutations.
+    new_tasks_input = create_multiple_tasks_from_taskimages('input', seed + 1, task, number_of_permutations)
+    new_tasks_output = create_multiple_tasks_from_taskimages('output', seed + 2, task, number_of_permutations)
 
-    new_tasks_output = create_multiple_tasks_from_taskimages('output', node_pre, node_transform, node_input_post, seed, task)
-    # IDEA: This currently creates just 1 task. Create more than 1 task, N permutations.
-
-    splitted_tasks = task_split(task, seed, 3, 3)
+    splitted_tasks = task_split(task, seed + 3, 3, number_of_permutations)
 
     node_input = NodeScale('up', 2, 'up', 2)
     node_output = NodeShuffleColors(42)
