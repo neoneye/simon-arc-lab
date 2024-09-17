@@ -18,6 +18,7 @@ from simon_arc_lab.image_mix import *
 from simon_arc_lab.image_util import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.task import *
+from simon_arc_lab.task_split import *
 from simon_arc_lab.image_bresenham_line import *
 from simon_arc_lab.image_mask import *
 from simon_arc_lab.image_scale import *
@@ -290,6 +291,37 @@ def create_augmented_tasks(input_output: str, node_pre: BaseNode, node_transform
         # print(f"Error: {e}")
         return []
 
+def create_augmented_task(task: Task, node_input: BaseNode, node_output: BaseNode) -> Task:
+    """
+    Create a new task by applying input and output nodes to the original task.
+    """
+    n = task.count_examples + task.count_tests
+
+    input_images = []
+    output_images = []
+    for i in range(n):
+        input_images.append(task.input_images[i].copy())
+        output_images.append(task.output_images[i].copy())
+
+    try:
+        new_input_images = node_input.apply_many(input_images)
+        new_output_images = node_output.apply_many(output_images)
+    except ApplyManyError as e:
+        print(f"create_augmented_task. Error: {e}")
+        return None
+
+    assert len(new_input_images) == n
+    assert len(new_output_images) == n
+
+    new_task = Task()
+    new_task.metadata_task_id = f'{task.metadata_task_id} {node_input.name()} {node_output.name()}'
+
+    for i in range(n):
+        is_example = i < task.count_examples
+        new_task.append_pair(new_input_images[i], new_output_images[i], is_example)
+
+    return new_task
+
 NUMBER_OF_PERMUTATIONS_PRE = 2
 # NUMBER_OF_PERMUTATIONS_TRANSFORM = 2 * 9 * 4 * 5 * 5
 NUMBER_OF_PERMUTATIONS_TRANSFORM = 5
@@ -454,12 +486,31 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     node_input_post = permuted_node_input_post(permutation)
     permutation = permutation // NUMBER_OF_PERMUTATIONS_INPUT_POST
 
+    print(f"node: {node_pre.name()} {node_transform.name()} {node_input_post.name()}")
+
     new_tasks_input = create_augmented_tasks('input', node_pre, node_transform, node_input_post, permutation, task)
     permutation = permutation // 2
 
     new_tasks_output = create_augmented_tasks('output', node_pre, node_transform, node_input_post, permutation, task)
     permutation = permutation // 2
 
+    # IDEA: create augmented tasks containing both input and output
+    # splitted_tasks = []
+    # for task in original_tasks:
+    #     smaller_tasks = task_split(task, 42, 3, 3)
+    #     splitted_tasks.extend(smaller_tasks)
+
+    # node_input = NodeScale('up', 2, 'up', 2)
+    # node_output = NodeShuffleColors(42)
+    # augmented_tasks = []
+    # for task in splitted_tasks:
+    #     augmented_task = create_augmented_task(task, node_input, node_output)
+    #     if augmented_task is not None:
+    #         augmented_tasks.append(augmented_task)
+
+    # accumulated_new_tasks = original_tasks.copy()
+    # accumulated_new_tasks = splitted_tasks
+    # accumulated_new_tasks = augmented_tasks
     accumulated_new_tasks = new_tasks_input + new_tasks_output
 
     accumulated_dataset_items = []
