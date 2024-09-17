@@ -335,18 +335,10 @@ def create_augmented_task(task: Task, node_input: BaseNode, node_output: BaseNod
 
     return new_task
 
-NUMBER_OF_PERMUTATIONS_PRE = 2
-# NUMBER_OF_PERMUTATIONS_TRANSFORM = 2 * 9 * 4 * 5 * 5
-NUMBER_OF_PERMUTATIONS_TRANSFORM = 5
-NUMBER_OF_PERMUTATIONS_INPUT_POST = 9
-NUMBER_OF_PERMUTATIONS_INPUT_OUTPUT = 2
-NUMBER_OF_PERMUTATIONS_TOTAL = NUMBER_OF_PERMUTATIONS_PRE * NUMBER_OF_PERMUTATIONS_TRANSFORM * NUMBER_OF_PERMUTATIONS_INPUT_POST * NUMBER_OF_PERMUTATIONS_INPUT_OUTPUT
-
-def permuted_node_pre(permutation: int) -> BaseNode:
-    j = permutation % 2
-    permutation = permutation // 2
+def permuted_node_pre(seed: int) -> BaseNode:
+    j = random.Random(seed).randint(0, 1)
     if j == 0:
-        node_shuffle_colors = NodeShuffleColors(permutation % 100)
+        node_shuffle_colors = NodeShuffleColors(seed + 1003023)
     else:
         node_shuffle_colors = None
 
@@ -357,18 +349,16 @@ def permuted_node_pre(permutation: int) -> BaseNode:
     node_transform = NodeChain(node_list)
     return node_transform
 
-def permuted_node_transform(permutation: int) -> BaseNode:
-    j = permutation % 2
-    permutation = permutation // 2
-    j = 1
+def permuted_node_transform(seed: int) -> BaseNode:
+    j = random.Random(seed + 1).randint(0, 1)
+    # j = 1
     if j == 0:
         node_swap_colors = NodeSwapColors()
     else:
         node_swap_colors = None
 
-    j = permutation % 9
-    permutation = permutation // 8
-    j = 8
+    j = random.Random(seed + 2).randint(0, 8)
+    # j = 8
     if j == 0:
         node_scale = NodeScale('up', 2, 'up', 2)
     elif j == 1:
@@ -388,21 +378,19 @@ def permuted_node_transform(permutation: int) -> BaseNode:
     else:
         node_scale = None
 
-    j = permutation % 4
-    j = 3
-    permutation = permutation // 4
+    j = random.Random(seed + 3).randint(0, 3)
+    # j = 3
     if j == 0:
         node_rotate = NodeRotateCW()
     elif j == 1:
         node_rotate = NodeRotateCCW()
     elif j == 2:
         node_rotate = NodeRotate180()
-    elif j == 3:
+    else:
         node_rotate = None
 
-    j = permutation % 5
-    j = 4
-    permutation = permutation // 5
+    j = random.Random(seed + 4).randint(0, 4)
+    # j = 4
     if j == 0:
         node_flip = NodeFlipX()
     elif j == 1:
@@ -414,11 +402,9 @@ def permuted_node_transform(permutation: int) -> BaseNode:
     else:
         node_flip = None
 
-    j = permutation % 5
-    permutation = permutation // 5
+    skew_color = random.Random(seed + 5).randint(0, 9)
+    j = random.Random(seed + 6).randint(0, 4)
     # IDEA: Pick a skew_color that doesn't clash too much with the payload of the image.
-    skew_color = permutation % 10
-    permutation = permutation // 10
     if j == 0:
         node_skew = NodeSkew(skew_color, SkewDirection.UP)
     elif j == 1:
@@ -437,10 +423,9 @@ def permuted_node_transform(permutation: int) -> BaseNode:
     node_transform = NodeChain(node_list)
     return node_transform
 
-def permuted_node_input_post(permutation: int) -> BaseNode:
-    j = permutation % 9
-    j = 8
-    permutation = permutation // 9
+def permuted_node_input_post(seed: int) -> BaseNode:
+    j = random.Random(seed + 1).randint(0, 8)
+    # j = 8
     if j == 0:
         node_scale = NodeScale('up', 2, 'up', 2)
     elif j == 1:
@@ -485,28 +470,19 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def mutated_tasks_from_task(task: Task, seed: int) -> list[Task]:
-    permutation = seed * 103483827531
-
-    node_pre = permuted_node_pre(permutation)
-    permutation = permutation // NUMBER_OF_PERMUTATIONS_PRE
-
-    node_transform = permuted_node_transform(permutation)
-    permutation = permutation // NUMBER_OF_PERMUTATIONS_TRANSFORM
-
-    node_input_post = permuted_node_input_post(permutation)
-    permutation = permutation // NUMBER_OF_PERMUTATIONS_INPUT_POST
+    node_pre = permuted_node_pre(seed * 100101 + 5)
+    node_transform = permuted_node_transform(seed * 130131 + 1)
+    node_input_post = permuted_node_input_post(seed * 910177 + 5)
 
     # print(f"node: {node_pre.name()} {node_transform.name()} {node_input_post.name()}")
 
-    new_tasks_input = create_multiple_tasks_from_taskimages('input', node_pre, node_transform, node_input_post, permutation, task)
+    new_tasks_input = create_multiple_tasks_from_taskimages('input', node_pre, node_transform, node_input_post, seed, task)
     # IDEA: This currently creates just 1 task. Create more than 1 task, N permutations.
-    permutation = permutation // 2
 
-    new_tasks_output = create_multiple_tasks_from_taskimages('output', node_pre, node_transform, node_input_post, permutation, task)
+    new_tasks_output = create_multiple_tasks_from_taskimages('output', node_pre, node_transform, node_input_post, seed, task)
     # IDEA: This currently creates just 1 task. Create more than 1 task, N permutations.
-    permutation = permutation // 2
 
-    splitted_tasks = task_split(task, permutation, 3, 3)
+    splitted_tasks = task_split(task, seed, 3, 3)
 
     node_input = NodeScale('up', 2, 'up', 2)
     node_output = NodeShuffleColors(42)
@@ -542,19 +518,12 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
         accumulated_dataset_items.extend(dataset_items)
     return accumulated_dataset_items
 
-max_num_samples = min(100000, count_original_tasks * NUMBER_OF_PERMUTATIONS_TOTAL)
-print(f"count_original_tasks: {count_original_tasks}")
-print(f"NUMBER_OF_PERMUTATIONS_TRANSFORM: {NUMBER_OF_PERMUTATIONS_TRANSFORM}")
-print(f"NUMBER_OF_PERMUTATIONS_INPUT_POST: {NUMBER_OF_PERMUTATIONS_INPUT_POST}")
-print(f"NUMBER_OF_PERMUTATIONS_TOTAL: {NUMBER_OF_PERMUTATIONS_TOTAL}")
-print(f"max_num_samples: {max_num_samples}")
-
 generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
     seed=1200023425,
-    max_num_samples=max_num_samples,
+    max_num_samples=1000,
     max_byte_size=1024*1024*100
 )
 # generator.inspect()
