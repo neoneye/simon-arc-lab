@@ -484,12 +484,8 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     builder.append_image()
     return builder.dataset_items()
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
+def mutated_tasks_from_task(task: Task, seed: int) -> list[Task]:
     permutation = seed * 103483827531
-
-    task_index = permutation % count_original_tasks
-    permutation = permutation // count_original_tasks
-    task = original_tasks[task_index]
 
     node_pre = permuted_node_pre(permutation)
     permutation = permutation // NUMBER_OF_PERMUTATIONS_PRE
@@ -500,40 +496,49 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     node_input_post = permuted_node_input_post(permutation)
     permutation = permutation // NUMBER_OF_PERMUTATIONS_INPUT_POST
 
-    print(f"node: {node_pre.name()} {node_transform.name()} {node_input_post.name()}")
+    # print(f"node: {node_pre.name()} {node_transform.name()} {node_input_post.name()}")
 
     new_tasks_input = create_multiple_tasks_from_taskimages('input', node_pre, node_transform, node_input_post, permutation, task)
+    # IDEA: This currently creates just 1 task. Create more than 1 task, N permutations.
     permutation = permutation // 2
 
     new_tasks_output = create_multiple_tasks_from_taskimages('output', node_pre, node_transform, node_input_post, permutation, task)
+    # IDEA: This currently creates just 1 task. Create more than 1 task, N permutations.
     permutation = permutation // 2
 
-    # IDEA: create augmented tasks containing both input and output
-    # splitted_tasks = []
-    # for task in original_tasks:
-    #     smaller_tasks = task_split(task, 42, 3, 3)
-    #     splitted_tasks.extend(smaller_tasks)
+    splitted_tasks = task_split(task, permutation, 3, 3)
 
-    # node_input = NodeScale('up', 2, 'up', 2)
-    # node_output = NodeShuffleColors(42)
-    # augmented_tasks = []
-    # for task in splitted_tasks:
-    #     augmented_task = create_augmented_task(task, node_input, node_output)
-    #     if augmented_task is not None:
-    #         augmented_tasks.append(augmented_task)
+    node_input = NodeScale('up', 2, 'up', 2)
+    node_output = NodeShuffleColors(42)
+    augmented_tasks = []
+    for task in splitted_tasks:
+        augmented_task = create_augmented_task(task, node_input, node_output)
+        if augmented_task is not None:
+            augmented_tasks.append(augmented_task)
 
-    # accumulated_new_tasks = original_tasks.copy()
-    # accumulated_new_tasks = splitted_tasks
-    # accumulated_new_tasks = augmented_tasks
-    accumulated_new_tasks = new_tasks_input + new_tasks_output
+    mutated_tasks = new_tasks_input + new_tasks_output + augmented_tasks
+
+    print(f"Number of input tasks: {len(new_tasks_input)}")
+    print(f"Number of output tasks: {len(new_tasks_output)}")
+    print(f"Number of augmented tasks: {len(augmented_tasks)}")
+    print(f"Number of mutations: {len(mutated_tasks)} from task {task.metadata_task_id}")
+    return mutated_tasks
+
+def generate_dataset_item_list(seed: int) -> list[dict]:
+    accumulated_tasks = []
+    for task_index, task in enumerate(original_tasks):
+        new_tasks = mutated_tasks_from_task(task, seed + task_index * 10010101)
+        accumulated_tasks.extend(new_tasks)
+
+    print(f"Number of tasks: {len(accumulated_tasks)}")
 
     accumulated_dataset_items = []
-    for task_index, task in enumerate(accumulated_new_tasks):
+    for task_index, task in enumerate(accumulated_tasks):
         if task.total_pixel_count() > 1000:
             continue
         transformation_id = task.metadata_task_id
-        # task.show()
-        dataset_items = generate_dataset_item_list_inner(permutation + task_index * 1000, task, transformation_id)
+        task.show()
+        dataset_items = generate_dataset_item_list_inner(seed + task_index * 100053523, task, transformation_id)
         accumulated_dataset_items.extend(dataset_items)
     return accumulated_dataset_items
 
