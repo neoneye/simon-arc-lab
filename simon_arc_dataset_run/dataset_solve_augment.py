@@ -334,6 +334,38 @@ def create_augmented_task(task: Task, node_input: BaseNode, node_output: BaseNod
 
     return new_task
 
+def create_multiple_augmented_tasks_from_task(seed: int, task: Task, number_of_permutations: int) -> list[Task]:
+    max_example_pairs = 3
+    splitted_tasks = task_split(task, seed + 3, max_example_pairs, number_of_permutations)
+
+    task_list = []
+    for task_index, task in enumerate(splitted_tasks):
+        if len(task_list) >= number_of_permutations:
+            break
+        for i in range(number_of_permutations):
+            iteration_seed = seed + i * 10383838 + task_index * 38919923
+
+            color_shuffle_seed = iteration_seed + 3838
+            node_input_shuffle_colors = NodeShuffleColors(color_shuffle_seed)
+            node_output_shuffle_colors = NodeShuffleColors(color_shuffle_seed)
+
+            node_input_scaleup = NodeScale('up', 2, 'up', 2)
+
+            node_input_list = [node_input_shuffle_colors, node_input_scaleup]
+            node_output_list = [node_output_shuffle_colors]
+
+
+            node_input = NodeChain(node_input_list)
+            node_output = NodeChain(node_output_list)
+
+            new_task = create_augmented_task(task, node_input, node_output)
+            if new_task is None:
+                continue
+            new_task.shuffle_examples(iteration_seed + 383838100)
+            task_list.append(new_task)
+            break
+    return task_list
+
 def permuted_node_pre(seed: int) -> BaseNode:
     j = random.Random(seed).randint(0, 1)
     if j == 0:
@@ -474,16 +506,7 @@ def mutated_tasks_from_task(task: Task, seed: int) -> list[Task]:
 
     new_tasks_input = create_multiple_tasks_from_taskimages('input', seed + 1, task, number_of_permutations)
     new_tasks_output = create_multiple_tasks_from_taskimages('output', seed + 2, task, number_of_permutations)
-
-    splitted_tasks = task_split(task, seed + 3, 3, number_of_permutations)
-
-    node_input = NodeScale('up', 2, 'up', 2)
-    node_output = NodeShuffleColors(42)
-    augmented_tasks = []
-    for task in splitted_tasks:
-        augmented_task = create_augmented_task(task, node_input, node_output)
-        if augmented_task is not None:
-            augmented_tasks.append(augmented_task)
+    augmented_tasks = create_multiple_augmented_tasks_from_task(seed + 3, task, number_of_permutations)
 
     mutated_tasks = new_tasks_input + new_tasks_output + augmented_tasks
 
