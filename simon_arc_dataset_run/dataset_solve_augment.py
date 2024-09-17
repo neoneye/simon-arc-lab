@@ -216,7 +216,44 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
 
-def create_augmented_tasks(input_output: str, node_pre: BaseNode, node_transform: BaseNode, node_post_input: BaseNode, seed: int, task: Task) -> list[Task]:
+def create_task_from_images(images: list[np.array], node_pre: BaseNode, node_transform: BaseNode, node_post_input: BaseNode, task_id_prefix: str) -> Task:
+    pair_count = len(images)
+
+    # Prepare input images
+    prepared_input_images = node_pre.apply_many(images)
+    assert len(prepared_input_images) == pair_count
+
+    # Transform images
+    output_images = node_transform.apply_many(prepared_input_images)
+    assert len(output_images) == pair_count
+
+    # Post process input images, such as scaling up, padding, adding noise
+    input_images = node_post_input.apply_many(prepared_input_images)
+    assert len(input_images) == pair_count
+
+    # Tasks where the input/output images are the same are not interesting.
+    for pair_index in range(pair_count):
+        input_image = input_images[pair_index]
+        output_image = output_images[pair_index]
+        if np.array_equal(input_image, output_image):
+            raise ValueError("one or more Input/Output images are the same")
+
+    # Human readable name of the transformation
+    name_pre = node_pre.name()
+    name_transform = node_transform.name()
+    name_post_input = node_post_input.name()
+
+    # Create new task
+    new_task = Task()
+    new_task.metadata_task_id = f'{task_id_prefix} pre_{name_pre} post_{name_post_input} trans_{name_transform}'
+    for pair_index in range(pair_count):
+        input_image = input_images[pair_index]
+        output_image = output_images[pair_index]
+        new_task.append_pair(input_image, output_image, pair_index < pair_count - 1)
+
+    return new_task
+
+def create_multiple_tasks_from_taskimages(input_output: str, node_pre: BaseNode, node_transform: BaseNode, node_post_input: BaseNode, seed: int, task: Task) -> list[Task]:
     # Collect images for processing
     all_images = []
     if input_output == 'input':
@@ -229,11 +266,6 @@ def create_augmented_tasks(input_output: str, node_pre: BaseNode, node_transform
             all_images.append(task.example_output(i))
     else:
         raise Exception(f"Unknown input_output: {input_output}")
-
-    # Human readable name of the transformation
-    name_pre = node_pre.name()
-    name_transform = node_transform.name()
-    name_post_input = node_post_input.name()
 
     # Split up many images into smaller chunks.
     random.Random(seed + 1).shuffle(all_images)
@@ -256,40 +288,21 @@ def create_augmented_tasks(input_output: str, node_pre: BaseNode, node_transform
         groups.append(group1)
         groups.append(group2)
 
-    try:
-        # Process groups of images
-        augmented_tasks = []    
-        for group_index, group_images in enumerate(groups):
-            pair_count = len(group_images)
-
-            # Prepare input images
-            prepared_input_images = node_pre.apply_many(group_images)
-            assert len(prepared_input_images) == pair_count
-
-            # Transform images
-            output_images = node_transform.apply_many(prepared_input_images)
-            assert len(output_images) == pair_count
-
-            # Post process input images, such as scaling up, padding, adding noise
-            input_images = node_post_input.apply_many(prepared_input_images)
-            assert len(input_images) == pair_count
-
-            # Create new task
-            new_task = Task()
-            new_task.metadata_task_id = f'{task.metadata_task_id} {input_output} group{group_index} pre_{name_pre} post_{name_post_input} trans_{name_transform}'
-            for pair_index in range(len(group_images)):
-                input_image = input_images[pair_index]
-                output_image = output_images[pair_index]
-                new_task.append_pair(input_image, output_image, pair_index < pair_count - 1)
-
-            # IDEA: Check that all outputs are different than inputs. If it's all the same, then it's not interesting.
-
-            new_task.shuffle_examples(seed + group_index)
-            augmented_tasks.append(new_task)
-        return augmented_tasks
-    except ApplyManyError as e:
-        # print(f"Error: {e}")
-        return []
+    # Process groups of images
+    augmented_tasks = []    
+    for group_index, group_images in enumerate(groups):
+        task_id_prefix = f'{task.metadata_task_id} {input_output}'
+        try:
+            new_task = create_task_from_images(group_images, node_pre, node_transform, node_post_input, task_id_prefix)
+        except ApplyManyError as e:
+            print(f"create_task_from_images. Error: {e}")
+            continue
+        except ValueError as e:
+            print(f"create_task_from_images. ValueError: {e}")
+            continue
+        new_task.shuffle_examples(seed + group_index)
+        augmented_tasks.append(new_task)
+    return augmented_tasks
 
 def create_augmented_task(task: Task, node_input: BaseNode, node_output: BaseNode) -> Task:
     """
@@ -403,6 +416,7 @@ def permuted_node_transform(permutation: int) -> BaseNode:
 
     j = permutation % 5
     permutation = permutation // 5
+    # IDEA: Pick a skew_color that doesn't clash too much with the payload of the image.
     skew_color = permutation % 10
     permutation = permutation // 10
     if j == 0:
@@ -488,10 +502,10 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
 
     print(f"node: {node_pre.name()} {node_transform.name()} {node_input_post.name()}")
 
-    new_tasks_input = create_augmented_tasks('input', node_pre, node_transform, node_input_post, permutation, task)
+    new_tasks_input = create_multiple_tasks_from_taskimages('input', node_pre, node_transform, node_input_post, permutation, task)
     permutation = permutation // 2
 
-    new_tasks_output = create_augmented_tasks('output', node_pre, node_transform, node_input_post, permutation, task)
+    new_tasks_output = create_multiple_tasks_from_taskimages('output', node_pre, node_transform, node_input_post, permutation, task)
     permutation = permutation // 2
 
     # IDEA: create augmented tasks containing both input and output
