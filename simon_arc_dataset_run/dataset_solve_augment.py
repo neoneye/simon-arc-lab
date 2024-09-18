@@ -218,22 +218,18 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
 
-def create_task_from_images(images: list[np.array], node_pre: BaseNode, node_transform: BaseNode, node_post_input: BaseNode, task_id_prefix: str) -> Task:
+def create_task_from_images(images: list[np.array], node_input: BaseNode, node_transform: BaseNode, task_id_prefix: str) -> Task:
     pair_count = len(images)
     if pair_count < 3:
         raise ValueError("Need at least 3 images to create a task")
 
-    # Prepare input images
-    prepared_input_images = node_pre.apply_many(images)
-    assert len(prepared_input_images) == pair_count
+    # Post process input images, such as scaling up, padding, adding noise
+    input_images = node_input.apply_many(images)
+    assert len(input_images) == pair_count
 
     # Transform images
-    output_images = node_transform.apply_many(prepared_input_images)
+    output_images = node_transform.apply_many(images)
     assert len(output_images) == pair_count
-
-    # Post process input images, such as scaling up, padding, adding noise
-    input_images = node_post_input.apply_many(prepared_input_images)
-    assert len(input_images) == pair_count
 
     # Tasks where the input/output images are the same are not interesting.
     for pair_index in range(pair_count):
@@ -243,13 +239,12 @@ def create_task_from_images(images: list[np.array], node_pre: BaseNode, node_tra
             raise ValueError("one or more Input/Output images are the same")
 
     # Human readable name of the transformation
-    name_pre = node_pre.name()
+    name_input = node_input.name()
     name_transform = node_transform.name()
-    name_post_input = node_post_input.name()
 
     # Create new task
     new_task = Task()
-    new_task.metadata_task_id = f'{task_id_prefix} pre_{name_pre} post_{name_post_input} trans_{name_transform}'
+    new_task.metadata_task_id = f'{task_id_prefix} input_{name_input} trans_{name_transform}'
     for pair_index in range(pair_count):
         input_image = input_images[pair_index]
         output_image = output_images[pair_index]
@@ -278,15 +273,18 @@ def create_task_from_taskimages(input_output: str, seed: int, task: Task) -> Opt
     max_pair_count = 4
     truncated_images = all_images[:max_pair_count]
 
-    node_pre = permuted_node_pre(seed * 100101 + 5)
+    node_input = permuted_node_input(seed * 910177 + 5)
     node_transform = permuted_node_transform(seed * 130131 + 1, truncated_images)
-    node_post_input = permuted_node_input_post(seed * 910177 + 5)
 
-    # print(f"node: {node_pre.name()} {node_transform.name()} {node_input_post.name()}")
+    # node_color = permuted_node_color(seed * 100101 + 5)
+    # IDEA: insert the node_color after node_input
+    # IDEA: insert the node_color after node_transform
+
+    # print(f"node: {node_input.name()} {node_transform.name()} {node_color.name()}")
 
     task_id_prefix = f'{task.metadata_task_id} {input_output}'
     try:
-        new_task = create_task_from_images(truncated_images, node_pre, node_transform, node_post_input, task_id_prefix)
+        new_task = create_task_from_images(truncated_images, node_input, node_transform, task_id_prefix)
     except ApplyManyError as e:
         print(f"create_task_from_images. Error: {e}")
         return None
@@ -370,7 +368,7 @@ def create_multiple_augmented_tasks_from_task(seed: int, task: Task, number_of_p
             break
     return task_list
 
-def permuted_node_pre(seed: int) -> BaseNode:
+def permuted_node_color(seed: int) -> BaseNode:
     j = random.Random(seed).randint(0, 1)
     if j == 0:
         node_shuffle_colors = NodeShuffleColors(seed + 1003023)
@@ -384,14 +382,36 @@ def permuted_node_pre(seed: int) -> BaseNode:
     node_transform = NodeChain(node_list)
     return node_transform
 
-def permuted_node_transform(seed: int, images: list[np.array]) -> BaseNode:
-    j = random.Random(seed + 1).randint(0, 1)
-    # j = 1
+def permuted_node_input(seed: int) -> BaseNode:
+    j = random.Random(seed + 1).randint(0, 8)
+    # j = 8
     if j == 0:
-        node_swap_colors = NodeSwapColors()
+        node_scale = NodeScale('up', 2, 'up', 2)
+    elif j == 1:
+        node_scale = NodeScale('up', 3, 'up', 3)
+    elif j == 2:
+        node_scale = NodeScale('up', 1, 'up', 2)
+    elif j == 3:
+        node_scale = NodeScale('up', 2, 'up', 1)
+    elif j == 4:
+        node_scale = NodeScale('up', 1, 'up', 3)
+    elif j == 5:
+        node_scale = NodeScale('up', 3, 'up', 1)
+    elif j == 6:
+        node_scale = NodeScale('up', 2, 'up', 3)
+    elif j == 7:
+        node_scale = NodeScale('up', 3, 'up', 2)
     else:
-        node_swap_colors = None
+        node_scale = None
 
+    node_list_with_optionals = [node_scale]
+    # Remove the node's that are None
+    node_list = [node for node in node_list_with_optionals if node is not None]
+
+    node_transform = NodeChain(node_list)
+    return node_transform
+
+def permuted_node_transform(seed: int, images: list[np.array]) -> BaseNode:
     j = random.Random(seed + 2).randint(0, 8)
     # j = 8
     if j == 0:
@@ -453,36 +473,7 @@ def permuted_node_transform(seed: int, images: list[np.array]) -> BaseNode:
         else:
             node_skew = None
     
-    node_list_with_optionals = [node_swap_colors, node_rotate, node_scale, node_flip, node_skew]
-    # Remove the node's that are None
-    node_list = [node for node in node_list_with_optionals if node is not None]
-
-    node_transform = NodeChain(node_list)
-    return node_transform
-
-def permuted_node_input_post(seed: int) -> BaseNode:
-    j = random.Random(seed + 1).randint(0, 8)
-    # j = 8
-    if j == 0:
-        node_scale = NodeScale('up', 2, 'up', 2)
-    elif j == 1:
-        node_scale = NodeScale('up', 3, 'up', 3)
-    elif j == 2:
-        node_scale = NodeScale('up', 1, 'up', 2)
-    elif j == 3:
-        node_scale = NodeScale('up', 2, 'up', 1)
-    elif j == 4:
-        node_scale = NodeScale('up', 1, 'up', 3)
-    elif j == 5:
-        node_scale = NodeScale('up', 3, 'up', 1)
-    elif j == 6:
-        node_scale = NodeScale('up', 2, 'up', 3)
-    elif j == 7:
-        node_scale = NodeScale('up', 3, 'up', 2)
-    else:
-        node_scale = None
-
-    node_list_with_optionals = [node_scale]
+    node_list_with_optionals = [node_rotate, node_scale, node_flip, node_skew]
     # Remove the node's that are None
     node_list = [node for node in node_list_with_optionals if node is not None]
 
