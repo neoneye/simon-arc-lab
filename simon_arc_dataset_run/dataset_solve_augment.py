@@ -534,18 +534,6 @@ def create_node_output(seed: int, images: list[np.array], pad_color: Optional[in
     node_transform = NodeChain(node_list_with_optionals)
     return node_transform
 
-original_tasks = []
-for group_index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
-    taskset = TaskSet.load_directory(path_to_task_dir)
-    for task in taskset.tasks:
-        original_tasks.append(task)
-
-count_original_tasks = len(original_tasks)
-print(f"Number of original tasks: {count_original_tasks}")
-
-# for task in original_tasks:
-#     task.show()
-
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
     builder.append_image()
@@ -566,6 +554,18 @@ def mutated_tasks_from_task(task: Task, seed: int) -> list[Task]:
     print(f"Number of augmented tasks: {len(augmented_tasks)}")
     print(f"Number of mutations: {len(mutated_tasks)} from task {task.metadata_task_id}")
     return mutated_tasks
+
+original_tasks = []
+for group_index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
+    taskset = TaskSet.load_directory(path_to_task_dir)
+    for task in taskset.tasks:
+        original_tasks.append(task)
+
+count_original_tasks = len(original_tasks)
+print(f"Number of original tasks: {count_original_tasks}")
+
+# for task in original_tasks:
+#     task.show()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
     accumulated_tasks = []
