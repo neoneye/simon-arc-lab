@@ -21,6 +21,7 @@ from simon_arc_lab.task import *
 from simon_arc_lab.task_split import *
 from simon_arc_lab.image_bresenham_line import *
 from simon_arc_lab.image_mask import *
+from simon_arc_lab.image_pad import *
 from simon_arc_lab.image_scale import *
 from simon_arc_lab.image_skew import *
 from simon_arc_lab.histogram import *
@@ -154,6 +155,29 @@ class NodeScale(BaseNode):
     def name(self) -> str:
         return 'scale'
 
+class NodePad(BaseNode):
+    def __init__(self, seed: int, padding_color: int, min_pad_count: int, max_pad_count: int):
+        self.seed = seed
+        self.padding_color = padding_color
+        self.min_pad_count = min_pad_count
+        self.max_pad_count = max_pad_count
+
+    def apply_many(self, images: list[np.array]) -> list[np.array]:
+        new_images = []
+        for image_index, image in enumerate(images):
+            new_image = image_pad_random(
+                image, 
+                self.seed + image_index * 1000, 
+                self.padding_color, 
+                self.min_pad_count, 
+                self.max_pad_count
+            )
+            new_images.append(new_image)
+        return new_images
+
+    def name(self) -> str:
+        return 'pad'
+
 class NodeSwapColors(BaseNode):
     def apply_many(self, images: list[np.array]) -> list[np.array]:
         histogram_union = Histogram.empty()
@@ -273,7 +297,7 @@ def create_task_from_taskimages(input_output: str, seed: int, task: Task) -> Opt
     max_pair_count = 4
     truncated_images = all_images[:max_pair_count]
 
-    node_input = permuted_node_input(seed * 910177 + 5)
+    node_input = permuted_node_input(seed * 910177 + 5, truncated_images)
     node_transform = permuted_node_transform(seed * 130131 + 1, truncated_images)
 
     # node_color = permuted_node_color(seed * 100101 + 5)
@@ -382,7 +406,7 @@ def permuted_node_color(seed: int) -> BaseNode:
     node_transform = NodeChain(node_list)
     return node_transform
 
-def permuted_node_input(seed: int) -> BaseNode:
+def permuted_node_input(seed: int, images: list[np.array]) -> BaseNode:
     j = random.Random(seed + 1).randint(0, 8)
     # j = 8
     if j == 0:
@@ -404,7 +428,14 @@ def permuted_node_input(seed: int) -> BaseNode:
     else:
         node_scale = None
 
-    node_list_with_optionals = [node_scale]
+    j = random.Random(seed + 2).randint(0, 1)
+    node_pad = None
+    if j == 0:
+        pad_color = Histogram.create_with_image_list(images).find_free_color()
+        if pad_color is not None:
+            node_pad = NodePad(seed, pad_color, 1, 5)
+
+    node_list_with_optionals = [node_scale, node_pad]
     # Remove the node's that are None
     node_list = [node for node in node_list_with_optionals if node is not None]
 
