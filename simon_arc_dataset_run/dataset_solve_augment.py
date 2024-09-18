@@ -142,15 +142,13 @@ class NodeFlipB(BaseNode):
     def name(self) -> str:
         return 'flipb'
 
-class NodeScale(BaseNode):
-    def __init__(self, x_up_down: str, x_scale: int, y_up_down: str, y_scale: int):
-        self.x_up_down = x_up_down
+class NodeScaleUp(BaseNode):
+    def __init__(self, x_scale: int, y_scale: int):
         self.x_scale = x_scale
-        self.y_up_down = y_up_down
         self.y_scale = y_scale
 
     def apply(self, image: np.array) -> np.array:
-        input_image, output_image = image_scale(image, self.x_up_down, self.x_scale, self.y_up_down, self.y_scale)
+        input_image, output_image = image_scale(image, 'up', self.x_scale, 'up', self.y_scale)
         return output_image
 
     def name(self) -> str:
@@ -381,7 +379,7 @@ def create_multiple_augmented_tasks_from_task(seed: int, task: Task, number_of_p
             node_input_shuffle_colors = NodeShuffleColors(color_shuffle_seed)
             node_output_shuffle_colors = NodeShuffleColors(color_shuffle_seed)
 
-            node_input_scaleup = NodeScale('up', 2, 'up', 2)
+            node_input_scaleup = NodeScaleUp(2, 2)
 
             node_input_list = [node_input_shuffle_colors, node_input_scaleup]
             node_output_list = [node_output_shuffle_colors]
@@ -402,21 +400,21 @@ def permuted_node_input(seed: int, images: list[np.array]) -> BaseNode:
     j = random.Random(seed + 1).randint(0, 8)
     # j = 8
     if j == 0:
-        node_scale = NodeScale('up', 2, 'up', 2)
+        node_scale = NodeScaleUp(2, 2)
     elif j == 1:
-        node_scale = NodeScale('up', 3, 'up', 3)
+        node_scale = NodeScaleUp(3, 3)
     elif j == 2:
-        node_scale = NodeScale('up', 1, 'up', 2)
+        node_scale = NodeScaleUp(1, 2)
     elif j == 3:
-        node_scale = NodeScale('up', 2, 'up', 1)
+        node_scale = NodeScaleUp(2, 1)
     elif j == 4:
-        node_scale = NodeScale('up', 1, 'up', 3)
+        node_scale = NodeScaleUp(1, 3)
     elif j == 5:
-        node_scale = NodeScale('up', 3, 'up', 1)
+        node_scale = NodeScaleUp(3, 1)
     elif j == 6:
-        node_scale = NodeScale('up', 2, 'up', 3)
+        node_scale = NodeScaleUp(2, 3)
     elif j == 7:
-        node_scale = NodeScale('up', 3, 'up', 2)
+        node_scale = NodeScaleUp(3, 2)
     else:
         node_scale = None
 
@@ -435,21 +433,21 @@ def permuted_node_transform(seed: int, images: list[np.array]) -> BaseNode:
     j = random.Random(seed + 2).randint(0, 8)
     # j = 8
     if j == 0:
-        node_scale = NodeScale('up', 2, 'up', 2)
+        node_scale = NodeScaleUp(2, 2)
     elif j == 1:
-        node_scale = NodeScale('up', 3, 'up', 3)
+        node_scale = NodeScaleUp(3, 3)
     elif j == 2:
-        node_scale = NodeScale('up', 1, 'up', 2)
+        node_scale = NodeScaleUp(1, 2)
     elif j == 3:
-        node_scale = NodeScale('up', 2, 'up', 1)
+        node_scale = NodeScaleUp(2, 1)
     elif j == 4:
-        node_scale = NodeScale('up', 1, 'up', 3)
+        node_scale = NodeScaleUp(1, 3)
     elif j == 5:
-        node_scale = NodeScale('up', 3, 'up', 1)
+        node_scale = NodeScaleUp(3, 1)
     elif j == 6:
-        node_scale = NodeScale('up', 2, 'up', 3)
+        node_scale = NodeScaleUp(2, 3)
     elif j == 7:
-        node_scale = NodeScale('up', 3, 'up', 2)
+        node_scale = NodeScaleUp(3, 2)
     else:
         node_scale = None
 
