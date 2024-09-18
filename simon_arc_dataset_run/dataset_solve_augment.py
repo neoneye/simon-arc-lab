@@ -126,7 +126,6 @@ class NodeFlipB(BaseNode):
     def name(self) -> str:
         return 'flipb'
 
-# IDEA: Add noise to the scaled up image, so the model can learn to ignore the noise.
 # IDEA: Sparse scale up, where each scaled up cell contains only 1 pixel from the original image. Least popular color.
 # IDEA: Sparse scale up, where each scaled up cell contains only 1 pixel from the original image. Center pixel.
 class NodeScaleUp(BaseNode):
@@ -140,6 +139,29 @@ class NodeScaleUp(BaseNode):
 
     def name(self) -> str:
         return 'scaleup'
+
+class NodeScaleUpNoisy(BaseNode):
+    def __init__(self, x_scale: int, y_scale: int, min_noise_count: int, max_noise_count: int, noise_color: int, seed: int):
+        self.x_scale = x_scale
+        self.y_scale = y_scale
+        self.min_noise_count = min_noise_count
+        self.max_noise_count = max_noise_count
+        self.noise_color = noise_color
+        self.seed = seed
+
+    def apply(self, image: np.array) -> np.array:
+        return image_scale_up_with_noise(
+            image, 
+            self.x_scale, 
+            self.y_scale, 
+            self.min_noise_count, 
+            self.max_noise_count, 
+            self.noise_color, 
+            self.seed
+        )
+
+    def name(self) -> str:
+        return 'scaleupnoisy'
 
 class NodePad(BaseNode):
     def __init__(self, seed: int, padding_color: int, min_pad_count: int, max_pad_count: int):
