@@ -94,7 +94,6 @@ class NodeShuffleColors(BaseNode):
 
 class NodeRotateCW(BaseNode):
     def apply(self, image: np.array) -> np.array:
-        # IDEA: if the output is identical to the input, then raise an exception.
         return image_rotate_cw(image)
 
     def name(self) -> str:
@@ -142,6 +141,9 @@ class NodeFlipB(BaseNode):
     def name(self) -> str:
         return 'flipb'
 
+# IDEA: Add noise to the scaled up image, so the model can learn to ignore the noise.
+# IDEA: Sparse scale up, where each scaled up cell contains only 1 pixel from the original image. Least popular color.
+# IDEA: Sparse scale up, where each scaled up cell contains only 1 pixel from the original image. Center pixel.
 class NodeScaleUp(BaseNode):
     def __init__(self, x_scale: int, y_scale: int):
         self.x_scale = x_scale
