@@ -280,4 +280,15 @@ class Histogram:
             if self.color_count[color] < 1:
                 del self.color_count[color]
     
-    
+    def lowest_unused_color(self) -> Optional[int]:
+        """
+        Find the lowest color index that is not in the histogram.
+
+        If all colors are used, return None.
+        """
+        self.purge_mutable()
+        colors = set(self.color_count.keys())
+        for color in range(10):
+            if color not in colors:
+                return color
+        return None

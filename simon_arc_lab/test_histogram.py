@@ -377,5 +377,16 @@ class TestHistogram(unittest.TestCase):
         self.assertEqual(histogram.get_count_for_color(7), 8)
         self.assertEqual(histogram.get_count_for_color(9), 0)
 
+    def test_lowest_unused_color(self):
+        self.assertEqual(Histogram.empty().lowest_unused_color(), 0)
+        self.assertEqual(Histogram({0: -5}).lowest_unused_color(), 0)
+        self.assertEqual(Histogram({0: 5, 6: 1, 7: 8}).lowest_unused_color(), 1)
+        self.assertEqual(Histogram({0: 1, 1: 7, 2: 0}).lowest_unused_color(), 2)
+        self.assertEqual(Histogram({0: 1, 1: 7, 2: 1}).lowest_unused_color(), 3)
+        histogram = Histogram.empty()
+        for color in range(10):
+            histogram.increment(color)
+        self.assertEqual(histogram.lowest_unused_color(), None)
+
 if __name__ == '__main__':
     unittest.main()
