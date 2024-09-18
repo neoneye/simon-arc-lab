@@ -61,8 +61,9 @@ class NodeDoNothing(BaseNode):
         return 'nop'
 
 class NodeChain(BaseNode):
-    def __init__(self, nodes: list[BaseNode]):
-        self.nodes = nodes
+    def __init__(self, node_list_with_optionals: list[Optional[BaseNode]]):
+        # Remove the node's that are None
+        self.nodes = [node for node in node_list_with_optionals if node is not None]
 
     def apply_many(self, images: list[np.array]) -> list[np.array]:
         for node in self.nodes:
@@ -400,10 +401,7 @@ def permuted_node_color(seed: int) -> BaseNode:
         node_shuffle_colors = None
 
     node_list_with_optionals = [node_shuffle_colors]
-    # Remove the node's that are None
-    node_list = [node for node in node_list_with_optionals if node is not None]
-
-    node_transform = NodeChain(node_list)
+    node_transform = NodeChain(node_list_with_optionals)
     return node_transform
 
 def permuted_node_input(seed: int, images: list[np.array]) -> BaseNode:
@@ -436,10 +434,7 @@ def permuted_node_input(seed: int, images: list[np.array]) -> BaseNode:
             node_pad = NodePad(seed, pad_color, 1, 5)
 
     node_list_with_optionals = [node_scale, node_pad]
-    # Remove the node's that are None
-    node_list = [node for node in node_list_with_optionals if node is not None]
-
-    node_transform = NodeChain(node_list)
+    node_transform = NodeChain(node_list_with_optionals)
     return node_transform
 
 def permuted_node_transform(seed: int, images: list[np.array]) -> BaseNode:
@@ -505,10 +500,7 @@ def permuted_node_transform(seed: int, images: list[np.array]) -> BaseNode:
             node_skew = None
     
     node_list_with_optionals = [node_rotate, node_scale, node_flip, node_skew]
-    # Remove the node's that are None
-    node_list = [node for node in node_list_with_optionals if node is not None]
-
-    node_transform = NodeChain(node_list)
+    node_transform = NodeChain(node_list_with_optionals)
     return node_transform
 
 original_tasks = []
