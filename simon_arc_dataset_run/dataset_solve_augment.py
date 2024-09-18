@@ -292,8 +292,32 @@ def create_task_from_taskimages(input_output: str, seed: int, task: Task) -> Opt
     max_pair_count = 4
     truncated_images = all_images[:max_pair_count]
 
-    node_input = permuted_node_input(seed * 910177 + 5, truncated_images)
-    node_transform = permuted_node_transform(seed * 130131 + 1, truncated_images)
+    histogram = Histogram.create_with_image_list(truncated_images)
+    available_colors = histogram.available_colors()
+    random.Random(seed + 2).shuffle(available_colors)
+
+    # Pick colors for padding that doesn't clash with the colors already used by the images.
+    color_pad_input = None
+    color_pad_output = None
+    if len(available_colors) >= 2:
+        color0 = available_colors[0]
+        color1 = available_colors[1]
+        if random.Random(seed + 2).randint(0, 1) == 0:
+            # Use 2 different colors
+            color_pad_input = color0
+            color_pad_output = color1
+        else:
+            # Use the same color
+            color_pad_input = color0
+            color_pad_output = color0
+    elif len(available_colors) == 1:
+        # Use the same color
+        color0 = available_colors[0]
+        color_pad_input = color0
+        color_pad_output = color0
+
+    node_input = permuted_node_input(seed * 910177 + 5, truncated_images, color_pad_input)
+    node_transform = permuted_node_transform(seed * 130131 + 1, truncated_images, color_pad_output)
 
     # print(f"node: {node_input.name()} {node_transform.name()} {node_color.name()}")
 
@@ -387,7 +411,7 @@ def create_multiple_augmented_tasks_from_task(seed: int, task: Task, number_of_p
             break
     return task_list
 
-def permuted_node_input(seed: int, images: list[np.array]) -> BaseNode:
+def permuted_node_input(seed: int, images: list[np.array], pad_color: Optional[int]) -> BaseNode:
     j = random.Random(seed + 1).randint(0, 7)
     if j == 0:
         node_rotateflip = NodeRotateCW()
@@ -427,26 +451,25 @@ def permuted_node_input(seed: int, images: list[np.array]) -> BaseNode:
         node_scale = None
 
     # Pick a color that doesn't clash with the colors already used by the images.
-    available_color = Histogram.create_with_image_list(images).first_available_color()
     node_skew_or_pad = None
-    if available_color is not None:
+    if pad_color is not None:
         j = random.Random(seed + 4).randint(0, 5)
         if j == 0:
-            node_skew_or_pad = NodeSkew(available_color, SkewDirection.UP)
+            node_skew_or_pad = NodeSkew(pad_color, SkewDirection.UP)
         elif j == 1:
-            node_skew_or_pad = NodeSkew(available_color, SkewDirection.DOWN)
+            node_skew_or_pad = NodeSkew(pad_color, SkewDirection.DOWN)
         elif j == 2:
-            node_skew_or_pad = NodeSkew(available_color, SkewDirection.LEFT)
+            node_skew_or_pad = NodeSkew(pad_color, SkewDirection.LEFT)
         elif j == 3:
-            node_skew_or_pad = NodeSkew(available_color, SkewDirection.RIGHT)
+            node_skew_or_pad = NodeSkew(pad_color, SkewDirection.RIGHT)
         elif j == 4:
-            node_skew_or_pad = NodePad(seed, available_color, 1, 5)
+            node_skew_or_pad = NodePad(seed, pad_color, 1, 5)
 
     node_list_with_optionals = [node_rotateflip, node_scale, node_skew_or_pad]
     node_transform = NodeChain(node_list_with_optionals)
     return node_transform
 
-def permuted_node_transform(seed: int, images: list[np.array]) -> BaseNode:
+def permuted_node_transform(seed: int, images: list[np.array], pad_color: Optional[int]) -> BaseNode:
     j = random.Random(seed + 1).randint(0, 7)
     if j == 0:
         node_rotateflip = NodeRotateCW()
@@ -486,22 +509,17 @@ def permuted_node_transform(seed: int, images: list[np.array]) -> BaseNode:
     else:
         node_scale = None
 
-    # Pick a color that doesn't clash with the colors already used by the images.
-    # IDEA: pick a color that is different than the available colors used by the input images.
-    skew_color = Histogram.create_with_image_list(images).first_available_color()
     node_skew = None
-    if skew_color is not None:
+    if pad_color is not None:
         j = random.Random(seed + 6).randint(0, 4)
         if j == 0:
-            node_skew = NodeSkew(skew_color, SkewDirection.UP)
+            node_skew = NodeSkew(pad_color, SkewDirection.UP)
         elif j == 1:
-            node_skew = NodeSkew(skew_color, SkewDirection.DOWN)
+            node_skew = NodeSkew(pad_color, SkewDirection.DOWN)
         elif j == 2:
-            node_skew = NodeSkew(skew_color, SkewDirection.LEFT)
+            node_skew = NodeSkew(pad_color, SkewDirection.LEFT)
         elif j == 3:
-            node_skew = NodeSkew(skew_color, SkewDirection.RIGHT)
-        else:
-            node_skew = None
+            node_skew = NodeSkew(pad_color, SkewDirection.RIGHT)
     
     node_list_with_optionals = [node_rotateflip, node_scale, node_skew]
     node_transform = NodeChain(node_list_with_optionals)
