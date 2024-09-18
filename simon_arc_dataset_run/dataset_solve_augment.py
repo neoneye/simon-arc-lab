@@ -152,7 +152,7 @@ class NodeScaleUp(BaseNode):
         return output_image
 
     def name(self) -> str:
-        return 'scale'
+        return 'scaleup'
 
 class NodePad(BaseNode):
     def __init__(self, seed: int, padding_color: int, min_pad_count: int, max_pad_count: int):
