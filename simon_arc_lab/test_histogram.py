@@ -56,6 +56,19 @@ class TestHistogram(unittest.TestCase):
             self.assertTrue(histogram.number_of_unique_colors() >= 1)
             self.assertTrue(histogram.number_of_unique_colors() <= 10)
 
+    def test_create_with_image_list(self):
+        image0 = np.array([
+            [5, 5, 5], 
+            [5, 5, 9]], dtype=np.uint8)
+        image1 = np.array([
+            [7, 8, 7, 8], 
+            [7, 8, 7, 8],
+            [7, 8, 7, 9]], dtype=np.uint8)
+        histogram = Histogram.create_with_image_list([image0, image1])
+        actual = histogram.pretty()
+        expected = '7:6,5:5,8:5,9:2'
+        self.assertEqual(actual, expected)
+
     def test_sorted_color_count_list_unambiguous(self):
         image = np.zeros((3, 2), dtype=np.uint8)
         image[0:3, 0:2] = [

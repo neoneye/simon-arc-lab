@@ -1,5 +1,6 @@
 from typing import Dict, List, Tuple, Optional
 import random
+import numpy as np
 
 class Histogram:
     def __init__(self, color_count: Dict[int, int]):
@@ -17,7 +18,10 @@ class Histogram:
         return cls({})
 
     @classmethod
-    def create_with_image(cls, image) -> 'Histogram':
+    def create_with_image(cls, image: np.array) -> 'Histogram':
+        """
+        Populate a histogram with the colors from an image.
+        """
         hist = {}
         for y in range(image.shape[0]):
             for x in range(image.shape[1]):
@@ -27,6 +31,16 @@ class Histogram:
                 else:
                     hist[color] = 1
         return cls(hist)
+
+    @classmethod
+    def create_with_image_list(cls, image_list: list[np.array]) -> 'Histogram':
+        """
+        Populate a histogram with the colors from multiple images.
+        """
+        histogram = Histogram.empty()
+        for image in image_list:
+            histogram = histogram.add(cls.create_with_image(image))
+        return histogram
 
     @classmethod
     def create_random(cls, seed: int, min_colors: int, max_colors: int, min_count: int, max_count: int) -> 'Histogram':
@@ -61,6 +75,9 @@ class Histogram:
         return items
 
     def pretty(self) -> str:
+        """
+        Comma separated list of unique colors in the histogram. Ordered by popularity.
+        """
         histogram = self.clone()
         histogram.purge_mutable()
         color_count_list = histogram.sorted_color_count_list()
