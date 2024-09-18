@@ -427,7 +427,7 @@ def permuted_node_input(seed: int, images: list[np.array]) -> BaseNode:
         node_scale = None
 
     # Pick a color that doesn't clash with the colors already used by the images.
-    available_color = Histogram.create_with_image_list(images).find_free_color()
+    available_color = Histogram.create_with_image_list(images).first_available_color()
     node_skew_or_pad = None
     if available_color is not None:
         j = random.Random(seed + 4).randint(0, 5)
@@ -488,7 +488,7 @@ def permuted_node_transform(seed: int, images: list[np.array]) -> BaseNode:
 
     # Pick a color that doesn't clash with the colors already used by the images.
     # IDEA: pick a color that is different than the available colors used by the input images.
-    skew_color = Histogram.create_with_image_list(images).find_free_color()
+    skew_color = Histogram.create_with_image_list(images).first_available_color()
     node_skew = None
     if skew_color is not None:
         j = random.Random(seed + 6).randint(0, 4)

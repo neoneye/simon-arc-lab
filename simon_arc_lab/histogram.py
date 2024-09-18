@@ -280,15 +280,29 @@ class Histogram:
             if self.color_count[color] < 1:
                 del self.color_count[color]
     
-    def find_free_color(self) -> Optional[int]:
+    def available_colors(self) -> list[int]:
+        """
+        Find the color indexes that are not in the histogram.
+
+        If all colors are used, return an empty list.
+
+        The colors are sorted in ascending order.
+        """
+        self.purge_mutable()
+        colors = set(self.color_count.keys())
+        available_colors = []
+        for color in range(10):
+            if color not in colors:
+                available_colors.append(color)
+        return available_colors
+
+    def first_available_color(self) -> Optional[int]:
         """
         Find the lowest color index that is not in the histogram.
 
         If all colors are used, return None.
         """
-        self.purge_mutable()
-        colors = set(self.color_count.keys())
-        for color in range(10):
-            if color not in colors:
-                return color
-        return None
+        colors = self.available_colors()
+        if len(colors) == 0:
+            return None
+        return colors[0]
