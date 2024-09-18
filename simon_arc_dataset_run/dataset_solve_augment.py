@@ -397,8 +397,25 @@ def create_multiple_augmented_tasks_from_task(seed: int, task: Task, number_of_p
     return task_list
 
 def permuted_node_input(seed: int, images: list[np.array]) -> BaseNode:
-    j = random.Random(seed + 1).randint(0, 8)
-    # j = 8
+    j = random.Random(seed + 1).randint(0, 7)
+    if j == 0:
+        node_rotateflip = NodeRotateCW()
+    elif j == 1:
+        node_rotateflip = NodeRotateCCW()
+    elif j == 2:
+        node_rotateflip = NodeRotate180()
+    elif j == 3:
+        node_rotateflip = NodeFlipX()
+    elif j == 4:
+        node_rotateflip = NodeFlipY()
+    elif j == 5:
+        node_rotateflip = NodeFlipA()
+    elif j == 6:
+        node_rotateflip = NodeFlipB()
+    else:
+        node_rotateflip = None
+
+    j = random.Random(seed + 2).randint(0, 8)
     if j == 0:
         node_scale = NodeScaleUp(2, 2)
     elif j == 1:
@@ -418,18 +435,45 @@ def permuted_node_input(seed: int, images: list[np.array]) -> BaseNode:
     else:
         node_scale = None
 
-    j = random.Random(seed + 2).randint(0, 1)
-    node_pad = None
-    if j == 0:
-        pad_color = Histogram.create_with_image_list(images).find_free_color()
-        if pad_color is not None:
-            node_pad = NodePad(seed, pad_color, 1, 5)
+    # Pick a color that doesn't clash with the colors already used by the images.
+    available_color = Histogram.create_with_image_list(images).find_free_color()
+    node_skew_or_pad = None
+    if available_color is not None:
+        j = random.Random(seed + 4).randint(0, 5)
+        if j == 0:
+            node_skew_or_pad = NodeSkew(available_color, SkewDirection.UP)
+        elif j == 1:
+            node_skew_or_pad = NodeSkew(available_color, SkewDirection.DOWN)
+        elif j == 2:
+            node_skew_or_pad = NodeSkew(available_color, SkewDirection.LEFT)
+        elif j == 3:
+            node_skew_or_pad = NodeSkew(available_color, SkewDirection.RIGHT)
+        elif j == 4:
+            node_skew_or_pad = NodePad(seed, available_color, 1, 5)
 
-    node_list_with_optionals = [node_scale, node_pad]
+    node_list_with_optionals = [node_rotateflip, node_scale, node_skew_or_pad]
     node_transform = NodeChain(node_list_with_optionals)
     return node_transform
 
 def permuted_node_transform(seed: int, images: list[np.array]) -> BaseNode:
+    j = random.Random(seed + 1).randint(0, 7)
+    if j == 0:
+        node_rotateflip = NodeRotateCW()
+    elif j == 1:
+        node_rotateflip = NodeRotateCCW()
+    elif j == 2:
+        node_rotateflip = NodeRotate180()
+    elif j == 3:
+        node_rotateflip = NodeFlipX()
+    elif j == 4:
+        node_rotateflip = NodeFlipY()
+    elif j == 5:
+        node_rotateflip = NodeFlipA()
+    elif j == 6:
+        node_rotateflip = NodeFlipB()
+    else:
+        node_rotateflip = None
+
     j = random.Random(seed + 2).randint(0, 8)
     # j = 8
     if j == 0:
@@ -451,26 +495,8 @@ def permuted_node_transform(seed: int, images: list[np.array]) -> BaseNode:
     else:
         node_scale = None
 
-    j = random.Random(seed + 3).randint(0, 7)
-    # j = 3
-    if j == 0:
-        node_rotateflip = NodeRotateCW()
-    elif j == 1:
-        node_rotateflip = NodeRotateCCW()
-    elif j == 2:
-        node_rotateflip = NodeRotate180()
-    elif j == 3:
-        node_rotateflip = NodeFlipX()
-    elif j == 4:
-        node_rotateflip = NodeFlipY()
-    elif j == 5:
-        node_rotateflip = NodeFlipA()
-    elif j == 6:
-        node_rotateflip = NodeFlipB()
-    else:
-        node_rotateflip = None
-
-    # Pick a skew_color that doesn't clash with the colors used by the images.
+    # Pick a color that doesn't clash with the colors already used by the images.
+    # IDEA: pick a color that is different than the available colors used by the input images.
     skew_color = Histogram.create_with_image_list(images).find_free_color()
     node_skew = None
     if skew_color is not None:
