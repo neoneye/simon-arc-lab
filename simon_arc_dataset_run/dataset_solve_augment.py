@@ -228,7 +228,7 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
 
-def create_task_from_images(images: list[np.array], node_input: BaseNode, node_transform: BaseNode, task_id_prefix: str, seed: int) -> Task:
+def create_task_from_images(images: list[np.array], node_input: BaseNode, node_output: BaseNode, task_id_prefix: str, seed: int) -> Task:
     pair_count = len(images)
     if pair_count < 3:
         raise ValueError("Need at least 3 images to create a task")
@@ -238,7 +238,7 @@ def create_task_from_images(images: list[np.array], node_input: BaseNode, node_t
     assert len(input_images) == pair_count
 
     # Transform images
-    output_images = node_transform.apply_many(images)
+    output_images = node_output.apply_many(images)
     assert len(output_images) == pair_count
 
     # Tasks where the input/output images are the same are not interesting.
@@ -250,7 +250,7 @@ def create_task_from_images(images: list[np.array], node_input: BaseNode, node_t
 
     # Human readable name of the transformation
     name_input = node_input.name()
-    name_transform = node_transform.name()
+    name_transform = node_output.name()
 
     # Shuffle colors
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -316,14 +316,13 @@ def create_task_from_taskimages(input_output: str, seed: int, task: Task) -> Opt
         color_pad_input = color0
         color_pad_output = color0
 
-    node_input = permuted_node_input(seed * 910177 + 5, truncated_images, color_pad_input)
-    node_transform = permuted_node_transform(seed * 130131 + 1, truncated_images, color_pad_output)
-
-    # print(f"node: {node_input.name()} {node_transform.name()} {node_color.name()}")
+    node_input = create_node_input(seed * 910177 + 5, truncated_images, color_pad_input)
+    node_output = create_node_output(seed * 130131 + 1, truncated_images, color_pad_output)
+    # print(f"node: {node_input.name()} {node_output.name()}")
 
     task_id_prefix = f'{task.metadata_task_id} {input_output}'
     try:
-        new_task = create_task_from_images(truncated_images, node_input, node_transform, task_id_prefix, seed + 5)
+        new_task = create_task_from_images(truncated_images, node_input, node_output, task_id_prefix, seed + 5)
     except ApplyManyError as e:
         print(f"create_task_from_images. Error: {e}")
         return None
@@ -411,7 +410,13 @@ def create_multiple_augmented_tasks_from_task(seed: int, task: Task, number_of_p
             break
     return task_list
 
-def permuted_node_input(seed: int, images: list[np.array], pad_color: Optional[int]) -> BaseNode:
+def create_node_input(seed: int, images: list[np.array], pad_color: Optional[int]) -> BaseNode:
+    """
+    :param seed: The seed for the random number generator
+    :param images: The images to be transformed
+    :param pad_color: The color to use for padding, a color that doesn't clash with the colors already used by the images.
+    :return: A node that is configured for transforming images
+    """
     j = random.Random(seed + 1).randint(0, 7)
     if j == 0:
         node_rotateflip = NodeRotateCW()
@@ -450,7 +455,6 @@ def permuted_node_input(seed: int, images: list[np.array], pad_color: Optional[i
     else:
         node_scale = None
 
-    # Pick a color that doesn't clash with the colors already used by the images.
     node_skew_or_pad = None
     if pad_color is not None:
         j = random.Random(seed + 4).randint(0, 5)
@@ -469,7 +473,13 @@ def permuted_node_input(seed: int, images: list[np.array], pad_color: Optional[i
     node_transform = NodeChain(node_list_with_optionals)
     return node_transform
 
-def permuted_node_transform(seed: int, images: list[np.array], pad_color: Optional[int]) -> BaseNode:
+def create_node_output(seed: int, images: list[np.array], pad_color: Optional[int]) -> BaseNode:
+    """
+    :param seed: The seed for the random number generator
+    :param images: The images to be transformed
+    :param pad_color: The color to use for padding, a color that doesn't clash with the colors already used by the images.
+    :return: A node that is configured for transforming images
+    """
     j = random.Random(seed + 1).randint(0, 7)
     if j == 0:
         node_rotateflip = NodeRotateCW()
@@ -489,7 +499,6 @@ def permuted_node_transform(seed: int, images: list[np.array], pad_color: Option
         node_rotateflip = None
 
     j = random.Random(seed + 2).randint(0, 8)
-    # j = 8
     if j == 0:
         node_scale = NodeScaleUp(2, 2)
     elif j == 1:
