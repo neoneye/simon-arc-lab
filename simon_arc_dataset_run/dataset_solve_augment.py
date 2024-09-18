@@ -243,7 +243,7 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
 
-def create_task_from_images(images: list[np.array], node_input: BaseNode, node_transform: BaseNode, task_id_prefix: str) -> Task:
+def create_task_from_images(images: list[np.array], node_input: BaseNode, node_transform: BaseNode, task_id_prefix: str, seed: int) -> Task:
     pair_count = len(images)
     if pair_count < 3:
         raise ValueError("Need at least 3 images to create a task")
@@ -267,12 +267,21 @@ def create_task_from_images(images: list[np.array], node_input: BaseNode, node_t
     name_input = node_input.name()
     name_transform = node_transform.name()
 
+    # Shuffle colors
+    colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    random.Random(seed).shuffle(colors)
+    color_map = {}
+    for i, color in enumerate(colors):
+        color_map[i] = color
+
     # Create new task
     new_task = Task()
     new_task.metadata_task_id = f'{task_id_prefix} input_{name_input} trans_{name_transform}'
     for pair_index in range(pair_count):
-        input_image = input_images[pair_index]
-        output_image = output_images[pair_index]
+        input_image_raw = input_images[pair_index]
+        output_image_raw = output_images[pair_index]
+        input_image = image_replace_colors(input_image_raw, color_map)
+        output_image = image_replace_colors(output_image_raw, color_map)
         new_task.append_pair(input_image, output_image, pair_index < pair_count - 1)
 
     return new_task
@@ -301,22 +310,18 @@ def create_task_from_taskimages(input_output: str, seed: int, task: Task) -> Opt
     node_input = permuted_node_input(seed * 910177 + 5, truncated_images)
     node_transform = permuted_node_transform(seed * 130131 + 1, truncated_images)
 
-    # node_color = permuted_node_color(seed * 100101 + 5)
-    # IDEA: insert the node_color after node_input
-    # IDEA: insert the node_color after node_transform
-
     # print(f"node: {node_input.name()} {node_transform.name()} {node_color.name()}")
 
     task_id_prefix = f'{task.metadata_task_id} {input_output}'
     try:
-        new_task = create_task_from_images(truncated_images, node_input, node_transform, task_id_prefix)
+        new_task = create_task_from_images(truncated_images, node_input, node_transform, task_id_prefix, seed + 5)
     except ApplyManyError as e:
         print(f"create_task_from_images. Error: {e}")
         return None
     except ValueError as e:
         print(f"create_task_from_images. ValueError: {e}")
         return None
-    new_task.shuffle_examples(seed + group_index)
+    new_task.shuffle_examples(seed + 6)
     return new_task
 
 def create_multiple_tasks_from_taskimages(input_output: str, seed: int, task: Task, number_of_permutation: int) -> list[Task]:
@@ -392,17 +397,6 @@ def create_multiple_augmented_tasks_from_task(seed: int, task: Task, number_of_p
             task_list.append(new_task)
             break
     return task_list
-
-def permuted_node_color(seed: int) -> BaseNode:
-    j = random.Random(seed).randint(0, 1)
-    if j == 0:
-        node_shuffle_colors = NodeShuffleColors(seed + 1003023)
-    else:
-        node_shuffle_colors = None
-
-    node_list_with_optionals = [node_shuffle_colors]
-    node_transform = NodeChain(node_list_with_optionals)
-    return node_transform
 
 def permuted_node_input(seed: int, images: list[np.array]) -> BaseNode:
     j = random.Random(seed + 1).randint(0, 8)
