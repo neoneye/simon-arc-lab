@@ -280,7 +280,7 @@ class Histogram:
             if self.color_count[color] < 1:
                 del self.color_count[color]
     
-    def lowest_unused_color(self) -> Optional[int]:
+    def find_free_color(self) -> Optional[int]:
         """
         Find the lowest color index that is not in the histogram.
 
