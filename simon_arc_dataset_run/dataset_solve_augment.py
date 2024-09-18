@@ -383,6 +383,34 @@ def create_augmented_task(task: Task, node_input: BaseNode, node_output: BaseNod
 
     return new_task
 
+def taskspecific_create_node_input(seed: int) -> BaseNode:
+    j = random.Random(seed + 1).randint(0, 3)
+    node_scaleup = None
+    if j == 0:
+        node_scaleup = NodeScaleUp(2, 2)
+    elif j == 1:
+        node_scaleup = NodeScaleUp(3, 3)
+    elif j == 2:
+        node_scaleup = NodeScaleUp(4, 4)
+
+    node_list = [node_scaleup]
+
+    return NodeChain(node_list)
+
+def taskspecific_create_node_output(seed: int) -> BaseNode:
+    j = random.Random(seed + 1).randint(0, 3)
+    node_scaleup = None
+    if j == 0:
+        node_scaleup = NodeScaleUp(2, 2)
+    elif j == 1:
+        node_scaleup = NodeScaleUp(3, 3)
+    elif j == 2:
+        node_scaleup = NodeScaleUp(4, 4)
+
+    node_list = [node_scaleup]
+
+    return NodeChain(node_list)
+
 def create_multiple_augmented_tasks_from_task(seed: int, task: Task, number_of_permutations: int) -> list[Task]:
     max_example_pairs = 3
     splitted_tasks = task_split(task, seed + 3, max_example_pairs, number_of_permutations)
@@ -394,18 +422,13 @@ def create_multiple_augmented_tasks_from_task(seed: int, task: Task, number_of_p
         for i in range(number_of_permutations):
             iteration_seed = seed + i * 10383838 + task_index * 38919923
 
-            node_input_scaleup = NodeScaleUp(2, 2)
+            node_input = taskspecific_create_node_input(iteration_seed + 1)
+            node_output = taskspecific_create_node_output(iteration_seed + 2)
 
-            node_input_list = [node_input_scaleup]
-            node_output_list = []
-
-            node_input = NodeChain(node_input_list)
-            node_output = NodeChain(node_output_list)
-
-            new_task = create_augmented_task(task, node_input, node_output, iteration_seed + 1)
+            new_task = create_augmented_task(task, node_input, node_output, iteration_seed + 3)
             if new_task is None:
                 continue
-            new_task.shuffle_examples(iteration_seed + 383838100)
+            new_task.shuffle_examples(iteration_seed + 4)
             task_list.append(new_task)
             break
     return task_list
