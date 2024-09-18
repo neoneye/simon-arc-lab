@@ -258,12 +258,6 @@ def create_task_from_images(images: list[np.array], node_pre: BaseNode, node_tra
     return new_task
 
 def create_task_from_taskimages(input_output: str, seed: int, task: Task) -> Optional[Task]:
-    node_pre = permuted_node_pre(seed * 100101 + 5)
-    node_transform = permuted_node_transform(seed * 130131 + 1)
-    node_post_input = permuted_node_input_post(seed * 910177 + 5)
-
-    # print(f"node: {node_pre.name()} {node_transform.name()} {node_input_post.name()}")
-
     # Collect images for processing
     all_images = []
     if input_output == 'input':
@@ -283,6 +277,12 @@ def create_task_from_taskimages(input_output: str, seed: int, task: Task) -> Opt
     # Truncate to N images
     max_pair_count = 4
     truncated_images = all_images[:max_pair_count]
+
+    node_pre = permuted_node_pre(seed * 100101 + 5)
+    node_transform = permuted_node_transform(seed * 130131 + 1, truncated_images)
+    node_post_input = permuted_node_input_post(seed * 910177 + 5)
+
+    # print(f"node: {node_pre.name()} {node_transform.name()} {node_input_post.name()}")
 
     task_id_prefix = f'{task.metadata_task_id} {input_output}'
     try:
@@ -384,7 +384,7 @@ def permuted_node_pre(seed: int) -> BaseNode:
     node_transform = NodeChain(node_list)
     return node_transform
 
-def permuted_node_transform(seed: int) -> BaseNode:
+def permuted_node_transform(seed: int, images: list[np.array]) -> BaseNode:
     j = random.Random(seed + 1).randint(0, 1)
     # j = 1
     if j == 0:
@@ -437,19 +437,21 @@ def permuted_node_transform(seed: int) -> BaseNode:
     else:
         node_flip = None
 
-    skew_color = random.Random(seed + 5).randint(0, 9)
-    j = random.Random(seed + 6).randint(0, 4)
-    # IDEA: Pick a skew_color that doesn't clash too much with the payload of the image.
-    if j == 0:
-        node_skew = NodeSkew(skew_color, SkewDirection.UP)
-    elif j == 1:
-        node_skew = NodeSkew(skew_color, SkewDirection.DOWN)
-    elif j == 2:
-        node_skew = NodeSkew(skew_color, SkewDirection.LEFT)
-    elif j == 3:
-        node_skew = NodeSkew(skew_color, SkewDirection.RIGHT)
-    else:
-        node_skew = None
+    # Pick a skew_color that doesn't clash with the colors used by the images.
+    skew_color = Histogram.create_with_image_list(images).find_free_color()
+    node_skew = None
+    if skew_color is not None:
+        j = random.Random(seed + 6).randint(0, 4)
+        if j == 0:
+            node_skew = NodeSkew(skew_color, SkewDirection.UP)
+        elif j == 1:
+            node_skew = NodeSkew(skew_color, SkewDirection.DOWN)
+        elif j == 2:
+            node_skew = NodeSkew(skew_color, SkewDirection.LEFT)
+        elif j == 3:
+            node_skew = NodeSkew(skew_color, SkewDirection.RIGHT)
+        else:
+            node_skew = None
     
     node_list_with_optionals = [node_swap_colors, node_rotate, node_scale, node_flip, node_skew]
     # Remove the node's that are None
