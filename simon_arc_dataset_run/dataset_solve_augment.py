@@ -77,21 +77,6 @@ class NodeChain(BaseNode):
         names = [node.name() for node in self.nodes]
         return ','.join(names)
 
-class NodeShuffleColors(BaseNode):
-    def __init__(self, seed: int):
-        colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-        random.Random(seed + 3).shuffle(colors)
-        color_map = {}
-        for i, color in enumerate(colors):
-            color_map[i] = color
-        self.color_map = color_map
-
-    def apply(self, image: np.array) -> np.array:
-        return image_replace_colors(image, self.color_map)
-
-    def name(self) -> str:
-        return 'shuffle_colors'
-
 class NodeRotateCW(BaseNode):
     def apply(self, image: np.array) -> np.array:
         return image_rotate_cw(image)
@@ -335,7 +320,7 @@ def create_multiple_tasks_from_taskimages(input_output: str, seed: int, task: Ta
             break
     return task_list
 
-def create_augmented_task(task: Task, node_input: BaseNode, node_output: BaseNode) -> Task:
+def create_augmented_task(task: Task, node_input: BaseNode, node_output: BaseNode, seed: int) -> Task:
     """
     Create a new task by applying input and output nodes to the original task.
     """
@@ -357,12 +342,21 @@ def create_augmented_task(task: Task, node_input: BaseNode, node_output: BaseNod
     assert len(new_input_images) == n
     assert len(new_output_images) == n
 
+    # Shuffle colors
+    colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    random.Random(seed).shuffle(colors)
+    color_map = {}
+    for i, color in enumerate(colors):
+        color_map[i] = color
+
     new_task = Task()
     new_task.metadata_task_id = f'{task.metadata_task_id} {node_input.name()} {node_output.name()}'
 
     for i in range(n):
         is_example = i < task.count_examples
-        new_task.append_pair(new_input_images[i], new_output_images[i], is_example)
+        input_image = image_replace_colors(new_input_images[i], color_map)
+        output_image = image_replace_colors(new_output_images[i], color_map)
+        new_task.append_pair(input_image, output_image, is_example)
 
     return new_task
 
@@ -377,20 +371,15 @@ def create_multiple_augmented_tasks_from_task(seed: int, task: Task, number_of_p
         for i in range(number_of_permutations):
             iteration_seed = seed + i * 10383838 + task_index * 38919923
 
-            color_shuffle_seed = iteration_seed + 3838
-            node_input_shuffle_colors = NodeShuffleColors(color_shuffle_seed)
-            node_output_shuffle_colors = NodeShuffleColors(color_shuffle_seed)
-
             node_input_scaleup = NodeScaleUp(2, 2)
 
-            node_input_list = [node_input_shuffle_colors, node_input_scaleup]
-            node_output_list = [node_output_shuffle_colors]
-
+            node_input_list = [node_input_scaleup]
+            node_output_list = []
 
             node_input = NodeChain(node_input_list)
             node_output = NodeChain(node_output_list)
 
-            new_task = create_augmented_task(task, node_input, node_output)
+            new_task = create_augmented_task(task, node_input, node_output, iteration_seed + 1)
             if new_task is None:
                 continue
             new_task.shuffle_examples(iteration_seed + 383838100)
