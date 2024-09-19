@@ -45,16 +45,20 @@ class ApplyManyError(ValueError):
 
 class BaseNode:
     def apply_many(self, images: list[np.array]) -> list[np.array]:
-        return [self.apply(image) for image in images]
+        result_images = []
+        for image_index, image in enumerate(images):
+            new_image = self.apply(image, image_index)
+            result_images.append(new_image)
+        return result_images
     
-    def apply(self, image: np.array) -> np.array:
+    def apply(self, image: np.array, image_index: int) -> np.array:
         raise Exception("Not implemented")
     
     def name(self) -> str:
         raise Exception("Not implemented")
 
 class NodeDoNothing(BaseNode):
-    def apply(self, image: np.array) -> np.array:
+    def apply(self, image: np.array, image_index: int) -> np.array:
         return image.copy()
 
     def name(self) -> str:
@@ -70,7 +74,7 @@ class NodeChain(BaseNode):
             images = node.apply_many(images)
         return images
 
-    def apply(self, image: np.array) -> np.array:
+    def apply(self, image: np.array, image_index: int) -> np.array:
         raise Exception("Not implemented for NodeChain")
 
     def name(self) -> str:
@@ -78,49 +82,49 @@ class NodeChain(BaseNode):
         return ','.join(names)
 
 class NodeRotateCW(BaseNode):
-    def apply(self, image: np.array) -> np.array:
+    def apply(self, image: np.array, image_index: int) -> np.array:
         return image_rotate_cw(image)
 
     def name(self) -> str:
         return 'rotate_cw'
 
 class NodeRotateCCW(BaseNode):
-    def apply(self, image: np.array) -> np.array:
+    def apply(self, image: np.array, image_index: int) -> np.array:
         return image_rotate_ccw(image)
 
     def name(self) -> str:
         return 'rotate_ccw'
 
 class NodeRotate180(BaseNode):
-    def apply(self, image: np.array) -> np.array:
+    def apply(self, image: np.array, image_index: int) -> np.array:
         return image_rotate_ccw(image)
 
     def name(self) -> str:
         return 'rotate_180'
 
 class NodeFlipX(BaseNode):
-    def apply(self, image: np.array) -> np.array:
+    def apply(self, image: np.array, image_index: int) -> np.array:
         return image_flipx(image)
 
     def name(self) -> str:
         return 'flipx'
 
 class NodeFlipY(BaseNode):
-    def apply(self, image: np.array) -> np.array:
+    def apply(self, image: np.array, image_index: int) -> np.array:
         return image_flipy(image)
 
     def name(self) -> str:
         return 'flipy'
 
 class NodeFlipA(BaseNode):
-    def apply(self, image: np.array) -> np.array:
+    def apply(self, image: np.array, image_index: int) -> np.array:
         return image_flip_diagonal_a(image)
 
     def name(self) -> str:
         return 'flipa'
 
 class NodeFlipB(BaseNode):
-    def apply(self, image: np.array) -> np.array:
+    def apply(self, image: np.array, image_index: int) -> np.array:
         return image_flip_diagonal_b(image)
 
     def name(self) -> str:
@@ -133,7 +137,7 @@ class NodeScaleUp(BaseNode):
         self.x_scale = x_scale
         self.y_scale = y_scale
 
-    def apply(self, image: np.array) -> np.array:
+    def apply(self, image: np.array, image_index: int) -> np.array:
         input_image, output_image = image_scale(image, 'up', self.x_scale, 'up', self.y_scale)
         return output_image
 
@@ -149,7 +153,8 @@ class NodeScaleUpNoisy(BaseNode):
         self.noise_color = noise_color
         self.seed = seed
 
-    def apply(self, image: np.array) -> np.array:
+    def apply(self, image: np.array, image_index: int) -> np.array:
+        noise_seed = self.seed + image_index * 1000
         return image_scale_up_with_noise(
             image, 
             self.x_scale, 
@@ -157,7 +162,7 @@ class NodeScaleUpNoisy(BaseNode):
             self.min_noise_count, 
             self.max_noise_count, 
             self.noise_color, 
-            self.seed
+            noise_seed
         )
 
     def name(self) -> str:
@@ -170,18 +175,15 @@ class NodePad(BaseNode):
         self.min_pad_count = min_pad_count
         self.max_pad_count = max_pad_count
 
-    def apply_many(self, images: list[np.array]) -> list[np.array]:
-        new_images = []
-        for image_index, image in enumerate(images):
-            new_image = image_pad_random(
-                image, 
-                self.seed + image_index * 1000, 
-                self.padding_color, 
-                self.min_pad_count, 
-                self.max_pad_count
-            )
-            new_images.append(new_image)
-        return new_images
+    def apply(self, image: np.array, image_index: int) -> np.array:
+        noise_seed = self.seed + image_index * 1000
+        return image_pad_random(
+            image, 
+            noise_seed,
+            self.padding_color, 
+            self.min_pad_count, 
+            self.max_pad_count
+        )
 
     def name(self) -> str:
         return 'pad'
@@ -224,7 +226,7 @@ class NodeSkew(BaseNode):
         self.padding_color = padding_color
         self.direction = direction
 
-    def apply(self, image: np.array) -> np.array:
+    def apply(self, image: np.array, image_index: int) -> np.array:
         return image_skew(image, self.padding_color, self.direction)
 
     def name(self) -> str:
