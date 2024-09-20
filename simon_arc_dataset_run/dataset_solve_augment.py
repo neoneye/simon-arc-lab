@@ -21,6 +21,7 @@ from simon_arc_lab.task import *
 from simon_arc_lab.task_split import *
 from simon_arc_lab.image_bresenham_line import *
 from simon_arc_lab.image_mask import *
+from simon_arc_lab.image_grid import *
 from simon_arc_lab.image_pad import *
 from simon_arc_lab.image_scale import *
 from simon_arc_lab.image_skew import *
@@ -167,6 +168,42 @@ class NodeScaleUpNoisy(BaseNode):
 
     def name(self) -> str:
         return 'scaleupnoisy'
+
+class NodeGridNoisy(BaseNode):
+    def __init__(self, separator_size: int, min_cell_size: int, max_cell_size: int, grid_color: int, seed: int):
+        self.separator_size = separator_size
+        self.min_cell_size = min_cell_size
+        self.max_cell_size = max_cell_size
+        self.grid_color = grid_color
+        self.seed = seed
+
+    def apply(self, image: np.array, image_index: int) -> np.array:
+        noise_seed = self.seed + image_index * 1000
+        height, width = image.shape
+        b = ImageGridBuilder(width, height)
+        b.set_separator_size(self.separator_size)
+        b.set_cell_size_random(noise_seed, self.min_cell_size, self.max_cell_size)
+        return b.draw(image, self.grid_color)
+
+    def name(self) -> str:
+        return 'gridnoisy'
+
+class NodeGrid(BaseNode):
+    def __init__(self, separator_size: int, cell_size: int, grid_color: int, seed: int):
+        self.separator_size = separator_size
+        self.cell_size = cell_size
+        self.grid_color = grid_color
+        self.seed = seed
+
+    def apply(self, image: np.array, image_index: int) -> np.array:
+        height, width = image.shape
+        b = ImageGridBuilder(width, height)
+        b.set_separator_size(self.separator_size)
+        b.set_cell_size(self.cell_size)
+        return b.draw(image, self.grid_color)
+
+    def name(self) -> str:
+        return 'grid'
 
 class NodePad(BaseNode):
     def __init__(self, seed: int, padding_color: int, min_pad_count: int, max_pad_count: int):
@@ -421,7 +458,7 @@ def create_augmented_task(task: Task, node_input: BaseNode, node_output: BaseNod
 def taskspecific_create_node_input(seed: int, noise_color: Optional[int]) -> BaseNode:
     choices = [0, 1, 2, 3]
     if noise_color is not None:
-        choices.extend([4, 5, 6, 7, 8, 9, 10, 11, 12])
+        choices.extend([4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])
     j = random.Random(seed + 1).choice(choices)
     node_scaleup = None
     if j == 0:
@@ -450,14 +487,21 @@ def taskspecific_create_node_input(seed: int, noise_color: Optional[int]) -> Bas
         node_scaleup = NodeScaleUpNoisy(4, 4, 2, 2, noise_color, seed + 2)
     elif j == 12:
         node_scaleup = NodeScaleUpNoisy(4, 4, 1, 2, noise_color, seed + 2)
+    elif j == 13:
+        node_scaleup = NodeGridNoisy(1, 1, 3, noise_color, seed + 2)
+    elif j == 14:
+        node_scaleup = NodeGridNoisy(1, 2, 5, noise_color, seed + 2)
 
     # IDEA: Random padding
     node_list = [node_scaleup]
 
     return NodeChain(node_list)
 
-def taskspecific_create_node_output(seed: int) -> BaseNode:
-    j = random.Random(seed + 1).randint(0, 3)
+def taskspecific_create_node_output(seed: int, noise_color: Optional[int]) -> BaseNode:
+    choices = [0, 1, 2, 3]
+    if noise_color is not None:
+        choices.extend([4, 5, 6])
+    j = random.Random(seed + 1).choice(choices)
     if j == 0:
         node_scaleup = None
     elif j == 1:
@@ -466,6 +510,12 @@ def taskspecific_create_node_output(seed: int) -> BaseNode:
         node_scaleup = NodeScaleUp(3, 3)
     elif j == 3:
         node_scaleup = NodeScaleUp(4, 4)
+    elif j == 4:
+        node_scaleup = NodeGrid(1, 1, noise_color, seed + 2)
+    elif j == 5:
+        node_scaleup = NodeGrid(1, 2, noise_color, seed + 2)
+    elif j == 6:
+        node_scaleup = NodeGrid(1, 3, noise_color, seed + 2)
 
     node_list = [node_scaleup]
 
@@ -494,7 +544,7 @@ def create_multiple_augmented_tasks_from_task(seed: int, task: Task, number_of_p
             noise_color = histogram.first_available_color()
 
             node_input = taskspecific_create_node_input(iteration_seed + 1, noise_color)
-            node_output = taskspecific_create_node_output(iteration_seed + 2)
+            node_output = taskspecific_create_node_output(iteration_seed + 2, noise_color)
 
             new_task = create_augmented_task(task, node_input, node_output, iteration_seed + 3)
             if new_task is None:
