@@ -407,15 +407,26 @@ def create_augmented_task(task: Task, node_input: BaseNode, node_output: BaseNod
 
     return new_task
 
-def taskspecific_create_node_input(seed: int) -> BaseNode:
-    j = random.Random(seed + 1).randint(0, 3)
+def taskspecific_create_node_input(seed: int, noise_color: Optional[int]) -> BaseNode:
+    choices = [0, 1, 2]
+    if noise_color is not None:
+        choices.extend([4, 5, 6])
+    j = random.Random(seed + 1).choice(choices)
     node_scaleup = None
     if j == 0:
-        node_scaleup = NodeScaleUp(2, 2)
+        node_scaleup = None
     elif j == 1:
-        node_scaleup = NodeScaleUp(3, 3)
+        node_scaleup = NodeScaleUp(2, 2)
     elif j == 2:
+        node_scaleup = NodeScaleUp(3, 3)
+    elif j == 3:
         node_scaleup = NodeScaleUp(4, 4)
+    elif j == 4:
+        node_scaleup = NodeScaleUpNoisy(2, 2, 1, 1, noise_color, seed + 2)
+    elif j == 5:
+        node_scaleup = NodeScaleUpNoisy(2, 2, 2, 2, noise_color, seed + 2)
+    elif j == 6:
+        node_scaleup = NodeScaleUpNoisy(2, 2, 1, 2, noise_color, seed + 2)
 
     node_list = [node_scaleup]
 
@@ -423,12 +434,13 @@ def taskspecific_create_node_input(seed: int) -> BaseNode:
 
 def taskspecific_create_node_output(seed: int) -> BaseNode:
     j = random.Random(seed + 1).randint(0, 3)
-    node_scaleup = None
     if j == 0:
-        node_scaleup = NodeScaleUp(2, 2)
+        node_scaleup = None
     elif j == 1:
-        node_scaleup = NodeScaleUp(3, 3)
+        node_scaleup = NodeScaleUp(2, 2)
     elif j == 2:
+        node_scaleup = NodeScaleUp(3, 3)
+    elif j == 3:
         node_scaleup = NodeScaleUp(4, 4)
 
     node_list = [node_scaleup]
@@ -446,12 +458,24 @@ def create_multiple_augmented_tasks_from_task(seed: int, task: Task, number_of_p
         for i in range(number_of_permutations):
             iteration_seed = seed + i * 10383838 + task_index * 38919923
 
-            node_input = taskspecific_create_node_input(iteration_seed + 1)
+            # Find an unused color across all images
+            all_images = []
+            for image in range(task.count_examples):
+                all_images.append(task.example_input(image))
+                all_images.append(task.example_output(image))
+            for image in range(task.count_tests):
+                all_images.append(task.test_input(image))
+                # Don't add test output, as there is no access to it. The model has to predict it.
+            histogram = Histogram.create_with_image_list(all_images)
+            noise_color = histogram.first_available_color()
+
+            node_input = taskspecific_create_node_input(iteration_seed + 1, noise_color)
             node_output = taskspecific_create_node_output(iteration_seed + 2)
 
             new_task = create_augmented_task(task, node_input, node_output, iteration_seed + 3)
             if new_task is None:
                 continue
+            # IDEA: if the task is identical to the original task, then skip it.
             new_task.shuffle_examples(iteration_seed + 4)
             task_list.append(new_task)
             break
