@@ -464,11 +464,31 @@ def taskspecific_create_node_input(seed: int, available_colors: list[int]) -> Ba
     if len(available_colors) >= 2:
         padding_color = available_colors[1]
 
+    # Rotate or flip
+    j = random.Random(seed + 1).randint(0, 7)
+    if j == 0:
+        node_rotateflip = NodeRotateCW()
+    elif j == 1:
+        node_rotateflip = NodeRotateCCW()
+    elif j == 2:
+        node_rotateflip = NodeRotate180()
+    elif j == 3:
+        node_rotateflip = NodeFlipX()
+    elif j == 4:
+        node_rotateflip = NodeFlipY()
+    elif j == 5:
+        node_rotateflip = NodeFlipA()
+    elif j == 6:
+        node_rotateflip = NodeFlipB()
+    else:
+        node_rotateflip = None
+
     # Scale up or grid
     choices = [0, 1, 2, 3]
     if noise_color is not None:
         choices.extend([4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])
-    j = random.Random(seed + 1).choice(choices)
+    j = random.Random(seed + 2).choice(choices)
+    scaleup_seed = seed + 3
     node_scaleup = None
     if j == 0:
         node_scaleup = None
@@ -479,36 +499,36 @@ def taskspecific_create_node_input(seed: int, available_colors: list[int]) -> Ba
     elif j == 3:
         node_scaleup = NodeScaleUp(4, 4)
     elif j == 4:
-        node_scaleup = NodeScaleUpNoisy(2, 2, 1, 1, noise_color, seed + 2)
+        node_scaleup = NodeScaleUpNoisy(2, 2, 1, 1, noise_color, scaleup_seed)
     elif j == 5:
-        node_scaleup = NodeScaleUpNoisy(2, 2, 2, 2, noise_color, seed + 2)
+        node_scaleup = NodeScaleUpNoisy(2, 2, 2, 2, noise_color, scaleup_seed)
     elif j == 6:
-        node_scaleup = NodeScaleUpNoisy(2, 2, 1, 2, noise_color, seed + 2)
+        node_scaleup = NodeScaleUpNoisy(2, 2, 1, 2, noise_color, scaleup_seed)
     elif j == 7:
-        node_scaleup = NodeScaleUpNoisy(3, 3, 1, 1, noise_color, seed + 2)
+        node_scaleup = NodeScaleUpNoisy(3, 3, 1, 1, noise_color, scaleup_seed)
     elif j == 8:
-        node_scaleup = NodeScaleUpNoisy(3, 3, 2, 2, noise_color, seed + 2)
+        node_scaleup = NodeScaleUpNoisy(3, 3, 2, 2, noise_color, scaleup_seed)
     elif j == 9:
-        node_scaleup = NodeScaleUpNoisy(3, 3, 1, 2, noise_color, seed + 2)
+        node_scaleup = NodeScaleUpNoisy(3, 3, 1, 2, noise_color, scaleup_seed)
     elif j == 10:
-        node_scaleup = NodeScaleUpNoisy(4, 4, 1, 1, noise_color, seed + 2)
+        node_scaleup = NodeScaleUpNoisy(4, 4, 1, 1, noise_color, scaleup_seed)
     elif j == 11:
-        node_scaleup = NodeScaleUpNoisy(4, 4, 2, 2, noise_color, seed + 2)
+        node_scaleup = NodeScaleUpNoisy(4, 4, 2, 2, noise_color, scaleup_seed)
     elif j == 12:
-        node_scaleup = NodeScaleUpNoisy(4, 4, 1, 2, noise_color, seed + 2)
+        node_scaleup = NodeScaleUpNoisy(4, 4, 1, 2, noise_color, scaleup_seed)
     elif j == 13:
-        node_scaleup = NodeGridNoisy(1, 1, 3, noise_color, seed + 2)
+        node_scaleup = NodeGridNoisy(1, 1, 3, noise_color, scaleup_seed)
     elif j == 14:
-        node_scaleup = NodeGridNoisy(1, 2, 5, noise_color, seed + 2)
+        node_scaleup = NodeGridNoisy(1, 2, 5, noise_color, scaleup_seed)
 
     # Padding around the input image
     node_pad = None
     if padding_color is not None:
-        j = random.Random(seed + 2).randint(0, 1)
+        j = random.Random(seed + 4).randint(0, 1)
         if j == 0:
-            node_pad = NodePad(seed + 3, padding_color, 0, 6)
+            node_pad = NodePad(seed + 5, padding_color, 0, 6)
 
-    node_list = [node_scaleup, node_pad]
+    node_list = [node_rotateflip, node_scaleup, node_pad, node_rotateflip]
 
     return NodeChain(node_list)
 
@@ -517,10 +537,31 @@ def taskspecific_create_node_output(seed: int, available_colors: list[int]) -> B
     if len(available_colors) >= 1:
         noise_color = available_colors[0]
 
+    # Rotate or flip
+    j = random.Random(seed + 1).randint(0, 7)
+    if j == 0:
+        node_rotateflip = NodeRotateCW()
+    elif j == 1:
+        node_rotateflip = NodeRotateCCW()
+    elif j == 2:
+        node_rotateflip = NodeRotate180()
+    elif j == 3:
+        node_rotateflip = NodeFlipX()
+    elif j == 4:
+        node_rotateflip = NodeFlipY()
+    elif j == 5:
+        node_rotateflip = NodeFlipA()
+    elif j == 6:
+        node_rotateflip = NodeFlipB()
+    else:
+        node_rotateflip = None
+
+    # Scale up or grid
     choices = [0, 1, 2, 3]
     if noise_color is not None:
         choices.extend([4, 5, 6])
-    j = random.Random(seed + 1).choice(choices)
+    j = random.Random(seed + 2).choice(choices)
+    seed_scaleup = seed + 3
     if j == 0:
         node_scaleup = None
     elif j == 1:
@@ -530,13 +571,13 @@ def taskspecific_create_node_output(seed: int, available_colors: list[int]) -> B
     elif j == 3:
         node_scaleup = NodeScaleUp(4, 4)
     elif j == 4:
-        node_scaleup = NodeGrid(1, 1, noise_color, seed + 2)
+        node_scaleup = NodeGrid(1, 1, noise_color, seed_scaleup)
     elif j == 5:
-        node_scaleup = NodeGrid(1, 2, noise_color, seed + 2)
+        node_scaleup = NodeGrid(1, 2, noise_color, seed_scaleup)
     elif j == 6:
-        node_scaleup = NodeGrid(1, 3, noise_color, seed + 2)
+        node_scaleup = NodeGrid(1, 3, noise_color, seed_scaleup)
 
-    node_list = [node_scaleup]
+    node_list = [node_rotateflip, node_scaleup]
 
     return NodeChain(node_list)
 
