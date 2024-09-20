@@ -408,9 +408,9 @@ def create_augmented_task(task: Task, node_input: BaseNode, node_output: BaseNod
     return new_task
 
 def taskspecific_create_node_input(seed: int, noise_color: Optional[int]) -> BaseNode:
-    choices = [0, 1, 2]
+    choices = [0, 1, 2, 3]
     if noise_color is not None:
-        choices.extend([4, 5, 6])
+        choices.extend([4, 5, 6, 7, 8, 9, 10, 11, 12])
     j = random.Random(seed + 1).choice(choices)
     node_scaleup = None
     if j == 0:
@@ -427,7 +427,20 @@ def taskspecific_create_node_input(seed: int, noise_color: Optional[int]) -> Bas
         node_scaleup = NodeScaleUpNoisy(2, 2, 2, 2, noise_color, seed + 2)
     elif j == 6:
         node_scaleup = NodeScaleUpNoisy(2, 2, 1, 2, noise_color, seed + 2)
+    elif j == 7:
+        node_scaleup = NodeScaleUpNoisy(3, 3, 1, 1, noise_color, seed + 2)
+    elif j == 8:
+        node_scaleup = NodeScaleUpNoisy(3, 3, 2, 2, noise_color, seed + 2)
+    elif j == 9:
+        node_scaleup = NodeScaleUpNoisy(3, 3, 1, 2, noise_color, seed + 2)
+    elif j == 10:
+        node_scaleup = NodeScaleUpNoisy(4, 4, 1, 1, noise_color, seed + 2)
+    elif j == 11:
+        node_scaleup = NodeScaleUpNoisy(4, 4, 2, 2, noise_color, seed + 2)
+    elif j == 12:
+        node_scaleup = NodeScaleUpNoisy(4, 4, 1, 2, noise_color, seed + 2)
 
+    # IDEA: Random padding
     node_list = [node_scaleup]
 
     return NodeChain(node_list)
