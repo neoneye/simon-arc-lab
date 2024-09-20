@@ -455,7 +455,16 @@ def create_augmented_task(task: Task, node_input: BaseNode, node_output: BaseNod
 
     return new_task
 
-def taskspecific_create_node_input(seed: int, noise_color: Optional[int]) -> BaseNode:
+def taskspecific_create_node_input(seed: int, available_colors: list[int]) -> BaseNode:
+    noise_color = None
+    if len(available_colors) >= 1:
+        noise_color = available_colors[0]
+
+    padding_color = None
+    if len(available_colors) >= 2:
+        padding_color = available_colors[1]
+
+    # Scale up or grid
     choices = [0, 1, 2, 3]
     if noise_color is not None:
         choices.extend([4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])
@@ -492,12 +501,22 @@ def taskspecific_create_node_input(seed: int, noise_color: Optional[int]) -> Bas
     elif j == 14:
         node_scaleup = NodeGridNoisy(1, 2, 5, noise_color, seed + 2)
 
-    # IDEA: Random padding
-    node_list = [node_scaleup]
+    # Padding around the input image
+    node_pad = None
+    if padding_color is not None:
+        j = random.Random(seed + 2).randint(0, 1)
+        if j == 0:
+            node_pad = NodePad(seed + 3, padding_color, 0, 6)
+
+    node_list = [node_scaleup, node_pad]
 
     return NodeChain(node_list)
 
-def taskspecific_create_node_output(seed: int, noise_color: Optional[int]) -> BaseNode:
+def taskspecific_create_node_output(seed: int, available_colors: list[int]) -> BaseNode:
+    noise_color = None
+    if len(available_colors) >= 1:
+        noise_color = available_colors[0]
+
     choices = [0, 1, 2, 3]
     if noise_color is not None:
         choices.extend([4, 5, 6])
@@ -541,12 +560,18 @@ def create_multiple_augmented_tasks_from_task(seed: int, task: Task, number_of_p
                 all_images.append(task.test_input(image))
                 # Don't add test output, as there is no access to it. The model has to predict it.
             histogram = Histogram.create_with_image_list(all_images)
-            noise_color = histogram.first_available_color()
+            available_colors = histogram.available_colors()
 
-            node_input = taskspecific_create_node_input(iteration_seed + 1, noise_color)
-            node_output = taskspecific_create_node_output(iteration_seed + 2, noise_color)
+            available_colors_input = available_colors.copy()
+            random.Random(iteration_seed + 1).shuffle(available_colors_input)
 
-            new_task = create_augmented_task(task, node_input, node_output, iteration_seed + 3)
+            available_colors_output = available_colors.copy()
+            random.Random(iteration_seed + 2).shuffle(available_colors_output)
+
+            node_input = taskspecific_create_node_input(iteration_seed + 3, available_colors_input)
+            node_output = taskspecific_create_node_output(iteration_seed + 4, available_colors_output)
+
+            new_task = create_augmented_task(task, node_input, node_output, iteration_seed + 4)
             if new_task is None:
                 continue
             new_task.shuffle_examples(iteration_seed + 4)
