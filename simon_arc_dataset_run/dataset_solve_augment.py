@@ -405,6 +405,13 @@ def create_augmented_task(task: Task, node_input: BaseNode, node_output: BaseNod
         output_image = image_replace_colors(new_output_images[i], color_map)
         new_task.append_pair(input_image, output_image, is_example)
 
+    # Avoid creating tasks that are identical to the original task
+    json0 = task.to_arcagi1_json(compact=True)
+    json1 = new_task.to_arcagi1_json(compact=True)
+    if json0 == json1:
+        print("create_augmented_task. The mutated task is identical to the original task. Skip it.")
+        return None
+
     return new_task
 
 def taskspecific_create_node_input(seed: int, noise_color: Optional[int]) -> BaseNode:
@@ -488,7 +495,6 @@ def create_multiple_augmented_tasks_from_task(seed: int, task: Task, number_of_p
             new_task = create_augmented_task(task, node_input, node_output, iteration_seed + 3)
             if new_task is None:
                 continue
-            # IDEA: if the task is identical to the original task, then skip it.
             new_task.shuffle_examples(iteration_seed + 4)
             task_list.append(new_task)
             break
