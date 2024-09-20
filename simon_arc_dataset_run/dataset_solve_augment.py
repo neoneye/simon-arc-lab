@@ -455,16 +455,7 @@ def create_augmented_task(task: Task, node_input: BaseNode, node_output: BaseNod
 
     return new_task
 
-def taskspecific_create_node_input(seed: int, available_colors: list[int]) -> BaseNode:
-    noise_color = None
-    if len(available_colors) >= 1:
-        noise_color = available_colors[0]
-
-    padding_color = None
-    if len(available_colors) >= 2:
-        padding_color = available_colors[1]
-
-    # Rotate or flip
+def create_rotate_flip_node(seed: int) -> Optional[BaseNode]:
     j = random.Random(seed + 1).randint(0, 7)
     if j == 0:
         node_rotateflip = NodeRotateCW()
@@ -482,6 +473,16 @@ def taskspecific_create_node_input(seed: int, available_colors: list[int]) -> Ba
         node_rotateflip = NodeFlipB()
     else:
         node_rotateflip = None
+    return node_rotateflip
+
+def taskspecific_create_node_input(seed: int, available_colors: list[int]) -> BaseNode:
+    noise_color = None
+    if len(available_colors) >= 1:
+        noise_color = available_colors[0]
+
+    padding_color = None
+    if len(available_colors) >= 2:
+        padding_color = available_colors[1]
 
     # Scale up or grid
     choices = [0, 1, 2, 3]
@@ -501,21 +502,21 @@ def taskspecific_create_node_input(seed: int, available_colors: list[int]) -> Ba
     elif j == 4:
         node_scaleup = NodeScaleUpNoisy(2, 2, 1, 1, noise_color, scaleup_seed)
     elif j == 5:
-        node_scaleup = NodeScaleUpNoisy(2, 2, 2, 2, noise_color, scaleup_seed)
-    elif j == 6:
-        node_scaleup = NodeScaleUpNoisy(2, 2, 1, 2, noise_color, scaleup_seed)
-    elif j == 7:
         node_scaleup = NodeScaleUpNoisy(3, 3, 1, 1, noise_color, scaleup_seed)
-    elif j == 8:
+    elif j == 6:
         node_scaleup = NodeScaleUpNoisy(3, 3, 2, 2, noise_color, scaleup_seed)
-    elif j == 9:
+    elif j == 7:
         node_scaleup = NodeScaleUpNoisy(3, 3, 1, 2, noise_color, scaleup_seed)
-    elif j == 10:
+    elif j == 8:
         node_scaleup = NodeScaleUpNoisy(4, 4, 1, 1, noise_color, scaleup_seed)
-    elif j == 11:
+    elif j == 9:
         node_scaleup = NodeScaleUpNoisy(4, 4, 2, 2, noise_color, scaleup_seed)
-    elif j == 12:
+    elif j == 10:
         node_scaleup = NodeScaleUpNoisy(4, 4, 1, 2, noise_color, scaleup_seed)
+    elif j == 11:
+        node_scaleup = NodeScaleUpNoisy(5, 5, 1, 3, noise_color, scaleup_seed)
+    elif j == 12:
+        node_scaleup = NodeScaleUpNoisy(6, 6, 1, 3, noise_color, scaleup_seed)
     elif j == 13:
         node_scaleup = NodeGridNoisy(1, 1, 3, noise_color, scaleup_seed)
     elif j == 14:
@@ -528,7 +529,7 @@ def taskspecific_create_node_input(seed: int, available_colors: list[int]) -> Ba
         if j == 0:
             node_pad = NodePad(seed + 5, padding_color, 0, 6)
 
-    node_list = [node_rotateflip, node_scaleup, node_pad, node_rotateflip]
+    node_list = [node_scaleup, node_pad]
 
     return NodeChain(node_list)
 
@@ -536,25 +537,6 @@ def taskspecific_create_node_output(seed: int, available_colors: list[int]) -> B
     noise_color = None
     if len(available_colors) >= 1:
         noise_color = available_colors[0]
-
-    # Rotate or flip
-    j = random.Random(seed + 1).randint(0, 7)
-    if j == 0:
-        node_rotateflip = NodeRotateCW()
-    elif j == 1:
-        node_rotateflip = NodeRotateCCW()
-    elif j == 2:
-        node_rotateflip = NodeRotate180()
-    elif j == 3:
-        node_rotateflip = NodeFlipX()
-    elif j == 4:
-        node_rotateflip = NodeFlipY()
-    elif j == 5:
-        node_rotateflip = NodeFlipA()
-    elif j == 6:
-        node_rotateflip = NodeFlipB()
-    else:
-        node_rotateflip = None
 
     # Scale up or grid
     choices = [0, 1, 2, 3]
@@ -577,7 +559,7 @@ def taskspecific_create_node_output(seed: int, available_colors: list[int]) -> B
     elif j == 6:
         node_scaleup = NodeGrid(1, 3, noise_color, seed_scaleup)
 
-    node_list = [node_rotateflip, node_scaleup]
+    node_list = [node_scaleup]
 
     return NodeChain(node_list)
 
@@ -599,7 +581,8 @@ def create_multiple_augmented_tasks_from_task(seed: int, task: Task, number_of_p
                 all_images.append(task.example_output(image))
             for image in range(task.count_tests):
                 all_images.append(task.test_input(image))
-                # Don't add test output, as there is no access to it. The model has to predict it.
+                all_images.append(task.test_output(image))
+
             histogram = Histogram.create_with_image_list(all_images)
             available_colors = histogram.available_colors()
 
@@ -609,13 +592,16 @@ def create_multiple_augmented_tasks_from_task(seed: int, task: Task, number_of_p
             available_colors_output = available_colors.copy()
             random.Random(iteration_seed + 2).shuffle(available_colors_output)
 
-            node_input = taskspecific_create_node_input(iteration_seed + 3, available_colors_input)
-            node_output = taskspecific_create_node_output(iteration_seed + 4, available_colors_output)
+            node_rotate_flip = create_rotate_flip_node(iteration_seed + 3)
+            node_manipulate_input = taskspecific_create_node_input(iteration_seed + 4, available_colors_input)
+            node_manipulate_output = taskspecific_create_node_output(iteration_seed + 5, available_colors_output)
+            node_input = NodeChain([node_rotate_flip, node_manipulate_input])
+            node_output = NodeChain([node_manipulate_output, node_rotate_flip])
 
-            new_task = create_augmented_task(task, node_input, node_output, iteration_seed + 4)
+            new_task = create_augmented_task(task, node_input, node_output, iteration_seed + 6)
             if new_task is None:
                 continue
-            new_task.shuffle_examples(iteration_seed + 4)
+            new_task.shuffle_examples(iteration_seed + 7)
             task_list.append(new_task)
             break
     return task_list
