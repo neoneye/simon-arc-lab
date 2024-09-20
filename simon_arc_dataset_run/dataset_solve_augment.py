@@ -36,7 +36,7 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_augment'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_augment.jsonl')
 
-raise Exception("This is highly experimental code, and not ready for use. It's worsening the model severely at the moment. I may return to this code later.")
+# raise Exception("This is highly experimental code, and not ready for use. It's worsening the model severely at the moment. I may return to this code later.")
 
 class ApplyManyError(ValueError):
     """Exception raised for errors in Node apply_many."""
@@ -275,9 +275,9 @@ if not os.path.isdir(path_to_arc_dataset_collection_dataset):
     sys.exit(1)
 
 groupname_pathtotaskdir_list = [
-    ('arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
+    # ('arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
     # ('arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
-    # ('miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
+    ('miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
     # ('tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
     # ('diva', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-diva/data')),
     # ('conceptarc', os.path.join(path_to_arc_dataset_collection_dataset, 'ConceptARC/data')),
@@ -732,23 +732,26 @@ def create_node_output(seed: int, images: list[np.array], pad_color: Optional[in
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    builder.append_image()
+    builder.append_image_randomized()
     return builder.dataset_items()
 
 def mutated_tasks_from_task(task: Task, seed: int) -> list[Task]:
 
     number_of_permutations = 3
 
-    new_tasks_input = create_multiple_tasks_from_taskimages('input', seed + 1, task, number_of_permutations)
-    new_tasks_output = create_multiple_tasks_from_taskimages('output', seed + 2, task, number_of_permutations)
+    new_tasks_input = []
+    new_tasks_output = []
+    augmented_tasks = []
+    # new_tasks_input = create_multiple_tasks_from_taskimages('input', seed + 1, task, number_of_permutations)
+    # new_tasks_output = create_multiple_tasks_from_taskimages('output', seed + 2, task, number_of_permutations)
     augmented_tasks = create_multiple_augmented_tasks_from_task(seed + 3, task, number_of_permutations)
 
     mutated_tasks = new_tasks_input + new_tasks_output + augmented_tasks
 
-    print(f"Number of input tasks: {len(new_tasks_input)}")
-    print(f"Number of output tasks: {len(new_tasks_output)}")
-    print(f"Number of augmented tasks: {len(augmented_tasks)}")
-    print(f"Number of mutations: {len(mutated_tasks)} from task {task.metadata_task_id}")
+    # print(f"Number of input tasks: {len(new_tasks_input)}")
+    # print(f"Number of output tasks: {len(new_tasks_output)}")
+    # print(f"Number of augmented tasks: {len(augmented_tasks)}")
+    # print(f"Number of mutations: {len(mutated_tasks)} from task {task.metadata_task_id}")
     return mutated_tasks
 
 original_tasks = []
@@ -767,16 +770,18 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
     accumulated_tasks = []
     for task_index, task in enumerate(original_tasks):
         new_tasks = mutated_tasks_from_task(task, seed + task_index * 10010101)
+        # for nt in new_tasks:
+        #     nt.show()
         accumulated_tasks.extend(new_tasks)
 
-    print(f"Number of tasks: {len(accumulated_tasks)}")
+    # print(f"Number of tasks: {len(accumulated_tasks)}")
 
     accumulated_dataset_items = []
     for task_index, task in enumerate(accumulated_tasks):
-        if task.total_pixel_count() > 1000:
+        if task.total_pixel_count() > 2000:
             continue
         transformation_id = task.metadata_task_id
-        task.show()
+        # task.show()
         dataset_items = generate_dataset_item_list_inner(seed + task_index * 100053523, task, transformation_id)
         accumulated_dataset_items.extend(dataset_items)
     return accumulated_dataset_items
@@ -786,7 +791,7 @@ generator = DatasetGenerator(
 )
 generator.generate(
     seed=1200023425,
-    max_num_samples=1000,
+    max_num_samples=100000,
     max_byte_size=1024*1024*100
 )
 # generator.inspect()
