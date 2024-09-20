@@ -405,6 +405,10 @@ def create_augmented_task(task: Task, node_input: BaseNode, node_output: BaseNod
         output_image = image_replace_colors(new_output_images[i], color_map)
         new_task.append_pair(input_image, output_image, is_example)
 
+    if new_task.total_pixel_count() <= 20:
+        # print("create_augmented_task. The new task is too small. Skip it.")
+        return None
+
     # Avoid creating tasks that are identical to the original task
     json0 = task.to_arcagi1_json(compact=True)
     json1 = new_task.to_arcagi1_json(compact=True)
