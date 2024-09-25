@@ -1,12 +1,47 @@
 from .histogram import *
 
+# IDEA: do the images roughly agree on the same colors.
+# Do 10 checks, for each color, is color[i] present in both images
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e99362f0
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e6de6e8f_v2
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d4c90558
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=c8b7cc0f
+#
+# IDEA: does one image contain the other image, original/rotated/flipped, as in: 
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f5aa3634
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f4081712
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e66aafb8
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e633a9e5
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=de493100
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d56f2372
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=cd3c21df
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=be03b35f
+#
+# IDEA: are there shapes that are present in both images, as in:
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ed74f2f2
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=c64f1187
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=bf699163
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=bbb1b8b6
+#
+# IDEA: the mask for a particular color, is that mask present in both images, as in:
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ea9794b1
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e9b4f6fc
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e7a25a18
+#
+# IDEA: same count of a particular color, is the black color the same count, as in: 
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=09c534e7
+#
+# IDEA: is the compressed images the same, as in:
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e1baa8a4
+#
+# IDEA: two images with different sizes, scaling up the histogram, are there then a color component with the same counter, as in:
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=c92b942c_v2
+#
 # IDEA: Make another similarity class that compares images, where the order matters.
 # This way I can check, is one image a subset of the other image.
 #
 # IDEA: A verbose jaccard_index, where I can see which features are satisfied.
 #
-# same count of a particular color, is the black color the same count, as in: https://neoneye.github.io/arc/edit.html?dataset=ARC&task=09c534e7
-# same total pixel count
 # distance between histograms
 # bigrams
 # trigrams
