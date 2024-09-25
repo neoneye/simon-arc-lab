@@ -292,6 +292,29 @@ class Histogram:
             return None
         return found_color
 
+    def least_popular_color_list(self) -> list[int]:
+        """
+        Find the colors with the lowest counter.
+        If there is an unambiguous color, return return a list with just that color.
+        If there is a tie, return a list with multiple colors.
+        If there are no colors, return an empty list.
+        Only consider counters that are 1 or greater. Ignore colors with zero counters or negative counters.
+        """
+        found_count = self.sum_of_counters() + 1
+        found_colors = []
+        same_count = 0
+        for color, count in self.color_count.items():
+            if count < 1:
+                continue
+            if count < found_count:
+                found_count = count
+                found_colors = [color]
+                same_count = 1
+            elif count == found_count:
+                same_count += 1
+                found_colors.append(color)
+        return found_colors
+
     def get_count_for_color(self, color: int) -> int:
         """
         Get the count for a specific color.
