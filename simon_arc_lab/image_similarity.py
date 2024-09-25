@@ -55,6 +55,7 @@ class ImageSimilarity:
             self.same_shape_orientation(),
             self.same_histogram(),
             self.same_unique_colors(),
+            self.same_histogram_ignoring_scale(),
         ]
         return self.compute_jaccard_index(params)
 
@@ -139,3 +140,24 @@ class ImageSimilarity:
         colors0 = histogram0.unique_colors()
         colors1 = histogram1.unique_colors()
         return colors0 == colors1
+
+    def same_histogram_ignoring_scale(self) -> bool:
+        """
+        Identical histogram, but with a different ratio.
+        """
+        histogram0 = self.histogram0()
+        histogram1 = self.histogram1()
+        height0, width0 = self.image0.shape
+        height1, width1 = self.image1.shape
+        mass0 = height0 * width0
+        mass1 = height1 * width1
+
+        for color in range(10):
+            count0 = histogram0.color_count.get(color, 0)
+            count1 = histogram1.color_count.get(color, 0)
+            a = count0 * mass1
+            b = count1 * mass0
+            if a != b:
+                return False
+
+        return True

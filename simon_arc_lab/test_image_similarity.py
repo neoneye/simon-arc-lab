@@ -298,3 +298,62 @@ class TestImageSimilarity(unittest.TestCase):
         actual = i.same_unique_colors()
         # Assert
         self.assertEqual(actual, False)
+
+    def test_32002_same_histogram_ignoring_scale_factor1(self):
+        # Arrange
+        image0 = np.array([
+            [1, 2],
+            [3, 4]], dtype=np.uint8)
+        image1 = np.array([
+            [4, 3, 2, 1]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_histogram_ignoring_scale()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_32001_same_histogram_ignoring_scale_factor2(self):
+        # Arrange
+        image0 = np.array([
+            [1, 4],
+            [2, 5],
+            [3, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 1, 2, 2, 3, 3],
+            [4, 4, 5, 5, 6, 6]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_histogram_ignoring_scale()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_32002_same_histogram_ignoring_scale_factor3(self):
+        # Arrange
+        image0 = np.array([
+            [1, 4],
+            [2, 5],
+            [3, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 2, 3, 4, 5, 6],
+            [1, 2, 3, 4, 5, 6],
+            [1, 2, 3, 4, 5, 6]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_histogram_ignoring_scale()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_32003_same_histogram_ignoring_scale_false(self):
+        # Arrange
+        image0 = np.array([
+            [1],
+            [2],
+            [3]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 2]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_histogram_ignoring_scale()
+        # Assert
+        self.assertEqual(actual, False)
+
