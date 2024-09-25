@@ -58,6 +58,7 @@ class ImageSimilarity:
             self.same_histogram_ignoring_scale(),
             self.same_histogram_counters(),
             self.same_most_popular_color_list(),
+            self.same_least_popular_color_list(),
         ]
         return self.compute_jaccard_index(params)
 
@@ -182,5 +183,15 @@ class ImageSimilarity:
         histogram1 = self.histogram1()
         color_list0 = histogram0.most_popular_color_list()
         color_list1 = histogram1.most_popular_color_list()
+        return color_list0 == color_list1
+
+    def same_least_popular_color_list(self) -> bool:
+        """
+        Both images agree on the same least popular colors.
+        """
+        histogram0 = self.histogram0()
+        histogram1 = self.histogram1()
+        color_list0 = histogram0.least_popular_color_list()
+        color_list1 = histogram1.least_popular_color_list()
         return color_list0 == color_list1
 
