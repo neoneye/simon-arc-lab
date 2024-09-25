@@ -38,11 +38,22 @@ class ImageSimilarity:
         
         return: 0 to 100
         """
+        if self.same_image():
+            # No need to compute the rest of the features.
+            return 100
+        
         params = [
+            False, # Since same_image() is False.
             self.same_histogram(),
             self.same_unique_colors(),
         ]
         return self.compute_jaccard_index(params)
+
+    def same_image(self) -> bool:
+        """
+        Identical images.
+        """
+        return np.array_equal(self.image0, self.image1)
 
     def histogram0(self) -> Histogram:
         if self.lazy_histogram0 is None:

@@ -9,7 +9,35 @@ class TestImageSimilarity(unittest.TestCase):
         self.assertEqual(ImageSimilarity.compute_jaccard_index([True, False]), 50)
         self.assertEqual(ImageSimilarity.compute_jaccard_index([True, True]), 100)
 
-    def test_20000_same_histogram_true(self):
+    def test_20000_same_image_true(self):
+        # Arrange
+        image0 = np.array([
+            [1, 4],
+            [2, 5],
+            [3, 6]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image0)
+        # Act
+        actual = i.same_image()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_20001_same_image_false(self):
+        # Arrange
+        image0 = np.array([
+            [1, 4],
+            [2, 5],
+            [3, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [3, 3],
+            [3, 3],
+            [3, 3]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_image()
+        # Assert
+        self.assertEqual(actual, False)
+
+    def test_21000_same_histogram_true(self):
         # Arrange
         image0 = np.array([
             [1, 4],
@@ -25,7 +53,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, True)
 
-    def test_20001_same_histogram_false(self):
+    def test_21001_same_histogram_false(self):
         # Arrange
         image0 = np.array([
             [1, 4],
@@ -41,7 +69,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
-    def test_21000_same_unique_colors_true(self):
+    def test_22000_same_unique_colors_true(self):
         # Arrange
         image0 = np.array([
             [1, 4],
@@ -57,7 +85,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, True)
 
-    def test_21001_same_histogram_false(self):
+    def test_22001_same_histogram_false(self):
         # Arrange
         image0 = np.array([
             [3, 4, 5],
