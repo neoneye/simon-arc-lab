@@ -174,6 +174,68 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
+    def test_25000_same_shape_orientation_landscape(self):
+        # Arrange
+        image0 = np.array([
+            [5, 5, 5, 5],
+            [5, 5, 5, 5],
+            [5, 5, 5, 5]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_shape_orientation()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_25001_same_shape_orientation_portrait(self):
+        # Arrange
+        image0 = np.array([
+            [5, 5, 5],
+            [5, 5, 5],
+            [5, 5, 5],
+            [5, 5, 5]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 4],
+            [2, 5],
+            [3, 6]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_shape_orientation()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_25002_same_shape_orientation_square(self):
+        # Arrange
+        image0 = np.array([
+            [5, 5, 5],
+            [5, 5, 5],
+            [5, 5, 5]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 3],
+            [2, 4]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_shape_orientation()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_25003_same_shape_orientation_false(self):
+        # Arrange
+        image0 = np.array([
+            [1, 4],
+            [2, 5],
+            [3, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_shape_orientation()
+        # Assert
+        self.assertEqual(actual, False)
+
     def test_30000_same_histogram_true(self):
         # Arrange
         image0 = np.array([

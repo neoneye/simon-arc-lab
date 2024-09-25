@@ -1,12 +1,10 @@
 from .histogram import *
 
-# width, height
 # same total pixel count
 # same number of unique colors
 # same count of a particular color
 # distance between histograms
 # sort histogram of colors, compare counters
-# same orientation: portrait, landscape, square
 # bigrams
 # trigrams
 # shape types
@@ -48,6 +46,7 @@ class ImageSimilarity:
             self.same_shape_allow_for_rotation(),
             self.same_shape_width(),
             self.same_shape_height(),
+            self.same_shape_orientation(),
             self.same_histogram(),
             self.same_unique_colors(),
         ]
@@ -88,6 +87,22 @@ class ImageSimilarity:
         height0 = self.image0.shape[0]
         height1 = self.image1.shape[0]
         return height0 == height1
+
+    def same_shape_orientation(self) -> bool:
+        """
+        Same orientation: portrait, landscape, square.
+        """
+        def orientation(image: np.array) -> str:
+            height, width = image.shape
+            if width == height:
+                return "square"
+            elif width > height:
+                return "landscape"
+            else:
+                return "portrait"
+        orientation0 = orientation(self.image0)
+        orientation1 = orientation(self.image1)
+        return orientation0 == orientation1
 
     def histogram0(self) -> Histogram:
         if self.lazy_histogram0 is None:
