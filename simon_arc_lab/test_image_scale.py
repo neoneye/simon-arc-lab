@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from .image_scale import image_scale, image_scale_up_variable
+from .image_scale import *
 
 class TestImageScale(unittest.TestCase):
     def test_scale_do_nothing(self):
@@ -121,5 +121,39 @@ class TestImageScale(unittest.TestCase):
         expected = np.array([
             [1, 3],
             [4, 6]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_image_scale_up_with_noise_min1max1(self):
+        # Arrange
+        image = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        # Act
+        actual = image_scale_up_with_noise(image, 3, 3, 1, 1, 9, 42)
+        # Assert
+        expected = np.array([
+            [1, 1, 1, 2, 2, 2, 3, 3, 3],
+            [1, 1, 1, 9, 2, 2, 3, 3, 3],
+            [9, 1, 1, 2, 2, 2, 3, 3, 9],
+            [9, 4, 4, 5, 5, 5, 6, 9, 6],
+            [4, 4, 4, 5, 5, 5, 6, 6, 6],
+            [4, 4, 4, 5, 9, 5, 6, 6, 6]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_image_scale_up_with_noise_min2max4(self):
+        # Arrange
+        image = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        # Act
+        actual = image_scale_up_with_noise(image, 3, 3, 2, 4, 9, 43)
+        # Assert
+        expected = np.array([
+            [9, 1, 1, 2, 9, 2, 3, 3, 3],
+            [1, 9, 9, 2, 2, 2, 9, 3, 9],
+            [1, 1, 1, 9, 2, 2, 3, 9, 3],
+            [9, 4, 4, 9, 5, 5, 9, 9, 9],
+            [4, 9, 9, 5, 5, 5, 9, 6, 6],
+            [4, 4, 4, 9, 5, 5, 6, 6, 6]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
 

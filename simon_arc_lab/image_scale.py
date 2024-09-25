@@ -1,4 +1,5 @@
 from typing import Tuple
+import random
 import numpy as np
 from .image_util import *
 
@@ -92,4 +93,46 @@ def image_scale_up_variable(unscaled_image: np.array, repeat_xs: list[int], repe
     image = _image_scale_up_variable_x(unscaled_image, repeat_xs)
     image = _image_scale_up_variable_y(image, repeat_ys)
     return image
+
+def image_scale_up_with_noise(unscaled_image: np.array, x_scale: int, y_scale: int, min_noise_count: int, max_noise_count: int, noise_color: int, seed: int) -> np.array:
+    """
+    Scale up an image and add noise to each cell.
+
+    :param unscaled_image: The image to scale.
+    :param x_scale: The factor to scale by in the x direction.
+    :param y_scale: The factor to scale by in the y direction.
+    :param min_noise_count: The minimum number of noise pixels per cell. Must be 0 or greater.
+    :param max_noise_count: The maximum number of noise pixels per cell. Must be less than the number of pixels in a cell.
+    :param noise_color: The color of the noise pixels.
+    :return: The scaled image.
+    """
+    if min_noise_count > max_noise_count:
+        raise ValueError("min_noise_count <= max_noise_count, is not satisfied")
+    if min_noise_count < 0:
+        raise ValueError("min_noise_count must be 0 or greater")
+
+    if max_noise_count < 1:
+        raise ValueError("number_of_noise_pixels_per_cell must be 1 or greater")
+    if max_noise_count >= (x_scale * y_scale):
+        raise ValueError("number_of_noise_pixels_per_cell must be less than the number of pixels in a cell.")
+
+    all_positions_inside_cell = []
+    for y_offset in range(y_scale):
+        for x_offset in range(x_scale):
+            all_positions_inside_cell.append((x_offset, y_offset))
+
+    input_image, output_image = image_scale(unscaled_image, 'up', x_scale, 'up', y_scale)
+    result_image = output_image.copy()
+
+    height, width = unscaled_image.shape
+    for y in range(height):
+        for x in range(width):
+            iteration_seed = seed + y * 100 + x
+            random.Random(iteration_seed + 1).shuffle(all_positions_inside_cell)
+            noise_count = random.Random(iteration_seed + 2).randint(min_noise_count, max_noise_count)
+            noise_positions = all_positions_inside_cell[:noise_count]
+            for dx, dy in noise_positions:
+                result_image[y*y_scale + dy, x*x_scale + dx] = noise_color
+
+    return result_image
 

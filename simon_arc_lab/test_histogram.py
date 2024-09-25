@@ -56,6 +56,19 @@ class TestHistogram(unittest.TestCase):
             self.assertTrue(histogram.number_of_unique_colors() >= 1)
             self.assertTrue(histogram.number_of_unique_colors() <= 10)
 
+    def test_create_with_image_list(self):
+        image0 = np.array([
+            [5, 5, 5], 
+            [5, 5, 9]], dtype=np.uint8)
+        image1 = np.array([
+            [7, 8, 7, 8], 
+            [7, 8, 7, 8],
+            [7, 8, 7, 9]], dtype=np.uint8)
+        histogram = Histogram.create_with_image_list([image0, image1])
+        actual = histogram.pretty()
+        expected = '7:6,5:5,8:5,9:2'
+        self.assertEqual(actual, expected)
+
     def test_sorted_color_count_list_unambiguous(self):
         image = np.zeros((3, 2), dtype=np.uint8)
         image[0:3, 0:2] = [
@@ -363,6 +376,28 @@ class TestHistogram(unittest.TestCase):
         self.assertEqual(histogram.get_count_for_color(6), 1)
         self.assertEqual(histogram.get_count_for_color(7), 8)
         self.assertEqual(histogram.get_count_for_color(9), 0)
+
+    def test_available_colors(self):
+        self.assertEqual(Histogram.empty().available_colors(), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+        self.assertEqual(Histogram({0: -5}).available_colors(), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+        self.assertEqual(Histogram({0: 5, 6: 1, 7: 8}).available_colors(), [1, 2, 3, 4, 5, 8, 9])
+        self.assertEqual(Histogram({0: 1, 1: 7, 2: 0}).available_colors(), [2, 3, 4, 5, 6, 7, 8, 9])
+        self.assertEqual(Histogram({0: 1, 1: 7, 2: 1}).available_colors(), [3, 4, 5, 6, 7, 8, 9])
+        histogram = Histogram.empty()
+        for color in range(10):
+            histogram.increment(color)
+        self.assertEqual(histogram.available_colors(), [])
+
+    def test_first_available_color(self):
+        self.assertEqual(Histogram.empty().first_available_color(), 0)
+        self.assertEqual(Histogram({0: -5}).first_available_color(), 0)
+        self.assertEqual(Histogram({0: 5, 6: 1, 7: 8}).first_available_color(), 1)
+        self.assertEqual(Histogram({0: 1, 1: 7, 2: 0}).first_available_color(), 2)
+        self.assertEqual(Histogram({0: 1, 1: 7, 2: 1}).first_available_color(), 3)
+        histogram = Histogram.empty()
+        for color in range(10):
+            histogram.increment(color)
+        self.assertEqual(histogram.first_available_color(), None)
 
 if __name__ == '__main__':
     unittest.main()
