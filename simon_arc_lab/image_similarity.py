@@ -1,5 +1,8 @@
 from .histogram import *
 
+# IDEA: Make another similarity class that compares images, where the order matters.
+# This way I can check, is one image a subset of the other image.
+
 # same total pixel count
 # same number of unique colors
 # same count of a particular color
@@ -11,6 +14,9 @@ from .histogram import *
 
 class ImageSimilarity:
     def __init__(self, image0: np.array, image1: np.array) -> None:
+        """
+        Compare two images. The order doesn't matter.
+        """
         self.image0 = image0
         self.image1 = image1
         self.lazy_histogram0 = None
