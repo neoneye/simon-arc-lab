@@ -74,6 +74,15 @@ class Histogram:
         items = sorted(self.color_count.items(), key=lambda item: (-item[1], item[0]))
         return items
 
+    def sorted_count_list(self) -> list[int]:
+        """
+        sort by popularity. Leave out counters that are zero or negative.
+        Descending. The biggest counter is first. The smallest counter is last.
+        """
+
+        items = sorted(self.color_count.values(), reverse=True)
+        return items
+
     def pretty(self) -> str:
         """
         Comma separated list of unique colors in the histogram. Ordered by popularity.

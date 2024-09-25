@@ -93,6 +93,15 @@ class TestHistogram(unittest.TestCase):
         expected = [(5, 2), (7, 2), (9, 2)]
         self.assertEqual(actual, expected)
 
+    def test_sorted_count_list(self):
+        image = np.array([
+            [9, 8, 7, 7, 6, 6, 6, 5, 5, 5, 5]], dtype=np.uint8)
+        
+        histogram = Histogram.create_with_image(image)
+        actual = histogram.sorted_count_list()
+        expected = [4, 3, 2, 1, 1]
+        self.assertEqual(actual, expected)
+
     def test_pretty_histogram_of_image_unambiguous(self):
         image = np.zeros((3, 2), dtype=np.uint8)
         image[0:3, 0:2] = [
