@@ -39,11 +39,15 @@ class ImageSimilarity:
         return: 0 to 100
         """
         if self.same_image():
-            # No need to compute the rest of the features.
+            # The images are identical, no need to compute the rest of the features.
             return 100
         
         params = [
             False, # Since same_image() is False.
+            self.same_shape(),
+            self.same_shape_allow_for_rotation(),
+            self.same_shape_width(),
+            self.same_shape_height(),
             self.same_histogram(),
             self.same_unique_colors(),
         ]
@@ -54,6 +58,36 @@ class ImageSimilarity:
         Identical images.
         """
         return np.array_equal(self.image0, self.image1)
+
+    def same_shape(self) -> bool:
+        """
+        Same width and height.
+        """
+        return self.image0.shape == self.image1.shape
+    
+    def same_shape_allow_for_rotation(self) -> bool:
+        """
+        Same width and height, allow for rotation.
+        """
+        height0, width0 = self.image0.shape
+        height1, width1 = self.image1.shape
+        return (width0 == width1 and height0 == height1) or (width0 == height1 and height0 == width1)
+
+    def same_shape_width(self) -> bool:
+        """
+        Same width
+        """
+        width0 = self.image0.shape[1]
+        width1 = self.image1.shape[1]
+        return width0 == width1
+
+    def same_shape_height(self) -> bool:
+        """
+        Same height
+        """
+        height0 = self.image0.shape[0]
+        height1 = self.image1.shape[0]
+        return height0 == height1
 
     def histogram0(self) -> Histogram:
         if self.lazy_histogram0 is None:
