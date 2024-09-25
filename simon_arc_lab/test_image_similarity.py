@@ -284,7 +284,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, True)
 
-    def test_31001_same_histogram_false(self):
+    def test_31001_same_unique_colors_false(self):
         # Arrange
         image0 = np.array([
             [3, 4, 5],
