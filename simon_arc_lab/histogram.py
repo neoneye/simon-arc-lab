@@ -313,7 +313,8 @@ class Histogram:
             elif count == found_count:
                 same_count += 1
                 found_colors.append(color)
-        return found_colors
+        sorted_colors = sorted(found_colors)
+        return sorted_colors
 
     def get_count_for_color(self, color: int) -> int:
         """
