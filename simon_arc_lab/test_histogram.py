@@ -347,6 +347,38 @@ class TestHistogram(unittest.TestCase):
         actual = histogram.most_popular_color()
         self.assertEqual(actual, None)
 
+    def test_most_popular_color_list_unambiguous(self):
+        actual = Histogram({0: 5, 6: 3, 7: 8}).most_popular_color_list()
+        self.assertEqual(actual, [7])
+
+    def test_most_popular_color_list_tie_a(self):
+        actual = Histogram({0: 5, 6: 8, 7: 8}).most_popular_color_list()
+        self.assertEqual(actual, [6, 7])
+
+    def test_most_popular_color_list_tie_b(self):
+        actual = Histogram({0: 5, 6: 8, 7: 8, 8: 9, 9: 9}).most_popular_color_list()
+        self.assertEqual(actual, [8, 9])
+
+    def test_most_popular_color_list_tie_c(self):
+        actual = Histogram({0: 1, 1: 1, 2: 9, 3: 2, 6: 8, 7: 8, 8: 9, 9: 9}).most_popular_color_list()
+        self.assertEqual(actual, [2, 8, 9])
+
+    def test_most_popular_color_list_empty(self):
+        actual = Histogram({}).most_popular_color_list()
+        self.assertEqual(actual, [])
+
+    def test_most_popular_color_list_zero(self):
+        histogram = Histogram.empty()
+        histogram.color_count = {5: 0}
+        actual = histogram.most_popular_color_list()
+        self.assertEqual(actual, [])
+
+    def test_most_popular_color_list_negative(self):
+        histogram = Histogram.empty()
+        histogram.color_count = {5: -1}
+        actual = histogram.most_popular_color_list()
+        self.assertEqual(actual, [])
+
     def test_least_popular_color_unambiguous(self):
         actual = Histogram({0: 5, 6: 1, 7: 8}).least_popular_color()
         self.assertEqual(actual, 6)
