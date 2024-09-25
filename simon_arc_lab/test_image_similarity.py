@@ -385,3 +385,46 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
+    def test_34000_same_most_popular_color_list_unambiguous_true(self):
+        # Arrange
+        image0 = np.array([
+            [5, 5],
+            [5, 6],
+            [6, 7]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 5, 8, 5]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_most_popular_color_list()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_34001_same_most_popular_color_list_tie_true(self):
+        # Arrange
+        image0 = np.array([
+            [1, 1],
+            [5, 7],
+            [5, 7],
+            [5, 7]], dtype=np.uint8)
+        image1 = np.array([
+            [5, 5, 9, 7, 7]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_most_popular_color_list()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_34002_same_most_popular_color_list_false(self):
+        # Arrange
+        image0 = np.array([
+            [1, 1, 1],
+            [1, 7, 1],
+            [1, 7, 1],
+            [1, 1, 1]], dtype=np.uint8)
+        image1 = np.array([
+            [3, 3, 3, 1]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_most_popular_color_list()
+        # Assert
+        self.assertEqual(actual, False)

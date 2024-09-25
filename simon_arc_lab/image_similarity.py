@@ -5,11 +5,9 @@ from .histogram import *
 #
 # IDEA: A verbose jaccard_index, where I can see which features are satisfied.
 #
+# same count of a particular color, is the black color the same count, as in: https://neoneye.github.io/arc/edit.html?dataset=ARC&task=09c534e7
 # same total pixel count
-# same number of unique colors
-# same count of a particular color
 # distance between histograms
-# sort histogram of colors, compare counters
 # bigrams
 # trigrams
 # shape types
@@ -59,6 +57,7 @@ class ImageSimilarity:
             self.same_unique_colors(),
             self.same_histogram_ignoring_scale(),
             self.same_histogram_counters(),
+            self.same_most_popular_color_list(),
         ]
         return self.compute_jaccard_index(params)
 
@@ -174,3 +173,14 @@ class ImageSimilarity:
         counters0 = histogram0.sorted_count_list()
         counters1 = histogram1.sorted_count_list()
         return counters0 == counters1
+
+    def same_most_popular_color_list(self) -> bool:
+        """
+        Both images agree on the same most popular colors.
+        """
+        histogram0 = self.histogram0()
+        histogram1 = self.histogram1()
+        color_list0 = histogram0.most_popular_color_list()
+        color_list1 = histogram1.most_popular_color_list()
+        return color_list0 == color_list1
+
