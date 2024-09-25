@@ -45,7 +45,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
             input = task.input_images[i]
             output = task.output_images[i]
             score = ImageSimilarity(input, output).jaccard_index()
-            # print(f"Task: {task.metadata_task_id}, example/test: {i}, score: {score}")
+            # print(f"pair: {i} score: {score}")
             score_list.append(score)
         score_min = min(score_list)
         score_max = max(score_list)

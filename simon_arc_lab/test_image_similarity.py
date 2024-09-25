@@ -357,3 +357,31 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
+    def test_33000_same_histogram_counters_true(self):
+        # Arrange
+        image0 = np.array([
+            [5, 5],
+            [6, 6],
+            [6, 7]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 1, 8, 8, 8, 9]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_histogram_counters()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_33001_same_histogram_counters_false(self):
+        # Arrange
+        image0 = np.array([
+            [5, 5],
+            [6, 6],
+            [6, 7]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 8, 8, 8, 8, 9]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_histogram_counters()
+        # Assert
+        self.assertEqual(actual, False)
+

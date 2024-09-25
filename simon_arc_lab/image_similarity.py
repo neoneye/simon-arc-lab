@@ -2,7 +2,9 @@ from .histogram import *
 
 # IDEA: Make another similarity class that compares images, where the order matters.
 # This way I can check, is one image a subset of the other image.
-
+#
+# IDEA: A verbose jaccard_index, where I can see which features are satisfied.
+#
 # same total pixel count
 # same number of unique colors
 # same count of a particular color
@@ -56,6 +58,7 @@ class ImageSimilarity:
             self.same_histogram(),
             self.same_unique_colors(),
             self.same_histogram_ignoring_scale(),
+            self.same_histogram_counters(),
         ]
         return self.compute_jaccard_index(params)
 
@@ -161,3 +164,13 @@ class ImageSimilarity:
                 return False
 
         return True
+
+    def same_histogram_counters(self) -> bool:
+        """
+        The counters are the same in the histogram, but the colors may be different.
+        """
+        histogram0 = self.histogram0()
+        histogram1 = self.histogram1()
+        counters0 = histogram0.sorted_count_list()
+        counters1 = histogram1.sorted_count_list()
+        return counters0 == counters1
