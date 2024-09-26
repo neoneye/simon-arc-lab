@@ -19,7 +19,7 @@ from simon_arc_lab.task import *
 from simon_arc_lab.rectangle import Rectangle
 from simon_arc_lab.image_rect import image_rect, image_rect_hollow
 from simon_arc_lab.image_create_random_simple import *
-from simon_arc_lab.image_trim import outer_bounding_box_after_trim_with_color
+from simon_arc_lab.image_trim import find_bounding_box_ignoring_color
 from simon_arc_lab.image_bresenham_line import image_bresenham_line
 from simon_arc_lab.benchmark import *
 from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
