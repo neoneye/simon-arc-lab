@@ -1,6 +1,16 @@
-from .histogram import *
-from .image_bigram import *
-
+# Measure similarity between 2 images, despite having different sizes, they may still be similar.
+#
+# Most interesting are the ARC-AGI puzzles with a very low similarity score
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=8731374e
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=995c5fa3
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=b9b7f026
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2037f2c7
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=3194b014
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=642d658d
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9a4bb226
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=bf699163
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=c3202e5a
+#
 # IDEA: does one image contain the other image, original/rotated/flipped, by checking if the all the bigrams are contained in the other image bigrams: 
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f5aa3634
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f4081712
@@ -39,6 +49,9 @@ from .image_bigram import *
 # distance between histograms
 # trigrams
 # shape types
+
+from .histogram import *
+from .image_bigram import *
 
 class ImageSimilarity:
     def __init__(self, image0: np.array, image1: np.array) -> None:
