@@ -821,3 +821,87 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
+    def test_50000_same_bounding_box_size_of_color_a_color_that_is_present(self):
+        # Arrange
+        image0 = np.array([
+            [9, 9, 9, 9, 9, 9],
+            [9, 9, 9, 9, 9, 9],
+            [9, 9, 5, 5, 9, 9],
+            [9, 9, 5, 9, 9, 9],
+            [9, 9, 5, 5, 9, 9],
+            [9, 9, 9, 9, 9, 9]], dtype=np.uint8)
+        image1 = np.array([
+            [9, 9, 9, 9],
+            [9, 5, 5, 9],
+            [9, 9, 9, 9],
+            [9, 5, 5, 9],
+            [9, 9, 9, 9]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bounding_box_size_of_color(5)
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_50001_same_bounding_box_size_of_color_a_color_that_is_not_present(self):
+        # Arrange
+        image0 = np.array([
+            [9, 9, 9, 9, 9, 9],
+            [9, 9, 9, 9, 9, 9],
+            [9, 9, 5, 5, 9, 9],
+            [9, 9, 5, 9, 9, 9],
+            [9, 9, 5, 5, 9, 9],
+            [9, 9, 9, 9, 9, 9]], dtype=np.uint8)
+        image1 = np.array([
+            [9, 9, 9, 9],
+            [9, 5, 5, 9],
+            [9, 9, 9, 9],
+            [9, 5, 5, 9],
+            [9, 9, 9, 9]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bounding_box_size_of_color(0)
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_50002_same_bounding_box_size_of_color_false(self):
+        # Arrange
+        image0 = np.array([
+            [9, 9, 9, 9, 9, 9],
+            [9, 9, 9, 9, 9, 9],
+            [9, 9, 5, 5, 9, 9],
+            [9, 9, 5, 9, 9, 9],
+            [9, 5, 5, 9, 9, 9],
+            [9, 9, 9, 9, 9, 9]], dtype=np.uint8)
+        image1 = np.array([
+            [9, 9, 9, 9],
+            [9, 5, 5, 9],
+            [9, 5, 9, 9],
+            [9, 5, 5, 9],
+            [9, 9, 9, 9]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bounding_box_size_of_color(5)
+        # Assert
+        self.assertEqual(actual, False)
+
+    def test_50003_same_bounding_box_size_of_color_a_color_only_present_in_one_of_the_images_false(self):
+        # Arrange
+        image0 = np.array([
+            [9, 9, 9, 9, 9, 9],
+            [9, 9, 9, 9, 9, 9],
+            [9, 9, 5, 5, 9, 9],
+            [9, 9, 5, 9, 9, 9],
+            [9, 5, 5, 9, 9, 9],
+            [9, 9, 9, 9, 9, 9]], dtype=np.uint8)
+        image1 = np.array([
+            [9, 9, 9, 9],
+            [9, 3, 3, 9],
+            [9, 3, 3, 9],
+            [9, 3, 3, 9],
+            [9, 9, 9, 9]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bounding_box_size_of_color(5)
+        # Assert
+        self.assertEqual(actual, False)
+

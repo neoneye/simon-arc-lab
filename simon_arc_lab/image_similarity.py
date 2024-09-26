@@ -48,6 +48,7 @@
 
 from .histogram import *
 from .image_bigram import *
+from .image_trim import find_bounding_box_multiple_ignore_colors
 
 class ImageSimilarity:
     def __init__(self, image0: np.array, image1: np.array) -> None:
@@ -127,6 +128,18 @@ class ImageSimilarity:
             self.same_bigrams_direction_topleftbottomright(),
             self.same_bigrams_direction_toprightbottomleft(),
             self.same_bigrams_subset(),
+
+            # IDEA: there are many same_bounding_box_size_of_color, maybe assign a lower weight, so they don't dominate the jaccard index.
+            self.same_bounding_box_size_of_color(0),
+            self.same_bounding_box_size_of_color(1),
+            self.same_bounding_box_size_of_color(2),
+            self.same_bounding_box_size_of_color(3),
+            self.same_bounding_box_size_of_color(4),
+            self.same_bounding_box_size_of_color(5),
+            self.same_bounding_box_size_of_color(6),
+            self.same_bounding_box_size_of_color(7),
+            self.same_bounding_box_size_of_color(8),
+            self.same_bounding_box_size_of_color(9),
         ]
         return self.compute_jaccard_index(params)
 
@@ -437,4 +450,48 @@ class ImageSimilarity:
         subset_a = bigram_set0.issubset(bigram_set1)
         subset_b = bigram_set1.issubset(bigram_set0)
         return subset_a or subset_b
+
+    def same_bounding_box_size_of_color(self, color: int) -> bool:
+        """
+        Determines the bounding box of the specified color, 
+        and checks if the bounding box size is the same in both images.
+
+        Returns True if the bounding box is the same size in both images.
+        Returns False if the bounding box is not the same size in both images.
+
+        Example of tasks where this is satisfied:
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f45f5ca7
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f3e62deb
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ff72ca3e
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f9a67cb5
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f83cb3f6
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e95e3d8e
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e88171ec
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e7639916
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e74e1818
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e41c6fd3
+        """
+        histogram0 = self.histogram0()
+        histogram1 = self.histogram1()
+        count0 = histogram0.get_count_for_color(color)
+        count1 = histogram1.get_count_for_color(color)
+        if count0 == 0 and count1 == 0:
+            # The color is not present in any of the images.
+            # Thus the bounding box is the same size, 0x0 == 0x0
+            return True
+        if count0 == 0 or count1 == 0:
+            # The color is not present in one image, but not the other image.
+            # Thus the bounding box is not the same size, 0x0 != WIDTHxHEIGHT
+            return False
+
+        ignore_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        ignore_colors.remove(color)
+
+        rect0 = find_bounding_box_multiple_ignore_colors(self.image0, ignore_colors)
+        rect1 = find_bounding_box_multiple_ignore_colors(self.image1, ignore_colors)
+
+        same_width = rect0.width == rect1.width
+        same_height = rect0.height == rect1.height
+        same_size = same_width and same_height
+        return same_size
 
