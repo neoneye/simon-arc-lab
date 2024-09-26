@@ -1,7 +1,7 @@
 from .histogram import *
 from .image_bigram import *
 
-# IDEA: does one image contain the other image, original/rotated/flipped, as in: 
+# IDEA: does one image contain the other image, original/rotated/flipped, by checking if the all the bigrams are contained in the other image bigrams: 
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f5aa3634
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f4081712
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e66aafb8
@@ -37,6 +37,7 @@ from .image_bigram import *
 # IDEA: A verbose jaccard_index, where I can see which features are satisfied.
 #
 # distance between histograms
+# bigrams in the direction: horizontal, vertical, diagonal
 # trigrams
 # shape types
 
@@ -263,17 +264,25 @@ class ImageSimilarity:
         Example of tasks where this is satisfied:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ed98d772
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ecaa0ec1
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=eb281b96
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e9afcf9a
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e40b9e2f
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e21a174a
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=dc2aa30b
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d8c310e9
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ccd554ac
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=cad67732
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=bd14c3bf_v2
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ba9d41b8
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ba97ae07
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=b1fc8b8e
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=a57f2f04
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=a406ac07
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9ddd00f0
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9d9215db
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=98cf29f8
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=917bccba
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=91413438
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=8ee62060
         """
         bigram0 = image_bigrams_all_directions(self.image0, 255)
