@@ -37,7 +37,6 @@ from .image_bigram import *
 # IDEA: A verbose jaccard_index, where I can see which features are satisfied.
 #
 # distance between histograms
-# bigrams in the direction: horizontal, vertical, diagonal
 # trigrams
 # shape types
 
@@ -104,6 +103,8 @@ class ImageSimilarity:
             self.same_bigrams_direction_all(),
             self.same_bigrams_direction_leftright(),
             self.same_bigrams_direction_topbottom(),
+            self.same_bigrams_direction_topleftbottomright(),
+            self.same_bigrams_direction_toprightbottomleft(),
         ]
         return self.compute_jaccard_index(params)
 
@@ -327,3 +328,29 @@ class ImageSimilarity:
         bigram1 = image_bigrams_direction_topbottom(self.image1, 255)
         return bigram0 == bigram1
 
+    def same_bigrams_direction_topleftbottomright(self) -> bool:
+        """
+        Both images agree on the same bigrams, only considering the diagonal bigrams.
+
+        Example of tasks where this is satisfied:
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=bbc9ae5d
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9dfd6313
+        """
+        bigram0 = image_bigrams_direction_topleftbottomright(self.image0, 255)
+        bigram1 = image_bigrams_direction_topleftbottomright(self.image1, 255)
+        return bigram0 == bigram1
+
+    def same_bigrams_direction_toprightbottomleft(self) -> bool:
+        """
+        Both images agree on the same bigrams, only considering the diagonal bigrams.
+
+        Example of tasks where this is satisfied:
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9dfd6313
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=b8cdaf2b
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ba97ae07
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d10ecb37
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=feca6190
+        """
+        bigram0 = image_bigrams_direction_toprightbottomleft(self.image0, 255)
+        bigram1 = image_bigrams_direction_toprightbottomleft(self.image1, 255)
+        return bigram0 == bigram1

@@ -655,3 +655,67 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
+    def test_40300_same_bigrams_direction_topleftbottomright_true(self):
+        # Arrange
+        image0 = np.array([
+            [1, 4],
+            [2, 5],
+            [3, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [2, 1, 4, 4],
+            [3, 2, 5, 4],
+            [3, 3, 6, 5]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bigrams_direction_topleftbottomright()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_40301_same_bigrams_direction_topleftbottomright_false(self):
+        # Arrange
+        image0 = np.array([
+            [1, 4],
+            [2, 5],
+            [3, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 1, 4, 5],
+            [1, 2, 5, 6],
+            [2, 3, 6, 6]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bigrams_direction_topleftbottomright()
+        # Assert
+        self.assertEqual(actual, False)
+
+    def test_40400_same_bigrams_direction_topleftbottomright_true(self):
+        # Arrange
+        image0 = np.array([
+            [1, 4],
+            [2, 5],
+            [3, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 1, 4, 5],
+            [1, 2, 5, 6],
+            [2, 3, 6, 6]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bigrams_direction_toprightbottomleft()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_40401_same_bigrams_direction_topleftbottomright_false(self):
+        # Arrange
+        image0 = np.array([
+            [1, 4],
+            [2, 5],
+            [3, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [2, 1, 4, 4],
+            [3, 2, 5, 4],
+            [3, 3, 6, 5]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bigrams_direction_toprightbottomleft()
+        # Assert
+        self.assertEqual(actual, False)
+
