@@ -97,7 +97,7 @@ class ImageSimilarity:
             self.same_most_popular_color_list(),
             self.same_least_popular_color_list(),
 
-            # IDEA: there are many agree_on_color, maybe assign a lower weight to these in the score
+            # IDEA: there are many agree_on_color, maybe assign a lower weight, so they don't dominate the jaccard index.
             self.agree_on_color(0),
             self.agree_on_color(1),
             self.agree_on_color(2),
@@ -108,6 +108,18 @@ class ImageSimilarity:
             self.agree_on_color(7),
             self.agree_on_color(8),
             self.agree_on_color(9),
+
+            # IDEA: there are many agree_on_color_with_same_counter, maybe assign a lower weight, so they don't dominate the jaccard index.
+            self.agree_on_color_with_same_counter(0),
+            self.agree_on_color_with_same_counter(1),
+            self.agree_on_color_with_same_counter(2),
+            self.agree_on_color_with_same_counter(3),
+            self.agree_on_color_with_same_counter(4),
+            self.agree_on_color_with_same_counter(5),
+            self.agree_on_color_with_same_counter(6),
+            self.agree_on_color_with_same_counter(7),
+            self.agree_on_color_with_same_counter(8),
+            self.agree_on_color_with_same_counter(9),
 
             self.same_bigrams_direction_all(),
             self.same_bigrams_direction_leftright(),
@@ -269,6 +281,31 @@ class ImageSimilarity:
         a = histogram0.get_count_for_color(color) > 0
         b = histogram1.get_count_for_color(color) > 0
         return a == b
+
+    def agree_on_color_with_same_counter(self, color: int) -> bool:
+        """
+        True if both images have the specified color in their histogram, and the count is the same.
+        True if both images don't have the specified color in their histogram.
+        False if the counters are different.
+
+        Example of tasks where this is satisfied:
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ff72ca3e
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=fea12743
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=fe9372f3
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f9a67cb5
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f45f5ca7
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f3e62deb
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f3cdc58f
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ecaa0ec1
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e88171ec
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e74e1818
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e0fb7511
+        """
+        histogram0 = self.histogram0()
+        histogram1 = self.histogram1()
+        count0 = histogram0.get_count_for_color(color)
+        count1 = histogram1.get_count_for_color(color)
+        return count0 == count1
 
     def same_bigrams_direction_all(self) -> bool:
         """

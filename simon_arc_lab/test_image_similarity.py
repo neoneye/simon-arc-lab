@@ -522,6 +522,54 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
+    def test_37000_agree_on_color_with_same_counter_true_due_to_same_counter_value(self):
+        # Arrange
+        image0 = np.array([
+            [1, 1],
+            [1, 1],
+            [5, 7],
+            [5, 7],
+            [5, 7]], dtype=np.uint8)
+        image1 = np.array([
+            [5, 5, 7, 9, 9, 9, 7, 7]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.agree_on_color_with_same_counter(7)
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_37001_agree_on_color_with_same_counter_true_due_to_counter_being_zero(self):
+        # Arrange
+        image0 = np.array([
+            [1, 1],
+            [1, 1],
+            [5, 7],
+            [5, 7],
+            [5, 7]], dtype=np.uint8)
+        image1 = np.array([
+            [5, 5, 7, 9, 9, 9, 7, 7]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.agree_on_color_with_same_counter(8)
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_37002_agree_on_color_with_same_counter_false_due_to_different_counters(self):
+        # Arrange
+        image0 = np.array([
+            [1, 1],
+            [1, 1],
+            [5, 7],
+            [5, 7],
+            [5, 7]], dtype=np.uint8)
+        image1 = np.array([
+            [5, 5, 7, 9, 9, 9, 7]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.agree_on_color_with_same_counter(7)
+        # Assert
+        self.assertEqual(actual, False)
+
     def test_40000_same_bigrams_direction_all_rotate(self):
         # Arrange
         image0 = np.array([
