@@ -1,6 +1,19 @@
 # Measure similarity between 2 images, despite having different sizes, they may still be similar.
 #
-# Most interesting are the ARC-AGI puzzles with a very low similarity score
+# Interesting are the ARC-AGI puzzles with an unusual big standard deviation
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=4b6b68e5
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=54d9e175
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=a9f96cdd
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=44d8ac46
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=253bf280
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e9bb6954
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e9ac8c9e
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e1baa8a4
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d931c21c
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d4b1c2b1
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=1c02dbbe
+#
+# Interesting are the ARC-AGI puzzles with a very low similarity score
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=8731374e
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=995c5fa3
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=b9b7f026
@@ -41,6 +54,9 @@
 # This way I can check, is one image a subset of the other image.
 #
 # IDEA: A verbose jaccard_index, where I can see which features are satisfied.
+#
+# IDEA: has same 3x3 structure, as in:
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=44d8ac46
 #
 # distance between histograms
 # trigrams
@@ -93,6 +109,7 @@ class ImageSimilarity:
             self.same_shape_orientation(),
             self.same_histogram(),
             self.same_unique_colors(),
+            self.same_number_of_unique_colors(),
             self.same_histogram_ignoring_scale(),
             self.same_histogram_counters(),
             self.same_most_popular_color_list(),
@@ -224,6 +241,24 @@ class ImageSimilarity:
         colors0 = histogram0.unique_colors()
         colors1 = histogram1.unique_colors()
         return colors0 == colors1
+
+    def same_number_of_unique_colors(self) -> bool:
+        """
+        Do both images have the same number of unique colors.
+
+        One image use red+gree, the other image use blue+purple. So both images have 2 unique colors.
+
+        Examples:
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f8c80d96
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f76d97a5
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e179c5f4
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d5d6de2d
+        """
+        histogram0 = self.histogram0()
+        histogram1 = self.histogram1()
+        colors0 = histogram0.unique_colors()
+        colors1 = histogram1.unique_colors()
+        return len(colors0) == len(colors1)
 
     def same_histogram_ignoring_scale(self) -> bool:
         """

@@ -299,7 +299,52 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
-    def test_32002_same_histogram_ignoring_scale_factor1(self):
+    def test_32000_same_number_of_unique_colors_true(self):
+        # Arrange
+        image0 = np.array([
+            [1, 4],
+            [2, 5],
+            [3, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [9, 8, 7],
+            [9, 8, 7],
+            [6, 5, 4]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_number_of_unique_colors()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_32001_same_number_of_unique_colors_true(self):
+        # Arrange
+        image0 = np.array([
+            [1, 4],
+            [2, 5],
+            [3, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_number_of_unique_colors()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_32002_same_number_of_unique_colors_false(self):
+        # Arrange
+        image0 = np.array([
+            [3, 4, 5],
+            [6, 7, 8]], dtype=np.uint8)
+        image1 = np.array([
+            [3, 4, 5],
+            [6, 7, 5]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_number_of_unique_colors()
+        # Assert
+        self.assertEqual(actual, False)
+
+    def test_33002_same_histogram_ignoring_scale_factor1(self):
         # Arrange
         image0 = np.array([
             [1, 2],
@@ -312,7 +357,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, True)
 
-    def test_32001_same_histogram_ignoring_scale_factor2(self):
+    def test_33001_same_histogram_ignoring_scale_factor2(self):
         # Arrange
         image0 = np.array([
             [1, 4],
@@ -327,7 +372,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, True)
 
-    def test_32002_same_histogram_ignoring_scale_factor3(self):
+    def test_33002_same_histogram_ignoring_scale_factor3(self):
         # Arrange
         image0 = np.array([
             [1, 4],
@@ -343,7 +388,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, True)
 
-    def test_32003_same_histogram_ignoring_scale_false(self):
+    def test_33003_same_histogram_ignoring_scale_false(self):
         # Arrange
         image0 = np.array([
             [1],
@@ -357,7 +402,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
-    def test_33000_same_histogram_counters_true(self):
+    def test_34000_same_histogram_counters_true(self):
         # Arrange
         image0 = np.array([
             [5, 5],
@@ -371,7 +416,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, True)
 
-    def test_33001_same_histogram_counters_false(self):
+    def test_34001_same_histogram_counters_false(self):
         # Arrange
         image0 = np.array([
             [5, 5],
@@ -385,7 +430,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
-    def test_34000_same_most_popular_color_list_unambiguous_true(self):
+    def test_35000_same_most_popular_color_list_unambiguous_true(self):
         # Arrange
         image0 = np.array([
             [5, 5],
@@ -399,7 +444,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, True)
 
-    def test_34001_same_most_popular_color_list_tie_true(self):
+    def test_35001_same_most_popular_color_list_tie_true(self):
         # Arrange
         image0 = np.array([
             [1, 1],
@@ -414,7 +459,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, True)
 
-    def test_34002_same_most_popular_color_list_false(self):
+    def test_35002_same_most_popular_color_list_false(self):
         # Arrange
         image0 = np.array([
             [1, 1, 1],
@@ -429,7 +474,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
-    def test_35000_same_least_popular_color_list_unambiguous_true(self):
+    def test_36000_same_least_popular_color_list_unambiguous_true(self):
         # Arrange
         image0 = np.array([
             [5, 5],
@@ -443,7 +488,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, True)
 
-    def test_35001_same_least_popular_color_list_tie_true(self):
+    def test_36001_same_least_popular_color_list_tie_true(self):
         # Arrange
         image0 = np.array([
             [1, 1],
@@ -459,7 +504,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, True)
 
-    def test_35002_same_least_popular_color_list_false(self):
+    def test_36002_same_least_popular_color_list_false(self):
         # Arrange
         image0 = np.array([
             [1, 1, 1],
@@ -474,7 +519,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
-    def test_36000_agree_on_color_a_color_that_is_present(self):
+    def test_37000_agree_on_color_a_color_that_is_present(self):
         # Arrange
         image0 = np.array([
             [1, 1],
@@ -490,7 +535,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, True)
 
-    def test_36001_agree_on_color_a_color_that_isnt_present(self):
+    def test_37001_agree_on_color_a_color_that_isnt_present(self):
         # Arrange
         image0 = np.array([
             [1, 1],
@@ -506,7 +551,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, True)
 
-    def test_36002_same_color_is_present_false(self):
+    def test_37002_same_color_is_present_false(self):
         # Arrange
         image0 = np.array([
             [1, 1],
@@ -522,7 +567,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
-    def test_37000_agree_on_color_with_same_counter_true_due_to_same_counter_value(self):
+    def test_38000_agree_on_color_with_same_counter_true_due_to_same_counter_value(self):
         # Arrange
         image0 = np.array([
             [1, 1],
@@ -538,7 +583,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, True)
 
-    def test_37001_agree_on_color_with_same_counter_true_due_to_counter_being_zero(self):
+    def test_38001_agree_on_color_with_same_counter_true_due_to_counter_being_zero(self):
         # Arrange
         image0 = np.array([
             [1, 1],
@@ -554,7 +599,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, True)
 
-    def test_37002_agree_on_color_with_same_counter_false_due_to_different_counters(self):
+    def test_38002_agree_on_color_with_same_counter_false_due_to_different_counters(self):
         # Arrange
         image0 = np.array([
             [1, 1],
