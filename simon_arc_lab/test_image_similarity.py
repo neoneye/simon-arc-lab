@@ -522,7 +522,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
-    def test_40000_same_bigrams_all_directions_rotate(self):
+    def test_40000_same_bigrams_direction_all_rotate(self):
         # Arrange
         image0 = np.array([
             [1, 2, 3],
@@ -533,11 +533,11 @@ class TestImageSimilarity(unittest.TestCase):
             [3, 6]], dtype=np.uint8)
         i = ImageSimilarity(image0, image1)
         # Act
-        actual = i.same_bigrams_all_directions()
+        actual = i.same_bigrams_direction_all()
         # Assert
         self.assertEqual(actual, True)
 
-    def test_40001_same_bigrams_all_directions_flip(self):
+    def test_40001_same_bigrams_direction_all_flip(self):
         # Arrange
         image0 = np.array([
             [1, 2, 3],
@@ -547,11 +547,11 @@ class TestImageSimilarity(unittest.TestCase):
             [6, 5, 4]], dtype=np.uint8)
         i = ImageSimilarity(image0, image1)
         # Act
-        actual = i.same_bigrams_all_directions()
+        actual = i.same_bigrams_direction_all()
         # Assert
         self.assertEqual(actual, True)
 
-    def test_40002_same_bigrams_all_directions_symmetry(self):
+    def test_40002_same_bigrams_direction_all_symmetry(self):
         # Arrange
         image0 = np.array([
             [1, 2, 3],
@@ -561,11 +561,11 @@ class TestImageSimilarity(unittest.TestCase):
             [6, 5, 4, 5, 6]], dtype=np.uint8)
         i = ImageSimilarity(image0, image1)
         # Act
-        actual = i.same_bigrams_all_directions()
+        actual = i.same_bigrams_direction_all()
         # Assert
         self.assertEqual(actual, True)
 
-    def test_40003_same_bigrams_all_directions_false(self):
+    def test_40003_same_bigrams_direction_all_false(self):
         # Arrange
         image0 = np.array([
             [1, 2, 3],
@@ -575,11 +575,11 @@ class TestImageSimilarity(unittest.TestCase):
             [6, 5, 4]], dtype=np.uint8)
         i = ImageSimilarity(image0, image1)
         # Act
-        actual = i.same_bigrams_all_directions()
+        actual = i.same_bigrams_direction_all()
         # Assert
         self.assertEqual(actual, False)
 
-    def test_40004_same_bigrams_all_directions_false(self):
+    def test_40004_same_bigrams_direction_all_false(self):
         # Arrange
         image0 = np.array([
             [1, 2, 3],
@@ -589,6 +589,69 @@ class TestImageSimilarity(unittest.TestCase):
             [7, 7, 7]], dtype=np.uint8)
         i = ImageSimilarity(image0, image1)
         # Act
-        actual = i.same_bigrams_all_directions()
+        actual = i.same_bigrams_direction_all()
         # Assert
         self.assertEqual(actual, False)
+
+    def test_40100_same_bigrams_direction_leftright_true(self):
+        # Arrange
+        image0 = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 2, 1, 2, 3],
+            [4, 5, 5, 5, 6]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bigrams_direction_leftright()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_40101_same_bigrams_direction_leftright_false(self):
+        # Arrange
+        image0 = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [2, 1, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bigrams_direction_leftright()
+        # Assert
+        self.assertEqual(actual, False)
+
+    def test_40200_same_bigrams_direction_topbottom_true(self):
+        # Arrange
+        image0 = np.array([
+            [1, 4],
+            [2, 5],
+            [3, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 4],
+            [2, 5],
+            [1, 5],
+            [2, 6],
+            [3, 6]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bigrams_direction_topbottom()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_40201_same_bigrams_direction_topbottom_false(self):
+        # Arrange
+        image0 = np.array([
+            [1, 4],
+            [2, 5],
+            [3, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 4],
+            [3, 5],
+            [2, 6]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bigrams_direction_topbottom()
+        # Assert
+        self.assertEqual(actual, False)
+

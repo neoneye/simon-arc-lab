@@ -101,7 +101,9 @@ class ImageSimilarity:
             self.agree_on_color(8),
             self.agree_on_color(9),
 
-            self.same_bigrams_all_directions(),
+            self.same_bigrams_direction_all(),
+            self.same_bigrams_direction_leftright(),
+            self.same_bigrams_direction_topbottom(),
         ]
         return self.compute_jaccard_index(params)
 
@@ -257,7 +259,7 @@ class ImageSimilarity:
         b = histogram1.get_count_for_color(color) > 0
         return a == b
 
-    def same_bigrams_all_directions(self) -> bool:
+    def same_bigrams_direction_all(self) -> bool:
         """
         Both images agree on the same bigrams ignoring the bigram direction.
 
@@ -285,7 +287,43 @@ class ImageSimilarity:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=91413438
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=8ee62060
         """
-        bigram0 = image_bigrams_all_directions(self.image0, 255)
-        bigram1 = image_bigrams_all_directions(self.image1, 255)
+        bigram0 = image_bigrams_direction_all(self.image0, 255)
+        bigram1 = image_bigrams_direction_all(self.image1, 255)
+        return bigram0 == bigram1
+
+    def same_bigrams_direction_leftright(self) -> bool:
+        """
+        Both images agree on the same bigrams, only considering the horizontal bigrams.
+
+        Example of tasks where this is satisfied:
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e74e1818
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e633a9e5
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e21a174a
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e1baa8a4
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=cf133acc
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ce8d95cc
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=b9630600
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=93c31fbe
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=8719f442
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=85b81ff1
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=7ee1c6ea
+        """
+        bigram0 = image_bigrams_direction_leftright(self.image0, 255)
+        bigram1 = image_bigrams_direction_leftright(self.image1, 255)
+        return bigram0 == bigram1
+
+    def same_bigrams_direction_topbottom(self) -> bool:
+        """
+        Both images agree on the same bigrams, only considering the vertical bigrams.
+
+        Example of tasks where this is satisfied:
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=5af49b42
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=20981f0e
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e9afcf9a
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d8c310e9
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=82819916
+        """
+        bigram0 = image_bigrams_direction_topbottom(self.image0, 255)
+        bigram1 = image_bigrams_direction_topbottom(self.image1, 255)
         return bigram0 == bigram1
 
