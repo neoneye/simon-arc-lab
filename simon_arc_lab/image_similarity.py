@@ -5,10 +5,6 @@
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=995c5fa3
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=b9b7f026
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2037f2c7
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=3194b014
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=642d658d
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9a4bb226
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=bf699163
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=c3202e5a
 #
 # IDEA: does one image contain the other image, original/rotated/flipped, by checking if the all the bigrams are contained in the other image bigrams: 
@@ -118,6 +114,7 @@ class ImageSimilarity:
             self.same_bigrams_direction_topbottom(),
             self.same_bigrams_direction_topleftbottomright(),
             self.same_bigrams_direction_toprightbottomleft(),
+            self.same_bigrams_subset(),
         ]
         return self.compute_jaccard_index(params)
 
@@ -367,3 +364,40 @@ class ImageSimilarity:
         bigram0 = image_bigrams_direction_toprightbottomleft(self.image0, 255)
         bigram1 = image_bigrams_direction_toprightbottomleft(self.image1, 255)
         return bigram0 == bigram1
+
+    def same_bigrams_subset(self) -> bool:
+        """
+        One image bigrams is a subset of the other image.
+
+        Example of tasks where this is satisfied:
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=3194b014
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=642d658d
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9a4bb226
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=bf699163
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=4938f0c2
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=44d8ac46
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=253bf280
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=22eb0ac0
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d4b1c2b1
+        """
+        bigram_list0 = image_bigrams_direction_all(self.image0, 255)
+        bigram_list1 = image_bigrams_direction_all(self.image1, 255)
+
+        # remove bigrams where the tuple contains 255
+        bigram_set0 = set()
+        for bigram in bigram_list0:
+            if 255 not in bigram:
+                bigram_set0.add(bigram)
+
+        bigram_set1 = set()
+        for bigram in bigram_list1:
+            if 255 not in bigram:
+                bigram_set1.add(bigram)
+
+        if len(bigram_set0) == 0 or len(bigram_set1) == 0:
+            return False
+
+        subset_a = bigram_set0.issubset(bigram_set1)
+        subset_b = bigram_set1.issubset(bigram_set0)
+        return subset_a or subset_b
+

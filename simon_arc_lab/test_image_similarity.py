@@ -719,3 +719,57 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
+    def test_40500_same_bigrams_subset_crop(self):
+        # Arrange
+        image0 = np.array([
+            [1, 4],
+            [2, 5],
+            [3, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [9, 9, 9, 9],
+            [9, 1, 4, 9],
+            [9, 2, 5, 9],
+            [9, 3, 6, 9],
+            [9, 9, 9, 9]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bigrams_subset()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_40501_same_bigrams_subset_flip(self):
+        # Arrange
+        image0 = np.array([
+            [1, 4],
+            [2, 5],
+            [3, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [9, 9, 9, 9],
+            [9, 4, 1, 9],
+            [9, 5, 2, 9],
+            [9, 6, 3, 9],
+            [9, 9, 9, 9]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bigrams_subset()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_40502_same_bigrams_subset_false(self):
+        # Arrange
+        image0 = np.array([
+            [1, 4],
+            [2, 5],
+            [3, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [9, 9, 9, 9],
+            [9, 5, 5, 9],
+            [9, 5, 5, 9],
+            [9, 5, 5, 9],
+            [9, 9, 9, 9]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bigrams_subset()
+        # Assert
+        self.assertEqual(actual, False)
+
