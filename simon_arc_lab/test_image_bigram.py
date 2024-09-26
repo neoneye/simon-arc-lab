@@ -72,11 +72,20 @@ class TestImageBigram(unittest.TestCase):
         ]
         self.assertEqual(actual, expected)
 
-    def test_60000_image_bigrams_all_directions_1x1(self):
+    def test_60000_sorted_unique_bigrams_a(self):
+        # Arrange
+        input = [(9, 1), (1, 1), (1, 2), (2, 2), (2, 2)]
+        # Act
+        actual = sorted_unique_bigrams(input)
+        # Assert
+        expected = [(1, 2), (1, 9)]
+        self.assertEqual(actual, expected)
+
+    def test_70000_image_bigrams_direction_all_1x1(self):
         # Arrange
         input = np.array([[1]], dtype=np.uint8)
         # Act
-        actual = image_bigrams_all_directions(input, 255)
+        actual = image_bigrams_direction_all(input, 255)
 
         # Assert
         expected = [
@@ -84,12 +93,11 @@ class TestImageBigram(unittest.TestCase):
         ]
         self.assertEqual(actual, expected)
 
-    def test_60001_image_bigrams_all_directions_2x2(self):
+    def test_70001_image_bigrams_direction_all_2x2(self):
         # Arrange
         input = np.array([[1, 2], [3, 4]], dtype=np.uint8)
         # Act
-        actual = image_bigrams_all_directions(input, 255)
-
+        actual = image_bigrams_direction_all(input, 255)
         # Assert
         expected = [
             (1, 2),
@@ -100,6 +108,68 @@ class TestImageBigram(unittest.TestCase):
             (2, 4),
             (2, 255),
             (3, 4),
+            (3, 255),
+            (4, 255)
+        ]
+        self.assertEqual(actual, expected)
+
+    def test_80000_image_bigrams_direction_leftright(self):
+        # Arrange
+        input = np.array([[1, 2], [3, 4]], dtype=np.uint8)
+        # Act
+        actual = image_bigrams_direction_leftright(input, 255)
+        # Assert
+        expected = [
+            (1, 2),
+            (1, 255),
+            (2, 255),
+            (3, 4),
+            (3, 255),
+            (4, 255)
+        ]
+        self.assertEqual(actual, expected)
+
+    def test_90000_image_bigrams_direction_topbottom(self):
+        # Arrange
+        input = np.array([[1, 2], [3, 4]], dtype=np.uint8)
+        # Act
+        actual = image_bigrams_direction_topbottom(input, 255)
+        # Assert
+        expected = [
+            (1, 3),
+            (1, 255),
+            (2, 4),
+            (2, 255),
+            (3, 255),
+            (4, 255)
+        ]
+        self.assertEqual(actual, expected)
+
+    def test_100000_image_bigrams_direction_topleftbottomright(self):
+        # Arrange
+        input = np.array([[1, 2], [3, 4]], dtype=np.uint8)
+        # Act
+        actual = image_bigrams_direction_topleftbottomright(input, 255)
+        # Assert
+        expected = [
+            (1, 4),
+            (1, 255),
+            (2, 255),
+            (3, 255),
+            (4, 255)
+        ]
+        self.assertEqual(actual, expected)
+
+    def test_110000_image_bigrams_direction_toprightbottomleft(self):
+        # Arrange
+        input = np.array([[1, 2], [3, 4]], dtype=np.uint8)
+        # Act
+        actual = image_bigrams_direction_toprightbottomleft(input, 255)
+        # Assert
+        expected = [
+            (1, 255),
+            (2, 3),
+            (2, 255),
             (3, 255),
             (4, 255)
         ]
