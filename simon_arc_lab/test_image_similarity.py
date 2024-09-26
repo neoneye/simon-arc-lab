@@ -521,3 +521,74 @@ class TestImageSimilarity(unittest.TestCase):
         actual = i.agree_on_color(9)
         # Assert
         self.assertEqual(actual, False)
+
+    def test_40000_same_bigrams_all_directions_rotate(self):
+        # Arrange
+        image0 = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 4],
+            [2, 5],
+            [3, 6]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bigrams_all_directions()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_40001_same_bigrams_all_directions_flip(self):
+        # Arrange
+        image0 = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [3, 2, 1],
+            [6, 5, 4]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bigrams_all_directions()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_40002_same_bigrams_all_directions_symmetry(self):
+        # Arrange
+        image0 = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [3, 2, 1, 2, 3],
+            [6, 5, 4, 5, 6]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bigrams_all_directions()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_40003_same_bigrams_all_directions_false(self):
+        # Arrange
+        image0 = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 2, 3],
+            [6, 5, 4]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bigrams_all_directions()
+        # Assert
+        self.assertEqual(actual, False)
+
+    def test_40004_same_bigrams_all_directions_false(self):
+        # Arrange
+        image0 = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [5, 5, 5],
+            [7, 7, 7]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_bigrams_all_directions()
+        # Assert
+        self.assertEqual(actual, False)
