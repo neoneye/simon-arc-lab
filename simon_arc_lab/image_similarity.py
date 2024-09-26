@@ -1,12 +1,5 @@
 from .histogram import *
 
-# IDEA: do the images roughly agree on the same colors.
-# Do 10 checks, for each color, is color[i] present in both images
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e99362f0
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e6de6e8f_v2
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d4c90558
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=c8b7cc0f
-#
 # IDEA: does one image contain the other image, original/rotated/flipped, as in: 
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f5aa3634
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f4081712
@@ -94,6 +87,18 @@ class ImageSimilarity:
             self.same_histogram_counters(),
             self.same_most_popular_color_list(),
             self.same_least_popular_color_list(),
+
+            # IDEA: maybe assign a lower weight to these in the score
+            self.agree_on_color(0),
+            self.agree_on_color(1),
+            self.agree_on_color(2),
+            self.agree_on_color(3),
+            self.agree_on_color(4),
+            self.agree_on_color(5),
+            self.agree_on_color(6),
+            self.agree_on_color(7),
+            self.agree_on_color(8),
+            self.agree_on_color(9),
         ]
         return self.compute_jaccard_index(params)
 
@@ -229,4 +234,23 @@ class ImageSimilarity:
         color_list0 = histogram0.least_popular_color_list()
         color_list1 = histogram1.least_popular_color_list()
         return color_list0 == color_list1
+
+    def agree_on_color(self, color: int) -> bool:
+        """
+        True if both images have the specified color in their histogram.
+        True if both images don't have the specified color in their histogram.
+        False if only one of the images have the color, and the other image doesn't have the color.
+
+        Do the images roughly agree on the same colors.
+        For each of the 10 color, is color[i] present/not present in both images
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e99362f0
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e6de6e8f_v2
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d4c90558
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=c8b7cc0f
+        """
+        histogram0 = self.histogram0()
+        histogram1 = self.histogram1()
+        a = histogram0.get_count_for_color(color) > 0
+        b = histogram1.get_count_for_color(color) > 0
+        return a == b
 

@@ -473,3 +473,51 @@ class TestImageSimilarity(unittest.TestCase):
         actual = i.same_least_popular_color_list()
         # Assert
         self.assertEqual(actual, False)
+
+    def test_36000_agree_on_color_a_color_that_is_present(self):
+        # Arrange
+        image0 = np.array([
+            [1, 1],
+            [1, 1],
+            [5, 7],
+            [5, 7],
+            [5, 7]], dtype=np.uint8)
+        image1 = np.array([
+            [5, 5, 9, 9, 9, 7, 7]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.agree_on_color(7)
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_36001_agree_on_color_a_color_that_isnt_present(self):
+        # Arrange
+        image0 = np.array([
+            [1, 1],
+            [1, 1],
+            [5, 7],
+            [5, 7],
+            [5, 7]], dtype=np.uint8)
+        image1 = np.array([
+            [5, 5, 9, 9, 9, 7, 7]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.agree_on_color(6)
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_36002_same_color_is_present_false(self):
+        # Arrange
+        image0 = np.array([
+            [1, 1],
+            [1, 1],
+            [5, 7],
+            [5, 7],
+            [5, 7]], dtype=np.uint8)
+        image1 = np.array([
+            [5, 5, 9, 9, 9, 7, 7]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.agree_on_color(9)
+        # Assert
+        self.assertEqual(actual, False)
