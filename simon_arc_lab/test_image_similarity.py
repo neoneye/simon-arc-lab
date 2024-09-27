@@ -950,3 +950,15 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
+    def test_60000_format_feature_list(self):
+        # Arrange
+        feature_list = [
+            Feature(FeatureType.SAME_ORIENTATION),
+            Feature(FeatureType.AGREE_ON_COLOR, 5),
+            Feature(FeatureType.SAME_BIGRAMS_SUBSET),
+        ]
+        # Act
+        actual = Feature.format_feature_list(feature_list)
+        # Assert
+        expected = 'agree_on_color(5),same_bigrams_subset,same_shape_orientation'
+        self.assertEqual(actual, expected)

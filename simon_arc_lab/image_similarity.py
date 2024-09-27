@@ -107,6 +107,12 @@ class Feature:
             return f"{self.feature_type.value}({self.parameter})"
         else:
             return self.feature_type.value
+        
+    @classmethod
+    def format_feature_list(cls, features: list):
+        feature_names = [f"{feature}" for feature in features]
+        feature_names = sorted(feature_names)
+        return ",".join(feature_names)
 
 class ImageSimilarity:
     def __init__(self, image0: np.array, image1: np.array) -> None:
