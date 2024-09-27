@@ -92,7 +92,7 @@ class ImageSimilarity:
 
     def jaccard_index(self) -> int:
         """
-        Jaccard index of of many features are satisfied.
+        Jaccard index of how many features are satisfied.
         
         return: 0 to 100
         """
