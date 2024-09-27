@@ -61,10 +61,52 @@
 # distance between histograms
 # trigrams
 # shape types
+#
+# IDEA: there are many agree_on_color, maybe assign a lower weight, so they don't dominate the jaccard index.
+# IDEA: there are many agree_on_color_with_same_counter, maybe assign a lower weight, so they don't dominate the jaccard index.
+# IDEA: there are many same_bounding_box_size_of_color, maybe assign a lower weight, so they don't dominate the jaccard index.
 
 from .histogram import *
 from .image_bigram import *
 from .find_bounding_box import find_bounding_box_multiple_ignore_colors
+import numpy as np
+from enum import Enum
+from dataclasses import dataclass
+
+class FeatureType(Enum):
+    SAME_IMAGE = "same_image"
+    SAME_SHAPE = "same_shape"
+    SAME_SHAPE_ALLOW_ROTATION = "same_shape_allow_rotation"
+    SAME_WIDTH = "same_shape_width"
+    SAME_HEIGHT = "same_shape_height"
+    SAME_ORIENTATION = "same_shape_orientation"
+    SAME_HISTOGRAM = "same_histogram"
+    SAME_UNIQUE_COLORS = "same_unique_colors"
+    SAME_NUMBER_UNIQUE_COLORS = "same_number_of_unique_colors"
+    SAME_HISTOGRAM_IGNORING_SCALE = "same_histogram_ignoring_scale"
+    SAME_HISTOGRAM_COUNTERS = "same_histogram_counters"
+    SAME_MOST_POPULAR_COLOR_LIST = "same_most_popular_color_list"
+    SAME_LEAST_POPULAR_COLOR_LIST = "same_least_popular_color_list"
+    AGREE_ON_COLOR = "agree_on_color"
+    AGREE_ON_COLOR_WITH_SAME_COUNTER = "agree_on_color_with_same_counter"
+    SAME_BOUNDING_BOX_SIZE_OF_COLOR = "same_bounding_box_size_of_color"
+    SAME_BIGRAMS_DIRECTION_ALL = "same_bigrams_direction_all"
+    SAME_BIGRAMS_DIRECTION_LEFTRIGHT = "same_bigrams_direction_leftright"
+    SAME_BIGRAMS_DIRECTION_TOPBOTTOM = "same_bigrams_direction_topbottom"
+    SAME_BIGRAMS_DIRECTION_TOPLEFTBOTTOMRIGHT = "same_bigrams_direction_topleftbottomright"
+    SAME_BIGRAMS_DIRECTION_TOPRIGHTBOTTOMLEFT = "same_bigrams_direction_toprightbottomleft"
+    SAME_BIGRAMS_SUBSET = "same_bigrams_subset"
+
+@dataclass(frozen=True)
+class Feature:
+    feature_type: FeatureType
+    parameter: any = None  # Optional parameter, e.g., color
+
+    def __str__(self):
+        if self.parameter is not None:
+            return f"{self.feature_type.value}({self.parameter})"
+        else:
+            return self.feature_type.value
 
 class ImageSimilarity:
     def __init__(self, image0: np.array, image1: np.array) -> None:
@@ -75,90 +117,82 @@ class ImageSimilarity:
         self.image1 = image1
         self.lazy_histogram0 = None
         self.lazy_histogram1 = None
+        self.lazy_features = None
     
     @classmethod
     def compute_jaccard_index(cls, parameters: list[bool]) -> int:
-        """
-        Jaccard index of of many features are satisfied.
-        
-        return: 0 to 100
-        """
-        a_intersection_b = 0
-        for param in parameters:
-            if param:
-                a_intersection_b += 1
-        a_union_b = len(parameters)
-        return a_intersection_b * 100 // a_union_b
-
-    def jaccard_index(self) -> int:
         """
         Jaccard index of how many features are satisfied.
         
         return: 0 to 100
         """
-        if self.same_image():
-            # The images are identical, no need to compute the rest of the features.
-            return 100
-        
-        params = [
-            False, # Since same_image() is False.
-            self.same_shape(),
-            self.same_shape_allow_for_rotation(),
-            self.same_shape_width(),
-            self.same_shape_height(),
-            self.same_shape_orientation(),
-            self.same_histogram(),
-            self.same_unique_colors(),
-            self.same_number_of_unique_colors(),
-            self.same_histogram_ignoring_scale(),
-            self.same_histogram_counters(),
-            self.same_most_popular_color_list(),
-            self.same_least_popular_color_list(),
+        a_intersection_b = sum(parameters)
+        a_union_b = len(parameters)
+        return a_intersection_b * 100 // a_union_b
 
-            # IDEA: there are many agree_on_color, maybe assign a lower weight, so they don't dominate the jaccard index.
-            self.agree_on_color(0),
-            self.agree_on_color(1),
-            self.agree_on_color(2),
-            self.agree_on_color(3),
-            self.agree_on_color(4),
-            self.agree_on_color(5),
-            self.agree_on_color(6),
-            self.agree_on_color(7),
-            self.agree_on_color(8),
-            self.agree_on_color(9),
+    def _compute_features(self) -> dict:
+        """
+        Compare features between the two images and return a dictionary
+        mapping Feature instances to booleans indicating if they are satisfied.
+        """
+        features = {
+            Feature(FeatureType.SAME_IMAGE): self.same_image(),
+            Feature(FeatureType.SAME_SHAPE): self.same_shape(),
+            Feature(FeatureType.SAME_SHAPE_ALLOW_ROTATION): self.same_shape_allow_for_rotation(),
+            Feature(FeatureType.SAME_WIDTH): self.same_shape_width(),
+            Feature(FeatureType.SAME_HEIGHT): self.same_shape_height(),
+            Feature(FeatureType.SAME_ORIENTATION): self.same_shape_orientation(),
+            Feature(FeatureType.SAME_HISTOGRAM): self.same_histogram(),
+            Feature(FeatureType.SAME_UNIQUE_COLORS): self.same_unique_colors(),
+            Feature(FeatureType.SAME_NUMBER_UNIQUE_COLORS): self.same_number_of_unique_colors(),
+            Feature(FeatureType.SAME_HISTOGRAM_IGNORING_SCALE): self.same_histogram_ignoring_scale(),
+            Feature(FeatureType.SAME_HISTOGRAM_COUNTERS): self.same_histogram_counters(),
+            Feature(FeatureType.SAME_MOST_POPULAR_COLOR_LIST): self.same_most_popular_color_list(),
+            Feature(FeatureType.SAME_LEAST_POPULAR_COLOR_LIST): self.same_least_popular_color_list(),
+            Feature(FeatureType.SAME_BIGRAMS_DIRECTION_ALL): self.same_bigrams_direction_all(),
+            Feature(FeatureType.SAME_BIGRAMS_DIRECTION_LEFTRIGHT): self.same_bigrams_direction_leftright(),
+            Feature(FeatureType.SAME_BIGRAMS_DIRECTION_TOPBOTTOM): self.same_bigrams_direction_topbottom(),
+            Feature(FeatureType.SAME_BIGRAMS_DIRECTION_TOPLEFTBOTTOMRIGHT): self.same_bigrams_direction_topleftbottomright(),
+            Feature(FeatureType.SAME_BIGRAMS_DIRECTION_TOPRIGHTBOTTOMLEFT): self.same_bigrams_direction_toprightbottomleft(),
+            Feature(FeatureType.SAME_BIGRAMS_SUBSET): self.same_bigrams_subset(),
+        }
 
-            # IDEA: there are many agree_on_color_with_same_counter, maybe assign a lower weight, so they don't dominate the jaccard index.
-            self.agree_on_color_with_same_counter(0),
-            self.agree_on_color_with_same_counter(1),
-            self.agree_on_color_with_same_counter(2),
-            self.agree_on_color_with_same_counter(3),
-            self.agree_on_color_with_same_counter(4),
-            self.agree_on_color_with_same_counter(5),
-            self.agree_on_color_with_same_counter(6),
-            self.agree_on_color_with_same_counter(7),
-            self.agree_on_color_with_same_counter(8),
-            self.agree_on_color_with_same_counter(9),
+        # Color specific features
+        for color in range(10):
+            features[Feature(FeatureType.AGREE_ON_COLOR, color)] = self.agree_on_color(color)
+            features[Feature(FeatureType.AGREE_ON_COLOR_WITH_SAME_COUNTER, color)] = self.agree_on_color_with_same_counter(color)
+            features[Feature(FeatureType.SAME_BOUNDING_BOX_SIZE_OF_COLOR, color)] = self.same_bounding_box_size_of_color(color)
 
-            self.same_bigrams_direction_all(),
-            self.same_bigrams_direction_leftright(),
-            self.same_bigrams_direction_topbottom(),
-            self.same_bigrams_direction_topleftbottomright(),
-            self.same_bigrams_direction_toprightbottomleft(),
-            self.same_bigrams_subset(),
+        return features
 
-            # IDEA: there are many same_bounding_box_size_of_color, maybe assign a lower weight, so they don't dominate the jaccard index.
-            self.same_bounding_box_size_of_color(0),
-            self.same_bounding_box_size_of_color(1),
-            self.same_bounding_box_size_of_color(2),
-            self.same_bounding_box_size_of_color(3),
-            self.same_bounding_box_size_of_color(4),
-            self.same_bounding_box_size_of_color(5),
-            self.same_bounding_box_size_of_color(6),
-            self.same_bounding_box_size_of_color(7),
-            self.same_bounding_box_size_of_color(8),
-            self.same_bounding_box_size_of_color(9),
-        ]
-        return self.compute_jaccard_index(params)
+    def features(self) -> dict:
+        if self.lazy_features is None:
+            self.lazy_features = self._compute_features()
+        return self.lazy_features
+
+    def jaccard_index(self) -> int:
+        """
+        Jaccard index of how many features are satisfied.
+
+        return: 0 to 100
+        """
+        features = self.features()
+        feature_booleans = features.values()
+        return self.compute_jaccard_index(feature_booleans)
+
+    def get_satisfied_features(self) -> list:
+        """
+        Return a list of feature instances that are satisfied.
+        """
+        features = self.features()
+        return [feature for feature, satisfied in features.items() if satisfied]
+
+    def get_unsatisfied_features(self) -> list:
+        """
+        Return a list of feature instances that are not satisfied.
+        """
+        features = self.features()
+        return [feature for feature, satisfied in features.items() if not satisfied]
 
     def same_image(self) -> bool:
         """
