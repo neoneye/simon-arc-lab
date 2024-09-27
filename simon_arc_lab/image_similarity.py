@@ -1,5 +1,12 @@
 # Measure similarity between 2 images, despite having different sizes, they may still be similar.
 #
+# Interesting are the ARC-AGI puzzles with a tiny intersection across the pairs
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=3194b014
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=1a2e2828
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=0a1d4ef5
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f5aa3634
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e66aafb8
+#
 # Interesting are the ARC-AGI puzzles with an unusual big standard deviation
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=4b6b68e5
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=54d9e175
