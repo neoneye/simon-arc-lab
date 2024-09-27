@@ -15,7 +15,7 @@ from simon_arc_lab.image_util import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.task import *
 from simon_arc_lab.image_create_random_simple import *
-from simon_arc_lab.image_trim import find_bounding_box_ignoring_color
+from simon_arc_lab.find_bounding_box import find_bounding_box_ignoring_color
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.rectangle import Rectangle
 from simon_arc_lab.image_shape3x3_center import *

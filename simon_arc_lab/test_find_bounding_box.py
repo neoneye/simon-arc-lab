@@ -1,9 +1,9 @@
 import unittest
 import numpy as np
-from .image_trim import *
+from .find_bounding_box import *
 from .rectangle import *
 
-class TestImageTrim(unittest.TestCase):
+class TestFindBoundingBox(unittest.TestCase):
     def test_10000_find_bounding_box_multiple_ignore_colors(self):
         # Arrange
         image = np.array([

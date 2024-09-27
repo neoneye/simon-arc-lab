@@ -64,7 +64,7 @@
 
 from .histogram import *
 from .image_bigram import *
-from .image_trim import find_bounding_box_multiple_ignore_colors
+from .find_bounding_box import find_bounding_box_multiple_ignore_colors
 
 class ImageSimilarity:
     def __init__(self, image0: np.array, image1: np.array) -> None:
