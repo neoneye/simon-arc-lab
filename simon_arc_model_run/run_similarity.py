@@ -9,6 +9,7 @@ sys.path.insert(0, PROJECT_ROOT)
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.image_similarity import ImageSimilarity, Feature
 from simon_arc_lab.task_similarity import TaskSimilarity
+from simon_arc_lab.image_noise import image_noise_one_pixel
 
 model_iteration = 530
 
@@ -33,6 +34,7 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
 
+test_with_1pixel_noise = False
 show_plot_intersectioncount = False
 show_plot_testaccuracy = False
 
@@ -53,6 +55,10 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
         ts = TaskSimilarity.create_with_task(task)
         for i in range(task.count_tests):
             output = task.test_output(i)
+
+            if test_with_1pixel_noise:
+                output = image_noise_one_pixel(output.copy(), 0)
+            
             score = ts.measure_test_prediction(output, i)
             # if score < 70:
             #     print(f"task with low score {score}")
@@ -90,7 +96,8 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
         accumulated_score_average_list.append(score_average)
 
     accumulated_score_average = sum(accumulated_score_average_list) / len(accumulated_score_average_list)
-    summary = f"Group: '{groupname}'    similarity: {accumulated_score_average:,.1f}"
+    accumulated_accuracy_average = sum(accumulated_test_accuracy_list) / len(accumulated_test_accuracy_list)
+    summary = f"Group: '{groupname}'    similarity: {accumulated_score_average:,.1f}   accuracy: {accumulated_accuracy_average:,.1f}"
     summary_list.append(summary)
 
     if show_plot_intersectioncount:
