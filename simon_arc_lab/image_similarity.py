@@ -66,6 +66,8 @@
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=44d8ac46
 #
 # distance between histograms
+# Are there too few/many pixels with a particular color. By what amount, a few pixels, or many pixels.
+#
 # trigrams
 # shape types
 #
