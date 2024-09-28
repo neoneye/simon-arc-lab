@@ -1,5 +1,6 @@
 import os
 import sys
+from matplotlib import pyplot as plt
 import numpy as np
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -32,6 +33,7 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
 
+show_plot = False
 summary_list = []
 number_of_items_in_list = len(groupname_pathtotaskdir_list)
 for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
@@ -40,6 +42,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
     taskset = TaskSet.load_directory(path_to_task_dir)
 
     accumulated_score_average_list = []
+    accumulated_intersectioncount_list = []
     for task in taskset.tasks:
         # Exercise the TaskSimilarity class.
         # Measure how accurately the 'test' input/output satisfies the same features as the 'example' input/output pairs.
@@ -76,11 +79,19 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
         score_std_dev = np.std(score_list, ddof=1)
 
         count_features_set_intersection = len(feature_set_intersection)
+        accumulated_intersectioncount_list.append(count_features_set_intersection)
         print(f"Task: '{task.metadata_task_id}'    min: {score_min} average: {score_average:,.1f} max: {score_max} std_dev: {score_std_dev:,.1f} intersection: {count_features_set_intersection}  test_accuracy: {test_accuracy}  task_summary: {ts.summary()}")
         accumulated_score_average_list.append(score_average)
 
     accumulated_score_average = sum(accumulated_score_average_list) / len(accumulated_score_average_list)
     summary = f"Group: '{groupname}'    similarity: {accumulated_score_average:,.1f}"
     summary_list.append(summary)
+
+    if show_plot:
+        plt.hist(accumulated_intersectioncount_list, bins=100)
+        plt.title(f"Group: '{groupname}'")
+        plt.xlabel("Intersection count")
+        plt.ylabel("Frequency")
+        plt.show()
 
 print("Summary:\n" + "\n".join(summary_list))
