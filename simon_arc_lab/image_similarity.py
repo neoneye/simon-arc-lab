@@ -339,6 +339,9 @@ class ImageSimilarity:
     def same_histogram_counters(self) -> bool:
         """
         The counters are the same in the histogram, but the colors may be different.
+
+        Examples:
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=bda2d7a6
         """
         histogram0 = self.histogram0()
         histogram1 = self.histogram1()
