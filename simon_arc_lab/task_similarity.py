@@ -11,11 +11,15 @@ class TaskSimilarity:
         self.example_pair_feature_set_union = None
         self.all_input_feature_set_intersection = None
         self.all_input_feature_set_union = None
+        self.example_output_feature_set_intersection = None
+        self.example_output_feature_set_union = None
+
 
     @classmethod
     def create_with_task(cls, task: Task) -> 'TaskSimilarity':
         ts = cls(task)
         ts.populate_all_input_feature_set()
+        ts.populate_example_output_feature_set()
         ts.populate_example_pair_feature_set()
         return ts
 
@@ -81,12 +85,45 @@ class TaskSimilarity:
         self.all_input_feature_set_intersection = feature_set_intersection
         self.all_input_feature_set_union = feature_set_union
 
-    def print_summary(self):
-        features = list(self.all_input_feature_set_intersection)
-        count = len(features)
-        # s = Feature.format_feature_list(features)
-        # print(f"all_input_features: {s}")
-        print(f"all_input_features: {count}")
+    def populate_example_output_feature_set(self):
+        """
+        Compare all output images of the example pairs. Don't process the test pairs.
+        """
+        task = self.task
+        count = task.count_examples
+        comparisons = []
+        for i in range(count):
+            index0 = i
+            for j in range(i+1, count):
+                index1 = j
+                comparisons.append((index0, index1))
+
+        feature_set_intersection = set()
+        feature_set_union = set()
+        for i, (index0, index1) in enumerate(comparisons):
+            input0 = task.output_images[index0]
+            input1 = task.output_images[index1]
+            image_similarity = ImageSimilarity(input0, input1)
+            feature_list = image_similarity.get_satisfied_features()
+
+            feature_set = set(feature_list)
+            if i == 0:
+                feature_set_intersection = feature_set
+            else:
+                feature_set_intersection = feature_set & feature_set_intersection
+
+            feature_set_union = feature_set_union | feature_set
+
+        self.example_output_feature_set_intersection = feature_set_intersection
+        self.example_output_feature_set_union = feature_set_union
+
+    def summary(self) -> str:
+        items = [
+            f"input: {len(self.all_input_feature_set_intersection)}",
+            f"output: {len(self.example_output_feature_set_intersection)}",
+            f"pair: {len(self.example_pair_feature_set_intersection)}",
+        ]
+        return " ".join(items)
 
     def measure_test_prediction(self, predicted_output: np.array, test_index: int) -> int:
         """

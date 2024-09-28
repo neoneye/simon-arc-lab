@@ -76,9 +76,8 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
         score_std_dev = np.std(score_list, ddof=1)
 
         count_features_set_intersection = len(feature_set_intersection)
-        print(f"Task: '{task.metadata_task_id}'    min: {score_min} average: {score_average:,.1f} max: {score_max} std_dev: {score_std_dev:,.1f} intersection: {count_features_set_intersection}  test_accuracy: {test_accuracy}")
+        print(f"Task: '{task.metadata_task_id}'    min: {score_min} average: {score_average:,.1f} max: {score_max} std_dev: {score_std_dev:,.1f} intersection: {count_features_set_intersection}  test_accuracy: {test_accuracy}  task_summary: {ts.summary()}")
         accumulated_score_average_list.append(score_average)
-        ts.print_summary()
 
     accumulated_score_average = sum(accumulated_score_average_list) / len(accumulated_score_average_list)
     summary = f"Group: '{groupname}'    similarity: {accumulated_score_average:,.1f}"
