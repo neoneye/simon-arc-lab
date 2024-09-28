@@ -84,5 +84,48 @@ class TestImageShape2x2(unittest.TestCase):
             [22, 3, 3, 3, 42]], dtype=np.uint8)
         self.assertTrue(np.array_equal(actual, expected))
 
+    def test_shape_id_list_all_1x1(self):
+        image = np.array([[9]], dtype=np.uint8)
+        actual = ImageShape2x2.shape_id_list(image)
+        expected = [22, 25, 37, 42]
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_shape_id_list_all_rect_with_one_color(self):
+        image = np.array([
+            [9, 9, 9, 9], 
+            [9, 9, 9, 9], 
+            [9, 9, 9, 9]], dtype=np.uint8)
+        actual = ImageShape2x2.shape_id_list(image)
+        expected = [3, 12, 22, 25, 37, 42, 63]
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_shape_id_list_all_diagonal_topleftbottomright(self):
+        image = np.array([
+            [9, 7, 9, 9, 9], 
+            [9, 9, 7, 9, 9], 
+            [9, 9, 9, 7, 9]], dtype=np.uint8)
+        actual = ImageShape2x2.shape_id_list(image)
+        expected = [1, 2, 3, 12, 22, 25, 37, 42, 48, 63]
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_shape_id_list_all_diagonal_toprightbottomleft(self):
+        image = np.array([
+            [9, 9, 9, 7, 9],
+            [9, 9, 7, 9, 9], 
+            [9, 7, 9, 9, 9]], dtype=np.uint8) 
+        actual = ImageShape2x2.shape_id_list(image)
+        expected = [1, 2, 3, 12, 22, 25, 37, 42, 48, 63]
+        self.assertTrue(np.array_equal(actual, expected))
+
+    def test_shape_id_list_all_diagonal_alternating_lines(self):
+        image = np.array([
+            [9, 9, 9, 9, 9],
+            [7, 7, 7, 7, 7],
+            [9, 9, 9, 9, 9],
+            [7, 7, 7, 7, 7]], dtype=np.uint8) 
+        actual = ImageShape2x2.shape_id_list(image)
+        expected = [3, 4, 8, 22, 25, 37, 42]
+        self.assertTrue(np.array_equal(actual, expected))
+
 if __name__ == '__main__':
     unittest.main()
