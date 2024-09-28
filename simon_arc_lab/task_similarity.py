@@ -1,3 +1,5 @@
+# IDEA: score the features are there in the maybe set, with a lower weight. Or with an lower confidence level.
+# IDEA: score the features are there in the outside-intersection set, with a negative weight.
 # IDEA: compare all input histograms with each other, and determine what features are common.
 # IDEA: compare example output histograms with each other, and determine what features are common.
 import numpy as np
@@ -50,7 +52,6 @@ class TaskSimilarity:
         self.all_input_feature_set_union = None
         self.example_output_feature_set_intersection = None
         self.example_output_feature_set_union = None
-
 
     @classmethod
     def create_with_task(cls, task: Task) -> 'TaskSimilarity':
@@ -120,11 +121,13 @@ class TaskSimilarity:
         On Kaggle ARC-Prize, the test pairs are not provided. It's up to the solver to predict the output.
         I cannot peek at the test pair to determine if it's correct.
         This function, without knowing the `test_output`, it checks that the predicted_output
-        has the same features as the example pairs.
+        has the same features satisfied as there are typically satisfied in the example pairs.
 
-        returns: int, a value between 0 and 100, where 100 is the closest match.
+        returns: int, a value between 0 and 100, where 100 is the best match.
         """
         task = self.task
+
+        # Compare the test input image with the predicted output.
         input = task.test_input(test_index)
         image_similarity = ImageSimilarity(input, predicted_output)
         feature_list = image_similarity.get_satisfied_features()
@@ -132,7 +135,19 @@ class TaskSimilarity:
 
         parameter_list = []
         for key in self.example_pair_feature_set_intersection:
+            # Are there any features that are not satisfied, for the test input vs. predicted output, 
+            # it may be a sign that the prediction differs from the typical input/output features.
             is_satisfied = key in feature_set
+            parameter_list.append(is_satisfied)
+
+        # Compare all example output images with the predicted output.
+        output_images = self.task.output_images[:self.task.count_examples].copy()
+        output_images.append(predicted_output)
+        result = TaskSimilarityMultiImage.analyze_images(output_images)
+        for key in self.example_output_feature_set_intersection:
+            # Are there any features that are not satisfied, for the predicted output, 
+            # it may be a sign that the prediction differs from the example outputs.
+            is_satisfied = key in result.feature_set_intersection
             parameter_list.append(is_satisfied)
 
         score = ImageSimilarity.compute_jaccard_index(parameter_list)
