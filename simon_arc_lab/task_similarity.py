@@ -4,6 +4,43 @@ import numpy as np
 from .task import Task
 from .image_similarity import ImageSimilarity, Feature
 
+class TaskSimilarityMultiImage:
+    def __init__(self, feature_set_intersection: set, feature_set_union: set):
+        self.feature_set_intersection = feature_set_intersection
+        self.feature_set_union = feature_set_union
+
+    @classmethod
+    def analyze_images(cls, images: list[np.array]) -> 'TaskSimilarityMultiImage':
+        """
+        Identify what does these images have in common.
+        """
+
+        # Schedule how the images are to be compared with each other.
+        count = len(images)
+        comparisons = []
+        for i in range(count):
+            index0 = i
+            for j in range(i+1, count):
+                index1 = j
+                comparisons.append((index0, index1))
+
+        # Do several two-image comparisons
+        feature_set_intersection = set()
+        feature_set_union = set()
+        for i, (index0, index1) in enumerate(comparisons):
+            image_similarity = ImageSimilarity(images[index0], images[index1])
+            feature_list = image_similarity.get_satisfied_features()
+
+            feature_set = set(feature_list)
+            if i == 0:
+                feature_set_intersection = feature_set
+            else:
+                feature_set_intersection = feature_set & feature_set_intersection
+
+            feature_set_union = feature_set_union | feature_set
+
+        return cls(feature_set_intersection, feature_set_union)
+
 class TaskSimilarity:
     def __init__(self, task: Task):
         self.task = task
@@ -57,65 +94,18 @@ class TaskSimilarity:
         """
         Compare all input images of the example+test pairs.
         """
-        task = self.task
-        count = task.count_examples + task.count_tests
-        comparisons = []
-        for i in range(count):
-            index0 = i
-            for j in range(i+1, count):
-                index1 = j
-                comparisons.append((index0, index1))
-
-        feature_set_intersection = set()
-        feature_set_union = set()
-        for i, (index0, index1) in enumerate(comparisons):
-            input0 = task.input_images[index0]
-            input1 = task.input_images[index1]
-            image_similarity = ImageSimilarity(input0, input1)
-            feature_list = image_similarity.get_satisfied_features()
-
-            feature_set = set(feature_list)
-            if i == 0:
-                feature_set_intersection = feature_set
-            else:
-                feature_set_intersection = feature_set & feature_set_intersection
-
-            feature_set_union = feature_set_union | feature_set
-
-        self.all_input_feature_set_intersection = feature_set_intersection
-        self.all_input_feature_set_union = feature_set_union
+        result = TaskSimilarityMultiImage.analyze_images(self.task.input_images)
+        self.all_input_feature_set_intersection = result.feature_set_intersection
+        self.all_input_feature_set_union = result.feature_set_union
 
     def populate_example_output_feature_set(self):
         """
         Compare all output images of the example pairs. Don't process the test pairs.
         """
-        task = self.task
-        count = task.count_examples
-        comparisons = []
-        for i in range(count):
-            index0 = i
-            for j in range(i+1, count):
-                index1 = j
-                comparisons.append((index0, index1))
-
-        feature_set_intersection = set()
-        feature_set_union = set()
-        for i, (index0, index1) in enumerate(comparisons):
-            input0 = task.output_images[index0]
-            input1 = task.output_images[index1]
-            image_similarity = ImageSimilarity(input0, input1)
-            feature_list = image_similarity.get_satisfied_features()
-
-            feature_set = set(feature_list)
-            if i == 0:
-                feature_set_intersection = feature_set
-            else:
-                feature_set_intersection = feature_set & feature_set_intersection
-
-            feature_set_union = feature_set_union | feature_set
-
-        self.example_output_feature_set_intersection = feature_set_intersection
-        self.example_output_feature_set_union = feature_set_union
+        images = self.task.output_images[:self.task.count_examples]
+        result = TaskSimilarityMultiImage.analyze_images(images)
+        self.example_output_feature_set_intersection = result.feature_set_intersection
+        self.example_output_feature_set_union = result.feature_set_union
 
     def summary(self) -> str:
         items = [
