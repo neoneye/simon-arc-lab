@@ -7,6 +7,7 @@ sys.path.insert(0, PROJECT_ROOT)
 
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.image_similarity import ImageSimilarity, Feature
+from simon_arc_lab.task_similarity import TaskSimilarity
 
 model_iteration = 530
 
@@ -16,8 +17,8 @@ if not os.path.isdir(path_to_arc_dataset_collection_dataset):
     sys.exit(1)
 
 groupname_pathtotaskdir_list = [
-    # ('arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
-    ('arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
+    ('arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
+    # ('arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
     # ('tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
     # ('miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
     # ('conceptarc', os.path.join(path_to_arc_dataset_collection_dataset, 'ConceptARC/data')),
@@ -40,6 +41,17 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
 
     accumulated_score_average_list = []
     for task in taskset.tasks:
+        # Exercise the TaskSimilarity class.
+        # Measure how accurately the 'test' input/output satisfies the same features as the 'example' input/output pairs.
+        test_score_list = []
+        ts = TaskSimilarity.create_with_task(task)
+        for i in range(task.count_tests):
+            output = task.test_output(i)
+            score = ts.measure_test_prediction(output, i)
+            test_score_list.append(score)
+        test_accuracy = ",".join([str(x) for x in test_score_list])
+
+        # Exercises the ImageSimilarity class.
         score_list = []
         feature_set_intersection = set()
         for i in range(task.count_examples + task.count_tests):
@@ -64,7 +76,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
         score_std_dev = np.std(score_list, ddof=1)
 
         count_features_set_intersection = len(feature_set_intersection)
-        print(f"Task: '{task.metadata_task_id}'    min: {score_min} average: {score_average:,.1f} max: {score_max} std_dev: {score_std_dev:,.1f} intersection: {count_features_set_intersection}")
+        print(f"Task: '{task.metadata_task_id}'    min: {score_min} average: {score_average:,.1f} max: {score_max} std_dev: {score_std_dev:,.1f} intersection: {count_features_set_intersection}  test_accuracy: {test_accuracy}")
         accumulated_score_average_list.append(score_average)
 
     accumulated_score_average = sum(accumulated_score_average_list) / len(accumulated_score_average_list)
