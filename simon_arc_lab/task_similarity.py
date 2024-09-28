@@ -9,10 +9,13 @@ class TaskSimilarity:
         self.task = task
         self.example_pair_feature_set_intersection = None
         self.example_pair_feature_set_union = None
+        self.all_input_feature_set_intersection = None
+        self.all_input_feature_set_union = None
 
     @classmethod
     def create_with_task(cls, task: Task) -> 'TaskSimilarity':
         ts = cls(task)
+        ts.populate_all_input_feature_set()
         ts.populate_example_pair_feature_set()
         return ts
 
@@ -45,6 +48,45 @@ class TaskSimilarity:
 
         self.example_pair_feature_set_intersection = feature_set_intersection
         self.example_pair_feature_set_union = feature_set_union
+
+    def populate_all_input_feature_set(self):
+        """
+        Compare all input images of the example+test pairs.
+        """
+        task = self.task
+        count = task.count_examples + task.count_tests
+        comparisons = []
+        for i in range(count):
+            index0 = i
+            for j in range(i+1, count):
+                index1 = j
+                comparisons.append((index0, index1))
+
+        feature_set_intersection = set()
+        feature_set_union = set()
+        for i, (index0, index1) in enumerate(comparisons):
+            input0 = task.input_images[index0]
+            input1 = task.input_images[index1]
+            image_similarity = ImageSimilarity(input0, input1)
+            feature_list = image_similarity.get_satisfied_features()
+
+            feature_set = set(feature_list)
+            if i == 0:
+                feature_set_intersection = feature_set
+            else:
+                feature_set_intersection = feature_set & feature_set_intersection
+
+            feature_set_union = feature_set_union | feature_set
+
+        self.all_input_feature_set_intersection = feature_set_intersection
+        self.all_input_feature_set_union = feature_set_union
+
+    def print_summary(self):
+        features = list(self.all_input_feature_set_intersection)
+        count = len(features)
+        # s = Feature.format_feature_list(features)
+        # print(f"all_input_features: {s}")
+        print(f"all_input_features: {count}")
 
     def measure_test_prediction(self, predicted_output: np.array, test_index: int) -> int:
         """
