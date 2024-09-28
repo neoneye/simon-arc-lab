@@ -56,6 +56,19 @@ class TestHistogram(unittest.TestCase):
             self.assertTrue(histogram.number_of_unique_colors() >= 1)
             self.assertTrue(histogram.number_of_unique_colors() <= 10)
 
+    def test_create_with_image_list(self):
+        image0 = np.array([
+            [5, 5, 5], 
+            [5, 5, 9]], dtype=np.uint8)
+        image1 = np.array([
+            [7, 8, 7, 8], 
+            [7, 8, 7, 8],
+            [7, 8, 7, 9]], dtype=np.uint8)
+        histogram = Histogram.create_with_image_list([image0, image1])
+        actual = histogram.pretty()
+        expected = '7:6,5:5,8:5,9:2'
+        self.assertEqual(actual, expected)
+
     def test_sorted_color_count_list_unambiguous(self):
         image = np.zeros((3, 2), dtype=np.uint8)
         image[0:3, 0:2] = [
@@ -78,6 +91,15 @@ class TestHistogram(unittest.TestCase):
         histogram = Histogram.create_with_image(image)
         actual = histogram.sorted_color_count_list()
         expected = [(5, 2), (7, 2), (9, 2)]
+        self.assertEqual(actual, expected)
+
+    def test_sorted_count_list(self):
+        image = np.array([
+            [9, 8, 7, 7, 6, 6, 6, 5, 5, 5, 5]], dtype=np.uint8)
+        
+        histogram = Histogram.create_with_image(image)
+        actual = histogram.sorted_count_list()
+        expected = [4, 3, 2, 1, 1]
         self.assertEqual(actual, expected)
 
     def test_pretty_histogram_of_image_unambiguous(self):
@@ -325,6 +347,38 @@ class TestHistogram(unittest.TestCase):
         actual = histogram.most_popular_color()
         self.assertEqual(actual, None)
 
+    def test_most_popular_color_list_unambiguous(self):
+        actual = Histogram({0: 5, 6: 3, 7: 8}).most_popular_color_list()
+        self.assertEqual(actual, [7])
+
+    def test_most_popular_color_list_tie_a(self):
+        actual = Histogram({0: 5, 6: 8, 7: 8}).most_popular_color_list()
+        self.assertEqual(actual, [6, 7])
+
+    def test_most_popular_color_list_tie_b(self):
+        actual = Histogram({0: 5, 6: 8, 7: 8, 8: 9, 9: 9}).most_popular_color_list()
+        self.assertEqual(actual, [8, 9])
+
+    def test_most_popular_color_list_tie_c(self):
+        actual = Histogram({0: 1, 1: 1, 2: 9, 3: 2, 6: 8, 7: 8, 8: 9, 9: 9}).most_popular_color_list()
+        self.assertEqual(actual, [2, 8, 9])
+
+    def test_most_popular_color_list_empty(self):
+        actual = Histogram({}).most_popular_color_list()
+        self.assertEqual(actual, [])
+
+    def test_most_popular_color_list_zero(self):
+        histogram = Histogram.empty()
+        histogram.color_count = {5: 0}
+        actual = histogram.most_popular_color_list()
+        self.assertEqual(actual, [])
+
+    def test_most_popular_color_list_negative(self):
+        histogram = Histogram.empty()
+        histogram.color_count = {5: -1}
+        actual = histogram.most_popular_color_list()
+        self.assertEqual(actual, [])
+
     def test_least_popular_color_unambiguous(self):
         actual = Histogram({0: 5, 6: 1, 7: 8}).least_popular_color()
         self.assertEqual(actual, 6)
@@ -357,12 +411,66 @@ class TestHistogram(unittest.TestCase):
         actual = histogram.least_popular_color()
         self.assertEqual(actual, None)
 
+    def test_least_popular_color_list_unambiguous(self):
+        actual = Histogram({0: 5, 6: 1, 7: 8}).least_popular_color_list()
+        self.assertEqual(actual, [6])
+
+    def test_least_popular_color_list_tie_a(self):
+        actual = Histogram({0: 9, 6: 8, 7: 8}).least_popular_color_list()
+        self.assertEqual(actual, [6, 7])
+
+    def test_least_popular_color_list_tie_b(self):
+        actual = Histogram({0: 5, 6: 8, 7: 5, 8: 9, 9: 9}).least_popular_color_list()
+        self.assertEqual(actual, [0, 7])
+
+    def test_least_popular_color_list_tie_c(self):
+        actual = Histogram({0: 1, 1: 1, 2: 2, 3: 2, 6: 8, 7: 8, 8: 9, 9: 9}).least_popular_color_list()
+        self.assertEqual(actual, [0, 1])
+
+    def test_least_popular_color_list_empty(self):
+        actual = Histogram({}).least_popular_color_list()
+        self.assertEqual(actual, [])
+
+    def test_least_popular_color_list_zero(self):
+        histogram = Histogram.empty()
+        histogram.color_count = {5: 0}
+        actual = histogram.least_popular_color_list()
+        self.assertEqual(actual, [])
+
+    def test_least_popular_color_list_negative(self):
+        histogram = Histogram.empty()
+        histogram.color_count = {5: -1}
+        actual = histogram.least_popular_color_list()
+        self.assertEqual(actual, [])
+
     def test_get_count_for_color(self):
         histogram = Histogram({0: 5, 6: 1, 7: 8})
         self.assertEqual(histogram.get_count_for_color(0), 5)
         self.assertEqual(histogram.get_count_for_color(6), 1)
         self.assertEqual(histogram.get_count_for_color(7), 8)
         self.assertEqual(histogram.get_count_for_color(9), 0)
+
+    def test_available_colors(self):
+        self.assertEqual(Histogram.empty().available_colors(), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+        self.assertEqual(Histogram({0: -5}).available_colors(), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+        self.assertEqual(Histogram({0: 5, 6: 1, 7: 8}).available_colors(), [1, 2, 3, 4, 5, 8, 9])
+        self.assertEqual(Histogram({0: 1, 1: 7, 2: 0}).available_colors(), [2, 3, 4, 5, 6, 7, 8, 9])
+        self.assertEqual(Histogram({0: 1, 1: 7, 2: 1}).available_colors(), [3, 4, 5, 6, 7, 8, 9])
+        histogram = Histogram.empty()
+        for color in range(10):
+            histogram.increment(color)
+        self.assertEqual(histogram.available_colors(), [])
+
+    def test_first_available_color(self):
+        self.assertEqual(Histogram.empty().first_available_color(), 0)
+        self.assertEqual(Histogram({0: -5}).first_available_color(), 0)
+        self.assertEqual(Histogram({0: 5, 6: 1, 7: 8}).first_available_color(), 1)
+        self.assertEqual(Histogram({0: 1, 1: 7, 2: 0}).first_available_color(), 2)
+        self.assertEqual(Histogram({0: 1, 1: 7, 2: 1}).first_available_color(), 3)
+        histogram = Histogram.empty()
+        for color in range(10):
+            histogram.increment(color)
+        self.assertEqual(histogram.first_available_color(), None)
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,5 +1,6 @@
 from typing import Dict, List, Tuple, Optional
 import random
+import numpy as np
 
 class Histogram:
     def __init__(self, color_count: Dict[int, int]):
@@ -17,7 +18,10 @@ class Histogram:
         return cls({})
 
     @classmethod
-    def create_with_image(cls, image) -> 'Histogram':
+    def create_with_image(cls, image: np.array) -> 'Histogram':
+        """
+        Populate a histogram with the colors from an image.
+        """
         hist = {}
         for y in range(image.shape[0]):
             for x in range(image.shape[1]):
@@ -27,6 +31,16 @@ class Histogram:
                 else:
                     hist[color] = 1
         return cls(hist)
+
+    @classmethod
+    def create_with_image_list(cls, image_list: list[np.array]) -> 'Histogram':
+        """
+        Populate a histogram with the colors from multiple images.
+        """
+        histogram = Histogram.empty()
+        for image in image_list:
+            histogram = histogram.add(cls.create_with_image(image))
+        return histogram
 
     @classmethod
     def create_random(cls, seed: int, min_colors: int, max_colors: int, min_count: int, max_count: int) -> 'Histogram':
@@ -60,7 +74,19 @@ class Histogram:
         items = sorted(self.color_count.items(), key=lambda item: (-item[1], item[0]))
         return items
 
+    def sorted_count_list(self) -> list[int]:
+        """
+        sort by popularity. Leave out counters that are zero or negative.
+        Descending. The biggest counter is first. The smallest counter is last.
+        """
+
+        items = sorted(self.color_count.values(), reverse=True)
+        return items
+
     def pretty(self) -> str:
+        """
+        Comma separated list of unique colors in the histogram. Ordered by popularity.
+        """
         histogram = self.clone()
         histogram.purge_mutable()
         color_count_list = histogram.sorted_color_count_list()
@@ -222,6 +248,27 @@ class Histogram:
             return None
         return found_color
 
+    def most_popular_color_list(self) -> list[int]:
+        """
+        Find the colors with the highest counters.
+        If there is one unambiguous most popular color, return that color.
+        If there is a tie, return all multiple colors.
+        If there are no colors, return an empty list.
+        Only consider counters that are 1 or greater. Ignore colors with zero counters or negative counters.
+        """
+        found_count = 0
+        found_colors = []
+        for color, count in self.color_count.items():
+            if count < 1:
+                continue
+            if count > found_count:
+                found_count = count
+                found_colors = [color]
+            elif count == found_count:
+                found_colors.append(color)
+        sorted_colors = sorted(found_colors)
+        return sorted_colors
+
     def least_popular_color(self) -> Optional[int]:
         """
         Find the color with the unambiguous lowest counter.
@@ -245,6 +292,30 @@ class Histogram:
             return None
         return found_color
 
+    def least_popular_color_list(self) -> list[int]:
+        """
+        Find the colors with the lowest counter.
+        If there is an unambiguous color, return return a list with just that color.
+        If there is a tie, return a list with multiple colors.
+        If there are no colors, return an empty list.
+        Only consider counters that are 1 or greater. Ignore colors with zero counters or negative counters.
+        """
+        found_count = self.sum_of_counters() + 1
+        found_colors = []
+        same_count = 0
+        for color, count in self.color_count.items():
+            if count < 1:
+                continue
+            if count < found_count:
+                found_count = count
+                found_colors = [color]
+                same_count = 1
+            elif count == found_count:
+                same_count += 1
+                found_colors.append(color)
+        sorted_colors = sorted(found_colors)
+        return sorted_colors
+
     def get_count_for_color(self, color: int) -> int:
         """
         Get the count for a specific color.
@@ -263,4 +334,29 @@ class Histogram:
             if self.color_count[color] < 1:
                 del self.color_count[color]
     
-    
+    def available_colors(self) -> list[int]:
+        """
+        Find the color indexes that are not in the histogram.
+
+        If all colors are used, return an empty list.
+
+        The colors are sorted in ascending order.
+        """
+        self.purge_mutable()
+        colors = set(self.color_count.keys())
+        available_colors = []
+        for color in range(10):
+            if color not in colors:
+                available_colors.append(color)
+        return available_colors
+
+    def first_available_color(self) -> Optional[int]:
+        """
+        Find the lowest color index that is not in the histogram.
+
+        If all colors are used, return None.
+        """
+        colors = self.available_colors()
+        if len(colors) == 0:
+            return None
+        return colors[0]

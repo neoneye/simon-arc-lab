@@ -15,7 +15,7 @@ from simon_arc_lab.image_util import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.task import *
 from simon_arc_lab.image_create_random_simple import *
-from simon_arc_lab.image_trim import outer_bounding_box_after_trim_with_color
+from simon_arc_lab.find_bounding_box import find_bounding_box_ignoring_color
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.rectangle import Rectangle
 from simon_arc_lab.image_shape3x3_center import *
@@ -75,7 +75,7 @@ def generate_task_half(seed: int, edge_name: str, connectivity: PixelConnectivit
                 continue
             accumulated_mask = np.zeros_like(random_image)
             for component in component_list:
-                rect = outer_bounding_box_after_trim_with_color(component, 0)
+                rect = find_bounding_box_ignoring_color(component, 0)
                 rect2 = rectangle_getarea(rect, edge_name)
                 if rect2.is_empty():
                     continue

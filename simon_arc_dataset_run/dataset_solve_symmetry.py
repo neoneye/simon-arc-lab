@@ -36,7 +36,7 @@ from simon_arc_lab.image_symmetry import *
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.benchmark import *
 from simon_arc_lab.image_pad import image_pad_random
-from simon_arc_lab.image_trim import outer_bounding_box_after_trim_with_color
+from simon_arc_lab.find_bounding_box import find_bounding_box_ignoring_color
 from simon_arc_lab.rectangle import Rectangle
 from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
 from simon_arc_dataset.generate_solve import *
@@ -86,7 +86,7 @@ def generate_task_with_input_image_create_output_symmetry_rect(seed: int) -> Tas
                 height, width = input_image.shape
                 input_image = image_pad_random(input_image, seed=seed * 11 + 1000 + i * 997, color=color_padding, min_pad_count=1, max_pad_count=max_pad_count)
                 # Reject the image if the padding color conflicts with the tile color, so it's impossible to extract the tile.
-                rect = outer_bounding_box_after_trim_with_color(input_image, color_padding)
+                rect = find_bounding_box_ignoring_color(input_image, color_padding)
                 if rect.is_empty():
                     continue
                 if rect.width != width or rect.height != height:
@@ -158,7 +158,7 @@ def generate_task_with_input_image_create_output_symmetry_square(seed: int) -> T
                 height, width = input_image.shape
                 input_image = image_pad_random(input_image, seed=seed * 11 + 1000 + i * 997, color=color_padding, min_pad_count=1, max_pad_count=max_pad_count)
                 # Reject the image if the padding color conflicts with the tile color, so it's impossible to extract the tile.
-                rect = outer_bounding_box_after_trim_with_color(input_image, color_padding)
+                rect = find_bounding_box_ignoring_color(input_image, color_padding)
                 if rect.is_empty():
                     continue
                 if rect.width != width or rect.height != height:
@@ -226,7 +226,7 @@ def generate_task_with_symmetry_rect_input_image_and_extract_a_particular_tile(s
                 height, width = input_image.shape
                 input_image = image_pad_random(input_image, seed=seed * 11 + 1000 + i * 997, color=color_padding, min_pad_count=1, max_pad_count=max_pad_count)
                 # Reject the image if the padding color conflicts with the tile color, so it's impossible to extract the tile.
-                rect = outer_bounding_box_after_trim_with_color(input_image, color_padding)
+                rect = find_bounding_box_ignoring_color(input_image, color_padding)
                 if rect.is_empty():
                     continue
                 if rect.width != width or rect.height != height:
@@ -306,7 +306,7 @@ def generate_task_with_symmetry_square_input_image_and_extract_a_particular_tile
                 height, width = input_image.shape
                 input_image = image_pad_random(input_image, seed=seed * 11 + 1000 + i * 997, color=color_padding, min_pad_count=1, max_pad_count=max_pad_count)
                 # Reject the image if the padding color conflicts with the tile color, so it's impossible to extract the tile.
-                rect = outer_bounding_box_after_trim_with_color(input_image, color_padding)
+                rect = find_bounding_box_ignoring_color(input_image, color_padding)
                 if rect.is_empty():
                     continue
                 if rect.width != width or rect.height != height:

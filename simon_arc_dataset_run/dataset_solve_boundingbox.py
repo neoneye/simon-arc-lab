@@ -39,7 +39,7 @@ from simon_arc_lab.rectangle import Rectangle
 from simon_arc_lab.image_rect import image_rect, image_rect_hollow
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_create_random_simple import *
-from simon_arc_lab.image_trim import outer_bounding_box_after_trim_with_color
+from simon_arc_lab.find_bounding_box import find_bounding_box_ignoring_color
 from simon_arc_lab.benchmark import *
 from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
 from simon_arc_dataset.generate_solve import *
@@ -115,7 +115,7 @@ def generate_task_boundingbox_of_lonely_pixels(seed: int, transformation_id: str
                 input_image_raw[y, x] = random.Random(iteration_seed + 5 + x + y).randint(1, 9)
                 input_mask[y, x] = 1
 
-            bounding_box = outer_bounding_box_after_trim_with_color(input_mask, 0)
+            bounding_box = find_bounding_box_ignoring_color(input_mask, 0)
             if bounding_box.mass() < 1:
                 continue
             if bounding_box.width == width and bounding_box.height == height:
