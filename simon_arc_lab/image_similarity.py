@@ -139,8 +139,12 @@ class ImageSimilarity:
         
         return: 0 to 100
         """
-        a_intersection_b = sum(parameters)
         a_union_b = len(parameters)
+        if a_union_b == 0:
+            # Avoid division by zero
+            # No features to compare, thus no features can be satisfied.
+            return 0
+        a_intersection_b = sum(parameters)
         return a_intersection_b * 100 // a_union_b
 
     def _compute_features(self) -> dict:

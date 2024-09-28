@@ -4,6 +4,8 @@ from .image_similarity import *
 
 class TestImageSimilarity(unittest.TestCase):
     def test_10000_compute_jaccard_index(self):
+        self.assertEqual(ImageSimilarity.compute_jaccard_index([]), 0)
+        self.assertEqual(ImageSimilarity.compute_jaccard_index([False]), 0)
         self.assertEqual(ImageSimilarity.compute_jaccard_index([False, False]), 0)
         self.assertEqual(ImageSimilarity.compute_jaccard_index([False, True]), 50)
         self.assertEqual(ImageSimilarity.compute_jaccard_index([True, False]), 50)
