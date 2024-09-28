@@ -1,5 +1,5 @@
-# IDEA: compare all inputs with each other, and determine what features are common.
-# IDEA: compare all outputs with each other, and determine what features are common.
+# IDEA: compare all input histograms with each other, and determine what features are common.
+# IDEA: compare example output histograms with each other, and determine what features are common.
 import numpy as np
 from .task import Task
 from .image_similarity import ImageSimilarity, Feature
