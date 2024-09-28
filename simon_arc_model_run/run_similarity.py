@@ -33,7 +33,9 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
 
-show_plot = False
+show_plot_intersectioncount = False
+show_plot_testaccuracy = False
+
 summary_list = []
 number_of_items_in_list = len(groupname_pathtotaskdir_list)
 for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
@@ -41,6 +43,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
 
     taskset = TaskSet.load_directory(path_to_task_dir)
 
+    accumulated_test_accuracy_list = []
     accumulated_score_average_list = []
     accumulated_intersectioncount_list = []
     for task in taskset.tasks:
@@ -51,7 +54,10 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
         for i in range(task.count_tests):
             output = task.test_output(i)
             score = ts.measure_test_prediction(output, i)
+            # if score < 70:
+            #     print(f"task with low score {score}")
             test_score_list.append(score)
+            accumulated_test_accuracy_list.append(score)
         test_accuracy = ",".join([str(x) for x in test_score_list])
 
         # Exercises the ImageSimilarity class.
@@ -87,10 +93,17 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
     summary = f"Group: '{groupname}'    similarity: {accumulated_score_average:,.1f}"
     summary_list.append(summary)
 
-    if show_plot:
+    if show_plot_intersectioncount:
         plt.hist(accumulated_intersectioncount_list, bins=100)
         plt.title(f"Group: '{groupname}'")
         plt.xlabel("Intersection count")
+        plt.ylabel("Frequency")
+        plt.show()
+
+    if show_plot_testaccuracy:
+        plt.hist(accumulated_test_accuracy_list, bins=100)
+        plt.title(f"Group: '{groupname}'")
+        plt.xlabel("Test accuracy")
         plt.ylabel("Frequency")
         plt.show()
 

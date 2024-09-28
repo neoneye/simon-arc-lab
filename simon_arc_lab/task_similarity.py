@@ -1,5 +1,13 @@
+# IDEA: is the output histogram a subset of the input histogram, for all pairs.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=be94b721
+#
+# IDEA: compare scale factor across the input/output images.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=c59eb873
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=c3e719e8
+#
 # IDEA: score the features are there in the maybe set, with a lower weight. Or with an lower confidence level.
 # IDEA: score the features are there in the outside-intersection set, with a negative weight.
+#
 # IDEA: compare all input histograms with each other, and determine what features are common.
 # IDEA: compare example output histograms with each other, and determine what features are common.
 import numpy as np
