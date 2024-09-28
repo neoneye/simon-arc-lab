@@ -96,6 +96,7 @@ class FeatureType(Enum):
     SAME_LEAST_POPULAR_COLOR_LIST = "same_least_popular_color_list"
     AGREE_ON_COLOR = "agree_on_color"
     AGREE_ON_COLOR_WITH_SAME_COUNTER = "agree_on_color_with_same_counter"
+    UNIQUE_COLORS_IS_A_SUBSET = "unique_colors_is_a_subset"
     SAME_BOUNDING_BOX_SIZE_OF_COLOR = "same_bounding_box_size_of_color"
     SAME_BIGRAMS_DIRECTION_ALL = "same_bigrams_direction_all"
     SAME_BIGRAMS_DIRECTION_LEFTRIGHT = "same_bigrams_direction_leftright"
@@ -166,6 +167,7 @@ class ImageSimilarity:
             Feature(FeatureType.SAME_HISTOGRAM_COUNTERS): self.same_histogram_counters(),
             Feature(FeatureType.SAME_MOST_POPULAR_COLOR_LIST): self.same_most_popular_color_list(),
             Feature(FeatureType.SAME_LEAST_POPULAR_COLOR_LIST): self.same_least_popular_color_list(),
+            Feature(FeatureType.UNIQUE_COLORS_IS_A_SUBSET): self.unique_colors_is_a_subset(),
             Feature(FeatureType.SAME_BIGRAMS_DIRECTION_ALL): self.same_bigrams_direction_all(),
             Feature(FeatureType.SAME_BIGRAMS_DIRECTION_LEFTRIGHT): self.same_bigrams_direction_leftright(),
             Feature(FeatureType.SAME_BIGRAMS_DIRECTION_TOPBOTTOM): self.same_bigrams_direction_topbottom(),
@@ -361,6 +363,23 @@ class ImageSimilarity:
         color_list0 = histogram0.least_popular_color_list()
         color_list1 = histogram1.least_popular_color_list()
         return color_list0 == color_list1
+
+    def unique_colors_is_a_subset(self) -> bool:
+        """
+        Is the unique colors of one image a subset of the unique colors of the other image.
+
+        Examples:
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=be94b721
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ddf7fa4f
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=de1cd16c
+        """
+        histogram0 = self.histogram0()
+        histogram1 = self.histogram1()
+        color_set0 = set(histogram0.unique_colors())
+        color_set1 = set(histogram1.unique_colors())
+        a = color_set0.issubset(color_set1)
+        b = color_set1.issubset(color_set0)
+        return a or b
 
     def agree_on_color(self, color: int) -> bool:
         """

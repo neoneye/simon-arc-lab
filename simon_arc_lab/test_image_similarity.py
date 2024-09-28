@@ -617,6 +617,45 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
+    def test_39000_unique_colors_is_a_subset_true(self):
+        # Arrange
+        image0 = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [3, 2, 3, 2, 3]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.unique_colors_is_a_subset()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_39001_unique_colors_is_a_subset_true(self):
+        # Arrange
+        image0 = np.array([
+            [3, 2, 3, 2, 3]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.unique_colors_is_a_subset()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_39002_unique_colors_is_a_subset_false(self):
+        # Arrange
+        image0 = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [5, 6, 7]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.unique_colors_is_a_subset()
+        # Assert
+        self.assertEqual(actual, False)
+
     def test_40000_same_bigrams_direction_all_rotate(self):
         # Arrange
         image0 = np.array([
