@@ -63,8 +63,6 @@
 # IDEA: Make another similarity class that compares images, where the order matters.
 # This way I can check, is one image a subset of the other image.
 #
-# IDEA: A verbose jaccard_index, where I can see which features are satisfied.
-#
 # IDEA: has same 3x3 structure, as in:
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=44d8ac46
 #
@@ -72,15 +70,17 @@
 # Are there too few/many pixels with a particular color. By what amount, a few pixels, or many pixels.
 #
 # trigrams
-# shape types
+#
+# 3x3 shape types
 #
 # IDEA: there are many agree_on_color, maybe assign a lower weight, so they don't dominate the jaccard index.
 # IDEA: there are many agree_on_color_with_same_counter, maybe assign a lower weight, so they don't dominate the jaccard index.
 # IDEA: there are many same_bounding_box_size_of_color, maybe assign a lower weight, so they don't dominate the jaccard index.
-
+#
 from .histogram import *
 from .image_bigram import *
 from .find_bounding_box import find_bounding_box_multiple_ignore_colors
+from .image_shape2x2 import *
 import numpy as np
 from enum import Enum
 from dataclasses import dataclass
@@ -109,6 +109,7 @@ class FeatureType(Enum):
     SAME_BIGRAMS_DIRECTION_TOPLEFTBOTTOMRIGHT = "same_bigrams_direction_topleftbottomright"
     SAME_BIGRAMS_DIRECTION_TOPRIGHTBOTTOMLEFT = "same_bigrams_direction_toprightbottomleft"
     SAME_BIGRAMS_SUBSET = "same_bigrams_subset"
+    SAME_SHAPE2X2 = "same_shape2x2"
 
 @dataclass(frozen=True)
 class Feature:
@@ -179,6 +180,7 @@ class ImageSimilarity:
             Feature(FeatureType.SAME_BIGRAMS_DIRECTION_TOPLEFTBOTTOMRIGHT): self.same_bigrams_direction_topleftbottomright(),
             Feature(FeatureType.SAME_BIGRAMS_DIRECTION_TOPRIGHTBOTTOMLEFT): self.same_bigrams_direction_toprightbottomleft(),
             Feature(FeatureType.SAME_BIGRAMS_SUBSET): self.same_bigrams_subset(),
+            Feature(FeatureType.SAME_SHAPE2X2): self.same_shape2x2(),
         }
 
         # Color specific features
@@ -608,3 +610,21 @@ class ImageSimilarity:
         same_size = same_width and same_height
         return same_size
 
+    def same_shape2x2(self) -> bool:
+        """
+        Do the same 2x2 shapes occur in both images.
+
+        Examples:
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f76d97a5
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=eb5a1d5d
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=eb281b96
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ea32f347
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e9614598
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e76a88a6
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e509e548
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ded97339
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=44d8ac46
+        """
+        shape_id_list0 = ImageShape2x2.shape_id_list(self.image0)
+        shape_id_list1 = ImageShape2x2.shape_id_list(self.image1)
+        return shape_id_list0 == shape_id_list1

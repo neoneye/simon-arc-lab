@@ -991,6 +991,66 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
+    def test_60000_same_shape2x2_true(self):
+        # Arrange
+        image0 = np.array([
+            [9, 9, 9, 9, 9, 9],
+            [9, 9, 9, 9, 9, 9],
+            [1, 5, 5, 1, 5, 5],
+            [9, 9, 9, 9, 9, 9],
+            [9, 9, 9, 9, 9, 9]], dtype=np.uint8)
+        image1 = np.array([
+            [9, 9, 9, 9, 9, 9, 9, 9, 9],
+            [9, 9, 9, 9, 9, 9, 9, 9, 9],
+            [1, 5, 5, 1, 5, 5, 1, 1, 5],
+            [9, 9, 9, 9, 9, 9, 9, 9, 9],
+            [9, 9, 9, 9, 9, 9, 9, 9, 9]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_shape2x2()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_60001_same_shape2x2_true(self):
+        # Arrange
+        image0 = np.array([
+            [9, 9, 9, 9, 9, 9],
+            [9, 9, 9, 9, 9, 9],
+            [1, 5, 5, 1, 5, 5],
+            [9, 9, 9, 9, 9, 9],
+            [9, 9, 9, 9, 9, 9]], dtype=np.uint8)
+        image1 = np.array([
+            [9, 9, 9, 9, 9, 9],
+            [7, 3, 3, 1, 5, 5],
+            [7, 3, 3, 1, 5, 5],
+            [7, 3, 3, 1, 5, 5],
+            [9, 9, 9, 9, 9, 9]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_shape2x2()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_60002_same_shape2x2_false(self):
+        # Arrange
+        image0 = np.array([
+            [9, 9, 9, 9, 9, 9],
+            [9, 9, 9, 9, 9, 9],
+            [1, 5, 5, 1, 5, 5],
+            [9, 9, 9, 9, 9, 9],
+            [9, 9, 9, 9, 9, 9]], dtype=np.uint8)
+        image1 = np.array([
+            [9, 9, 9, 9, 7, 7],
+            [1, 5, 5, 1, 7, 1],
+            [1, 7, 7, 7, 1, 7],
+            [1, 5, 5, 1, 7, 1],
+            [9, 9, 9, 9, 7, 7]], dtype=np.uint8)
+        i = ImageSimilarity(image0, image1)
+        # Act
+        actual = i.same_shape2x2()
+        # Assert
+        self.assertEqual(actual, False)
+
     def test_60000_format_feature_list(self):
         # Arrange
         feature_list = [
