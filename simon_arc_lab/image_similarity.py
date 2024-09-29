@@ -81,6 +81,7 @@ from .histogram import *
 from .image_bigram import *
 from .find_bounding_box import find_bounding_box_multiple_ignore_colors
 from .image_shape2x2 import *
+from .image_with_cache import ImageWithCache
 import numpy as np
 from enum import Enum
 from dataclasses import dataclass
@@ -135,6 +136,8 @@ class ImageSimilarity:
         """
         self.image0 = image0
         self.image1 = image1
+        self.image_with_cache0 = ImageWithCache(image0)
+        self.image_with_cache1 = ImageWithCache(image1)
         self.lazy_histogram0 = None
         self.lazy_histogram1 = None
         self.lazy_features = None
@@ -273,14 +276,10 @@ class ImageSimilarity:
         return orientation0 == orientation1
 
     def histogram0(self) -> Histogram:
-        if self.lazy_histogram0 is None:
-            self.lazy_histogram0 = Histogram.create_with_image(self.image0)
-        return self.lazy_histogram0
+        return self.image_with_cache0.histogram()
     
     def histogram1(self) -> Histogram:
-        if self.lazy_histogram1 is None:
-            self.lazy_histogram1 = Histogram.create_with_image(self.image1)
-        return self.lazy_histogram1
+        return self.image_with_cache1.histogram()
 
     def same_histogram(self) -> bool:
         """
@@ -348,30 +347,24 @@ class ImageSimilarity:
         Examples:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=bda2d7a6
         """
-        histogram0 = self.histogram0()
-        histogram1 = self.histogram1()
-        counters0 = histogram0.sorted_count_list()
-        counters1 = histogram1.sorted_count_list()
+        counters0 = self.image_with_cache0.histogram_sorted_count_list()
+        counters1 = self.image_with_cache1.histogram_sorted_count_list()
         return counters0 == counters1
 
     def same_most_popular_color_list(self) -> bool:
         """
         Both images agree on the same most popular colors.
         """
-        histogram0 = self.histogram0()
-        histogram1 = self.histogram1()
-        color_list0 = histogram0.most_popular_color_list()
-        color_list1 = histogram1.most_popular_color_list()
+        color_list0 = self.image_with_cache0.histogram_most_popular_color_list()
+        color_list1 = self.image_with_cache1.histogram_most_popular_color_list()
         return color_list0 == color_list1
 
     def same_least_popular_color_list(self) -> bool:
         """
         Both images agree on the same least popular colors.
         """
-        histogram0 = self.histogram0()
-        histogram1 = self.histogram1()
-        color_list0 = histogram0.least_popular_color_list()
-        color_list1 = histogram1.least_popular_color_list()
+        color_list0 = self.image_with_cache0.histogram_least_popular_color_list()
+        color_list1 = self.image_with_cache1.histogram_least_popular_color_list()
         return color_list0 == color_list1
 
     def unique_colors_is_a_subset(self) -> bool:
