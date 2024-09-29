@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from matplotlib import pyplot as plt
 import numpy as np
 
@@ -20,10 +21,10 @@ if not os.path.isdir(path_to_arc_dataset_collection_dataset):
 
 groupname_pathtotaskdir_list = [
     ('arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
-    # ('arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
-    # ('tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
-    # ('miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
-    # ('conceptarc', os.path.join(path_to_arc_dataset_collection_dataset, 'ConceptARC/data')),
+    ('arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
+    ('tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
+    ('miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
+    ('conceptarc', os.path.join(path_to_arc_dataset_collection_dataset, 'ConceptARC/data')),
     # ('rearc_easy', os.path.join(path_to_arc_dataset_collection_dataset, 'RE-ARC/data/easy')),
     # ('rearc_hard', os.path.join(path_to_arc_dataset_collection_dataset, 'RE-ARC/data/hard')),
     # ('testdata', os.path.join(PROJECT_ROOT, 'testdata', 'simple_arc_tasks')),
@@ -40,10 +41,14 @@ show_plot_testaccuracy = False
 
 summary_list = []
 number_of_items_in_list = len(groupname_pathtotaskdir_list)
+total_elapsed_time = 0
 for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
     print(f"Processing {index+1} of {number_of_items_in_list}. Group name '{groupname}'")
 
     taskset = TaskSet.load_directory(path_to_task_dir)
+
+    # start time stamp, so I can measure elapsed time
+    start_time = time.time()
 
     accumulated_test_accuracy_list = []
     accumulated_score_average_list = []
@@ -95,9 +100,13 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
         print(f"Task: '{task.metadata_task_id}'    min: {score_min} average: {score_average:,.1f} max: {score_max} std_dev: {score_std_dev:,.1f} intersection: {count_features_set_intersection}  test_accuracy: {test_accuracy}  task_summary: {ts.summary()}")
         accumulated_score_average_list.append(score_average)
 
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    total_elapsed_time += elapsed_time
+
     accumulated_score_average = sum(accumulated_score_average_list) / len(accumulated_score_average_list)
     accumulated_accuracy_average = sum(accumulated_test_accuracy_list) / len(accumulated_test_accuracy_list)
-    summary = f"Group: '{groupname}'    similarity: {accumulated_score_average:,.1f}   accuracy: {accumulated_accuracy_average:,.1f}"
+    summary = f"Group: '{groupname}'    similarity: {accumulated_score_average:,.1f}   accuracy: {accumulated_accuracy_average:,.1f}  elapsed: {elapsed_time:,.1f} seconds"
     summary_list.append(summary)
 
     if show_plot_intersectioncount:
@@ -115,3 +124,4 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
         plt.show()
 
 print("Summary:\n" + "\n".join(summary_list))
+print(f"Total elapsed time: {total_elapsed_time:,.1f} seconds")
