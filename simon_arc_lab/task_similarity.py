@@ -59,8 +59,6 @@ class TaskSimilarity:
         self.output_image_with_cache_list = None
         self.example_pair_feature_set_intersection = None
         self.example_pair_feature_set_union = None
-        self.all_input_feature_set_intersection = None
-        self.all_input_feature_set_union = None
         self.example_output_feature_set_intersection = None
         self.example_output_feature_set_union = None
 
@@ -68,7 +66,6 @@ class TaskSimilarity:
     def create_with_task(cls, task: Task) -> 'TaskSimilarity':
         ts = cls(task)
         ts.prepare_image_cache()
-        ts.populate_all_input_feature_set()
         ts.populate_example_output_feature_set()
         ts.populate_example_pair_feature_set()
         return ts
@@ -128,15 +125,6 @@ class TaskSimilarity:
         self.example_pair_feature_set_intersection = feature_set_intersection
         self.example_pair_feature_set_union = feature_set_union
 
-    def populate_all_input_feature_set(self):
-        """
-        Compare all input images of the example+test pairs.
-        """
-        assert len(self.input_image_with_cache_list) == (self.task.count_examples + self.task.count_tests)
-        result = TaskSimilarityMultiImage.analyze_images(self.input_image_with_cache_list)
-        self.all_input_feature_set_intersection = result.feature_set_intersection
-        self.all_input_feature_set_union = result.feature_set_union
-
     def populate_example_output_feature_set(self):
         """
         Compare all output images of the example pairs. Don't process the test pairs.
@@ -148,7 +136,6 @@ class TaskSimilarity:
 
     def summary(self) -> str:
         items = [
-            f"input: {len(self.all_input_feature_set_intersection)}",
             f"output: {len(self.example_output_feature_set_intersection)}",
             f"pair: {len(self.example_pair_feature_set_intersection)}",
         ]
