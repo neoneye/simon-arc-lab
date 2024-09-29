@@ -452,9 +452,9 @@ class ImageSimilarity:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=91413438
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=8ee62060
         """
-        bigram0 = image_bigrams_direction_all(self.image0, 255)
-        bigram1 = image_bigrams_direction_all(self.image1, 255)
-        return bigram0 == bigram1
+        bigram_list0 = self.image_with_cache0.bigrams_direction_all()
+        bigram_list1 = self.image_with_cache1.bigrams_direction_all()
+        return bigram_list0 == bigram_list1
 
     def same_bigrams_direction_leftright(self) -> bool:
         """
@@ -473,9 +473,9 @@ class ImageSimilarity:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=85b81ff1
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=7ee1c6ea
         """
-        bigram0 = image_bigrams_direction_leftright(self.image0, 255)
-        bigram1 = image_bigrams_direction_leftright(self.image1, 255)
-        return bigram0 == bigram1
+        bigram_list0 = self.image_with_cache0.bigrams_direction_leftright()
+        bigram_list1 = self.image_with_cache1.bigrams_direction_leftright()
+        return bigram_list0 == bigram_list1
 
     def same_bigrams_direction_topbottom(self) -> bool:
         """
@@ -488,9 +488,9 @@ class ImageSimilarity:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d8c310e9
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=82819916
         """
-        bigram0 = image_bigrams_direction_topbottom(self.image0, 255)
-        bigram1 = image_bigrams_direction_topbottom(self.image1, 255)
-        return bigram0 == bigram1
+        bigram_list0 = self.image_with_cache0.bigrams_direction_topbottom()
+        bigram_list1 = self.image_with_cache1.bigrams_direction_topbottom()
+        return bigram_list0 == bigram_list1
 
     def same_bigrams_direction_topleftbottomright(self) -> bool:
         """
@@ -500,9 +500,9 @@ class ImageSimilarity:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=bbc9ae5d
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9dfd6313
         """
-        bigram0 = image_bigrams_direction_topleftbottomright(self.image0, 255)
-        bigram1 = image_bigrams_direction_topleftbottomright(self.image1, 255)
-        return bigram0 == bigram1
+        bigram_list0 = self.image_with_cache0.bigrams_direction_topleftbottomright()
+        bigram_list1 = self.image_with_cache1.bigrams_direction_topleftbottomright()
+        return bigram_list0 == bigram_list1
 
     def same_bigrams_direction_toprightbottomleft(self) -> bool:
         """
@@ -515,9 +515,9 @@ class ImageSimilarity:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d10ecb37
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=feca6190
         """
-        bigram0 = image_bigrams_direction_toprightbottomleft(self.image0, 255)
-        bigram1 = image_bigrams_direction_toprightbottomleft(self.image1, 255)
-        return bigram0 == bigram1
+        bigram_list0 = self.image_with_cache0.bigrams_direction_toprightbottomleft()
+        bigram_list1 = self.image_with_cache1.bigrams_direction_toprightbottomleft()
+        return bigram_list0 == bigram_list1
 
     def same_bigrams_subset(self) -> bool:
         """
@@ -534,8 +534,8 @@ class ImageSimilarity:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=22eb0ac0
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d4b1c2b1
         """
-        bigram_list0 = image_bigrams_direction_all(self.image0, 255)
-        bigram_list1 = image_bigrams_direction_all(self.image1, 255)
+        bigram_list0 = self.image_with_cache0.bigrams_direction_all()
+        bigram_list1 = self.image_with_cache1.bigrams_direction_all()
 
         # remove bigrams where the tuple contains 255
         bigram_set0 = set()

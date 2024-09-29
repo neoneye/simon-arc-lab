@@ -1,5 +1,7 @@
+from typing import Tuple
 import numpy as np
 from .histogram import Histogram
+from .image_bigram import *
 
 class ImageWithCache:
     def __init__(self, image: np.array):
@@ -9,6 +11,11 @@ class ImageWithCache:
         self.lazy_histogram_most_popular_color_list = None
         self.lazy_histogram_least_popular_color_list = None
         self.lazy_histogram_unique_colors = None
+        self.lazy_bigrams_direction_all = None
+        self.lazy_bigrams_direction_leftright = None
+        self.lazy_bigrams_direction_topbottom = None
+        self.lazy_bigrams_direction_topleftbottomright = None
+        self.lazy_bigrams_direction_toprightbottomleft = None
 
     def histogram(self) -> Histogram:
         if self.lazy_histogram is None:
@@ -34,3 +41,28 @@ class ImageWithCache:
         if self.lazy_histogram_unique_colors is None:
             self.lazy_histogram_unique_colors = self.histogram().unique_colors()
         return self.lazy_histogram_unique_colors
+
+    def bigrams_direction_all(self) -> list[Tuple[int, int]]:
+        if self.lazy_bigrams_direction_all is None:
+            self.lazy_bigrams_direction_all = image_bigrams_direction_all(self.image, 255)
+        return self.lazy_bigrams_direction_all
+
+    def bigrams_direction_leftright(self) -> list[Tuple[int, int]]:
+        if self.lazy_bigrams_direction_leftright is None:
+            self.lazy_bigrams_direction_leftright = image_bigrams_direction_leftright(self.image, 255)
+        return self.lazy_bigrams_direction_leftright
+
+    def bigrams_direction_topbottom(self) -> list[Tuple[int, int]]:
+        if self.lazy_bigrams_direction_topbottom is None:
+            self.lazy_bigrams_direction_topbottom = image_bigrams_direction_topbottom(self.image, 255)
+        return self.lazy_bigrams_direction_topbottom
+
+    def bigrams_direction_topleftbottomright(self) -> list[Tuple[int, int]]:
+        if self.lazy_bigrams_direction_topleftbottomright is None:
+            self.lazy_bigrams_direction_topleftbottomright = image_bigrams_direction_topleftbottomright(self.image, 255)
+        return self.lazy_bigrams_direction_topleftbottomright
+
+    def bigrams_direction_toprightbottomleft(self) -> list[Tuple[int, int]]:
+        if self.lazy_bigrams_direction_toprightbottomleft is None:
+            self.lazy_bigrams_direction_toprightbottomleft = image_bigrams_direction_toprightbottomleft(self.image, 255)
+        return self.lazy_bigrams_direction_toprightbottomleft
