@@ -38,7 +38,7 @@ class TaskSimilarityMultiImage:
         feature_set_intersection = set()
         feature_set_union = set()
         for i, (index0, index1) in enumerate(comparisons):
-            image_similarity = ImageSimilarity(images[index0], images[index1])
+            image_similarity = ImageSimilarity.create_with_images(images[index0], images[index1])
             feature_list = image_similarity.get_satisfied_features()
 
             feature_set = set(feature_list)
@@ -79,7 +79,7 @@ class TaskSimilarity:
         for i in range(task.count_examples):
             input = task.input_images[i]
             output = task.output_images[i]
-            image_similarity = ImageSimilarity(input, output)
+            image_similarity = ImageSimilarity.create_with_images(input, output)
             feature_list = image_similarity.get_satisfied_features()
 
             # IDEA: pair specific features, such as some colors for that pair, and some other colors for another pair.
@@ -137,7 +137,7 @@ class TaskSimilarity:
 
         # Compare the test input image with the predicted output.
         input = task.test_input(test_index)
-        image_similarity = ImageSimilarity(input, predicted_output)
+        image_similarity = ImageSimilarity.create_with_images(input, predicted_output)
         feature_list = image_similarity.get_satisfied_features()
         feature_set = set(feature_list)
 

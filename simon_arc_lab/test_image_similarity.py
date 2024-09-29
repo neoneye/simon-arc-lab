@@ -17,7 +17,7 @@ class TestImageSimilarity(unittest.TestCase):
             [1, 4],
             [2, 5],
             [3, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image0)
+        i = ImageSimilarity.create_with_images(image0, image0)
         # Act
         actual = i.same_image()
         # Assert
@@ -33,7 +33,7 @@ class TestImageSimilarity(unittest.TestCase):
             [3, 3],
             [3, 3],
             [3, 3]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_image()
         # Assert
@@ -49,7 +49,7 @@ class TestImageSimilarity(unittest.TestCase):
             [3, 6],
             [2, 5],
             [1, 4]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_shape()
         # Assert
@@ -64,7 +64,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [1, 2, 3],
             [4, 5, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_shape()
         # Assert
@@ -80,7 +80,7 @@ class TestImageSimilarity(unittest.TestCase):
             [3, 6],
             [2, 5],
             [1, 4]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_shape_allow_for_rotation()
         # Assert
@@ -95,7 +95,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [1, 2, 3],
             [4, 5, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_shape_allow_for_rotation()
         # Assert
@@ -110,7 +110,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [1, 2],
             [3, 4]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_shape_allow_for_rotation()
         # Assert
@@ -126,7 +126,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [1, 2, 3],
             [4, 5, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_shape_width()
         # Assert
@@ -141,7 +141,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [1, 2, 3],
             [4, 5, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_shape_width()
         # Assert
@@ -155,7 +155,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [1, 2, 3],
             [4, 5, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_shape_height()
         # Assert
@@ -170,7 +170,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [1, 2, 3],
             [4, 5, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_shape_height()
         # Assert
@@ -185,7 +185,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [1, 2, 3],
             [4, 5, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_shape_orientation()
         # Assert
@@ -202,7 +202,7 @@ class TestImageSimilarity(unittest.TestCase):
             [1, 4],
             [2, 5],
             [3, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_shape_orientation()
         # Assert
@@ -217,7 +217,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [1, 3],
             [2, 4]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_shape_orientation()
         # Assert
@@ -232,7 +232,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [1, 2, 3],
             [4, 5, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_shape_orientation()
         # Assert
@@ -248,7 +248,7 @@ class TestImageSimilarity(unittest.TestCase):
             [3, 6],
             [2, 5],
             [1, 4]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_histogram()
         # Assert
@@ -264,7 +264,7 @@ class TestImageSimilarity(unittest.TestCase):
             [3, 3],
             [3, 3],
             [3, 3]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_histogram()
         # Assert
@@ -280,7 +280,7 @@ class TestImageSimilarity(unittest.TestCase):
             [1, 2, 3, 4, 5, 6],
             [1, 2, 3, 4, 5, 6],
             [1, 2, 3, 4, 5, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_unique_colors()
         # Assert
@@ -295,7 +295,7 @@ class TestImageSimilarity(unittest.TestCase):
             [1, 2, 3, 4, 5, 6],
             [1, 2, 3, 4, 5, 6],
             [1, 2, 3, 4, 5, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_unique_colors()
         # Assert
@@ -311,7 +311,7 @@ class TestImageSimilarity(unittest.TestCase):
             [9, 8, 7],
             [9, 8, 7],
             [6, 5, 4]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_number_of_unique_colors()
         # Assert
@@ -326,7 +326,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [1, 2, 3],
             [4, 5, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_number_of_unique_colors()
         # Assert
@@ -340,7 +340,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [3, 4, 5],
             [6, 7, 5]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_number_of_unique_colors()
         # Assert
@@ -353,7 +353,7 @@ class TestImageSimilarity(unittest.TestCase):
             [3, 4]], dtype=np.uint8)
         image1 = np.array([
             [4, 3, 2, 1]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_histogram_ignoring_scale()
         # Assert
@@ -368,7 +368,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [1, 1, 2, 2, 3, 3],
             [4, 4, 5, 5, 6, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_histogram_ignoring_scale()
         # Assert
@@ -384,7 +384,7 @@ class TestImageSimilarity(unittest.TestCase):
             [1, 2, 3, 4, 5, 6],
             [1, 2, 3, 4, 5, 6],
             [1, 2, 3, 4, 5, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_histogram_ignoring_scale()
         # Assert
@@ -398,7 +398,7 @@ class TestImageSimilarity(unittest.TestCase):
             [3]], dtype=np.uint8)
         image1 = np.array([
             [1, 2]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_histogram_ignoring_scale()
         # Assert
@@ -412,7 +412,7 @@ class TestImageSimilarity(unittest.TestCase):
             [6, 7]], dtype=np.uint8)
         image1 = np.array([
             [1, 1, 8, 8, 8, 9]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_histogram_counters()
         # Assert
@@ -426,7 +426,7 @@ class TestImageSimilarity(unittest.TestCase):
             [6, 7]], dtype=np.uint8)
         image1 = np.array([
             [1, 8, 8, 8, 8, 9]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_histogram_counters()
         # Assert
@@ -440,7 +440,7 @@ class TestImageSimilarity(unittest.TestCase):
             [6, 7]], dtype=np.uint8)
         image1 = np.array([
             [1, 5, 8, 5]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_most_popular_color_list()
         # Assert
@@ -455,7 +455,7 @@ class TestImageSimilarity(unittest.TestCase):
             [5, 7]], dtype=np.uint8)
         image1 = np.array([
             [5, 5, 9, 7, 7]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_most_popular_color_list()
         # Assert
@@ -470,7 +470,7 @@ class TestImageSimilarity(unittest.TestCase):
             [1, 1, 1]], dtype=np.uint8)
         image1 = np.array([
             [3, 3, 3, 1]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_most_popular_color_list()
         # Assert
@@ -484,7 +484,7 @@ class TestImageSimilarity(unittest.TestCase):
             [6, 7]], dtype=np.uint8)
         image1 = np.array([
             [1, 5, 7, 1, 5]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_least_popular_color_list()
         # Assert
@@ -500,7 +500,7 @@ class TestImageSimilarity(unittest.TestCase):
             [5, 7]], dtype=np.uint8)
         image1 = np.array([
             [5, 5, 9, 9, 9, 7, 7]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_least_popular_color_list()
         # Assert
@@ -515,7 +515,7 @@ class TestImageSimilarity(unittest.TestCase):
             [1, 1, 1]], dtype=np.uint8)
         image1 = np.array([
             [7, 7, 7, 1, 1]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_least_popular_color_list()
         # Assert
@@ -531,7 +531,7 @@ class TestImageSimilarity(unittest.TestCase):
             [5, 7]], dtype=np.uint8)
         image1 = np.array([
             [5, 5, 9, 9, 9, 7, 7]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.agree_on_color(7)
         # Assert
@@ -547,7 +547,7 @@ class TestImageSimilarity(unittest.TestCase):
             [5, 7]], dtype=np.uint8)
         image1 = np.array([
             [5, 5, 9, 9, 9, 7, 7]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.agree_on_color(6)
         # Assert
@@ -563,7 +563,7 @@ class TestImageSimilarity(unittest.TestCase):
             [5, 7]], dtype=np.uint8)
         image1 = np.array([
             [5, 5, 9, 9, 9, 7, 7]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.agree_on_color(9)
         # Assert
@@ -579,7 +579,7 @@ class TestImageSimilarity(unittest.TestCase):
             [5, 7]], dtype=np.uint8)
         image1 = np.array([
             [5, 5, 7, 9, 9, 9, 7, 7]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.agree_on_color_with_same_counter(7)
         # Assert
@@ -595,7 +595,7 @@ class TestImageSimilarity(unittest.TestCase):
             [5, 7]], dtype=np.uint8)
         image1 = np.array([
             [5, 5, 7, 9, 9, 9, 7, 7]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.agree_on_color_with_same_counter(8)
         # Assert
@@ -611,7 +611,7 @@ class TestImageSimilarity(unittest.TestCase):
             [5, 7]], dtype=np.uint8)
         image1 = np.array([
             [5, 5, 7, 9, 9, 9, 7]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.agree_on_color_with_same_counter(7)
         # Assert
@@ -624,7 +624,7 @@ class TestImageSimilarity(unittest.TestCase):
             [4, 5, 6]], dtype=np.uint8)
         image1 = np.array([
             [3, 2, 3, 2, 3]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.unique_colors_is_a_subset()
         # Assert
@@ -637,7 +637,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [1, 2, 3],
             [4, 5, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.unique_colors_is_a_subset()
         # Assert
@@ -650,7 +650,7 @@ class TestImageSimilarity(unittest.TestCase):
             [4, 5, 6]], dtype=np.uint8)
         image1 = np.array([
             [5, 6, 7]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.unique_colors_is_a_subset()
         # Assert
@@ -665,7 +665,7 @@ class TestImageSimilarity(unittest.TestCase):
             [1, 4],
             [2, 5],
             [3, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bigrams_direction_all()
         # Assert
@@ -679,7 +679,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [3, 2, 1],
             [6, 5, 4]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bigrams_direction_all()
         # Assert
@@ -693,7 +693,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [3, 2, 1, 2, 3],
             [6, 5, 4, 5, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bigrams_direction_all()
         # Assert
@@ -707,7 +707,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [1, 2, 3],
             [6, 5, 4]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bigrams_direction_all()
         # Assert
@@ -721,7 +721,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [5, 5, 5],
             [7, 7, 7]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bigrams_direction_all()
         # Assert
@@ -735,7 +735,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [1, 2, 1, 2, 3],
             [4, 5, 5, 5, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bigrams_direction_leftright()
         # Assert
@@ -749,7 +749,7 @@ class TestImageSimilarity(unittest.TestCase):
         image1 = np.array([
             [2, 1, 3],
             [4, 5, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bigrams_direction_leftright()
         # Assert
@@ -767,7 +767,7 @@ class TestImageSimilarity(unittest.TestCase):
             [1, 5],
             [2, 6],
             [3, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bigrams_direction_topbottom()
         # Assert
@@ -783,7 +783,7 @@ class TestImageSimilarity(unittest.TestCase):
             [1, 4],
             [3, 5],
             [2, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bigrams_direction_topbottom()
         # Assert
@@ -799,7 +799,7 @@ class TestImageSimilarity(unittest.TestCase):
             [2, 1, 4, 4],
             [3, 2, 5, 4],
             [3, 3, 6, 5]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bigrams_direction_topleftbottomright()
         # Assert
@@ -815,7 +815,7 @@ class TestImageSimilarity(unittest.TestCase):
             [1, 1, 4, 5],
             [1, 2, 5, 6],
             [2, 3, 6, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bigrams_direction_topleftbottomright()
         # Assert
@@ -831,7 +831,7 @@ class TestImageSimilarity(unittest.TestCase):
             [1, 1, 4, 5],
             [1, 2, 5, 6],
             [2, 3, 6, 6]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bigrams_direction_toprightbottomleft()
         # Assert
@@ -847,7 +847,7 @@ class TestImageSimilarity(unittest.TestCase):
             [2, 1, 4, 4],
             [3, 2, 5, 4],
             [3, 3, 6, 5]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bigrams_direction_toprightbottomleft()
         # Assert
@@ -865,7 +865,7 @@ class TestImageSimilarity(unittest.TestCase):
             [9, 2, 5, 9],
             [9, 3, 6, 9],
             [9, 9, 9, 9]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bigrams_subset()
         # Assert
@@ -883,7 +883,7 @@ class TestImageSimilarity(unittest.TestCase):
             [9, 5, 2, 9],
             [9, 6, 3, 9],
             [9, 9, 9, 9]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bigrams_subset()
         # Assert
@@ -901,7 +901,7 @@ class TestImageSimilarity(unittest.TestCase):
             [9, 5, 5, 9],
             [9, 5, 5, 9],
             [9, 9, 9, 9]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bigrams_subset()
         # Assert
@@ -922,7 +922,7 @@ class TestImageSimilarity(unittest.TestCase):
             [9, 9, 9, 9],
             [9, 5, 5, 9],
             [9, 9, 9, 9]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bounding_box_size_of_color(5)
         # Assert
@@ -943,7 +943,7 @@ class TestImageSimilarity(unittest.TestCase):
             [9, 9, 9, 9],
             [9, 5, 5, 9],
             [9, 9, 9, 9]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bounding_box_size_of_color(0)
         # Assert
@@ -964,7 +964,7 @@ class TestImageSimilarity(unittest.TestCase):
             [9, 5, 9, 9],
             [9, 5, 5, 9],
             [9, 9, 9, 9]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bounding_box_size_of_color(5)
         # Assert
@@ -985,7 +985,7 @@ class TestImageSimilarity(unittest.TestCase):
             [9, 3, 3, 9],
             [9, 3, 3, 9],
             [9, 9, 9, 9]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_bounding_box_size_of_color(5)
         # Assert
@@ -1005,7 +1005,7 @@ class TestImageSimilarity(unittest.TestCase):
             [1, 5, 5, 1, 5, 5, 1, 1, 5],
             [9, 9, 9, 9, 9, 9, 9, 9, 9],
             [9, 9, 9, 9, 9, 9, 9, 9, 9]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_shape2x2()
         # Assert
@@ -1025,7 +1025,7 @@ class TestImageSimilarity(unittest.TestCase):
             [7, 3, 3, 1, 5, 5],
             [7, 3, 3, 1, 5, 5],
             [9, 9, 9, 9, 9, 9]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_shape2x2()
         # Assert
@@ -1045,7 +1045,7 @@ class TestImageSimilarity(unittest.TestCase):
             [1, 7, 7, 7, 1, 7],
             [1, 5, 5, 1, 7, 1],
             [9, 9, 9, 9, 7, 7]], dtype=np.uint8)
-        i = ImageSimilarity(image0, image1)
+        i = ImageSimilarity.create_with_images(image0, image1)
         # Act
         actual = i.same_shape2x2()
         # Assert

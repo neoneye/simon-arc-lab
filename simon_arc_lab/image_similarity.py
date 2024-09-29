@@ -128,17 +128,21 @@ class Feature:
         return ",".join(feature_names)
 
 class ImageSimilarity:
-    def __init__(self, image0: np.array, image1: np.array) -> None:
+    def __init__(self, image_with_cache0: ImageWithCache, image_with_cache1: ImageWithCache) -> None:
         """
         Compare two images. The order doesn't matter.
         """
-        self.image0 = image0
-        self.image1 = image1
-        self.image_with_cache0 = ImageWithCache(image0)
-        self.image_with_cache1 = ImageWithCache(image1)
-        self.lazy_histogram0 = None
-        self.lazy_histogram1 = None
+        assert isinstance(image_with_cache0, ImageWithCache)
+        assert isinstance(image_with_cache1, ImageWithCache)
+        self.image_with_cache0 = image_with_cache0
+        self.image_with_cache1 = image_with_cache1
         self.lazy_features = None
+
+    @classmethod
+    def create_with_images(cls, image0: np.array, image1: np.array) -> 'ImageSimilarity':
+        image_with_cache0 = ImageWithCache(image0)
+        image_with_cache1 = ImageWithCache(image1)
+        return cls(image_with_cache0, image_with_cache1)
     
     @classmethod
     def compute_jaccard_index(cls, parameters: list[bool]) -> int:
@@ -225,36 +229,36 @@ class ImageSimilarity:
         """
         Identical images.
         """
-        return np.array_equal(self.image0, self.image1)
+        return np.array_equal(self.image_with_cache0.image, self.image_with_cache1.image)
 
     def same_shape(self) -> bool:
         """
         Same width and height.
         """
-        return self.image0.shape == self.image1.shape
+        return self.image_with_cache0.image.shape == self.image_with_cache1.image.shape
     
     def same_shape_allow_for_rotation(self) -> bool:
         """
         Same width and height, allow for rotation.
         """
-        height0, width0 = self.image0.shape
-        height1, width1 = self.image1.shape
+        height0, width0 = self.image_with_cache0.image.shape
+        height1, width1 = self.image_with_cache1.image.shape
         return (width0 == width1 and height0 == height1) or (width0 == height1 and height0 == width1)
 
     def same_shape_width(self) -> bool:
         """
         Same width
         """
-        width0 = self.image0.shape[1]
-        width1 = self.image1.shape[1]
+        width0 = self.image_with_cache0.image.shape[1]
+        width1 = self.image_with_cache1.image.shape[1]
         return width0 == width1
 
     def same_shape_height(self) -> bool:
         """
         Same height
         """
-        height0 = self.image0.shape[0]
-        height1 = self.image1.shape[0]
+        height0 = self.image_with_cache0.image.shape[0]
+        height1 = self.image_with_cache1.image.shape[0]
         return height0 == height1
 
     def same_shape_orientation(self) -> bool:
@@ -269,8 +273,8 @@ class ImageSimilarity:
                 return "landscape"
             else:
                 return "portrait"
-        orientation0 = orientation(self.image0)
-        orientation1 = orientation(self.image1)
+        orientation0 = orientation(self.image_with_cache0.image)
+        orientation1 = orientation(self.image_with_cache1.image)
         return orientation0 == orientation1
 
     def histogram0(self) -> Histogram:
@@ -319,8 +323,8 @@ class ImageSimilarity:
         """
         histogram0 = self.histogram0()
         histogram1 = self.histogram1()
-        height0, width0 = self.image0.shape
-        height1, width1 = self.image1.shape
+        height0, width0 = self.image_with_cache0.image.shape
+        height1, width1 = self.image_with_cache1.image.shape
         mass0 = height0 * width0
         mass1 = height1 * width1
 
@@ -589,8 +593,11 @@ class ImageSimilarity:
         ignore_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         ignore_colors.remove(color)
 
-        rect0 = find_bounding_box_multiple_ignore_colors(self.image0, ignore_colors)
-        rect1 = find_bounding_box_multiple_ignore_colors(self.image1, ignore_colors)
+        # IDEA: Move to ImageWithCache, since this is a slow operation
+        image0 = self.image_with_cache0.image
+        image1 = self.image_with_cache1.image
+        rect0 = find_bounding_box_multiple_ignore_colors(image0, ignore_colors)
+        rect1 = find_bounding_box_multiple_ignore_colors(image1, ignore_colors)
 
         same_width = rect0.width == rect1.width
         same_height = rect0.height == rect1.height

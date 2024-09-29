@@ -72,7 +72,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
         for i in range(task.count_examples + task.count_tests):
             input = task.input_images[i]
             output = task.output_images[i]
-            image_similarity = ImageSimilarity(input, output)
+            image_similarity = ImageSimilarity.create_with_images(input, output)
             score = image_similarity.jaccard_index()
             feature_list = image_similarity.get_satisfied_features()
             # feature_strings_joined = Feature.format_feature_list(feature_list)
