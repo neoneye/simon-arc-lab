@@ -12,8 +12,6 @@ from simon_arc_lab.image_similarity import ImageSimilarity, Feature
 from simon_arc_lab.task_similarity import TaskSimilarity
 from simon_arc_lab.image_noise import image_noise_one_pixel
 
-model_iteration = 530
-
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
 if not os.path.isdir(path_to_arc_dataset_collection_dataset):
     print(f"ARC dataset collection directory '{path_to_arc_dataset_collection_dataset}' does not exist.")

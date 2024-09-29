@@ -74,7 +74,7 @@ class ImageShape2x2:
         counter = Counter(shapeid_image.flatten())
         # extract the shape ids and ignore the count
         shape_ids = list(counter.keys())
-        # cast the np uint keys to int
+        # cast from np uint to int
         shape_ids = [int(key) for key in shape_ids]
         shape_ids = sorted(shape_ids)
         return shape_ids
