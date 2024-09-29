@@ -12,6 +12,7 @@
 # IDEA: compare example output histograms with each other, and determine what features are common.
 import numpy as np
 from .task import Task
+from .image_with_cache import ImageWithCache
 from .image_similarity import ImageSimilarity, Feature
 
 class TaskSimilarityMultiImage:
@@ -20,13 +21,13 @@ class TaskSimilarityMultiImage:
         self.feature_set_union = feature_set_union
 
     @classmethod
-    def analyze_images(cls, images: list[np.array]) -> 'TaskSimilarityMultiImage':
+    def analyze_images(cls, imagewithcache_list: list[ImageWithCache]) -> 'TaskSimilarityMultiImage':
         """
         Identify what does these images have in common.
         """
 
         # Schedule how the images are to be compared with each other.
-        count = len(images)
+        count = len(imagewithcache_list)
         comparisons = []
         for i in range(count):
             index0 = i
@@ -38,7 +39,7 @@ class TaskSimilarityMultiImage:
         feature_set_intersection = set()
         feature_set_union = set()
         for i, (index0, index1) in enumerate(comparisons):
-            image_similarity = ImageSimilarity.create_with_images(images[index0], images[index1])
+            image_similarity = ImageSimilarity(imagewithcache_list[index0], imagewithcache_list[index1])
             feature_list = image_similarity.get_satisfied_features()
 
             feature_set = set(feature_list)
@@ -54,6 +55,8 @@ class TaskSimilarityMultiImage:
 class TaskSimilarity:
     def __init__(self, task: Task):
         self.task = task
+        self.input_image_with_cache_list = None
+        self.output_image_with_cache_list = None
         self.example_pair_feature_set_intersection = None
         self.example_pair_feature_set_union = None
         self.all_input_feature_set_intersection = None
@@ -64,22 +67,48 @@ class TaskSimilarity:
     @classmethod
     def create_with_task(cls, task: Task) -> 'TaskSimilarity':
         ts = cls(task)
+        ts.prepare_image_cache()
         ts.populate_all_input_feature_set()
         ts.populate_example_output_feature_set()
         ts.populate_example_pair_feature_set()
         return ts
+    
+    def prepare_image_cache(self):
+        """
+        Allocate ImageWithCache instances for all images, except the test output images.
+        """
+        # The example input images and the test input images.
+        input_image_with_cache_list = []
+        for i in range(self.task.count_examples + self.task.count_tests):
+            image = self.task.input_images[i]
+            image_with_cache = ImageWithCache(image)
+            input_image_with_cache_list.append(image_with_cache)
+
+        # The example output images, excluding the test output images.
+        output_image_with_cache_list = []
+        for i in range(self.task.count_examples):
+            image = self.task.output_images[i]
+            image_with_cache = ImageWithCache(image)
+            output_image_with_cache_list.append(image_with_cache)
+        
+        self.input_image_with_cache_list = input_image_with_cache_list
+        self.output_image_with_cache_list = output_image_with_cache_list
+
 
     def populate_example_pair_feature_set(self):
         """
         Compare input/output pairs of the example pairs. Don't process the test pairs.
         """
+        assert len(self.input_image_with_cache_list) == (self.task.count_examples + self.task.count_tests)
+        assert len(self.output_image_with_cache_list) == self.task.count_examples
+
         task = self.task
         feature_set_intersection = set()
         feature_set_union = set()
         for i in range(task.count_examples):
-            input = task.input_images[i]
-            output = task.output_images[i]
-            image_similarity = ImageSimilarity.create_with_images(input, output)
+            image_with_cache0 = self.input_image_with_cache_list[i]
+            image_with_cache1 = self.output_image_with_cache_list[i]
+            image_similarity = ImageSimilarity(image_with_cache0, image_with_cache1)
             feature_list = image_similarity.get_satisfied_features()
 
             # IDEA: pair specific features, such as some colors for that pair, and some other colors for another pair.
@@ -103,7 +132,8 @@ class TaskSimilarity:
         """
         Compare all input images of the example+test pairs.
         """
-        result = TaskSimilarityMultiImage.analyze_images(self.task.input_images)
+        assert len(self.input_image_with_cache_list) == (self.task.count_examples + self.task.count_tests)
+        result = TaskSimilarityMultiImage.analyze_images(self.input_image_with_cache_list)
         self.all_input_feature_set_intersection = result.feature_set_intersection
         self.all_input_feature_set_union = result.feature_set_union
 
@@ -111,8 +141,8 @@ class TaskSimilarity:
         """
         Compare all output images of the example pairs. Don't process the test pairs.
         """
-        images = self.task.output_images[:self.task.count_examples]
-        result = TaskSimilarityMultiImage.analyze_images(images)
+        assert len(self.output_image_with_cache_list) == self.task.count_examples
+        result = TaskSimilarityMultiImage.analyze_images(self.output_image_with_cache_list)
         self.example_output_feature_set_intersection = result.feature_set_intersection
         self.example_output_feature_set_union = result.feature_set_union
 
@@ -135,9 +165,11 @@ class TaskSimilarity:
         """
         task = self.task
 
+        predicted_output_image_with_cache = ImageWithCache(predicted_output)
+
         # Compare the test input image with the predicted output.
-        input = task.test_input(test_index)
-        image_similarity = ImageSimilarity.create_with_images(input, predicted_output)
+        test_input_image_with_cache = self.input_image_with_cache_list[task.count_examples + test_index]
+        image_similarity = ImageSimilarity(test_input_image_with_cache, predicted_output_image_with_cache)
         feature_list = image_similarity.get_satisfied_features()
         feature_set = set(feature_list)
 
@@ -149,8 +181,8 @@ class TaskSimilarity:
             parameter_list.append(is_satisfied)
 
         # Compare all example output images with the predicted output.
-        output_images = self.task.output_images[:self.task.count_examples].copy()
-        output_images.append(predicted_output)
+        output_images = self.output_image_with_cache_list.copy()
+        output_images.append(predicted_output_image_with_cache)
         result = TaskSimilarityMultiImage.analyze_images(output_images)
         for key in self.example_output_feature_set_intersection:
             # Are there any features that are not satisfied, for the predicted output, 
