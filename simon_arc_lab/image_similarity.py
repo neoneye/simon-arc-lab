@@ -78,9 +78,7 @@
 # IDEA: there are many same_bounding_box_size_of_color, maybe assign a lower weight, so they don't dominate the jaccard index.
 #
 from .histogram import *
-from .image_bigram import *
 from .find_bounding_box import find_bounding_box_multiple_ignore_colors
-from .image_shape2x2 import *
 from .image_with_cache import ImageWithCache
 import numpy as np
 from enum import Enum
@@ -614,6 +612,6 @@ class ImageSimilarity:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ded97339
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=44d8ac46
         """
-        shape_id_list0 = ImageShape2x2.shape_id_list(self.image0)
-        shape_id_list1 = ImageShape2x2.shape_id_list(self.image1)
+        shape_id_list0 = self.image_with_cache0.shape2x2_id_list()
+        shape_id_list1 = self.image_with_cache1.shape2x2_id_list()
         return shape_id_list0 == shape_id_list1

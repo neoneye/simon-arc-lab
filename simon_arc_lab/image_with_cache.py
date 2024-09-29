@@ -2,6 +2,7 @@ from typing import Tuple
 import numpy as np
 from .histogram import Histogram
 from .image_bigram import *
+from .image_shape2x2 import *
 
 class ImageWithCache:
     def __init__(self, image: np.array):
@@ -16,6 +17,7 @@ class ImageWithCache:
         self.lazy_bigrams_direction_topbottom = None
         self.lazy_bigrams_direction_topleftbottomright = None
         self.lazy_bigrams_direction_toprightbottomleft = None
+        self.lazy_shape2x2_id_list = None
 
     def histogram(self) -> Histogram:
         if self.lazy_histogram is None:
@@ -66,3 +68,8 @@ class ImageWithCache:
         if self.lazy_bigrams_direction_toprightbottomleft is None:
             self.lazy_bigrams_direction_toprightbottomleft = image_bigrams_direction_toprightbottomleft(self.image, 255)
         return self.lazy_bigrams_direction_toprightbottomleft
+
+    def shape2x2_id_list(self) -> list[int]:
+        if self.lazy_shape2x2_id_list is None:
+            self.lazy_shape2x2_id_list = ImageShape2x2.shape_id_list(self.image)
+        return self.lazy_shape2x2_id_list
