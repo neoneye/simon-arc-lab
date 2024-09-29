@@ -295,11 +295,9 @@ class ImageSimilarity:
         """
         The same colors occur in both images.
         """
-        histogram0 = self.histogram0()
-        histogram1 = self.histogram1()
-        colors0 = histogram0.unique_colors()
-        colors1 = histogram1.unique_colors()
-        return colors0 == colors1
+        color_list0 = self.image_with_cache0.histogram_unique_colors()
+        color_list1 = self.image_with_cache1.histogram_unique_colors()
+        return color_list0 == color_list1
 
     def same_number_of_unique_colors(self) -> bool:
         """
@@ -313,11 +311,9 @@ class ImageSimilarity:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e179c5f4
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d5d6de2d
         """
-        histogram0 = self.histogram0()
-        histogram1 = self.histogram1()
-        colors0 = histogram0.unique_colors()
-        colors1 = histogram1.unique_colors()
-        return len(colors0) == len(colors1)
+        color_list0 = self.image_with_cache0.histogram_unique_colors()
+        color_list1 = self.image_with_cache1.histogram_unique_colors()
+        return len(color_list0) == len(color_list1)
 
     def same_histogram_ignoring_scale(self) -> bool:
         """
@@ -376,10 +372,10 @@ class ImageSimilarity:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ddf7fa4f
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=de1cd16c
         """
-        histogram0 = self.histogram0()
-        histogram1 = self.histogram1()
-        color_set0 = set(histogram0.unique_colors())
-        color_set1 = set(histogram1.unique_colors())
+        color_list0 = self.image_with_cache0.histogram_unique_colors()
+        color_list1 = self.image_with_cache1.histogram_unique_colors()
+        color_set0 = set(color_list0)
+        color_set1 = set(color_list1)
         a = color_set0.issubset(color_set1)
         b = color_set1.issubset(color_set0)
         return a or b
