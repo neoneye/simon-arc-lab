@@ -30,6 +30,11 @@
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2037f2c7
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=c3202e5a
 #
+# IDEA: jaccard index with fractions
+# Intersection: Positions where both images have Red pixels.
+# Union: Positions where at least one image has Red pixels.
+# Score: len(Intersection) / len(Union)
+#
 # IDEA: does one image contain the other image, original/rotated/flipped, by checking if the all the bigrams are contained in the other image bigrams: 
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f5aa3634
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f4081712
