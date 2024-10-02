@@ -629,44 +629,32 @@ class ImageSimilarity:
         shape_id_list1 = self.image_with_cache1.shape2x2_id_list()
         return shape_id_list0 == shape_id_list1
 
-    def measure_same_pixels(self) -> dict:
+    def measure_similar_pixels(self) -> dict:
         """
         Measure how many pixels are the same in both images.
         """
         dict = {}
-        for color in range(10):
-            intersection, union = self.same_pixels_with_color(color)
-            if union == 0:
-                continue
-            dict[color] = (intersection, union)
-        return dict
-    
-    def same_pixels_with_color(self, color: int) -> Tuple[int, int]:
-        """
-        Count number of positions where both images agree/disagree on a particular color.
-
-        return: (count_intersection, count_union)
-        """
-        count0 = self.histogram0().get_count_for_color(color)
-        count1 = self.histogram1().get_count_for_color(color)
-        min_count = min(count0, count1)
-        max_count = max(count0, count1)
-        if min_count == 0:
-            return (0, max_count)
-        if (self.image_with_cache0.image.shape != self.image_with_cache1.image.shape):
-            return (0, max_count)
-        
         image0 = self.image_with_cache0.image
         image1 = self.image_with_cache1.image
+        if (image0.shape != image1.shape):
+            return dict
+        
         height, width = image0.shape
-        count_intersection = 0
-        count_union = 0
         for y in range(height):
             for x in range(width):
-                same0 = image0[y, x] == color
-                same1 = image1[y, x] == color
-                if same0 and same1:
-                    count_intersection += 1
-                if same0 or same1:
+                color0 = image0[y, x]
+                color1 = image1[y, x]
+                if color0 == color1:
+                    colors = [color0]
+                    same = True
+                else:
+                    colors = [color0, color1]
+                    same = False
+                for color in colors:
+                    count_intersection, count_union = dict.get(color, (0, 0))
+                    if same:
+                        count_intersection += 1
                     count_union += 1
-        return (count_intersection, count_union)
+                    dict[color] = (count_intersection, count_union)
+
+        return dict

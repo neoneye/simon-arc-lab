@@ -1051,7 +1051,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
-    def test_70000_measure_same_pixels(self):
+    def test_70000_measure_similar_pixels(self):
         # Arrange
         image0 = np.array([
             [1, 1, 1, 2, 2, 2, 2],
@@ -1067,7 +1067,7 @@ class TestImageSimilarity(unittest.TestCase):
             [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
         i = ImageSimilarity.create_with_images(image0, image1)
         # Act
-        actual = i.measure_same_pixels()
+        actual = i.measure_similar_pixels()
         # Assert
         expected = {
             1: (8, 9),
