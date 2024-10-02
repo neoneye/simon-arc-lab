@@ -1051,7 +1051,34 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
-    def test_60000_format_feature_list(self):
+    def test_70000_same_pixel_with_color(self):
+        # Arrange
+        image0 = np.array([
+            [1, 1, 1, 2, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2, 2],
+            [3, 3, 5, 5, 4, 4, 4],
+            [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 1, 1, 2, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2, 2],
+            [1, 1, 5, 5, 2, 2, 2],
+            [3, 3, 3, 4, 4, 4, 4],
+            [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
+        i = ImageSimilarity.create_with_images(image0, image1)
+        # Act + Assert
+        self.assertEqual(i.same_pixels_with_color(0), (0, 0))
+        self.assertEqual(i.same_pixels_with_color(1), (8, 9))
+        self.assertEqual(i.same_pixels_with_color(2), (11, 12))
+        self.assertEqual(i.same_pixels_with_color(3), (5, 6))
+        self.assertEqual(i.same_pixels_with_color(4), (7, 8))
+        self.assertEqual(i.same_pixels_with_color(5), (0, 4))
+        self.assertEqual(i.same_pixels_with_color(6), (0, 0))
+        self.assertEqual(i.same_pixels_with_color(7), (0, 0))
+        self.assertEqual(i.same_pixels_with_color(8), (0, 0))
+        self.assertEqual(i.same_pixels_with_color(9), (0, 0))
+
+    def test_80000_format_feature_list(self):
         # Arrange
         feature_list = [
             Feature(FeatureType.SAME_ORIENTATION),

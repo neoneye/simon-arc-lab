@@ -628,3 +628,33 @@ class ImageSimilarity:
         shape_id_list0 = self.image_with_cache0.shape2x2_id_list()
         shape_id_list1 = self.image_with_cache1.shape2x2_id_list()
         return shape_id_list0 == shape_id_list1
+
+    def same_pixels_with_color(self, color: int) -> Tuple[int, int]:
+        """
+        Count number of positions where both images agree/disagree on a particular color.
+
+        return: (count_intersection, count_union)
+        """
+        count0 = self.histogram0().get_count_for_color(color)
+        count1 = self.histogram1().get_count_for_color(color)
+        min_count = min(count0, count1)
+        max_count = max(count0, count1)
+        if min_count == 0:
+            return (0, max_count)
+        if (self.image_with_cache0.image.shape != self.image_with_cache1.image.shape):
+            return 0, max_count
+        
+        image0 = self.image_with_cache0.image
+        image1 = self.image_with_cache1.image
+        height, width = image0.shape
+        count_intersection = 0
+        count_union = 0
+        for y in range(height):
+            for x in range(width):
+                same0 = image0[y, x] == color
+                same1 = image1[y, x] == color
+                if same0 and same1:
+                    count_intersection += 1
+                if same0 or same1:
+                    count_union += 1
+        return (count_intersection, count_union)
