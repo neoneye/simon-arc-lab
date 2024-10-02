@@ -153,6 +153,7 @@ class ImageSimilarity:
     def compute_jaccard_index(cls, parameters: list[bool]) -> int:
         """
         Jaccard index of how many features are satisfied.
+        https://en.wikipedia.org/wiki/Jaccard_index
         
         return: 0 to 100
         """
