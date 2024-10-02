@@ -632,6 +632,8 @@ class ImageSimilarity:
     def measure_similar_pixels(self) -> dict:
         """
         Measure how many pixels are the same in both images.
+
+        return: {color: (count_intersection, count_union)}
         """
         dict = {}
         image0 = self.image_with_cache0.image
