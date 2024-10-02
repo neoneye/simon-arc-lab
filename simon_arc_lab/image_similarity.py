@@ -629,6 +629,18 @@ class ImageSimilarity:
         shape_id_list1 = self.image_with_cache1.shape2x2_id_list()
         return shape_id_list0 == shape_id_list1
 
+    def measure_same_pixels(self) -> dict:
+        """
+        Measure how many pixels are the same in both images.
+        """
+        dict = {}
+        for color in range(10):
+            intersection, union = self.same_pixels_with_color(color)
+            if union == 0:
+                continue
+            dict[color] = (intersection, union)
+        return dict
+    
     def same_pixels_with_color(self, color: int) -> Tuple[int, int]:
         """
         Count number of positions where both images agree/disagree on a particular color.
@@ -642,7 +654,7 @@ class ImageSimilarity:
         if min_count == 0:
             return (0, max_count)
         if (self.image_with_cache0.image.shape != self.image_with_cache1.image.shape):
-            return 0, max_count
+            return (0, max_count)
         
         image0 = self.image_with_cache0.image
         image1 = self.image_with_cache1.image

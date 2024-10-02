@@ -1051,7 +1051,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
-    def test_70000_same_pixel_with_color(self):
+    def test_70000_measure_same_pixels(self):
         # Arrange
         image0 = np.array([
             [1, 1, 1, 2, 2, 2, 2],
@@ -1066,17 +1066,17 @@ class TestImageSimilarity(unittest.TestCase):
             [3, 3, 3, 4, 4, 4, 4],
             [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
         i = ImageSimilarity.create_with_images(image0, image1)
-        # Act + Assert
-        self.assertEqual(i.same_pixels_with_color(0), (0, 0))
-        self.assertEqual(i.same_pixels_with_color(1), (8, 9))
-        self.assertEqual(i.same_pixels_with_color(2), (11, 12))
-        self.assertEqual(i.same_pixels_with_color(3), (5, 6))
-        self.assertEqual(i.same_pixels_with_color(4), (7, 8))
-        self.assertEqual(i.same_pixels_with_color(5), (0, 4))
-        self.assertEqual(i.same_pixels_with_color(6), (0, 0))
-        self.assertEqual(i.same_pixels_with_color(7), (0, 0))
-        self.assertEqual(i.same_pixels_with_color(8), (0, 0))
-        self.assertEqual(i.same_pixels_with_color(9), (0, 0))
+        # Act
+        actual = i.measure_same_pixels()
+        # Assert
+        expected = {
+            1: (8, 9),
+            2: (11, 12),
+            3: (5, 6),
+            4: (7, 8),
+            5: (0, 4),
+        }
+        self.assertEqual(actual, expected)
 
     def test_80000_format_feature_list(self):
         # Arrange
