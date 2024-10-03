@@ -48,12 +48,14 @@ def generate_dataset_item_for_output_image(
     benchmark_pixels = task_pixels_to_string(task.total_pixel_count())
     benchmark_id = f'dataset={dataset_id} group={transformation_id} predict=image image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
 
+    no_earlier_output = ''
     result_dict = {
         'instruction': instruction,
         'input': input,
         'output': output,
         'arc_task': arc_task_dict,
         'test_index': test_index,
+        'earlier_output': no_earlier_output,
         'benchmark': benchmark_id
     }
     return result_dict
