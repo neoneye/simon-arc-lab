@@ -12,13 +12,16 @@ def generate_dataset_item_for_output_image(
     dataset_id: str, 
     task: Task, 
     test_index: int, 
-    output_image: np.array, 
     transformation_id: str
 ) -> dict:
     random.seed(seed)
     dataset_name = random.choice(dataset_names)
 
-    task_formatter = TaskFormatterRLECompact(task)
+    output_image = task.test_output(test_index)
+
+    task_without_test_output = task.clone()
+    task_without_test_output.set_all_test_outputs_to_none()
+    task_formatter = TaskFormatterRLECompact(task_without_test_output)
 
     output_ids = task_formatter.output_ids()
     test_output_id = output_ids[task.count_examples + test_index]
@@ -37,6 +40,8 @@ def generate_dataset_item_for_output_image(
 
     output = serialize(output_image)
 
+    arc_task_dict = task.to_arcagi1_dict()
+
     max_width, max_height = task.max_image_size()
     benchmark_width = image_size1d_to_string(max_width)
     benchmark_height = image_size1d_to_string(max_height)
@@ -47,6 +52,8 @@ def generate_dataset_item_for_output_image(
         'instruction': instruction,
         'input': input,
         'output': output,
+        'arc_task': arc_task_dict,
+        'test_index': test_index,
         'benchmark': benchmark_id
     }
     return result_dict
@@ -144,14 +151,12 @@ class DatasetItemListBuilder:
         Predict the entire output image
         """
         for test_index in range(self.task.count_tests):
-            output_image = self.task.test_output(test_index)
             dataset_item = generate_dataset_item_for_output_image(
                 self.seed + test_index * 100 + 2000, 
                 self.dataset_names, 
                 self.dataset_id,
-                self.task_without_test_output, 
+                self.task, 
                 test_index, 
-                output_image,
                 self.transformation_id
             )
             self.accumulated_dataset_items.append(dataset_item)
