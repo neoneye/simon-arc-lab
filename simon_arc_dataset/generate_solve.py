@@ -40,22 +40,22 @@ def generate_dataset_item_for_output_image(
 
     output = serialize(output_image)
 
-    arc_task_dict = task.to_arcagi1_dict()
+    arc_task_string = task.to_arcagi1_json(True)
 
     max_width, max_height = task.max_image_size()
     benchmark_width = image_size1d_to_string(max_width)
     benchmark_height = image_size1d_to_string(max_height)
     benchmark_pixels = task_pixels_to_string(task.total_pixel_count())
-    benchmark_id = f'dataset={dataset_id} group={transformation_id} predict=image image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
+    benchmark_id = f'dataset={dataset_id} group={transformation_id} predict=image earlier_prediction=none image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
 
-    no_earlier_output = ''
+    earlier_output_none = ''
     result_dict = {
         'instruction': instruction,
         'input': input,
         'output': output,
-        'arc_task': arc_task_dict,
+        'arc_task': arc_task_string,
         'test_index': test_index,
-        'earlier_output': no_earlier_output,
+        'earlier_output': earlier_output_none,
         'benchmark': benchmark_id
     }
     return result_dict
@@ -101,7 +101,7 @@ def generate_dataset_item_for_output_image_with_earlier_prediction(
 
     output = serialize(output_image)
 
-    arc_task_dict = task.to_arcagi1_dict()
+    arc_task_string = task.to_arcagi1_json(True)
 
     max_width, max_height = task.max_image_size()
     benchmark_width = image_size1d_to_string(max_width)
@@ -110,14 +110,15 @@ def generate_dataset_item_for_output_image_with_earlier_prediction(
     benchmark_id = f'dataset={dataset_id} group={transformation_id} predict=image earlier_prediction={benchmark_earlier_prediction_id} image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
 
     serializable_earlier_output_image = earlier_output_image.tolist()
+    earlier_output = json.dumps(serializable_earlier_output_image, separators=(',', ':'))
 
     result_dict = {
         'instruction': instruction,
         'input': input,
         'output': output,
-        'arc_task': arc_task_dict,
+        'arc_task': arc_task_string,
         'test_index': test_index,
-        'earlier_output': serializable_earlier_output_image,
+        'earlier_output': earlier_output,
         'benchmark': benchmark_id
     }
     return result_dict
