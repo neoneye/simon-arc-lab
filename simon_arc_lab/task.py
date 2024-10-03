@@ -186,10 +186,6 @@ class Task:
         with open(path, 'w') as file:
             file.write(self.to_arcagi1_json(compact))
 
-    def show_in_terminal(self):
-        from .task_show_rich import task_show_rich
-        task_show_rich(self, answer=True)
-
     def show(self, show_grid: bool = True, show_answer: bool = True, save_path: Optional[str] = None):
         """
         Show the task in a graphical user interface, or save the image to a PNG file.
