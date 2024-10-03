@@ -6,7 +6,15 @@ from simon_arc_lab.task_formatter_rle_compact import *
 from simon_arc_lab.benchmark import *
 from simon_arc_lab.image_distort import *
 
-def generate_dataset_item_for_output_image(seed: int, dataset_names: list[str], dataset_id: str, task: Task, test_index: int, output_image: np.array, transformation_id: str) -> dict:
+def generate_dataset_item_for_output_image(
+    seed: int, 
+    dataset_names: list[str], 
+    dataset_id: str, 
+    task: Task, 
+    test_index: int, 
+    output_image: np.array, 
+    transformation_id: str
+) -> dict:
     random.seed(seed)
     dataset_name = random.choice(dataset_names)
 
@@ -43,7 +51,17 @@ def generate_dataset_item_for_output_image(seed: int, dataset_names: list[str], 
     }
     return result_dict
 
-def generate_dataset_item_for_output_image_with_earlier_prediction(seed: int, dataset_names: list[str], dataset_id: str, task: Task, test_index: int, earlier_output_image: np.array, output_image: np.array, transformation_id: str, benchmark_earlier_prediction_id: str) -> dict:
+def generate_dataset_item_for_output_image_with_earlier_prediction(
+    seed: int, 
+    dataset_names: list[str], 
+    dataset_id: str, 
+    task: Task, 
+    test_index: int, 
+    earlier_output_image: np.array, 
+    output_image: np.array, 
+    transformation_id: str, 
+    benchmark_earlier_prediction_id: str
+) -> dict:
     random.seed(seed)
     dataset_name = random.choice(dataset_names)
 
