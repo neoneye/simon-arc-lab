@@ -65,17 +65,18 @@ def generate_dataset_item_for_output_image_with_earlier_prediction(
     task: Task, 
     test_index: int, 
     earlier_output_image: np.array, 
-    output_image: np.array, 
     transformation_id: str, 
     benchmark_earlier_prediction_id: str
 ) -> dict:
     random.seed(seed)
     dataset_name = random.choice(dataset_names)
 
+    output_image = task.test_output(test_index)
+
     t2 = task.clone()
+    t2.set_all_test_outputs_to_none()
     image_index = t2.count_examples + test_index
     t2.output_images[image_index] = earlier_output_image
-
     t2.metadata_task_id = f'{t2.metadata_task_id} {benchmark_earlier_prediction_id}'
     # t2.show()
 
@@ -98,16 +99,23 @@ def generate_dataset_item_for_output_image_with_earlier_prediction(
 
     output = serialize(output_image)
 
+    arc_task_dict = task.to_arcagi1_dict()
+
     max_width, max_height = task.max_image_size()
     benchmark_width = image_size1d_to_string(max_width)
     benchmark_height = image_size1d_to_string(max_height)
     benchmark_pixels = task_pixels_to_string(task.total_pixel_count())
     benchmark_id = f'dataset={dataset_id} group={transformation_id} predict=image earlier_prediction={benchmark_earlier_prediction_id} image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
 
+    serializable_earlier_output_image = earlier_output_image.tolist()
+
     result_dict = {
         'instruction': instruction,
         'input': input,
         'output': output,
+        'arc_task': arc_task_dict,
+        'test_index': test_index,
+        'earlier_output': serializable_earlier_output_image,
         'benchmark': benchmark_id
     }
     return result_dict
@@ -173,10 +181,9 @@ class DatasetItemListBuilder:
                 self.seed + test_index * 100 + 2000, 
                 self.dataset_names, 
                 self.dataset_id,
-                self.task_without_test_output, 
+                self.task, 
                 test_index, 
                 earlier_predicted_image,
-                output_image,
                 self.transformation_id,
                 'output_distort_1steps_10percent'
             )
@@ -188,7 +195,6 @@ class DatasetItemListBuilder:
         With a distorted input image. No help from the expected output image.
         """
         for test_index in range(self.task.count_tests):
-            output_image = self.task.test_output(test_index)
             input_image = self.task.test_input(test_index)
             earlier_predicted_image = image_distort(input_image, 1, 10, self.seed + test_index * 100 + 1000)
 
@@ -196,10 +202,9 @@ class DatasetItemListBuilder:
                 self.seed + test_index * 100 + 2000, 
                 self.dataset_names, 
                 self.dataset_id,
-                self.task_without_test_output, 
+                self.task, 
                 test_index, 
                 earlier_predicted_image,
-                output_image,
                 self.transformation_id,
                 'input_distort_1steps_10percent'
             )
@@ -219,10 +224,9 @@ class DatasetItemListBuilder:
                 iteration_seed + 4, 
                 self.dataset_names, 
                 self.dataset_id,
-                self.task_without_test_output, 
+                self.task, 
                 test_index, 
                 earlier_predicted_image,
-                output_image,
                 self.transformation_id,
                 'repair_1_bad_pixel'
             )
