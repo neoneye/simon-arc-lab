@@ -127,11 +127,6 @@ class DatasetItemListBuilder:
         self.dataset_names = dataset_names
         self.dataset_id = dataset_id
         self.transformation_id = transformation_id
-
-        task_without_test_output = task.clone()
-        task_without_test_output.set_all_test_outputs_to_none()
-        self.task_without_test_output = task_without_test_output
-
         self.accumulated_dataset_items = []
 
     def append_arcagi1_json(self):
