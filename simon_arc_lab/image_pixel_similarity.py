@@ -1,6 +1,6 @@
 import numpy as np
 
-def image_pixel_similarity(image0: np.array, image1: np.array) -> dict:
+def image_pixel_similarity_dict(image0: np.array, image1: np.array) -> dict:
     """
     Measure how many pixels are the same in both images.
 
@@ -45,3 +45,13 @@ def jaccard_index_from_image_pixel_similarity_dict(dict: dict) -> int:
     if count_union == 0:
         return 100
     return 100 * count_intersection // count_union
+
+def image_pixel_similarity_jaccard_index(image0: np.array, image1: np.array) -> int:
+    """
+    Measure how many pixels are the same in both images.
+    Calculate the Jaccard index.
+
+    return: A score between 0 (least similar) and 100 (most similar).
+    """
+    dict = image_pixel_similarity_dict(image0, image1)
+    return jaccard_index_from_image_pixel_similarity_dict(dict)
