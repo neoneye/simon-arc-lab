@@ -53,5 +53,7 @@ def image_pixel_similarity_jaccard_index(image0: np.array, image1: np.array) -> 
 
     return: A score between 0 (least similar) and 100 (most similar).
     """
+    if (image0.shape != image1.shape):
+        return 0
     dict = image_pixel_similarity_dict(image0, image1)
     return jaccard_index_from_image_pixel_similarity_dict(dict)

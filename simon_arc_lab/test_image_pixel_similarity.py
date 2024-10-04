@@ -133,3 +133,18 @@ class TestImagePixelSimilarity(unittest.TestCase):
         expected = 100 * (8 + 11 + 5 + 7) // (9 + 12 + 6 + 8 + 4)
         self.assertEqual(expected, 79)
         self.assertEqual(actual, expected)
+
+    def test_30003_image_pixel_similarity_jaccard_index_different_sizes(self):
+        # Arrange
+        image0 = np.array([
+            [1, 2, 3],
+            [4, 5, 6]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 2],
+            [3, 4],
+            [5, 6]], dtype=np.uint8)
+        # Act
+        actual = image_pixel_similarity_jaccard_index(image0, image1)
+        # Assert
+        self.assertEqual(actual, 0)
+
