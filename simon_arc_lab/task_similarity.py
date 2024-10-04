@@ -1,3 +1,10 @@
+# IDEA: TaskSimilarity.measure_test_prediction() currently checks how many of the features that are satisfied. 
+# However if it satisfies too many features, then rejection mechanism.
+# It could be an image that is near identical to the input image, it will get a high score, where it should be rejected.
+# If it satisfies all the features, then it will appear as if it’s almost correct. 
+# However if it satisfies too many features, then it’s incorrect.
+# Make a mechanism that checks that rejects predictions that satisfies too many constraints.
+#
 # IDEA: is the output histogram a subset of the input histogram, for all pairs.
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=be94b721
 #
