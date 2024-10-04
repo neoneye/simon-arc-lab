@@ -269,8 +269,8 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=15011103031,
-    max_num_samples=100000,
+    seed=15021103031,
+    max_num_samples=1000,
     max_byte_size=1024*1024*150
 )
 # generator.inspect()
