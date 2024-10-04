@@ -628,35 +628,3 @@ class ImageSimilarity:
         shape_id_list0 = self.image_with_cache0.shape2x2_id_list()
         shape_id_list1 = self.image_with_cache1.shape2x2_id_list()
         return shape_id_list0 == shape_id_list1
-
-    def measure_similar_pixels(self) -> dict:
-        """
-        Measure how many pixels are the same in both images.
-
-        return: {color: (count_intersection, count_union)}
-        """
-        dict = {}
-        image0 = self.image_with_cache0.image
-        image1 = self.image_with_cache1.image
-        if (image0.shape != image1.shape):
-            return dict
-        
-        height, width = image0.shape
-        for y in range(height):
-            for x in range(width):
-                color0 = image0[y, x]
-                color1 = image1[y, x]
-                if color0 == color1:
-                    colors = [color0]
-                    same = True
-                else:
-                    colors = [color0, color1]
-                    same = False
-                for color in colors:
-                    count_intersection, count_union = dict.get(color, (0, 0))
-                    if same:
-                        count_intersection += 1
-                    count_union += 1
-                    dict[color] = (count_intersection, count_union)
-
-        return dict

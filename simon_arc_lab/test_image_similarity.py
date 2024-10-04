@@ -1051,50 +1051,7 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
-    def test_70000_measure_similar_pixels_same_size(self):
-        # Arrange
-        image0 = np.array([
-            [1, 1, 1, 2, 2, 2, 2],
-            [1, 1, 1, 2, 2, 2, 2],
-            [1, 1, 1, 2, 2, 2, 2],
-            [3, 3, 5, 5, 4, 4, 4],
-            [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
-        image1 = np.array([
-            [1, 1, 1, 2, 2, 2, 2],
-            [1, 1, 1, 2, 2, 2, 2],
-            [1, 1, 5, 5, 2, 2, 2],
-            [3, 3, 3, 4, 4, 4, 4],
-            [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
-        i = ImageSimilarity.create_with_images(image0, image1)
-        # Act
-        actual = i.measure_similar_pixels()
-        # Assert
-        expected = {
-            1: (8, 9),
-            2: (11, 12),
-            3: (5, 6),
-            4: (7, 8),
-            5: (0, 4),
-        }
-        self.assertEqual(actual, expected)
-
-    def test_70001_measure_similar_pixels_different_size(self):
-        # Arrange
-        image0 = np.array([
-            [1, 2, 3],
-            [4, 5, 6]], dtype=np.uint8)
-        image1 = np.array([
-            [1, 2],
-            [3, 4],
-            [5, 6]], dtype=np.uint8)
-        i = ImageSimilarity.create_with_images(image0, image1)
-        # Act
-        actual = i.measure_similar_pixels()
-        # Assert
-        expected = {}
-        self.assertEqual(actual, expected)
-
-    def test_80000_format_feature_list(self):
+    def test_70000_format_feature_list(self):
         # Arrange
         feature_list = [
             Feature(FeatureType.SAME_ORIENTATION),
