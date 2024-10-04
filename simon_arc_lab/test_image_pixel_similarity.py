@@ -43,3 +43,49 @@ class TestImagePixelSimilarity(unittest.TestCase):
         # Assert
         expected = {}
         self.assertEqual(actual, expected)
+
+    def test_20000_jaccard_index_from_image_pixel_similarity_dict_empty(self):
+        # Arrange
+        dict = {}
+        # Act
+        actual = jaccard_index_from_image_pixel_similarity_dict(dict)
+        # Assert
+        expected = 100
+        self.assertEqual(actual, expected)
+
+    def test_20001_jaccard_index_from_image_pixel_similarity_dict_2items_identical(self):
+        # Arrange
+        dict = {
+            1: (100, 100),
+            2: (200, 200),
+        }
+        # Act
+        actual = jaccard_index_from_image_pixel_similarity_dict(dict)
+        # Assert
+        expected = 100
+        self.assertEqual(actual, expected)
+
+    def test_20002_jaccard_index_from_image_pixel_similarity_dict_2items(self):
+        # Arrange
+        dict = {
+            1: (50, 100),
+            2: (50, 100),
+        }
+        # Act
+        actual = jaccard_index_from_image_pixel_similarity_dict(dict)
+        # Assert
+        expected = 50
+        self.assertEqual(actual, expected)
+
+    def test_20003_jaccard_index_from_image_pixel_similarity_dict_3items(self):
+        # Arrange
+        dict = {
+            1: (50, 100),
+            2: (25, 100),
+            3: (75, 100),
+        }
+        # Act
+        actual = jaccard_index_from_image_pixel_similarity_dict(dict)
+        # Assert
+        expected = 50
+        self.assertEqual(actual, expected)

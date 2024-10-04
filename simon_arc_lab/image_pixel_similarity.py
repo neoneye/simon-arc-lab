@@ -29,3 +29,19 @@ def image_pixel_similarity(image0: np.array, image1: np.array) -> dict:
                 dict[color] = (count_intersection, count_union)
 
     return dict
+
+def jaccard_index_from_image_pixel_similarity_dict(dict: dict) -> int:
+    """
+    Calculate the Jaccard index from the result of the image_pixel_similarity dictionary.
+
+    return: A score between 0 (least similar) and 100 (most similar).
+    """
+
+    count_intersection = 0
+    count_union = 0
+    for color in dict:
+        count_intersection += dict[color][0]
+        count_union += dict[color][1]
+    if count_union == 0:
+        return 100
+    return 100 * count_intersection // count_union
