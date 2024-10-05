@@ -141,7 +141,12 @@ def deserialize(input_str: str) -> np.array:
             image[y, :] = decoded_row
             count_valid_row += 1
         except DecodeRLEError as e:
-            score = remap(count_valid_row, 0, height-1, 7, 99)
+            min_score = 7
+            max_score = 99
+            if height < 2:
+                score = min_score
+            else:
+                score = remap(count_valid_row, 0, height-1, min_score, max_score)
             raise DeserializeError(
                 "Cannot deserialize row",
                 score=score,

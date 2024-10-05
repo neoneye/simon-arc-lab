@@ -150,13 +150,25 @@ class TestDeserialize(unittest.TestCase):
         self.assertTrue("No adjacent a-z characters are allowed" in str(decode_rle_error))
         self.assertEqual("Character: a", decode_rle_error.details)
 
-    def test_deserialize_error_last_character(self):
-        junk = "3 2 345a,678"
+    def test_deserialize_error_last_character_1row(self):
+        junk = "3 1 345a"
         with self.assertRaises(DeserializeError) as context:
             deserialize(junk)
         self.assertTrue("Cannot deserialize row" in str(context.exception))
-        self.assertEqual("y: 0 height: 2", context.exception.details)
+        self.assertEqual("y: 0 height: 1", context.exception.details)
         self.assertAlmostEqual(7.0, context.exception.score, delta=0.0001)
+        decode_rle_error = context.exception.decode_rle_error
+        self.assertIsInstance(decode_rle_error, DecodeRLEError)
+        self.assertTrue("Last character must not be a-z character" in str(decode_rle_error))
+        self.assertEqual("Character: a", decode_rle_error.details)
+
+    def test_deserialize_error_last_character_2rows(self):
+        junk = "3 2 678,345a"
+        with self.assertRaises(DeserializeError) as context:
+            deserialize(junk)
+        self.assertTrue("Cannot deserialize row" in str(context.exception))
+        self.assertEqual("y: 1 height: 2", context.exception.details)
+        self.assertAlmostEqual(99.0, context.exception.score, delta=0.0001)
         decode_rle_error = context.exception.decode_rle_error
         self.assertIsInstance(decode_rle_error, DecodeRLEError)
         self.assertTrue("Last character must not be a-z character" in str(decode_rle_error))
