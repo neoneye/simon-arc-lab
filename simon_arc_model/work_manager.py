@@ -5,7 +5,7 @@ import json
 from enum import Enum
 import numpy as np
 from typing import Optional
-from simon_arc_lab.rle.deserialize import DecodeRLEError
+from simon_arc_lab.rle.deserialize import DeserializeError
 from simon_arc_lab.task import Task
 from simon_arc_lab.task_mutator import *
 from simon_arc_lab.taskset import TaskSet
@@ -48,8 +48,8 @@ class WorkItem:
 
         try:
             self.predicted_output_image = self.predictor.predicted_image()
-        except DecodeRLEError as e:
-            # print(f'RLE decoding error for task {task_id} test={test_index}. Error: {e}')
+        except DeserializeError as e:
+            # print(f'RLE decoding error for task {task_id} test={test_index}. Error: {e} score={e.score}')
             self.status = WorkItemStatus.PROBLEM_DESERIALIZE
             return
         
