@@ -1,6 +1,7 @@
+from typing import Dict, Tuple
 import numpy as np
 
-def image_pixel_similarity_dict(image0: np.array, image1: np.array) -> dict:
+def image_pixel_similarity_dict(image0: np.array, image1: np.array) -> Dict[int, Tuple[int, int]]:
     """
     Measure how many pixels are the same in both images.
 
