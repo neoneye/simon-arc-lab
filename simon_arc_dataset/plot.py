@@ -2,6 +2,9 @@ import matplotlib.pyplot as plt
 from collections import Counter
 
 def plot_prompt_length_distribution(dataset_items: list[dict]):
+    if not isinstance(dataset_items, list):
+        raise ValueError('dataset_items must be a list of dictionaries')
+
     counter = Counter()
     for item in dataset_items:
         instruction = item['instruction']
@@ -18,6 +21,9 @@ def plot_prompt_length_distribution(dataset_items: list[dict]):
     plt.show()
 
 def plot_response_length_distribution(dataset_items: list[dict]):
+    if not isinstance(dataset_items, list):
+        raise ValueError('dataset_items must be a list of dictionaries')
+
     counter = Counter()
     for item in dataset_items:
         output = item['output']

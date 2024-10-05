@@ -1,6 +1,9 @@
 # Measure similarity between 2 images, despite having different sizes, they may still be similar.
 #
 # Interesting are the ARC-AGI puzzles with a tiny intersection across the pairs
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=29c11459
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=a3325580
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=5bd6f4ac
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=3194b014
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=1a2e2828
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=0a1d4ef5
@@ -26,6 +29,11 @@
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=b9b7f026
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2037f2c7
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=c3202e5a
+#
+# IDEA: jaccard index with fractions
+# Intersection: Positions where both images have Red pixels.
+# Union: Positions where at least one image has Red pixels.
+# Score: len(Intersection) / len(Union)
 #
 # IDEA: does one image contain the other image, original/rotated/flipped, by checking if the all the bigrams are contained in the other image bigrams: 
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f5aa3634
@@ -60,22 +68,23 @@
 # IDEA: Make another similarity class that compares images, where the order matters.
 # This way I can check, is one image a subset of the other image.
 #
-# IDEA: A verbose jaccard_index, where I can see which features are satisfied.
-#
 # IDEA: has same 3x3 structure, as in:
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=44d8ac46
 #
 # distance between histograms
+# Are there too few/many pixels with a particular color. By what amount, a few pixels, or many pixels.
+#
 # trigrams
-# shape types
+#
+# 3x3 shape types
 #
 # IDEA: there are many agree_on_color, maybe assign a lower weight, so they don't dominate the jaccard index.
 # IDEA: there are many agree_on_color_with_same_counter, maybe assign a lower weight, so they don't dominate the jaccard index.
 # IDEA: there are many same_bounding_box_size_of_color, maybe assign a lower weight, so they don't dominate the jaccard index.
-
+#
 from .histogram import *
-from .image_bigram import *
 from .find_bounding_box import find_bounding_box_multiple_ignore_colors
+from .image_with_cache import ImageWithCache
 import numpy as np
 from enum import Enum
 from dataclasses import dataclass
@@ -96,6 +105,7 @@ class FeatureType(Enum):
     SAME_LEAST_POPULAR_COLOR_LIST = "same_least_popular_color_list"
     AGREE_ON_COLOR = "agree_on_color"
     AGREE_ON_COLOR_WITH_SAME_COUNTER = "agree_on_color_with_same_counter"
+    UNIQUE_COLORS_IS_A_SUBSET = "unique_colors_is_a_subset"
     SAME_BOUNDING_BOX_SIZE_OF_COLOR = "same_bounding_box_size_of_color"
     SAME_BIGRAMS_DIRECTION_ALL = "same_bigrams_direction_all"
     SAME_BIGRAMS_DIRECTION_LEFTRIGHT = "same_bigrams_direction_leftright"
@@ -103,6 +113,7 @@ class FeatureType(Enum):
     SAME_BIGRAMS_DIRECTION_TOPLEFTBOTTOMRIGHT = "same_bigrams_direction_topleftbottomright"
     SAME_BIGRAMS_DIRECTION_TOPRIGHTBOTTOMLEFT = "same_bigrams_direction_toprightbottomleft"
     SAME_BIGRAMS_SUBSET = "same_bigrams_subset"
+    SAME_SHAPE2X2 = "same_shape2x2"
 
 @dataclass(frozen=True)
 class Feature:
@@ -122,25 +133,36 @@ class Feature:
         return ",".join(feature_names)
 
 class ImageSimilarity:
-    def __init__(self, image0: np.array, image1: np.array) -> None:
+    def __init__(self, image_with_cache0: ImageWithCache, image_with_cache1: ImageWithCache) -> None:
         """
         Compare two images. The order doesn't matter.
         """
-        self.image0 = image0
-        self.image1 = image1
-        self.lazy_histogram0 = None
-        self.lazy_histogram1 = None
+        assert isinstance(image_with_cache0, ImageWithCache)
+        assert isinstance(image_with_cache1, ImageWithCache)
+        self.image_with_cache0 = image_with_cache0
+        self.image_with_cache1 = image_with_cache1
         self.lazy_features = None
+
+    @classmethod
+    def create_with_images(cls, image0: np.array, image1: np.array) -> 'ImageSimilarity':
+        image_with_cache0 = ImageWithCache(image0)
+        image_with_cache1 = ImageWithCache(image1)
+        return cls(image_with_cache0, image_with_cache1)
     
     @classmethod
     def compute_jaccard_index(cls, parameters: list[bool]) -> int:
         """
         Jaccard index of how many features are satisfied.
+        https://en.wikipedia.org/wiki/Jaccard_index
         
         return: 0 to 100
         """
-        a_intersection_b = sum(parameters)
         a_union_b = len(parameters)
+        if a_union_b == 0:
+            # Avoid division by zero
+            # No features to compare, thus no features can be satisfied.
+            return 0
+        a_intersection_b = sum(parameters)
         return a_intersection_b * 100 // a_union_b
 
     def _compute_features(self) -> dict:
@@ -162,12 +184,14 @@ class ImageSimilarity:
             Feature(FeatureType.SAME_HISTOGRAM_COUNTERS): self.same_histogram_counters(),
             Feature(FeatureType.SAME_MOST_POPULAR_COLOR_LIST): self.same_most_popular_color_list(),
             Feature(FeatureType.SAME_LEAST_POPULAR_COLOR_LIST): self.same_least_popular_color_list(),
+            Feature(FeatureType.UNIQUE_COLORS_IS_A_SUBSET): self.unique_colors_is_a_subset(),
             Feature(FeatureType.SAME_BIGRAMS_DIRECTION_ALL): self.same_bigrams_direction_all(),
             Feature(FeatureType.SAME_BIGRAMS_DIRECTION_LEFTRIGHT): self.same_bigrams_direction_leftright(),
             Feature(FeatureType.SAME_BIGRAMS_DIRECTION_TOPBOTTOM): self.same_bigrams_direction_topbottom(),
             Feature(FeatureType.SAME_BIGRAMS_DIRECTION_TOPLEFTBOTTOMRIGHT): self.same_bigrams_direction_topleftbottomright(),
             Feature(FeatureType.SAME_BIGRAMS_DIRECTION_TOPRIGHTBOTTOMLEFT): self.same_bigrams_direction_toprightbottomleft(),
             Feature(FeatureType.SAME_BIGRAMS_SUBSET): self.same_bigrams_subset(),
+            Feature(FeatureType.SAME_SHAPE2X2): self.same_shape2x2(),
         }
 
         # Color specific features
@@ -211,36 +235,36 @@ class ImageSimilarity:
         """
         Identical images.
         """
-        return np.array_equal(self.image0, self.image1)
+        return np.array_equal(self.image_with_cache0.image, self.image_with_cache1.image)
 
     def same_shape(self) -> bool:
         """
         Same width and height.
         """
-        return self.image0.shape == self.image1.shape
+        return self.image_with_cache0.image.shape == self.image_with_cache1.image.shape
     
     def same_shape_allow_for_rotation(self) -> bool:
         """
         Same width and height, allow for rotation.
         """
-        height0, width0 = self.image0.shape
-        height1, width1 = self.image1.shape
+        height0, width0 = self.image_with_cache0.image.shape
+        height1, width1 = self.image_with_cache1.image.shape
         return (width0 == width1 and height0 == height1) or (width0 == height1 and height0 == width1)
 
     def same_shape_width(self) -> bool:
         """
         Same width
         """
-        width0 = self.image0.shape[1]
-        width1 = self.image1.shape[1]
+        width0 = self.image_with_cache0.image.shape[1]
+        width1 = self.image_with_cache1.image.shape[1]
         return width0 == width1
 
     def same_shape_height(self) -> bool:
         """
         Same height
         """
-        height0 = self.image0.shape[0]
-        height1 = self.image1.shape[0]
+        height0 = self.image_with_cache0.image.shape[0]
+        height1 = self.image_with_cache1.image.shape[0]
         return height0 == height1
 
     def same_shape_orientation(self) -> bool:
@@ -255,19 +279,15 @@ class ImageSimilarity:
                 return "landscape"
             else:
                 return "portrait"
-        orientation0 = orientation(self.image0)
-        orientation1 = orientation(self.image1)
+        orientation0 = orientation(self.image_with_cache0.image)
+        orientation1 = orientation(self.image_with_cache1.image)
         return orientation0 == orientation1
 
     def histogram0(self) -> Histogram:
-        if self.lazy_histogram0 is None:
-            self.lazy_histogram0 = Histogram.create_with_image(self.image0)
-        return self.lazy_histogram0
+        return self.image_with_cache0.histogram()
     
     def histogram1(self) -> Histogram:
-        if self.lazy_histogram1 is None:
-            self.lazy_histogram1 = Histogram.create_with_image(self.image1)
-        return self.lazy_histogram1
+        return self.image_with_cache1.histogram()
 
     def same_histogram(self) -> bool:
         """
@@ -283,11 +303,9 @@ class ImageSimilarity:
         """
         The same colors occur in both images.
         """
-        histogram0 = self.histogram0()
-        histogram1 = self.histogram1()
-        colors0 = histogram0.unique_colors()
-        colors1 = histogram1.unique_colors()
-        return colors0 == colors1
+        color_list0 = self.image_with_cache0.histogram_unique_colors()
+        color_list1 = self.image_with_cache1.histogram_unique_colors()
+        return color_list0 == color_list1
 
     def same_number_of_unique_colors(self) -> bool:
         """
@@ -301,11 +319,9 @@ class ImageSimilarity:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e179c5f4
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d5d6de2d
         """
-        histogram0 = self.histogram0()
-        histogram1 = self.histogram1()
-        colors0 = histogram0.unique_colors()
-        colors1 = histogram1.unique_colors()
-        return len(colors0) == len(colors1)
+        color_list0 = self.image_with_cache0.histogram_unique_colors()
+        color_list1 = self.image_with_cache1.histogram_unique_colors()
+        return len(color_list0) == len(color_list1)
 
     def same_histogram_ignoring_scale(self) -> bool:
         """
@@ -313,8 +329,8 @@ class ImageSimilarity:
         """
         histogram0 = self.histogram0()
         histogram1 = self.histogram1()
-        height0, width0 = self.image0.shape
-        height1, width1 = self.image1.shape
+        height0, width0 = self.image_with_cache0.image.shape
+        height1, width1 = self.image_with_cache1.image.shape
         mass0 = height0 * width0
         mass1 = height1 * width1
 
@@ -331,32 +347,46 @@ class ImageSimilarity:
     def same_histogram_counters(self) -> bool:
         """
         The counters are the same in the histogram, but the colors may be different.
+
+        Examples:
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=bda2d7a6
         """
-        histogram0 = self.histogram0()
-        histogram1 = self.histogram1()
-        counters0 = histogram0.sorted_count_list()
-        counters1 = histogram1.sorted_count_list()
+        counters0 = self.image_with_cache0.histogram_sorted_count_list()
+        counters1 = self.image_with_cache1.histogram_sorted_count_list()
         return counters0 == counters1
 
     def same_most_popular_color_list(self) -> bool:
         """
         Both images agree on the same most popular colors.
         """
-        histogram0 = self.histogram0()
-        histogram1 = self.histogram1()
-        color_list0 = histogram0.most_popular_color_list()
-        color_list1 = histogram1.most_popular_color_list()
+        color_list0 = self.image_with_cache0.histogram_most_popular_color_list()
+        color_list1 = self.image_with_cache1.histogram_most_popular_color_list()
         return color_list0 == color_list1
 
     def same_least_popular_color_list(self) -> bool:
         """
         Both images agree on the same least popular colors.
         """
-        histogram0 = self.histogram0()
-        histogram1 = self.histogram1()
-        color_list0 = histogram0.least_popular_color_list()
-        color_list1 = histogram1.least_popular_color_list()
+        color_list0 = self.image_with_cache0.histogram_least_popular_color_list()
+        color_list1 = self.image_with_cache1.histogram_least_popular_color_list()
         return color_list0 == color_list1
+
+    def unique_colors_is_a_subset(self) -> bool:
+        """
+        Is the unique colors of one image a subset of the unique colors of the other image.
+
+        Examples:
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=be94b721
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ddf7fa4f
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=de1cd16c
+        """
+        color_list0 = self.image_with_cache0.histogram_unique_colors()
+        color_list1 = self.image_with_cache1.histogram_unique_colors()
+        color_set0 = set(color_list0)
+        color_set1 = set(color_list1)
+        a = color_set0.issubset(color_set1)
+        b = color_set1.issubset(color_set0)
+        return a or b
 
     def agree_on_color(self, color: int) -> bool:
         """
@@ -430,9 +460,9 @@ class ImageSimilarity:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=91413438
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=8ee62060
         """
-        bigram0 = image_bigrams_direction_all(self.image0, 255)
-        bigram1 = image_bigrams_direction_all(self.image1, 255)
-        return bigram0 == bigram1
+        bigram_list0 = self.image_with_cache0.bigrams_direction_all()
+        bigram_list1 = self.image_with_cache1.bigrams_direction_all()
+        return bigram_list0 == bigram_list1
 
     def same_bigrams_direction_leftright(self) -> bool:
         """
@@ -451,9 +481,9 @@ class ImageSimilarity:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=85b81ff1
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=7ee1c6ea
         """
-        bigram0 = image_bigrams_direction_leftright(self.image0, 255)
-        bigram1 = image_bigrams_direction_leftright(self.image1, 255)
-        return bigram0 == bigram1
+        bigram_list0 = self.image_with_cache0.bigrams_direction_leftright()
+        bigram_list1 = self.image_with_cache1.bigrams_direction_leftright()
+        return bigram_list0 == bigram_list1
 
     def same_bigrams_direction_topbottom(self) -> bool:
         """
@@ -466,9 +496,9 @@ class ImageSimilarity:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d8c310e9
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=82819916
         """
-        bigram0 = image_bigrams_direction_topbottom(self.image0, 255)
-        bigram1 = image_bigrams_direction_topbottom(self.image1, 255)
-        return bigram0 == bigram1
+        bigram_list0 = self.image_with_cache0.bigrams_direction_topbottom()
+        bigram_list1 = self.image_with_cache1.bigrams_direction_topbottom()
+        return bigram_list0 == bigram_list1
 
     def same_bigrams_direction_topleftbottomright(self) -> bool:
         """
@@ -478,9 +508,9 @@ class ImageSimilarity:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=bbc9ae5d
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9dfd6313
         """
-        bigram0 = image_bigrams_direction_topleftbottomright(self.image0, 255)
-        bigram1 = image_bigrams_direction_topleftbottomright(self.image1, 255)
-        return bigram0 == bigram1
+        bigram_list0 = self.image_with_cache0.bigrams_direction_topleftbottomright()
+        bigram_list1 = self.image_with_cache1.bigrams_direction_topleftbottomright()
+        return bigram_list0 == bigram_list1
 
     def same_bigrams_direction_toprightbottomleft(self) -> bool:
         """
@@ -493,9 +523,9 @@ class ImageSimilarity:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d10ecb37
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=feca6190
         """
-        bigram0 = image_bigrams_direction_toprightbottomleft(self.image0, 255)
-        bigram1 = image_bigrams_direction_toprightbottomleft(self.image1, 255)
-        return bigram0 == bigram1
+        bigram_list0 = self.image_with_cache0.bigrams_direction_toprightbottomleft()
+        bigram_list1 = self.image_with_cache1.bigrams_direction_toprightbottomleft()
+        return bigram_list0 == bigram_list1
 
     def same_bigrams_subset(self) -> bool:
         """
@@ -512,8 +542,8 @@ class ImageSimilarity:
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=22eb0ac0
         https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d4b1c2b1
         """
-        bigram_list0 = image_bigrams_direction_all(self.image0, 255)
-        bigram_list1 = image_bigrams_direction_all(self.image1, 255)
+        bigram_list0 = self.image_with_cache0.bigrams_direction_all()
+        bigram_list1 = self.image_with_cache1.bigrams_direction_all()
 
         # remove bigrams where the tuple contains 255
         bigram_set0 = set()
@@ -569,11 +599,32 @@ class ImageSimilarity:
         ignore_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         ignore_colors.remove(color)
 
-        rect0 = find_bounding_box_multiple_ignore_colors(self.image0, ignore_colors)
-        rect1 = find_bounding_box_multiple_ignore_colors(self.image1, ignore_colors)
+        # IDEA: Move to ImageWithCache, since this is a slow operation
+        image0 = self.image_with_cache0.image
+        image1 = self.image_with_cache1.image
+        rect0 = find_bounding_box_multiple_ignore_colors(image0, ignore_colors)
+        rect1 = find_bounding_box_multiple_ignore_colors(image1, ignore_colors)
 
         same_width = rect0.width == rect1.width
         same_height = rect0.height == rect1.height
         same_size = same_width and same_height
         return same_size
 
+    def same_shape2x2(self) -> bool:
+        """
+        Do the same 2x2 shapes occur in both images.
+
+        Examples:
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f76d97a5
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=eb5a1d5d
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=eb281b96
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ea32f347
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e9614598
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e76a88a6
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e509e548
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ded97339
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=44d8ac46
+        """
+        shape_id_list0 = self.image_with_cache0.shape2x2_id_list()
+        shape_id_list1 = self.image_with_cache1.shape2x2_id_list()
+        return shape_id_list0 == shape_id_list1

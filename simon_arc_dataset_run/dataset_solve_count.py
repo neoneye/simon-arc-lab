@@ -265,7 +265,7 @@ def generate_task_count_pixels_and_repeat_input_pattern(seed: int, transformatio
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    builder.append_image()
+    builder.append_image_randomized()
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
@@ -288,8 +288,8 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=19000003,
-    max_num_samples=100000,
+    seed=19100003,
+    max_num_samples=1000,
     max_byte_size=1024*1024*100
 )
 # generator.inspect()

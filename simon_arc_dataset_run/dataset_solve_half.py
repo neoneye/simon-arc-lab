@@ -53,7 +53,7 @@ def generate_task_half(seed: int, edge_name: str, connectivity: PixelConnectivit
     max_image_size = 6
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    random.shuffle(colors)
+    random.Random(seed + 8).shuffle(colors)
     color0 = colors[0]
     color1 = colors[1]
     color_map_output = {
@@ -140,8 +140,8 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=1319377377,
-    max_num_samples=100000,
+    seed=1329377377,
+    max_num_samples=1000,
     max_byte_size=1024*1024*100
 )
 # generator.inspect()

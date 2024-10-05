@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, Tuple, Optional
 import random
 import numpy as np
 
@@ -66,7 +66,7 @@ class Histogram:
             hist[colors[color_index]] = count
         return cls(hist)
 
-    def sorted_color_count_list(self) -> List[Tuple[int, int]]:
+    def sorted_color_count_list(self) -> list[Tuple[int, int]]:
         """
         sort by popularity, if there is a tie, sort by color
         """
@@ -142,7 +142,7 @@ class Histogram:
         """
         return set(self.color_count.keys()) & set(other.color_count.keys())
 
-    def color_intersection_list(self, other: 'Histogram') -> List[int]:
+    def color_intersection_list(self, other: 'Histogram') -> list[int]:
         """
         Sorted list of colors that are in both histograms. The overlap.
         """
@@ -186,7 +186,7 @@ class Histogram:
         histogram.purge_mutable()
         return len(histogram.color_count)
 
-    def unique_colors(self) -> List[int]:
+    def unique_colors(self) -> list[int]:
         """
         Sorted list of unique colors in the histogram.
         """
