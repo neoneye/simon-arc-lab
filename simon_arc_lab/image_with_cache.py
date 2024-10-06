@@ -2,8 +2,9 @@ from typing import Tuple
 import numpy as np
 from .histogram import Histogram
 from .image_bigram import *
-from .image_shape2x2 import *
-from .image_shape3x3_opposite import *
+from .image_shape2x2 import ImageShape2x2
+from .image_shape3x3_opposite import ImageShape3x3Opposite
+from .image_shape3x3_center import ImageShape3x3Center
 
 class ImageWithCache:
     def __init__(self, image: np.array):
@@ -20,6 +21,7 @@ class ImageWithCache:
         self.lazy_bigrams_direction_toprightbottomleft = None
         self.lazy_shape2x2_id_list = None
         self.lazy_shape3x3opposite_id_list = None
+        self.lazy_shape3x3center_id_list = None
 
     def histogram(self) -> Histogram:
         if self.lazy_histogram is None:
@@ -80,3 +82,8 @@ class ImageWithCache:
         if self.lazy_shape3x3opposite_id_list is None:
             self.lazy_shape3x3opposite_id_list = ImageShape3x3Opposite.shape_id_list(self.image)
         return self.lazy_shape3x3opposite_id_list
+
+    def shape3x3center_id_list(self) -> list[int]:
+        if self.lazy_shape3x3center_id_list is None:
+            self.lazy_shape3x3center_id_list = ImageShape3x3Center.shape_id_list(self.image)
+        return self.lazy_shape3x3center_id_list

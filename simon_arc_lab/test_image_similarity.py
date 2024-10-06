@@ -1087,7 +1087,47 @@ class TestImageSimilarity(unittest.TestCase):
         # Assert
         self.assertEqual(actual, False)
 
-    def test_80000_format_feature_list(self):
+    def test_80000_same_shape3x3center_true(self):
+        # Arrange
+        image0 = np.array([
+            [9, 9, 9, 9, 9, 9],
+            [9, 5, 5, 5, 5, 5],
+            [9, 5, 9, 5, 9, 5],
+            [9, 5, 5, 5, 9, 5],
+            [9, 9, 9, 5, 5, 5]], dtype=np.uint8)
+        image1 = np.array([
+            [9, 9, 9, 9, 9, 9],
+            [9, 5, 5, 5, 5, 5],
+            [9, 5, 9, 5, 7, 5],
+            [9, 5, 5, 5, 7, 5],
+            [9, 9, 9, 5, 5, 5]], dtype=np.uint8)
+        i = ImageSimilarity.create_with_images(image0, image1)
+        # Act
+        actual = i.same_shape3x3center()
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_80001_same_shape3x3center_false(self):
+        # Arrange
+        image0 = np.array([
+            [9, 9, 9, 9, 9, 9],
+            [9, 5, 5, 5, 5, 5],
+            [9, 5, 9, 5, 9, 5],
+            [9, 5, 5, 5, 9, 5],
+            [9, 9, 9, 5, 5, 5]], dtype=np.uint8)
+        image1 = np.array([
+            [9, 9, 9, 9, 9, 9],
+            [9, 5, 5, 5, 5, 5],
+            [9, 5, 9, 5, 5, 5],
+            [9, 5, 5, 5, 5, 5],
+            [9, 9, 9, 5, 5, 5]], dtype=np.uint8)
+        i = ImageSimilarity.create_with_images(image0, image1)
+        # Act
+        actual = i.same_shape3x3center()
+        # Assert
+        self.assertEqual(actual, False)
+
+    def test_90000_format_feature_list(self):
         # Arrange
         feature_list = [
             Feature(FeatureType.SAME_ORIENTATION),
