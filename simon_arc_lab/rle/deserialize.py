@@ -88,10 +88,10 @@ def deserialize(input_str: str) -> np.array:
             details=str(e)
         )
 
-    # Images with negative dimensions cannot be created
-    if width < 0:
+    # Images with negative dimensions cannot be created, or 0 width
+    if width < 1:
         raise DeserializeError(
-            "Width must non-negative",
+            "Width must 1 or greater",
             score=2
         )
 
@@ -105,10 +105,10 @@ def deserialize(input_str: str) -> np.array:
             details=str(e)
         )
 
-    # Images with negative dimensions cannot be created
-    if height < 0:
+    # Images with negative dimensions cannot be created, or 0 height
+    if height < 1:
         raise DeserializeError(
-            "Height must non-negative",
+            "Height must 1 or greater",
             score=4
         )
 

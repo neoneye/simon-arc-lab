@@ -84,7 +84,14 @@ class TestDeserialize(unittest.TestCase):
         junk = "-11 12 0,0c2e0,02a12e0,,,,,,0c2e0,0,,"
         with self.assertRaises(DeserializeError) as context:
             deserialize(junk)
-        self.assertTrue("Width must non-negative" in str(context.exception))
+        self.assertTrue("Width must 1 or greater" in str(context.exception))
+        self.assertAlmostEqual(2.0, context.exception.score, delta=0.0001)
+
+    def test_deserialize_error_width_zero(self):
+        junk = "0 12 0,0c2e0,02a12e0,,,,,,0c2e0,0,,"
+        with self.assertRaises(DeserializeError) as context:
+            deserialize(junk)
+        self.assertTrue("Width must 1 or greater" in str(context.exception))
         self.assertAlmostEqual(2.0, context.exception.score, delta=0.0001)
 
     def test_deserialize_error_height_junk(self):
@@ -98,7 +105,14 @@ class TestDeserialize(unittest.TestCase):
         junk = "11 -12 0,0c2e0,02a12e0,,,,,,0c2e0,0,,"
         with self.assertRaises(DeserializeError) as context:
             deserialize(junk)
-        self.assertTrue("Height must non-negative" in str(context.exception))
+        self.assertTrue("Height must 1 or greater" in str(context.exception))
+        self.assertAlmostEqual(4.0, context.exception.score, delta=0.0001)
+
+    def test_deserialize_error_height_zero(self):
+        junk = "11 0 0,0c2e0,02a12e0,,,,,,0c2e0,0,,"
+        with self.assertRaises(DeserializeError) as context:
+            deserialize(junk)
+        self.assertTrue("Height must 1 or greater" in str(context.exception))
         self.assertAlmostEqual(4.0, context.exception.score, delta=0.0001)
 
     def test_deserialize_error_heightmismatch(self):
