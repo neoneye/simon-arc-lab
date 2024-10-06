@@ -2,6 +2,10 @@ from typing import List, Optional
 import numpy as np
 from ..remap import remap
 
+# Image sizes that use too many digits for the width makes little sense in the LLM, 30x30 is already a lot.
+# The MAX_IMAGE_SIZE is set to 99, which is 2 digits. Allowing for 3 digits and it would take much longer to train the LLM.
+MAX_IMAGE_SIZE = 99
+
 class DecodeRLEError(ValueError):
     """Exception raised for errors in RLE decoding."""
     def __init__(self, message: str, details: Optional[str] = None):
@@ -95,13 +99,22 @@ def deserialize(input_str: str) -> np.array:
             score=2
         )
 
+    # Sizes that use too many digits for the width makes little sense in the LLM, 30x30 is already a lot.
+    # The MAX_IMAGE_SIZE is set to 99, which is 2 digits. Allowing for 3 digits and it would take longer to train.
+    if width > MAX_IMAGE_SIZE:
+        raise DeserializeError(
+            "Width exceeds MAX_IMAGE_SIZE",
+            score=3,
+            details=f"width: {width}, MAX_IMAGE_SIZE: {MAX_IMAGE_SIZE}"
+        )
+
     # Validate the "height" string
     try:
         height = int(height_str)
     except ValueError as e:
         raise DeserializeError(
             "Cannot parse height",
-            score=3,
+            score=4,
             details=str(e)
         )
 
@@ -109,15 +122,31 @@ def deserialize(input_str: str) -> np.array:
     if height < 1:
         raise DeserializeError(
             "Height must 1 or greater",
-            score=4
+            score=5
+        )
+
+    # Sizes that use too many digits for the width makes little sense in the LLM, 30x30 is already a lot.
+    # The MAX_IMAGE_SIZE is set to 99, which is 2 digits. Allowing for 3 digits and it would take longer to train.
+    if height > MAX_IMAGE_SIZE:
+        raise DeserializeError(
+            "Height exceeds MAX_IMAGE_SIZE",
+            score=6,
+            details=f"height: {height}, MAX_IMAGE_SIZE: {MAX_IMAGE_SIZE}"
         )
 
     count_rows = len(rows)
-    if count_rows != height:
+    if count_rows < height:
         raise DeserializeError(
-            "Mismatch between height and the number of RLE rows",
-            score=5,
-            details=f"Expected height: {height}, Number of rows: {count_rows}"
+            "Too few rows. Mismatch between height and the number of RLE rows",
+            score=7,
+            details=f"height: {height} != count_rows: {count_rows}"
+        )
+    
+    if count_rows > height:
+        raise DeserializeError(
+            "Too many rows. Mismatch between height and the number of RLE rows",
+            score=8,
+            details=f"height: {height} != count_rows: {count_rows}"
         )
 
     image = np.zeros((height, width), dtype=np.uint8)
@@ -131,7 +160,7 @@ def deserialize(input_str: str) -> np.array:
             if y == 0:
                 raise DeserializeError(
                     "First row is empty",
-                    score=6
+                    score=9
                 )
             image[y, :] = image[copy_y, :]
             continue
@@ -141,7 +170,7 @@ def deserialize(input_str: str) -> np.array:
             image[y, :] = decoded_row
             count_valid_row += 1
         except DecodeRLEError as e:
-            min_score = 7
+            min_score = 10
             max_score = 99
             if height < 2:
                 score = min_score
