@@ -20,9 +20,9 @@ if not os.path.isdir(path_to_arc_dataset_collection_dataset):
 groupname_pathtotaskdir_list = [
     ('arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
     ('arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
-    ('tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
-    ('miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
-    ('conceptarc', os.path.join(path_to_arc_dataset_collection_dataset, 'ConceptARC/data')),
+    # ('tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
+    # ('miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
+    # ('conceptarc', os.path.join(path_to_arc_dataset_collection_dataset, 'ConceptARC/data')),
     # ('rearc_easy', os.path.join(path_to_arc_dataset_collection_dataset, 'RE-ARC/data/easy')),
     # ('rearc_hard', os.path.join(path_to_arc_dataset_collection_dataset, 'RE-ARC/data/hard')),
     # ('testdata', os.path.join(PROJECT_ROOT, 'testdata', 'simple_arc_tasks')),
@@ -95,7 +95,8 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
 
         count_features_set_intersection = len(feature_set_intersection)
         accumulated_intersectioncount_list.append(count_features_set_intersection)
-        print(f"Task: '{task.metadata_task_id}'    min: {score_min} average: {score_average:,.1f} max: {score_max} std_dev: {score_std_dev:,.1f} intersection: {count_features_set_intersection}  test_accuracy: {test_accuracy}  task_summary: {ts.summary()}")
+        if score_min > 0:
+            print(f"Task: '{task.metadata_task_id}'    min: {score_min} average: {score_average:,.1f} max: {score_max} std_dev: {score_std_dev:,.1f} intersection: {count_features_set_intersection}  test_accuracy: {test_accuracy}  task_summary: {ts.summary()}")
         accumulated_score_average_list.append(score_average)
 
     end_time = time.time()
