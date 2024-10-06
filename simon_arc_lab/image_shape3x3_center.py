@@ -1,4 +1,5 @@
 import numpy as np
+from collections import Counter
 
 class ImageShape3x3Center:
     TOP_LEFT = 1
@@ -47,3 +48,21 @@ class ImageShape3x3Center:
                 new_image[y, x] = same_color_mask
         
         return new_image
+
+    @classmethod
+    def shape_id_list(cls, image: np.array) -> list[int]:
+        """
+        Extract the shape ids that are present in the image.
+
+        :param image: The image to analyze.
+        return: list of shape ids, eg. [0, 4, 32, 36]
+        """
+        shapeid_image = cls.apply(image)
+        # histogram of the shape ids, and the count of each shape id
+        counter = Counter(shapeid_image.flatten())
+        # extract the shape ids and ignore the count
+        shape_ids = list(counter.keys())
+        # cast from np uint to int
+        shape_ids = [int(key) for key in shape_ids]
+        shape_ids = sorted(shape_ids)
+        return shape_ids
