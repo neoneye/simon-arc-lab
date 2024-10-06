@@ -39,6 +39,12 @@ class Rectangle:
         if x0 >= x1 or y0 >= y1:
             return Rectangle.empty()
         return Rectangle(x0, y0, x1 - x0, y1 - y0)
+    
+    def has_overlap(self, other: 'Rectangle') -> bool:
+        """
+        Check if two rectangles have an overlap.
+        """
+        return self.intersection(other).is_not_empty()
 
     def random_child_rectangle(self, seed: int) -> 'Rectangle':
         """
