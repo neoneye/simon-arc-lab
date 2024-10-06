@@ -1,3 +1,10 @@
+# Measure how similar two images are.
+#
+# IDEA: Fuzzy measuring of how similar two images are.
+# big reward if the number of pixels are very close to the desired count.
+# small reward if the number of pixels are far away to the desired count.
+# if there are 50% or more of the pixels with the desired count, then return True.
+# otherwise return False.
 from typing import Dict, Tuple
 import numpy as np
 
