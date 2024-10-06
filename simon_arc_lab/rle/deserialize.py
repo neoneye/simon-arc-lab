@@ -134,18 +134,45 @@ def deserialize(input_str: str) -> np.array:
             details=f"height: {height}, MAX_IMAGE_SIZE: {MAX_IMAGE_SIZE}"
         )
 
+    # Check that the number of rows matches the height
+    # Reward the model for getting this right, since it's the most frequent mistake.
+    # If it's off by 1, then it's a minor mistake, and gets a bigger reward.
+    # If it's off by more than 1, then it's a major mistake, and gets less reward.
     count_rows = len(rows)
-    if count_rows < height:
+    count_rows_plus1 = count_rows + 1
+    count_rows_minus1 = count_rows - 1
+    if count_rows_plus1 < height:
         raise DeserializeError(
             "Too few rows. Mismatch between height and the number of RLE rows",
             score=7,
             details=f"height: {height} != count_rows: {count_rows}"
         )
     
-    if count_rows > height:
+    if count_rows_minus1 > height:
         raise DeserializeError(
             "Too many rows. Mismatch between height and the number of RLE rows",
             score=8,
+            details=f"height: {height} != count_rows: {count_rows}"
+        )
+
+    if count_rows_plus1 == height:
+        raise DeserializeError(
+            "Too few rows, only 1 row missing. Mismatch between height and the number of RLE rows",
+            score=9,
+            details=f"height: {height} != count_rows: {count_rows}"
+        )
+    
+    if count_rows_minus1 == height:
+        raise DeserializeError(
+            "Too many rows, only 1 row too many. Mismatch between height and the number of RLE rows",
+            score=10,
+            details=f"height: {height} != count_rows: {count_rows}"
+        )
+
+    if count_rows != height:
+        raise DeserializeError(
+            "Should not happen, earlier checks should have caught this. Mismatch between height and the number of RLE rows",
+            score=7,
             details=f"height: {height} != count_rows: {count_rows}"
         )
 
@@ -160,7 +187,7 @@ def deserialize(input_str: str) -> np.array:
             if y == 0:
                 raise DeserializeError(
                     "First row is empty",
-                    score=9
+                    score=11
                 )
             image[y, :] = image[copy_y, :]
             continue
@@ -170,7 +197,7 @@ def deserialize(input_str: str) -> np.array:
             image[y, :] = decoded_row
             count_valid_row += 1
         except DecodeRLEError as e:
-            min_score = 10
+            min_score = 12
             max_score = 99
             if height < 2:
                 score = min_score

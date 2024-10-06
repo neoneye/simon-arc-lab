@@ -131,7 +131,7 @@ class TestDeserialize(unittest.TestCase):
         self.assertEqual("height: 100, MAX_IMAGE_SIZE: 99", context.exception.details)
         self.assertAlmostEqual(6.0, context.exception.score, delta=0.0001)
 
-    def test_deserialize_error_heightmismatch_too_few(self):
+    def test_deserialize_error_heightmismatch_way_too_few(self):
         junk = "1 15 0,,,,,,,,,,,"
         with self.assertRaises(DeserializeError) as context:
             deserialize(junk)
@@ -139,7 +139,7 @@ class TestDeserialize(unittest.TestCase):
         self.assertEqual("height: 15 != count_rows: 12", context.exception.details)
         self.assertAlmostEqual(7.0, context.exception.score, delta=0.0001)
 
-    def test_deserialize_error_heightmismatch_too_many(self):
+    def test_deserialize_error_heightmismatch_way_too_many(self):
         junk = "1 5 0,,,,,,,,,,,"
         with self.assertRaises(DeserializeError) as context:
             deserialize(junk)
@@ -147,12 +147,28 @@ class TestDeserialize(unittest.TestCase):
         self.assertEqual("height: 5 != count_rows: 12", context.exception.details)
         self.assertAlmostEqual(8.0, context.exception.score, delta=0.0001)
 
+    def test_deserialize_error_heightmismatch_one_too_few(self):
+        junk = "1 7 0,,,,,"
+        with self.assertRaises(DeserializeError) as context:
+            deserialize(junk)
+        self.assertTrue("Too few rows, only 1 row missing. Mismatch between height and the number of RLE rows" in str(context.exception))
+        self.assertEqual("height: 7 != count_rows: 6", context.exception.details)
+        self.assertAlmostEqual(9.0, context.exception.score, delta=0.0001)
+
+    def test_deserialize_error_heightmismatch_one_too_many(self):
+        junk = "1 5 0,,,,,"
+        with self.assertRaises(DeserializeError) as context:
+            deserialize(junk)
+        self.assertTrue("Too many rows, only 1 row too many. Mismatch between height and the number of RLE rows" in str(context.exception))
+        self.assertEqual("height: 5 != count_rows: 6", context.exception.details)
+        self.assertAlmostEqual(10.0, context.exception.score, delta=0.0001)
+
     def test_deserialize_error_emptyfirstrow(self):
         junk = "1 2 ,5"
         with self.assertRaises(DeserializeError) as context:
             deserialize(junk)
         self.assertTrue("First row is empty" in str(context.exception))
-        self.assertAlmostEqual(9.0, context.exception.score, delta=0.0001)
+        self.assertAlmostEqual(11.0, context.exception.score, delta=0.0001)
 
     def test_deserialize_error_invalidcharacterforfullrow(self):
         junk = "1 2 3,#"
@@ -171,7 +187,7 @@ class TestDeserialize(unittest.TestCase):
             deserialize(junk)
         self.assertTrue("Cannot deserialize row" in str(context.exception))
         self.assertEqual("y: 0 height: 2", context.exception.details)
-        self.assertAlmostEqual(10.0, context.exception.score, delta=0.0001)
+        self.assertAlmostEqual(12.0, context.exception.score, delta=0.0001)
         decode_rle_error = context.exception.decode_rle_error
         self.assertIsInstance(decode_rle_error, DecodeRLEError)
         self.assertTrue("Invalid character inside row" in str(decode_rle_error))
@@ -183,7 +199,7 @@ class TestDeserialize(unittest.TestCase):
             deserialize(junk)
         self.assertTrue("Cannot deserialize row" in str(context.exception))
         self.assertEqual("y: 0 height: 2", context.exception.details)
-        self.assertAlmostEqual(10.0, context.exception.score, delta=0.0001)
+        self.assertAlmostEqual(12.0, context.exception.score, delta=0.0001)
         decode_rle_error = context.exception.decode_rle_error
         self.assertIsInstance(decode_rle_error, DecodeRLEError)
         self.assertTrue("No adjacent a-z characters are allowed" in str(decode_rle_error))
@@ -195,7 +211,7 @@ class TestDeserialize(unittest.TestCase):
             deserialize(junk)
         self.assertTrue("Cannot deserialize row" in str(context.exception))
         self.assertEqual("y: 0 height: 1", context.exception.details)
-        self.assertAlmostEqual(10.0, context.exception.score, delta=0.0001)
+        self.assertAlmostEqual(12.0, context.exception.score, delta=0.0001)
         decode_rle_error = context.exception.decode_rle_error
         self.assertIsInstance(decode_rle_error, DecodeRLEError)
         self.assertTrue("Last character must not be a-z character" in str(decode_rle_error))
@@ -219,7 +235,7 @@ class TestDeserialize(unittest.TestCase):
             deserialize(junk)
         self.assertTrue("Cannot deserialize row" in str(context.exception))
         self.assertEqual("y: 2 height: 5", context.exception.details)
-        self.assertAlmostEqual(54.5, context.exception.score, delta=0.0001)
+        self.assertAlmostEqual(55.5, context.exception.score, delta=0.0001)
         decode_rle_error = context.exception.decode_rle_error
         self.assertIsInstance(decode_rle_error, DecodeRLEError)
         self.assertTrue("Mismatch between width and the number of RLE columns" in str(decode_rle_error))
