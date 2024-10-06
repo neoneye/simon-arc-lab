@@ -1,7 +1,10 @@
 # Insert objects into templates
 #
-# Example:
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e76a88a6
+# IDEA: Templates with non-rectangular shapes.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=321b1fc6
+#
+# IDEA: Templates with a marker.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=88a10436
 #
 # Present the same input images, but with different transformations.
 # so from the examples alone, the model have to determine what happened.
@@ -33,6 +36,9 @@ SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_template
 def generate_task_with_template_areas(seed: int) -> Task:
     """
     Create some template areas, and insert objects into them.
+
+    Example:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e76a88a6
     """
     count_example = random.Random(seed + 1).randint(2, 3)
     count_test = random.Random(seed + 2).randint(1, 2)
