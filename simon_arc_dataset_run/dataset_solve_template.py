@@ -38,11 +38,11 @@ def generate_task_with_template_areas(seed: int) -> Task:
     count_test = random.Random(seed + 2).randint(1, 2)
     task = Task()
     min_template_size = 2
-    max_template_size = 4
-    min_image_size = 8
-    max_image_size = 10
+    max_template_size = 2
+    min_image_size = 6
+    max_image_size = 8
     min_rect_count = 2
-    max_rect_count = 4
+    max_rect_count = 3
 
     color_background = 0
     color_template = 1
@@ -136,7 +136,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=7373200041,
+    seed=7383200041,
     max_num_samples=1000,
     max_byte_size=1024*1024*100
 )
