@@ -76,6 +76,8 @@ def image_transition_similarity_per_row(image0: np.array, image1: np.array, tran
 
     If the images are identical then the count_intersection will be the same as count_union.
 
+    Two different images can have the exact same transitions so the count_intersection is equal to count_union.
+
     return: (count_intersection, count_union)
     """
 
@@ -96,3 +98,17 @@ def image_transition_similarity_per_row(image0: np.array, image1: np.array, tran
     intersection_set = intersectionset_of_listlistint(value_list_list0, value_list_list1)
     count_intersection = len(intersection_set)
     return (count_intersection, count_union)
+
+def image_transition_similarity_per_column(image0: np.array, image1: np.array, transition_type: TransitionType) -> tuple[int, int]:
+    """
+    Measure how many transitions are the same in both images.
+    The images doesn't have to be the same size.
+
+    If the images are identical then the count_intersection will be the same as count_union.
+
+    Two different images can have the exact same transitions so the count_intersection is equal to count_union.
+
+    return: (count_intersection, count_union)
+    """
+    return image_transition_similarity_per_row(np.transpose(image0), np.transpose(image1), transition_type)    
+
