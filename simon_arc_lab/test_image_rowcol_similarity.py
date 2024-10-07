@@ -106,7 +106,21 @@ class TestImageRowColSimilarity(unittest.TestCase):
         expected = []
         self.assertEqual(actual, expected)
 
-    def test_30000_image_transition_similarity_per_row_color(self):
+    def test_30000_image_transition_similarity_per_row_color_identical(self):
+        # Arrange
+        image0 = np.array([
+            [1, 1, 1, 2, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2, 2],
+            [3, 3, 5, 5, 4, 4, 4],
+            [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
+        # Act
+        actual = image_transition_similarity_per_row(image0, image0, TransitionType.COLOR)
+        # Assert
+        expected = (5, 10)
+        self.assertEqual(actual, expected)
+
+    def test_30001_image_transition_similarity_per_row_color_some_overlap(self):
         # Arrange
         image0 = np.array([
             [1, 1, 1, 2, 2, 2, 2],
@@ -122,7 +136,6 @@ class TestImageRowColSimilarity(unittest.TestCase):
             [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
         # Act
         actual = image_transition_similarity_per_row(image0, image1, TransitionType.COLOR)
-        # print(actual)
         # Assert
         expected = (3, 10)
         self.assertEqual(actual, expected)
