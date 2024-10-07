@@ -1,24 +1,24 @@
 import numpy as np
 
-def image_color_transitions_per_row(image: np.array) -> list[list[int]]:
+def image_transition_color_per_row(image: np.array) -> list[list[int]]:
     """
     Extract the color transitions per row.
     """
     height, width = image.shape
-    transitions_list = []
+    color_list_list = []
     for y in range(height):
-        transition_list = []
+        color_list = []
         last_color = None
         for x in range(width):
             color = image[y, x]
             if color == last_color:
                 continue
-            transition_list.append(int(color))
+            color_list.append(int(color))
             last_color = color
-        transitions_list.append(transition_list)
-    return transitions_list
+        color_list_list.append(color_list)
+    return color_list_list
 
-def image_mass_transitions_per_row(image: np.array) -> list[list[int]]:
+def image_transition_mass_per_row(image: np.array) -> list[list[int]]:
     """
     Measure the mass of each color span per row.
     """

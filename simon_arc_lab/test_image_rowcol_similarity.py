@@ -3,7 +3,7 @@ import numpy as np
 from .image_rowcol_similarity import *
 
 class TestImageRowColSimilarity(unittest.TestCase):
-    def test_10000_image_color_transitions_per_row(self):
+    def test_10000_image_transition_color_per_row(self):
         # Arrange
         image = np.array([
             [1, 1, 1, 1, 1, 1, 1],
@@ -12,7 +12,7 @@ class TestImageRowColSimilarity(unittest.TestCase):
             [3, 3, 5, 5, 4, 4, 4],
             [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
         # Act
-        actual = image_color_transitions_per_row(image)
+        actual = image_transition_color_per_row(image)
         # Assert
         expected = [
             [1],
@@ -23,7 +23,7 @@ class TestImageRowColSimilarity(unittest.TestCase):
         ]
         self.assertEqual(actual, expected)
 
-    def test_20000_image_mass_transitions_per_row(self):
+    def test_20000_image_transition_mass_per_row(self):
         # Arrange
         image = np.array([
             [1, 1, 1, 1, 1, 1, 1],
@@ -32,7 +32,7 @@ class TestImageRowColSimilarity(unittest.TestCase):
             [3, 3, 5, 5, 4, 4, 4],
             [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
         # Act
-        actual = image_mass_transitions_per_row(image)
+        actual = image_transition_mass_per_row(image)
         # Assert
         expected = [
             [7],
