@@ -48,19 +48,22 @@ def image_transition_mass_per_row(image: np.array) -> list[list[int]]:
         mass_list_list.append(mass_list)
     return mass_list_list
 
-def intersection_of_listlistint(items0: list[list[int]], items1: list[list[int]]) -> list[list[int]]:
+def intersectionset_of_listlistint(items0: list[list[int]], items1: list[list[int]]) -> set[list[int]]:
     """
-    Identify what does these lists have in common.
+    Ignores duplicates in the lists.
+    Identify what unique items these lists have in common.
     """
-    intersection_list = []
-    remaining_list0 = items0.copy()
-    for value_list1 in items1:
-        for value_list0 in remaining_list0:
-            if value_list0 == value_list1:
-                intersection_list.append(value_list0)
-                remaining_list0.remove(value_list0)
-                break
-    return intersection_list
+    items_set0 = set(map(tuple, items0))
+    items_set1 = set(map(tuple, items1))
+    return items_set0 & items_set1
+
+def unionset_of_listlistint(items0: list[list[int]], items1: list[list[int]]) -> set[list[int]]:
+    """
+    Combine lists, and remove duplicates
+    """
+    items_set0 = set(map(tuple, items0))
+    items_set1 = set(map(tuple, items1))
+    return items_set0 | items_set1
 
 class TransitionType(Enum):
     COLOR = 0
@@ -70,6 +73,10 @@ def image_transition_similarity_per_row(image0: np.array, image1: np.array, tran
     """
     Measure how many transitions are the same in both images.
     The images doesn't have to be the same size.
+
+    If the images are identical then the count_intersection will be the same as count_union.
+
+    return: (count_intersection, count_union)
     """
 
     if transition_type == TransitionType.COLOR:
@@ -81,10 +88,11 @@ def image_transition_similarity_per_row(image0: np.array, image1: np.array, tran
     else:
         raise ValueError("Invalid transition_type")
 
-    count_union = len(value_list_list0) + len(value_list_list1)
+    union_set = unionset_of_listlistint(value_list_list0, value_list_list1)
+    count_union = len(union_set)
     if count_union == 0:
         return (0, 0)
 
-    intersection_list = intersection_of_listlistint(value_list_list0, value_list_list1)
-    count_intersection = len(intersection_list)
+    intersection_set = intersectionset_of_listlistint(value_list_list0, value_list_list1)
+    count_intersection = len(intersection_set)
     return (count_intersection, count_union)

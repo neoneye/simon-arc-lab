@@ -43,7 +43,7 @@ class TestImageRowColSimilarity(unittest.TestCase):
         ]
         self.assertEqual(actual, expected)
 
-    def test_20000_intersection_of_listlistint_identical(self):
+    def test_20000_intersectionset_of_listlistint_identical(self):
         # Arrange
         items0 = [
             [7],
@@ -53,12 +53,12 @@ class TestImageRowColSimilarity(unittest.TestCase):
             [3, 4],
         ]
         # Act
-        actual = intersection_of_listlistint(items0, items0)
+        actual = intersectionset_of_listlistint(items0, items0)
         # Assert
-        expected = items0
+        expected = set(map(tuple, items0))
         self.assertEqual(actual, expected)
 
-    def test_20001_intersection_of_listlistint_some_overlap(self):
+    def test_20001_intersectionset_of_listlistint_with_some_overlap(self):
         # Arrange
         items0 = [
             [7],
@@ -76,16 +76,15 @@ class TestImageRowColSimilarity(unittest.TestCase):
             [3, 4, 5, 6],
         ]
         # Act
-        actual = intersection_of_listlistint(items0, items1)
+        actual = intersectionset_of_listlistint(items0, items1)
         # Assert
-        expected = [
-            [3, 4],
+        expected = set(map(tuple, [
             [3, 4],
             [2, 2, 3],
-        ]
+        ]))
         self.assertEqual(actual, expected)
 
-    def test_20002_intersection_of_listlistint_no_overlap(self):
+    def test_20002_intersectionset_of_listlistint_no_overlap(self):
         # Arrange
         items0 = [
             [7],
@@ -101,12 +100,76 @@ class TestImageRowColSimilarity(unittest.TestCase):
             [3, 4, 5, 6],
         ]
         # Act
-        actual = intersection_of_listlistint(items0, items1)
+        actual = intersectionset_of_listlistint(items0, items1)
         # Assert
-        expected = []
+        expected = set()
         self.assertEqual(actual, expected)
 
-    def test_30000_image_transition_similarity_per_row_color_identical(self):
+    def test_30000_unionset_of_listlistint_identical(self):
+        # Arrange
+        items0 = [
+            [7],
+            [2, 2, 4],
+            [9, 3],
+        ]
+        # Act
+        actual = unionset_of_listlistint(items0, items0)
+        # Assert
+        expected = set(map(tuple, [
+            [2, 2, 4],
+            [7],
+            [9, 3],
+        ]))
+        self.assertEqual(actual, expected)
+
+    def test_30001_unionset_of_listlistint_some_overlap(self):
+        # Arrange
+        items0 = [
+            [7],
+            [2, 2, 4],
+            [4, 3, 1],
+            [9, 3],
+        ]
+        items1 = [
+            [7],
+            [8, 8, 3],
+            [2, 2, 4],
+            [9, 3],
+        ]
+        # Act
+        actual = unionset_of_listlistint(items0, items1)
+        # Assert
+        expected = set(map(tuple, [
+            [7],
+            [9, 3],
+            [2, 2, 4],
+            [4, 3, 1],
+            [8, 8, 3],
+        ]))
+        self.assertEqual(actual, expected)
+
+    def test_30002_unionset_of_listlistint_no_overlap(self):
+        # Arrange
+        items0 = [
+            [7],
+            [1, 2, 3],
+        ]
+        items1 = [
+            [5, 5],
+            [4, 5, 6],
+        ]
+        # Act
+        actual = unionset_of_listlistint(items0, items1)
+        # Assert
+        expected = set(map(tuple, [
+            [7],
+            [1, 2, 3],
+            [5, 5],
+            [4, 5, 6],
+        ]))
+        self.assertEqual(actual, expected)
+
+    def test_40000_image_transition_similarity_per_row_color_identical(self):
         # Arrange
         image0 = np.array([
             [1, 1, 1, 2, 2, 2, 2],
@@ -117,10 +180,10 @@ class TestImageRowColSimilarity(unittest.TestCase):
         # Act
         actual = image_transition_similarity_per_row(image0, image0, TransitionType.COLOR)
         # Assert
-        expected = (5, 10)
+        expected = (3, 3)
         self.assertEqual(actual, expected)
 
-    def test_30001_image_transition_similarity_per_row_color_some_overlap(self):
+    def test_40001_image_transition_similarity_per_row_color_some_overlap(self):
         # Arrange
         image0 = np.array([
             [1, 1, 1, 2, 2, 2, 2],
@@ -137,5 +200,25 @@ class TestImageRowColSimilarity(unittest.TestCase):
         # Act
         actual = image_transition_similarity_per_row(image0, image1, TransitionType.COLOR)
         # Assert
-        expected = (3, 10)
+        expected = (2, 4)
+        self.assertEqual(actual, expected)
+
+    def test_40002_image_transition_similarity_per_row_color_no_overlap(self):
+        # Arrange
+        image0 = np.array([
+            [1, 1, 1, 2, 2, 2, 7],
+            [1, 1, 1, 2, 2, 2, 7],
+            [1, 1, 1, 2, 2, 2, 7],
+            [3, 3, 5, 5, 4, 4, 4],
+            [3, 3, 3, 4, 4, 4, 7]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 1, 1, 2, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2, 2],
+            [1, 1, 5, 5, 2, 2, 2],
+            [3, 3, 3, 4, 4, 4, 4],
+            [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
+        # Act
+        actual = image_transition_similarity_per_row(image0, image1, TransitionType.COLOR)
+        # Assert
+        expected = (0, 6)
         self.assertEqual(actual, expected)
