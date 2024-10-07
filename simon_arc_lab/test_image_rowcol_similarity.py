@@ -297,3 +297,75 @@ class TestImageRowColSimilarity(unittest.TestCase):
         expected = (0, 8)
         self.assertEqual(actual, expected)
 
+    def test_60000_image_transition_similarity_color_identical_same_size(self):
+        # Arrange
+        image0 = np.array([
+            [1, 1, 1, 2, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2, 2],
+            [3, 3, 3, 3, 4, 4, 4],
+            [3, 3, 3, 3, 4, 4, 4]], dtype=np.uint8)
+        # Act
+        actual = image_transition_similarity(image0, image0, TransitionType.COLOR)
+        # Assert
+        expected = (5, 5)
+        self.assertEqual(actual, expected)
+
+    def test_60001_image_transition_similarity_color_identical_different_size(self):
+        # Arrange
+        image0 = np.array([
+            [1, 1, 1, 2, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2, 2],
+            [3, 3, 3, 3, 4, 4, 4],
+            [3, 3, 3, 3, 4, 4, 4]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 1, 1, 2, 2],
+            [1, 1, 1, 2, 2],
+            [3, 3, 3, 3, 4],
+            [3, 3, 3, 3, 4]], dtype=np.uint8)
+        # Act
+        actual = image_transition_similarity(image0, image1, TransitionType.COLOR)
+        # Assert
+        expected = (5, 5)
+        self.assertEqual(actual, expected)
+
+    def test_60002_image_transition_similarity_color_some_overlap(self):
+        # Arrange
+        image0 = np.array([
+            [1, 1, 1, 2, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2, 2],
+            [3, 3, 3, 3, 4, 4, 4],
+            [3, 3, 3, 3, 4, 4, 4]], dtype=np.uint8)
+        image1 = np.array([
+            [1, 1, 1, 2, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2, 2],
+            [3, 3, 7, 7, 4, 4, 4],
+            [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
+        # Act
+        actual = image_transition_similarity(image0, image1, TransitionType.COLOR)
+        # Assert
+        expected = (2 + 2, 5 + 3)
+        self.assertEqual(actual, expected)
+
+    def test_60003_image_transition_similarity_color_no_overlap(self):
+        # Arrange
+        image0 = np.array([
+            [1, 1, 1, 2, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2, 2],
+            [3, 3, 3, 3, 4, 4, 4],
+            [3, 3, 3, 3, 4, 4, 4]], dtype=np.uint8)
+        image1 = np.array([
+            [8, 8, 8, 8, 8, 8, 8],
+            [1, 1, 1, 2, 2, 2, 8],
+            [1, 1, 1, 2, 2, 2, 8],
+            [3, 3, 7, 7, 4, 4, 8],
+            [3, 3, 3, 4, 4, 4, 8]], dtype=np.uint8)
+        # Act
+        actual = image_transition_similarity(image0, image1, TransitionType.COLOR)
+        # Assert
+        expected = (0, 8 + 6)
+        self.assertEqual(actual, expected)

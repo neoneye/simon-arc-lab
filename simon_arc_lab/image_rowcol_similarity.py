@@ -71,7 +71,7 @@ class TransitionType(Enum):
 
 def image_transition_similarity_per_row(image0: np.array, image1: np.array, transition_type: TransitionType) -> tuple[int, int]:
     """
-    Measure how many transitions are the same in both images.
+    Measure how many transitions are the same per row.
     The images doesn't have to be the same size.
 
     If the images are identical then the count_intersection will be the same as count_union.
@@ -101,7 +101,7 @@ def image_transition_similarity_per_row(image0: np.array, image1: np.array, tran
 
 def image_transition_similarity_per_column(image0: np.array, image1: np.array, transition_type: TransitionType) -> tuple[int, int]:
     """
-    Measure how many transitions are the same in both images.
+    Measure how many transitions are the same in per column.
     The images doesn't have to be the same size.
 
     If the images are identical then the count_intersection will be the same as count_union.
@@ -112,3 +112,17 @@ def image_transition_similarity_per_column(image0: np.array, image1: np.array, t
     """
     return image_transition_similarity_per_row(np.transpose(image0), np.transpose(image1), transition_type)    
 
+def image_transition_similarity(image0: np.array, image1: np.array, transition_type: TransitionType) -> tuple[int, int]:
+    """
+    Measure how many transitions are the same considering rows and columns.
+    The images doesn't have to be the same size.
+
+    If the images are identical then the count_intersection will be the same as count_union.
+
+    Two different images can have the exact same transitions so the count_intersection is equal to count_union.
+
+    return: (count_intersection, count_union)
+    """
+    count_intersection_row, count_union_row = image_transition_similarity_per_row(image0, image1, transition_type)
+    count_intersection_column, count_union_column = image_transition_similarity_per_column(image0, image1, transition_type)
+    return (count_intersection_row + count_intersection_column, count_union_row + count_union_column)
