@@ -23,26 +23,6 @@ class TestImageTransitionSimilarity(unittest.TestCase):
         ]
         self.assertEqual(actual, expected)
 
-    def test_20000_image_transition_mass_per_row(self):
-        # Arrange
-        image = np.array([
-            [1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 2, 2, 2, 2],
-            [1, 1, 1, 2, 2, 2, 2],
-            [3, 3, 5, 5, 4, 4, 4],
-            [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
-        # Act
-        actual = image_transition_mass_per_row(image)
-        # Assert
-        expected = [
-            [7],
-            [3, 4],
-            [3, 4],
-            [2, 2, 3],
-            [3, 4],
-        ]
-        self.assertEqual(actual, expected)
-
     def test_20000_intersectionset_of_listlistint_identical(self):
         # Arrange
         items0 = [
@@ -178,7 +158,7 @@ class TestImageTransitionSimilarity(unittest.TestCase):
             [3, 3, 5, 5, 4, 4, 4],
             [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
         # Act
-        actual = image_transition_similarity_per_row(image0, image0, TransitionType.COLOR)
+        actual = image_transition_similarity_per_row(image0, image0)
         # Assert
         expected = (3, 3)
         self.assertEqual(actual, expected)
@@ -198,7 +178,7 @@ class TestImageTransitionSimilarity(unittest.TestCase):
             [3, 3, 3, 4, 4, 4, 4],
             [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
         # Act
-        actual = image_transition_similarity_per_row(image0, image1, TransitionType.COLOR)
+        actual = image_transition_similarity_per_row(image0, image1)
         # Assert
         expected = (2, 4)
         self.assertEqual(actual, expected)
@@ -218,7 +198,7 @@ class TestImageTransitionSimilarity(unittest.TestCase):
             [3, 3, 3, 4, 4, 4, 4],
             [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
         # Act
-        actual = image_transition_similarity_per_row(image0, image1, TransitionType.COLOR)
+        actual = image_transition_similarity_per_row(image0, image1)
         # Assert
         expected = (0, 6)
         self.assertEqual(actual, expected)
@@ -232,7 +212,7 @@ class TestImageTransitionSimilarity(unittest.TestCase):
             [3, 3, 5, 5, 4, 4, 4],
             [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
         # Act
-        actual = image_transition_similarity_per_column(image0, image0, TransitionType.COLOR)
+        actual = image_transition_similarity_per_column(image0, image0)
         # Assert
         expected = (4, 4)
         self.assertEqual(actual, expected)
@@ -252,7 +232,7 @@ class TestImageTransitionSimilarity(unittest.TestCase):
             [3, 3, 3, 4, 4, 4, 4],
             [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
         # Act
-        actual = image_transition_similarity_per_column(image0, image1, TransitionType.COLOR)
+        actual = image_transition_similarity_per_column(image0, image1)
         # Assert
         expected = (4, 4)
         self.assertEqual(actual, expected)
@@ -272,7 +252,7 @@ class TestImageTransitionSimilarity(unittest.TestCase):
             [3, 3, 7, 7, 4, 4, 4],
             [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
         # Act
-        actual = image_transition_similarity_per_column(image0, image1, TransitionType.COLOR)
+        actual = image_transition_similarity_per_column(image0, image1)
         # Assert
         expected = (2, 6)
         self.assertEqual(actual, expected)
@@ -292,7 +272,7 @@ class TestImageTransitionSimilarity(unittest.TestCase):
             [3, 3, 7, 7, 4, 4, 4],
             [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
         # Act
-        actual = image_transition_similarity_per_column(image0, image1, TransitionType.COLOR)
+        actual = image_transition_similarity_per_column(image0, image1)
         # Assert
         expected = (0, 8)
         self.assertEqual(actual, expected)
@@ -306,7 +286,7 @@ class TestImageTransitionSimilarity(unittest.TestCase):
             [3, 3, 3, 3, 4, 4, 4],
             [3, 3, 3, 3, 4, 4, 4]], dtype=np.uint8)
         # Act
-        actual = image_transition_similarity(image0, image0, TransitionType.COLOR)
+        actual = image_transition_similarity(image0, image0)
         # Assert
         expected = (5, 5)
         self.assertEqual(actual, expected)
@@ -325,7 +305,7 @@ class TestImageTransitionSimilarity(unittest.TestCase):
             [3, 3, 3, 3, 4],
             [3, 3, 3, 3, 4]], dtype=np.uint8)
         # Act
-        actual = image_transition_similarity(image0, image1, TransitionType.COLOR)
+        actual = image_transition_similarity(image0, image1)
         # Assert
         expected = (5, 5)
         self.assertEqual(actual, expected)
@@ -345,7 +325,7 @@ class TestImageTransitionSimilarity(unittest.TestCase):
             [3, 3, 7, 7, 4, 4, 4],
             [3, 3, 3, 4, 4, 4, 4]], dtype=np.uint8)
         # Act
-        actual = image_transition_similarity(image0, image1, TransitionType.COLOR)
+        actual = image_transition_similarity(image0, image1)
         # Assert
         expected = (2 + 2, 5 + 3)
         self.assertEqual(actual, expected)
@@ -365,7 +345,7 @@ class TestImageTransitionSimilarity(unittest.TestCase):
             [3, 3, 7, 7, 4, 4, 8],
             [3, 3, 3, 4, 4, 4, 8]], dtype=np.uint8)
         # Act
-        actual = image_transition_similarity(image0, image1, TransitionType.COLOR)
+        actual = image_transition_similarity(image0, image1)
         # Assert
         expected = (0, 8 + 6)
         self.assertEqual(actual, expected)

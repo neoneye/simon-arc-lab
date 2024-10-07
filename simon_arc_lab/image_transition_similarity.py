@@ -21,33 +21,6 @@ def image_transition_color_per_row(image: np.array) -> list[list[int]]:
         color_list_list.append(color_list)
     return color_list_list
 
-def image_transition_mass_per_row(image: np.array) -> list[list[int]]:
-    """
-    Measure the mass of each color span per row.
-    """
-    height, width = image.shape
-    mass_list_list = []
-    for y in range(height):
-        mass_list = []
-        last_color = None
-        mass = 0
-        for x in range(width):
-            color = image[y, x]
-            if last_color is None:
-                last_color = color
-                mass = 1
-                continue
-            if color == last_color:
-                mass += 1
-                continue
-            mass_list.append(mass)
-            last_color = color
-            mass = 1
-        if mass > 0:
-            mass_list.append(mass)
-        mass_list_list.append(mass_list)
-    return mass_list_list
-
 def intersectionset_of_listlistint(items0: list[list[int]], items1: list[list[int]]) -> set[list[int]]:
     """
     Ignores duplicates in the lists.
@@ -65,11 +38,7 @@ def unionset_of_listlistint(items0: list[list[int]], items1: list[list[int]]) ->
     items_set1 = set(map(tuple, items1))
     return items_set0 | items_set1
 
-class TransitionType(Enum):
-    COLOR = 0
-    MASS = 1
-
-def image_transition_similarity_per_row(image0: np.array, image1: np.array, transition_type: TransitionType) -> tuple[int, int]:
+def image_transition_similarity_per_row(image0: np.array, image1: np.array) -> tuple[int, int]:
     """
     Measure how many transitions are the same per row.
     The images doesn't have to be the same size.
@@ -80,15 +49,8 @@ def image_transition_similarity_per_row(image0: np.array, image1: np.array, tran
 
     return: (count_intersection, count_union)
     """
-
-    if transition_type == TransitionType.COLOR:
-        value_list_list0 = image_transition_color_per_row(image0)
-        value_list_list1 = image_transition_color_per_row(image1)
-    elif transition_type == TransitionType.MASS:
-        value_list_list0 = image_transition_mass_per_row(image0)
-        value_list_list1 = image_transition_mass_per_row(image1)
-    else:
-        raise ValueError("Invalid transition_type")
+    value_list_list0 = image_transition_color_per_row(image0)
+    value_list_list1 = image_transition_color_per_row(image1)
 
     union_set = unionset_of_listlistint(value_list_list0, value_list_list1)
     count_union = len(union_set)
@@ -99,7 +61,7 @@ def image_transition_similarity_per_row(image0: np.array, image1: np.array, tran
     count_intersection = len(intersection_set)
     return (count_intersection, count_union)
 
-def image_transition_similarity_per_column(image0: np.array, image1: np.array, transition_type: TransitionType) -> tuple[int, int]:
+def image_transition_similarity_per_column(image0: np.array, image1: np.array) -> tuple[int, int]:
     """
     Measure how many transitions are the same in per column.
     The images doesn't have to be the same size.
@@ -110,9 +72,9 @@ def image_transition_similarity_per_column(image0: np.array, image1: np.array, t
 
     return: (count_intersection, count_union)
     """
-    return image_transition_similarity_per_row(np.transpose(image0), np.transpose(image1), transition_type)    
+    return image_transition_similarity_per_row(np.transpose(image0), np.transpose(image1))
 
-def image_transition_similarity(image0: np.array, image1: np.array, transition_type: TransitionType) -> tuple[int, int]:
+def image_transition_similarity(image0: np.array, image1: np.array) -> tuple[int, int]:
     """
     Measure how many transitions are the same considering rows and columns.
     The images doesn't have to be the same size.
@@ -123,6 +85,6 @@ def image_transition_similarity(image0: np.array, image1: np.array, transition_t
 
     return: (count_intersection, count_union)
     """
-    count_intersection_row, count_union_row = image_transition_similarity_per_row(image0, image1, transition_type)
-    count_intersection_column, count_union_column = image_transition_similarity_per_column(image0, image1, transition_type)
+    count_intersection_row, count_union_row = image_transition_similarity_per_row(image0, image1)
+    count_intersection_column, count_union_column = image_transition_similarity_per_column(image0, image1)
     return (count_intersection_row + count_intersection_column, count_union_row + count_union_column)
