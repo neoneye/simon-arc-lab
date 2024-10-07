@@ -1,8 +1,8 @@
 import unittest
 import numpy as np
-from .image_rowcol_similarity import *
+from .image_transition_similarity import *
 
-class TestImageRowColSimilarity(unittest.TestCase):
+class TestImageTransitionSimilarity(unittest.TestCase):
     def test_10000_image_transition_color_per_row(self):
         # Arrange
         image = np.array([
