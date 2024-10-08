@@ -101,7 +101,11 @@ class WorkManager:
                 for task_mutator_class in task_mutator_class_list:
                     predictor = PredictOutputV1(task, test_index, task_mutator_class)
                     work_item = WorkItem(task, test_index, predictor)
-                    work_items.append(work_item)
+                    try:
+                        prompt = work_item.predictor.prompt()
+                        work_items.append(work_item)
+                    except DeserializeError as e:
+                        print(f'Error cannot construct prompt for {task.metadata_task_id} test={test_index}. Error: {e}')
         return work_items
 
     def discard_items_with_too_long_prompts(self, max_prompt_length: int):
