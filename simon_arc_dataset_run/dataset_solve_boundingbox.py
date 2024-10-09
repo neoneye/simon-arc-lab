@@ -45,6 +45,7 @@ from simon_arc_lab.image_rect import image_rect, image_rect_hollow
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.find_bounding_box import find_bounding_box_ignoring_color
+from simon_arc_lab.generate_random_values import GenerateRandomValues
 from simon_arc_lab.benchmark import *
 from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
 from simon_arc_dataset.generate_solve import *
@@ -169,25 +170,6 @@ def generate_task_boundingbox_of_lonely_pixels(seed: int, transformation_id: str
         task.append_pair(input_image, output_image, is_example)
 
     return task
-
-class GenerateRandomValues:
-    def __init__(self):
-        self.value_constraints = []
-
-    def append_value(self, min_value: int, max_value: int):
-        self.value_constraints.append((min_value, max_value))
-    
-    def find_random_values(self, seed: int, max_sum: int) -> list[int]:
-        for retry_index in range(100):
-            random_values = []
-            available = max_sum
-            for contraint_index, (min_value, max_value) in enumerate(self.value_constraints):
-                random_value = random.Random(seed + retry_index + contraint_index * 1000).randint(min_value, max_value)
-                available -= random_value
-                random_values.append(random_value)
-            if available >= 0:
-                return random_values
-        raise Exception("Failed to find random values.")
 
 def generate_task_inner_boundingbox(seed: int, transformation_id: str) -> Task:
     """
