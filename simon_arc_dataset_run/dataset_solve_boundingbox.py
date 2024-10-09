@@ -2,8 +2,8 @@
 # - Extract one bounding box from multiple lonely pixels. Where it's filled with 1s.
 # - Extract one bounding box from multiple lonely pixels. Where it's hollow with the border set to 1s.
 #
-# IDEA: find the inner bounding box
-# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d37a1ef5
+# IDEA: find the outer bounding box
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=4347f46a
 #
 # IDEA: preserve the original object inside the bounding box, but fill the bounding box with a different color.
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6d75e8bb
@@ -37,6 +37,8 @@ import random
 from simon_arc_lab.image_mix import *
 from simon_arc_lab.image_mask import *
 from simon_arc_lab.image_util import *
+from simon_arc_lab.image_paste import *
+from simon_arc_lab.image_rect import *
 from simon_arc_lab.task import *
 from simon_arc_lab.rectangle import Rectangle
 from simon_arc_lab.image_rect import image_rect, image_rect_hollow
@@ -168,13 +170,126 @@ def generate_task_boundingbox_of_lonely_pixels(seed: int, transformation_id: str
 
     return task
 
+class GenerateRandomValues:
+    def __init__(self):
+        self.value_constraints = []
+
+    def append_value(self, min_value: int, max_value: int):
+        self.value_constraints.append((min_value, max_value))
+    
+    def find_random_values(self, seed: int, max_sum: int) -> list[int]:
+        for retry_index in range(100):
+            random_values = []
+            available = max_sum
+            for contraint_index, (min_value, max_value) in enumerate(self.value_constraints):
+                random_value = random.Random(seed + retry_index + contraint_index * 1000).randint(min_value, max_value)
+                available -= random_value
+                random_values.append(random_value)
+            if available >= 0:
+                return random_values
+        raise Exception("Failed to find random values.")
+
+def generate_task_inner_boundingbox(seed: int, transformation_id: str) -> Task:
+    """
+    Identify the inner bounding box.
+
+    Example:
+    https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d37a1ef5
+    """
+    count_example = random.Random(seed + 1).randint(2, 3)
+    count_test = random.Random(seed + 2).randint(1, 2)
+    # count_test = 1
+    task = Task()
+    max_image_size = 12
+
+    available_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    random.Random(seed + 3).shuffle(available_colors)
+
+    color_map = {}
+    for i in range(10):
+        color_map[i] = available_colors[i]
+
+    task.metadata_task_id = f'boundingbox_inner {transformation_id}'
+
+    gvr = GenerateRandomValues()
+    gvr.append_value(1, 5)
+    gvr.append_value(1, 5)
+    gvr.append_value(2, 3)
+    gvr.append_value(1, 5)
+    gvr.append_value(1, 5)
+
+    color_background = 0
+    color_outer = 1
+    color_inner0 = color_background
+    color_inner1 = 2
+    color_inner2 = 3
+    weight0 = 1
+    weight1 = 1
+    weight2 = 1
+    for i in range(count_example+count_test):
+        is_example = i < count_example
+        input_image = None
+        output_image = None
+        for retry_index in range(100):
+            iteration_seed = (retry_index * 10000) + (seed * 37) + (i * 9932342) + 101
+
+            xvalues = gvr.find_random_values(iteration_seed + 1, max_image_size)
+            outer_left = xvalues[0]
+            inner_left = xvalues[1]
+            inner_width = xvalues[2]
+            inner_right = xvalues[3]
+            outer_right = xvalues[4]
+            outer_width = inner_left + inner_width + inner_right
+            background_width = outer_left + outer_width + outer_right
+
+            yvalues = gvr.find_random_values(iteration_seed + 2, max_image_size)
+            outer_top = yvalues[0]
+            inner_top = yvalues[1]
+            inner_height = yvalues[2]
+            inner_bottom = yvalues[3]
+            outer_bottom = yvalues[4]
+            outer_height = inner_top + inner_height + inner_bottom
+            background_height = outer_top + outer_height + outer_bottom
+
+            if inner_width + 2 == outer_width and inner_height + 2 == outer_height:
+                continue
+            if outer_width + 2 == background_width and outer_height + 2 == background_height:
+                continue
+
+            inner_image = image_create_random_with_three_colors(inner_width, inner_height, color_inner0, color_inner1, color_inner2, weight0, weight1, weight2, iteration_seed + 20)
+            bounding_box = find_bounding_box_ignoring_color(inner_image, color_inner0)
+            if bounding_box.mass() < 1:
+                continue
+            if bounding_box.width != inner_width or bounding_box.height != inner_height:
+                # print("bounding_box.width == inner_width and bounding_box.height == inner_height")
+                continue
+
+            background_image = image_create(background_width, background_height, color_background)
+            input_image_raw = image_rect_hollow(background_image, Rectangle(outer_left, outer_top, outer_width, outer_height), color_outer, 1)
+            input_image_raw = image_paste_at(inner_image, input_image_raw, outer_left + inner_left, outer_top + inner_top)
+
+            output_image_raw = background_image.copy()
+            output_image_raw = image_rect(output_image_raw, Rectangle(outer_left, outer_top, outer_width, outer_height), color_outer)
+            output_image_raw = image_paste_at(inner_image, output_image_raw, outer_left + inner_left, outer_top + inner_top)
+
+            input_image = image_replace_colors(input_image_raw, color_map)
+            output_image = image_replace_colors(output_image_raw, color_map)
+
+            break
+        if (input_image is None) or (output_image is None):
+            raise Exception("Failed to find a candidate images.")
+        task.append_pair(input_image, output_image, is_example)
+
+    return task
+
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
     builder.append_image_randomized()
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 6
+    j = seed % 7
+    j = 6
     if j == 0:
         task = generate_task_boundingbox_of_lonely_pixels(seed, 'filled')
     elif j == 1:
@@ -187,6 +302,8 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
         task = generate_task_boundingbox_of_lonely_pixels(seed, 'filled_outer')
     elif j == 5:
         task = generate_task_boundingbox_of_lonely_pixels(seed, 'hollow_outer')
+    elif j == 6:
+        task = generate_task_inner_boundingbox(seed, 'simple_fill')
     transformation_id = task.metadata_task_id
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
@@ -196,7 +313,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=221000913,
+    seed=222000913,
     max_num_samples=1000,
     max_byte_size=1024*1024*100
 )
