@@ -280,7 +280,7 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 8
-    j = (seed % 2) + 6
+    # j = (seed % 2) + 6
     # j = 7
     if j == 0:
         task = generate_task_boundingbox_of_lonely_pixels(seed, 'filled')
@@ -307,7 +307,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=229000913,
+    seed=230000913,
     max_num_samples=1000,
     max_byte_size=1024*1024*100
 )
