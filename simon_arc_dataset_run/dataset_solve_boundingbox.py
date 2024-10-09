@@ -268,8 +268,17 @@ def generate_task_inner_boundingbox(seed: int, transformation_id: str) -> Task:
             input_image_raw = image_rect_hollow(background_image, Rectangle(outer_left, outer_top, outer_width, outer_height), color_outer, 1)
             input_image_raw = image_paste_at(inner_image, input_image_raw, outer_left + inner_left, outer_top + inner_top)
 
-            output_image_raw = background_image.copy()
-            output_image_raw = image_rect(output_image_raw, Rectangle(outer_left, outer_top, outer_width, outer_height), color_outer)
+            if transformation_id == 'simple_fill':
+                output_background_color = color_background
+                output_outer_color = color_outer
+            elif transformation_id == 'swap_background_outer':
+                output_background_color = color_outer
+                output_outer_color = color_background
+            else:
+                raise Exception(f"Unknown transformation_id: {transformation_id}")
+
+            output_background_image = image_create(background_width, background_height, output_background_color)
+            output_image_raw = image_rect(output_background_image, Rectangle(outer_left, outer_top, outer_width, outer_height), output_outer_color)
             output_image_raw = image_paste_at(inner_image, output_image_raw, outer_left + inner_left, outer_top + inner_top)
 
             input_image = image_replace_colors(input_image_raw, color_map)
@@ -288,7 +297,7 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 7
+    j = seed % 8
     # j = 6
     if j == 0:
         task = generate_task_boundingbox_of_lonely_pixels(seed, 'filled')
@@ -304,6 +313,8 @@ def generate_dataset_item_list(seed: int) -> list[dict]:
         task = generate_task_boundingbox_of_lonely_pixels(seed, 'hollow_outer')
     elif j == 6:
         task = generate_task_inner_boundingbox(seed, 'simple_fill')
+    elif j == 7:
+        task = generate_task_inner_boundingbox(seed, 'swap_background_outer')
     transformation_id = task.metadata_task_id
     # task.show()
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
