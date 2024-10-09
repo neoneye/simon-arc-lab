@@ -200,7 +200,7 @@ def generate_task_inner_boundingbox(seed: int, transformation_id: str) -> Task:
     count_test = random.Random(seed + 2).randint(1, 2)
     # count_test = 1
     task = Task()
-    max_image_size = 12
+    max_image_size = 14
 
     available_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(available_colors)
@@ -214,7 +214,7 @@ def generate_task_inner_boundingbox(seed: int, transformation_id: str) -> Task:
     gvr = GenerateRandomValues()
     gvr.append_value(1, 5)
     gvr.append_value(1, 5)
-    gvr.append_value(2, 3)
+    gvr.append_value(2, 4)
     gvr.append_value(1, 5)
     gvr.append_value(1, 5)
 
@@ -289,7 +289,7 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 7
-    j = 6
+    # j = 6
     if j == 0:
         task = generate_task_boundingbox_of_lonely_pixels(seed, 'filled')
     elif j == 1:
@@ -313,7 +313,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=222000913,
+    seed=223000913,
     max_num_samples=1000,
     max_byte_size=1024*1024*100
 )
