@@ -2,6 +2,9 @@
 # - Extract one bounding box from multiple lonely pixels. Where it's filled with 1s.
 # - Extract one bounding box from multiple lonely pixels. Where it's hollow with the border set to 1s.
 #
+# IDEA: find the inner bounding box
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d37a1ef5
+#
 # IDEA: preserve the original object inside the bounding box, but fill the bounding box with a different color.
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6d75e8bb
 #
