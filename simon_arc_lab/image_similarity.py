@@ -114,6 +114,8 @@ class FeatureType(Enum):
     SAME_BIGRAMS_DIRECTION_TOPRIGHTBOTTOMLEFT = "same_bigrams_direction_toprightbottomleft"
     SAME_BIGRAMS_SUBSET = "same_bigrams_subset"
     SAME_SHAPE2X2 = "same_shape2x2"
+    SAME_SHAPE3x3_OPPOSITE = "same_shape3x3_opposite"
+    SAME_SHAPE3x3_CENTER = "same_shape3x3_center"
 
 @dataclass(frozen=True)
 class Feature:
@@ -192,6 +194,8 @@ class ImageSimilarity:
             Feature(FeatureType.SAME_BIGRAMS_DIRECTION_TOPRIGHTBOTTOMLEFT): self.same_bigrams_direction_toprightbottomleft(),
             Feature(FeatureType.SAME_BIGRAMS_SUBSET): self.same_bigrams_subset(),
             Feature(FeatureType.SAME_SHAPE2X2): self.same_shape2x2(),
+            Feature(FeatureType.SAME_SHAPE3x3_OPPOSITE): self.same_shape3x3opposite(),
+            Feature(FeatureType.SAME_SHAPE3x3_CENTER): self.same_shape3x3center(),
         }
 
         # Color specific features
@@ -627,4 +631,38 @@ class ImageSimilarity:
         """
         shape_id_list0 = self.image_with_cache0.shape2x2_id_list()
         shape_id_list1 = self.image_with_cache1.shape2x2_id_list()
+        return shape_id_list0 == shape_id_list1
+
+    def same_shape3x3opposite(self) -> bool:
+        """
+        Do the same 3x3shapeopposite's occur in both images.
+
+        Examples:
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=53b68214
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=bda2d7a6
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6ea4a07e
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=92e50de0
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d94c3b52
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=72207abc
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f3e62deb
+        """
+        shape_id_list0 = self.image_with_cache0.shape3x3opposite_id_list()
+        shape_id_list1 = self.image_with_cache1.shape3x3opposite_id_list()
+        return shape_id_list0 == shape_id_list1
+
+    def same_shape3x3center(self) -> bool:
+        """
+        Do the same 3x3shapecenter's occur in both images.
+
+        Examples:
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=00dbd492
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=0a2355a6
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=0becf7df
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=1acc24af
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=1da012fc
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=bda2d7a6
+        https://neoneye.github.io/arc/edit.html?dataset=ARC&task=a5313dff
+        """
+        shape_id_list0 = self.image_with_cache0.shape3x3center_id_list()
+        shape_id_list1 = self.image_with_cache1.shape3x3center_id_list()
         return shape_id_list0 == shape_id_list1

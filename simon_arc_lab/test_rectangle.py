@@ -32,6 +32,37 @@ class TestRectangle(unittest.TestCase):
         expected = Rectangle.empty()
         self.assertEqual(actual, expected)
 
+    def test_10003_has_overlap_true(self):
+        a = Rectangle(5, 5, 10, 10)
+        # Act
+        actual = a.has_overlap(a)
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_10004_has_overlap_true(self):
+        a = Rectangle(0, 0, 10, 10)
+        b = Rectangle(9, 9, 10, 10)
+        # Act
+        actual = a.has_overlap(b)
+        # Assert
+        self.assertEqual(actual, True)
+
+    def test_10005_has_overlap_false(self):
+        a = Rectangle(10, 9, 10, 10)
+        b = Rectangle(0, 0, 10, 10)
+        # Act
+        actual = a.has_overlap(b)
+        # Assert
+        self.assertEqual(actual, False)
+
+    def test_10006_has_overlap_false(self):
+        a = Rectangle(11, 0, 10, 10)
+        b = Rectangle(0, 0, 10, 10)
+        # Act
+        actual = a.has_overlap(b)
+        # Assert
+        self.assertEqual(actual, False)
+
     def test_20000_random_child_rectangle(self):
         # Arrange
         a = Rectangle(0, 100, 10, 10)

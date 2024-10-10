@@ -239,9 +239,12 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def can_fit_inside_context_length(task: Task) -> bool:
-    task_formatter = TaskFormatterRLECompact(task)
-    s = task_formatter.to_string()
-    return len(s) < 800
+    try:
+        task_formatter = TaskFormatterRLECompact(task)
+        s = task_formatter.to_string()
+        return len(s) < 800
+    except Exception as e:
+        return False
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 2
@@ -269,7 +272,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=15021103031,
+    seed=15031103031,
     max_num_samples=1000,
     max_byte_size=1024*1024*150
 )
