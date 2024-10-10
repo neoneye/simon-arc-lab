@@ -21,14 +21,11 @@ sys.path.insert(0, PROJECT_ROOT)
 import random
 from simon_arc_lab.image_mix import *
 from simon_arc_lab.image_util import *
-from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.task import *
 from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.image_rect import image_rect, image_rect_hollow
-from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.benchmark import *
 from simon_arc_lab.image_paste import *
-from simon_arc_lab.find_bounding_box import find_bounding_box_ignoring_color
 from simon_arc_lab.rectangle import Rectangle
 from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
 from simon_arc_dataset.generate_solve import *
@@ -46,9 +43,9 @@ def generate_task_with_rectangles(seed: int, transformation_id: str) -> Task:
     count_test = random.Random(seed + 2).randint(1, 2)
     task = Task()
     min_rect_size = 3
-    max_rect_size = 4
+    max_rect_size = 5
     min_image_size = 8
-    max_image_size = 12
+    max_image_size = 14
     min_rect_count = 2
     max_rect_count = 3
 
@@ -164,7 +161,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=7381000031,
+    seed=7382000031,
     max_num_samples=1000,
     max_byte_size=1024*1024*100
 )
