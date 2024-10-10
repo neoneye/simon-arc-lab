@@ -49,7 +49,7 @@ def generate_task_with_template_areas(seed: int, transformation_id: str) -> Task
     min_template_size = 2
     max_template_size = 4
     min_image_size = 6
-    max_image_size = 10
+    max_image_size = 12
     min_rect_count = 2
     max_rect_count = 3
 
