@@ -33,7 +33,7 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_template'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_template.jsonl')
 
-def generate_task_with_template_areas(seed: int) -> Task:
+def generate_task_with_template_areas(seed: int, transformation_id: str) -> Task:
     """
     Create some template areas, and insert objects into them.
 
@@ -44,7 +44,7 @@ def generate_task_with_template_areas(seed: int) -> Task:
     count_test = random.Random(seed + 2).randint(1, 2)
     task = Task()
     min_template_size = 2
-    max_template_size = 2
+    max_template_size = 3
     min_image_size = 6
     max_image_size = 8
     min_rect_count = 2
@@ -52,6 +52,11 @@ def generate_task_with_template_areas(seed: int) -> Task:
 
     color_background = 0
     color_template = 1
+
+    if transformation_id == "with_insertion_image":
+        output_show_original_insertion_image = True
+    elif transformation_id == "without_insertion_image":
+        output_show_original_insertion_image = False
 
     available_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(available_colors)
@@ -108,11 +113,19 @@ def generate_task_with_template_areas(seed: int) -> Task:
 
             template_image = image_create(insertion_image_width, insertion_image_height, color_template)
             for rect_index, rect in enumerate(rects):
-                result_output_image = image_paste_at(insertion_image, result_output_image, rect.x, rect.y)
-                if rect_index == 0:
-                    result_input_image = image_paste_at(insertion_image, result_input_image, rect.x, rect.y)
+                if rect_index > 0:
+                    result_output_image = image_paste_at(insertion_image, result_output_image, rect.x, rect.y)
+                elif output_show_original_insertion_image:
+                    result_output_image = image_paste_at(insertion_image, result_output_image, rect.x, rect.y)
                 else:
+                    # hide the original insertion image from the output
+                    pass
+
+            for rect_index, rect in enumerate(rects):
+                if rect_index > 0:
                     result_input_image = image_paste_at(template_image, result_input_image, rect.x, rect.y)
+                else:
+                    result_input_image = image_paste_at(insertion_image, result_input_image, rect.x, rect.y)
 
             # Palette
             input_image = image_replace_colors(result_input_image, color_map)
@@ -132,7 +145,12 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    task = generate_task_with_template_areas(seed)
+    j = seed % 2
+    j = 1
+    if j == 0:
+        task = generate_task_with_template_areas(seed, "with_insertion_image")
+    else:
+        task = generate_task_with_template_areas(seed, "without_insertion_image")
     # task.show()
     transformation_id = task.metadata_task_id
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
