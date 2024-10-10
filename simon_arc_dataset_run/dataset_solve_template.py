@@ -47,9 +47,9 @@ def generate_task_with_template_areas(seed: int, transformation_id: str) -> Task
     count_test = random.Random(seed + 2).randint(1, 2)
     task = Task()
     min_template_size = 2
-    max_template_size = 4
+    max_template_size = 3
     min_image_size = 6
-    max_image_size = 14
+    max_image_size = 10
     min_rect_count = 2
     max_rect_count = 3
 
@@ -174,7 +174,7 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 def generate_dataset_item_list(seed: int) -> list[dict]:
     j = seed % 4
     j = (seed % 2) + 2
-    j = 3
+    j = 2
     if j == 0:
         task = generate_task_with_template_areas(seed, "with_insertion_image")
     elif j == 1:
@@ -192,7 +192,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=7385400041,
+    seed=7385600041,
     max_num_samples=1000,
     max_byte_size=1024*1024*100
 )
