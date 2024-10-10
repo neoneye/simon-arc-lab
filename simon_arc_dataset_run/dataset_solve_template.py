@@ -53,18 +53,13 @@ def generate_task_with_template_areas(seed: int, transformation_id: str) -> Task
     color_background = 0
     color_template = 1
 
-    if transformation_id == "with_insertion_image":
-        output_show_original_insertion_image = True
-    elif transformation_id == "without_insertion_image":
-        output_show_original_insertion_image = False
-
     available_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(available_colors)
     color_map = {}
     for i in range(10):
         color_map[i] = available_colors[i]
 
-    task.metadata_task_id = "template"
+    task.metadata_task_id = f"template {transformation_id}"
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -112,20 +107,49 @@ def generate_task_with_template_areas(seed: int, transformation_id: str) -> Task
                 continue
 
             template_image = image_create(insertion_image_width, insertion_image_height, color_template)
-            for rect_index, rect in enumerate(rects):
-                if rect_index > 0:
-                    result_output_image = image_paste_at(insertion_image, result_output_image, rect.x, rect.y)
-                elif output_show_original_insertion_image:
-                    result_output_image = image_paste_at(insertion_image, result_output_image, rect.x, rect.y)
-                else:
-                    # hide the original insertion image from the output
-                    pass
 
-            for rect_index, rect in enumerate(rects):
-                if rect_index > 0:
-                    result_input_image = image_paste_at(template_image, result_input_image, rect.x, rect.y)
-                else:
-                    result_input_image = image_paste_at(insertion_image, result_input_image, rect.x, rect.y)
+            if transformation_id == "with_insertion_image":
+                for rect_index, rect in enumerate(rects):
+                    result_output_image = image_paste_at(insertion_image, result_output_image, rect.x, rect.y)
+
+                    if rect_index > 0:
+                        result_input_image = image_paste_at(template_image, result_input_image, rect.x, rect.y)
+                    else:
+                        result_input_image = image_paste_at(insertion_image, result_input_image, rect.x, rect.y)
+            elif transformation_id == "without_insertion_image":
+                for rect_index, rect in enumerate(rects):
+                    if rect_index > 0:
+                        result_output_image = image_paste_at(insertion_image, result_output_image, rect.x, rect.y)
+
+                    if rect_index > 0:
+                        result_input_image = image_paste_at(template_image, result_input_image, rect.x, rect.y)
+                    else:
+                        result_input_image = image_paste_at(insertion_image, result_input_image, rect.x, rect.y)
+            elif transformation_id == "swap_one_to_many":
+                for rect_index, rect in enumerate(rects):
+                    if rect_index > 0:
+                        result_output_image = image_paste_at(insertion_image, result_output_image, rect.x, rect.y)
+                    else:
+                        result_output_image = image_paste_at(template_image, result_output_image, rect.x, rect.y)
+
+                    if rect_index > 0:
+                        result_input_image = image_paste_at(template_image, result_input_image, rect.x, rect.y)
+                    else:
+                        result_input_image = image_paste_at(insertion_image, result_input_image, rect.x, rect.y)
+            elif transformation_id == "swap_many_to_one":
+                for rect_index, rect in enumerate(rects):
+                    if rect_index > 0:
+                        result_output_image = image_paste_at(template_image, result_output_image, rect.x, rect.y)
+                    else:
+                        result_output_image = image_paste_at(insertion_image, result_output_image, rect.x, rect.y)
+
+                    if rect_index > 0:
+                        result_input_image = image_paste_at(insertion_image, result_input_image, rect.x, rect.y)
+                    else:
+                        result_input_image = image_paste_at(template_image, result_input_image, rect.x, rect.y)
+            else:
+                raise ValueError(f"Unknown transformation_id: {transformation_id}")
+
 
             # Palette
             input_image = image_replace_colors(result_input_image, color_map)
@@ -145,12 +169,16 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
     return builder.dataset_items()
 
 def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 2
-    j = 1
+    j = seed % 4
+    # j = 1
     if j == 0:
         task = generate_task_with_template_areas(seed, "with_insertion_image")
-    else:
+    elif j == 1:
         task = generate_task_with_template_areas(seed, "without_insertion_image")
+    elif j == 2:
+        task = generate_task_with_template_areas(seed, "swap_one_to_many")
+    else:
+        task = generate_task_with_template_areas(seed, "swap_many_to_one")
     # task.show()
     transformation_id = task.metadata_task_id
     dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
