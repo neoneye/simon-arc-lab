@@ -1,5 +1,8 @@
 # Insert objects into templates
 #
+# IDEA: Template with flipx/flipy.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9f27f097
+#
 # IDEA: Templates with non-rectangular shapes.
 # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=321b1fc6
 #
