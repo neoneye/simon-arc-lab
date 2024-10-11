@@ -43,11 +43,11 @@ def generate_task_with_rectangles(seed: int, transformation_id: str) -> Task:
     count_test = random.Random(seed + 2).randint(1, 2)
     task = Task()
     min_rect_size = 3
-    max_rect_size = 6
+    max_rect_size = 7
     min_image_size = 8
     max_image_size = 16
     min_rect_count = 2
-    max_rect_count = 3
+    max_rect_count = 4
 
     color_background = 0
     color_rect = 1
@@ -161,7 +161,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=7383000031,
+    seed=7385000031,
     max_num_samples=1000,
     max_byte_size=1024*1024*100
 )
