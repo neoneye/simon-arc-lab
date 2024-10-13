@@ -161,17 +161,38 @@ def apply_manipulation_to_image(image: np.array, inventory: dict, s: list) -> Tu
         if rect is None:
             raise Exception("No current_rect in inventory")
         image = current_image[(rect.y):(rect.y + rect.height), (rect.x):(rect.x + rect.width)]
-        inventory['image'] = image
+        inventory['current_image'] = image
     elif s == 'paste':
         rect = inventory.get('current_rect', None)
         if rect is None:
             raise Exception("No current_rect in inventory")
-        image = inventory.get('image', None)
+        image = inventory.get('current_image', None)
         if image is None:
-            raise Exception("No image in inventory")
+            raise Exception("No current_image in inventory")
         if image.shape != (rect.height, rect.width):
             raise Exception("Image size does not match the rectangle size")
         current_image[(rect.y):(rect.y + rect.height), (rect.x):(rect.x + rect.width)] = image
+    elif s == 'setimagea':
+        image = current_image.copy()
+        inventory['imagea'] = image
+    elif s == 'setimageb':
+        image = current_image.copy()
+        inventory['imageb'] = image
+    elif s == 'useimagea':
+        image = inventory.get('imagea', None)
+        if image is None:
+            raise Exception("No imagea in inventory")
+        inventory['current_image'] = image.copy()
+    elif s == 'useimageb':
+        image = inventory.get('imageb', None)
+        if image is None:
+            raise Exception("No imageb in inventory")
+        inventory['current_image'] = image.copy()
+    elif s == 'updateimage':
+        image = inventory.get('current_image', None)
+        if image is None:
+            raise Exception("No current_image in inventory")
+        current_image = image.copy()
     else:
         raise Exception(f"Unknown manipulation: {s}")
     return (current_image, inventory)
@@ -280,6 +301,11 @@ userectc: set current_rect to rectangle 'c'
 userectd: set current_rect to rectangle 'd'
 copyrect: copy pixels from current_rectangle to inventory named 'image'
 paste: paste pixels from inventory named 'image' inside the area specified by 'current_rectangle'
+setimagea: set image 'a' to current_image
+setimageb: set image 'b' to current_image
+useimagea: set current_image to image 'a'
+useimageb: set current_image to image 'b'
+updateimage: assign current_image with inventory current_image
 """
 
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/009d5c81.json'
@@ -288,8 +314,23 @@ paste: paste pixels from inventory named 'image' inside the area specified by 'c
 task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/9f27f097.json'
 original_task = Task.load_arcagi1(task_path)
 
+manipulation_list_9f27f097 = [
+    'setimagea',
+    'color0', 'bb2', 'setrecta', 
+    'mpc', 'drawrect', 
+    'mpc', 'bb1', 'copyrect',
+    'updateimage',
+    'fx',
+    'setimageb',
+    'useimagea', 
+    'updateimage',
+    'userecta', 
+    'useimageb',
+    'paste' 
+]
+
 manipulation_list = []
-manipulation_list = ['color0', 'bb2', 'setrecta', 'mpc', 'drawrect', 'mpc', 'bb1', 'copyrect', 'userecta', 'paste']
+manipulation_list = manipulation_list_9f27f097
 
 available_manipulations = [
     'cw', 'ccw', '180', 'fx', 'fy', 'fa', 'fb', 'mu', 'md', 'ml', 'mr',
@@ -301,6 +342,9 @@ available_manipulations = [
     'drawrect',
     'copyrect',
     'paste',
+    'updateimage',
+    'setimagea', 'setimageb',
+    'useimagea', 'useimageb',
 ]
 
 current_task = apply_manipulations_to_task(original_task, manipulation_list)
