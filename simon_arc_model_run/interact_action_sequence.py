@@ -445,6 +445,8 @@ action_list_22168020 = [
     'gravitydraw_bottom_to_top',
     'color0',
     'drawrectoutside',
+    # IDEA: apply object color
+    # IDEA: loop over all the objects
 ]
 
 available_actions = [
