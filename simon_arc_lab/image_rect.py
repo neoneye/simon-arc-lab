@@ -59,3 +59,27 @@ def image_rect_hollow(image: np.array, rect: Rectangle, color: int, size: int) -
                 new_image[y, x] = color
 
     return new_image
+
+def image_rect_outside(image: np.array, rect: Rectangle, color: int) -> np.array:
+    """
+    Draw outside the rectangle on an image. Don't touch the pixels inside the rectangle.
+
+    :param image: The image to draw the rect on
+    :param rect: The coordinates of the rectangle
+    :param color: The color to filled with
+    :return: The image with the hollow rectangle drawn on it
+    """
+    height, width = image.shape
+    this_image_rect = Rectangle(0, 0, width, height)
+    intersection_rect = rect.intersection(this_image_rect)
+
+    top_rect = Rectangle(0, 0, width, intersection_rect.y)
+    left_rect = Rectangle(0, intersection_rect.y, intersection_rect.x, rect.height)
+    right_rect = Rectangle(intersection_rect.x + intersection_rect.width, intersection_rect.y, width - (intersection_rect.x + intersection_rect.width), rect.height)
+    bottom_rect = Rectangle(0, intersection_rect.y + intersection_rect.height, width, height - (intersection_rect.y + intersection_rect.height))
+
+    new_image = image_rect(image, top_rect, color)
+    new_image = image_rect(new_image, left_rect, color)
+    new_image = image_rect(new_image, right_rect, color)
+    new_image = image_rect(new_image, bottom_rect, color)
+    return new_image
