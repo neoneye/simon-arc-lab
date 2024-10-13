@@ -156,6 +156,11 @@ def apply_manipulation_to_image(image: np.array, inventory: dict, s: list) -> Tu
         if current_color is None:
             raise Exception("No current_color in inventory")
         current_image = image_rect(current_image, rect, current_color)
+    elif s == 'crop':
+        rect = inventory.get('current_rect', None)
+        if rect is None:
+            raise Exception("No current_rect in inventory")
+        current_image = current_image[(rect.y):(rect.y + rect.height), (rect.x):(rect.x + rect.width)]
     elif s == 'copyrect':
         rect = inventory.get('current_rect', None)
         if rect is None:
@@ -188,11 +193,13 @@ def apply_manipulation_to_image(image: np.array, inventory: dict, s: list) -> Tu
         if image is None:
             raise Exception("No imageb in inventory")
         inventory['current_image'] = image.copy()
-    elif s == 'updateimage':
+    elif s == 'loadimage':
         image = inventory.get('current_image', None)
         if image is None:
             raise Exception("No current_image in inventory")
         current_image = image.copy()
+    elif s == 'saveimage':
+        inventory['current_image'] = current_image.copy()
     else:
         raise Exception(f"Unknown manipulation: {s}")
     return (current_image, inventory)
@@ -299,13 +306,15 @@ userecta: set current_rect to rectangle 'a'
 userectb: set current_rect to rectangle 'b'
 userectc: set current_rect to rectangle 'c'
 userectd: set current_rect to rectangle 'd'
+crop: crop current image to current rectangle
 copyrect: copy pixels from current_rectangle to inventory named 'current_image'
 paste: paste pixels from inventory named 'image' inside the area specified by 'current_rectangle'
 setimagea: set image 'a' to current_image
 setimageb: set image 'b' to current_image
 useimagea: set current_image to image 'a'
 useimageb: set current_image to image 'b'
-updateimage: assign current_image with inventory current_image
+loadimage: load current_image from the inventory current_image
+saveimage: save current_image in the inventory current_image
 """
 
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/009d5c81.json'
@@ -320,18 +329,19 @@ manipulation_list_9f27f097 = [
     'color0', 'bb2', 'setrecta', 
     'mpc', 'drawrect', 
     'mpc', 'bb1', 'copyrect',
-    'updateimage',
+    'loadimage',
     'fx',
     'setimageb',
     'useimagea', 
-    'updateimage',
+    'loadimage',
     'userecta', 
     'useimageb',
     'paste' 
 ]
 
 manipulation_list_12997ef3 = [
-    'color1', 'bb2', 'copyrect'
+    'setimagea', 'color1', 'bb2', 'copyrect', 'loadimage', 'useimagea', 
+    'loadimage', 'color0', 'drawrect', 'color0', 'bb1', 'crop',
 ]
 
 available_manipulations = [
@@ -342,11 +352,13 @@ available_manipulations = [
     'setrecta', 'setrectb', 'setrectc', 'setrectd',
     'userecta', 'userectb', 'userectc', 'userectd',
     'drawrect',
+    'crop',
     'copyrect',
     'paste',
-    'updateimage',
     'setimagea', 'setimageb',
     'useimagea', 'useimageb',
+    'loadimage',
+    'saveimage',
 ]
 
 manipulation_list = []
