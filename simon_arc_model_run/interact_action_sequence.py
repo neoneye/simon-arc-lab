@@ -9,6 +9,7 @@ from simon_arc_lab.image_scale import *
 from simon_arc_lab.image_util import *
 from simon_arc_lab.image_rect import *
 from simon_arc_lab.image_gravity_move import *
+from simon_arc_lab.image_gravity_draw import *
 from simon_arc_lab.pixel_connectivity import *
 from simon_arc_lab.connected_component import *
 from simon_arc_lab.image_tile_template import image_tile_template
@@ -159,7 +160,7 @@ def apply_action_to_image(image: np.array, inventory: dict, s: list) -> Tuple[np
         current_color = inventory.get('current_color', None)
         if current_color is None:
             raise Exception("No current_color in inventory")
-        current_image = image_rect(current_image, rect, current_color)
+        current_image = image_rect_inside(current_image, rect, current_color)
     elif s == 'crop':
         rect = inventory.get('current_rect', None)
         if rect is None:
@@ -255,6 +256,11 @@ def apply_action_to_image(image: np.array, inventory: dict, s: list) -> Tuple[np
             raise Exception("No current_objects in inventory")
         current_objects = [object for object in current_objects if object.color != current_color]
         inventory['current_objects'] = current_objects
+    elif s == 'gravitydraw_bottom_to_top':
+        current_color = inventory.get('current_color', None)
+        if current_color is None:
+            raise Exception("No current_color in inventory")
+        current_image = image_gravity_draw(current_image, current_color, GravityDrawDirection.BOTTOM_TO_TOP)
     else:
         raise Exception(f"Unknown action: {s}")
     return (current_image, inventory)
@@ -380,6 +386,7 @@ maskinvert: convert non-zero pixels to zero and zero pixels to one.
 all8: enumerate connected components with PixelConnectivity.ALL8
 firstobject: set current_image to the first object found in the inventory current_objects
 deleteobjectswithcolor: delete objects with the current_color from the inventory current_objects
+gravitydraw_bottom_to_top: apply gravity in the up direction and draw a trail of pixels
 """
 
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/009d5c81.json'
@@ -422,6 +429,10 @@ action_list_12997ef3 = [
 action_list_22168020 = [
     'all8', 'color0', 'deleteobjectswithcolor', 
     'firstobject',
+    #'color1',
+    #'bb2',
+    'gravitydraw_bottom_to_top',
+    # 'drawrect',
 ]
 
 available_actions = [
@@ -445,6 +456,7 @@ available_actions = [
     'all8',
     'firstobject',
     'deleteobjectswithcolor',
+    'gravitydraw_up',
 ]
 
 action_list = []

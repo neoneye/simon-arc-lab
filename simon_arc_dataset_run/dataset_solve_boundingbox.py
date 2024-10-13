@@ -41,7 +41,7 @@ from simon_arc_lab.image_paste import *
 from simon_arc_lab.image_rect import *
 from simon_arc_lab.task import *
 from simon_arc_lab.rectangle import Rectangle
-from simon_arc_lab.image_rect import image_rect, image_rect_hollow
+from simon_arc_lab.image_rect import image_rect_inside, image_rect_hollow
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.find_bounding_box import find_bounding_box_ignoring_color
@@ -128,7 +128,7 @@ def generate_task_boundingbox_of_lonely_pixels(seed: int, transformation_id: str
                 continue
 
             if transformation_id == 'filled':
-                output_image_raw = image_rect(background_image, bounding_box, 1)
+                output_image_raw = image_rect_inside(background_image, bounding_box, 1)
             elif transformation_id == 'hollow':
                 if bounding_box.width <= 2 or bounding_box.height <= 2:
                     continue
@@ -137,7 +137,7 @@ def generate_task_boundingbox_of_lonely_pixels(seed: int, transformation_id: str
                 rect2 = Rectangle(bounding_box.x + border_size, bounding_box.y + border_size, bounding_box.width - border_size * 2, bounding_box.height - border_size * 2)
                 if rect2.mass() < 1:
                     continue
-                output_image_raw = image_rect(background_image, rect2, 1)
+                output_image_raw = image_rect_inside(background_image, rect2, 1)
             elif transformation_id == 'hollow_inner':
                 rect2 = Rectangle(bounding_box.x + border_size, bounding_box.y + border_size, bounding_box.width - border_size * 2, bounding_box.height - border_size * 2)
                 if rect2.mass() < 1:
@@ -147,7 +147,7 @@ def generate_task_boundingbox_of_lonely_pixels(seed: int, transformation_id: str
                 rect2 = Rectangle(bounding_box.x - border_size, bounding_box.y - border_size, bounding_box.width + border_size * 2, bounding_box.height + border_size * 2)
                 if rect2.mass() < 1:
                     continue
-                output_image_raw = image_rect(background_image, rect2, 1)
+                output_image_raw = image_rect_inside(background_image, rect2, 1)
             elif transformation_id == 'hollow_outer':
                 rect2 = Rectangle(bounding_box.x - border_size, bounding_box.y - border_size, bounding_box.width + border_size * 2, bounding_box.height + border_size * 2)
                 if rect2.mass() < 1:
@@ -260,7 +260,7 @@ def generate_task_inner_boundingbox(seed: int, transformation_id: str) -> Task:
                 raise Exception(f"Unknown transformation_id: {transformation_id}")
 
             output_background_image = image_create(background_width, background_height, output_background_color)
-            output_image_raw = image_rect(output_background_image, Rectangle(outer_left, outer_top, outer_width, outer_height), output_outer_color)
+            output_image_raw = image_rect_inside(output_background_image, Rectangle(outer_left, outer_top, outer_width, outer_height), output_outer_color)
             output_image_raw = image_paste_at(inner_image, output_image_raw, outer_left + inner_left, outer_top + inner_top)
 
             input_image = image_replace_colors(input_image_raw, color_map)

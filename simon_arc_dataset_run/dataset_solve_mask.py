@@ -245,7 +245,7 @@ def generate_task_repair_rectangle_and_crop(seed: int, transformation_id: str) -
             cropped_image = random_a_image[rect.y:rect.y+rect.height, rect.x:rect.x+rect.width]
 
             masked_output_image = np.zeros_like(random_a_image)
-            masked_output_image = image_rect(masked_output_image, rect, 1)
+            masked_output_image = image_rect_inside(masked_output_image, rect, 1)
 
             inverted_mask_output_image = np.zeros_like(random_a_image)
             inverted_mask_output_image = image_paste_at(cropped_image, inverted_mask_output_image, rect.x, rect.y)

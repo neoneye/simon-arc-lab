@@ -17,7 +17,7 @@ from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.image_mix import *
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.benchmark import *
-from simon_arc_lab.image_rect import image_rect
+from simon_arc_lab.image_rect import image_rect_inside
 from simon_arc_lab.image_scale import image_scale_up_variable
 from simon_arc_lab.rectangle import Rectangle
 from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
@@ -112,8 +112,8 @@ def generate_task_with_intersecting_spans(seed: int, transformation_id: str) -> 
 
                     if span_x == span_y:
                         color = span_color_list[span_x]
-                        primary_color_image = image_rect(primary_color_image, Rectangle(x, y, width, height), color)
-                        primary_mask = image_rect(primary_mask, Rectangle(x, y, width, height), color_template)
+                        primary_color_image = image_rect_inside(primary_color_image, Rectangle(x, y, width, height), color)
+                        primary_mask = image_rect_inside(primary_mask, Rectangle(x, y, width, height), color_template)
 
             # Vertical border
             vertical_image = image_create(1, image_height, color_background)
@@ -123,7 +123,7 @@ def generate_task_with_intersecting_spans(seed: int, transformation_id: str) -> 
                 height = y_span_list[span_y]
                 y = current_y
                 current_y += height
-                vertical_image = image_rect(vertical_image, Rectangle(0, y, 1, height), color)
+                vertical_image = image_rect_inside(vertical_image, Rectangle(0, y, 1, height), color)
 
             # Horizontal border
             horizontal_image = image_create(image_width, 1, color_background)
@@ -133,7 +133,7 @@ def generate_task_with_intersecting_spans(seed: int, transformation_id: str) -> 
                 width = x_span_list[span_x]
                 x = current_x
                 current_x += width
-                horizontal_image = image_rect(horizontal_image, Rectangle(x, 0, width, 1), color)
+                horizontal_image = image_rect_inside(horizontal_image, Rectangle(x, 0, width, 1), color)
 
             color_of_last_span = span_color_list[-1]
             bottom_right_image = image_create(1, 1, color_of_last_span)
@@ -251,7 +251,7 @@ def generate_task_with_template_lines(seed: int, transformation_id: str) -> Task
                 width = span_list[span_x]
                 x = current_x
                 current_x += width
-                horizontal_image = image_rect(horizontal_image, Rectangle(x, 0, width, 1), color)
+                horizontal_image = image_rect_inside(horizontal_image, Rectangle(x, 0, width, 1), color)
 
             # repeat the horizontal image by the height
             primary_image = np.tile(horizontal_image, (image_height, 1))
@@ -388,10 +388,10 @@ def generate_task_with_alternate(seed: int, transformation_id: str) -> Task:
                     rect = Rectangle(x, y, width, height)
                     value0 = x_span_value_list[span_x]
                     value1 = y_span_value_list[span_y]
-                    image_and = image_rect(image_and, rect, value0 & value1)
-                    image_or  = image_rect(image_or,  rect, value0 | value1)
-                    image_xor = image_rect(image_xor, rect, value0 ^ value1)
-                    image_sum = image_rect(image_sum, rect, value0 + value1)
+                    image_and = image_rect_inside(image_and, rect, value0 & value1)
+                    image_or  = image_rect_inside(image_or,  rect, value0 | value1)
+                    image_xor = image_rect_inside(image_xor, rect, value0 ^ value1)
+                    image_sum = image_rect_inside(image_sum, rect, value0 + value1)
 
             # Vertical border indicators
             vertical_image = image_create(1, image_height, color_background)
@@ -402,7 +402,7 @@ def generate_task_with_alternate(seed: int, transformation_id: str) -> Task:
                 y = current_y
                 current_y += height
                 if value > 0:
-                    vertical_image = image_rect(vertical_image, Rectangle(0, y, 1, height), color_indicator)
+                    vertical_image = image_rect_inside(vertical_image, Rectangle(0, y, 1, height), color_indicator)
 
             # Horizontal border indicators
             horizontal_image = image_create(image_width, 1, color_background)
@@ -413,7 +413,7 @@ def generate_task_with_alternate(seed: int, transformation_id: str) -> Task:
                 x = current_x
                 current_x += width
                 if value > 0:
-                    horizontal_image = image_rect(horizontal_image, Rectangle(x, 0, width, 1), color_indicator)
+                    horizontal_image = image_rect_inside(horizontal_image, Rectangle(x, 0, width, 1), color_indicator)
 
             bottom_right_image = image_create(1, 1, color_background)
 
