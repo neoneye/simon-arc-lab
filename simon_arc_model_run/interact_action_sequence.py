@@ -7,6 +7,7 @@ sys.path.insert(0, PROJECT_ROOT)
 from simon_arc_lab.task import Task
 from simon_arc_lab.image_scale import *
 from simon_arc_lab.image_util import *
+from simon_arc_lab.image_rect import *
 from simon_arc_lab.find_bounding_box import *
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_similarity import ImageSimilarity, Feature, FeatureType
@@ -127,6 +128,14 @@ def apply_manipulation_to_image(image: np.array, inventory: dict, s: list) -> Tu
         if rect is None:
             raise Exception("No current_rect in inventory")
         inventory['rectd'] = rect
+    elif s == 'drawrect':
+        rect = inventory.get('current_rect', None)
+        if rect is None:
+            raise Exception("No current_rect in inventory")
+        current_color = inventory.get('current_color', None)
+        if current_color is None:
+            raise Exception("No current_color in inventory")
+        current_image = image_rect(current_image, inventory['recta'], current_color)
     else:
         raise Exception(f"Unknown manipulation: {s}")
     return (current_image, inventory)
@@ -245,6 +254,7 @@ available_manipulations = [
     'mpc', 'lpc', 'bb1', 'bb2',
     'color0', 'color1', 'color2', 'color3', 'color4', 'color5', 'color6', 'color7', 'color8', 'color9',
     'setrecta', 'setrectb', 'setrectc', 'setrectd',
+    'drawrect'
 ]
 
 current_task = apply_manipulations_to_task(original_task, manipulation_list)
