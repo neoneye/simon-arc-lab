@@ -153,7 +153,7 @@ def apply_action_to_image(image: np.array, inventory: dict, s: list) -> Tuple[np
         if rect is None:
             raise Exception("No rectd in inventory")
         inventory['current_rect'] = rect
-    elif s == 'drawrect':
+    elif s == 'drawrectinside':
         rect = inventory.get('current_rect', None)
         if rect is None:
             raise Exception("No current_rect in inventory")
@@ -161,6 +161,14 @@ def apply_action_to_image(image: np.array, inventory: dict, s: list) -> Tuple[np
         if current_color is None:
             raise Exception("No current_color in inventory")
         current_image = image_rect_inside(current_image, rect, current_color)
+    elif s == 'drawrectoutside':
+        rect = inventory.get('current_rect', None)
+        if rect is None:
+            raise Exception("No current_rect in inventory")
+        current_color = inventory.get('current_color', None)
+        if current_color is None:
+            raise Exception("No current_color in inventory")
+        current_image = image_rect_outside(current_image, rect, current_color)
     elif s == 'crop':
         rect = inventory.get('current_rect', None)
         if rect is None:
@@ -367,6 +375,8 @@ userecta: set current_rect to rectangle 'a'
 userectb: set current_rect to rectangle 'b'
 userectc: set current_rect to rectangle 'c'
 userectd: set current_rect to rectangle 'd'
+drawrectinside: draw current_color inside current rectangle
+drawrectoutside: draw current_color outside current rectangle
 crop: crop current image to current rectangle
 copyrect: copy pixels from current_rectangle to inventory named 'current_image'
 paste: paste pixels from inventory named 'image' inside the area specified by 'current_rectangle'
@@ -403,7 +413,7 @@ original_task.metadata_task_id = task_id
 action_list_9f27f097 = [
     'setimagea',
     'color0', 'bb2', 'setrecta', 
-    'mpc', 'drawrect', 
+    'mpc', 'drawrectinside', 
     'mpc', 'bb1', 'copyrect',
     'loadimage',
     'fx',
@@ -421,7 +431,7 @@ action_list_12997ef3 = [
     'setimagea', 
     'useimaged', 
     'loadimage', 
-    'color0', 'drawrect', 'color0', 'bb1', 'crop', 'collapse',
+    'color0', 'drawrectinside', 'color0', 'bb1', 'crop', 'collapse',
     'color0',
     'tile',
 ]
@@ -429,10 +439,12 @@ action_list_12997ef3 = [
 action_list_22168020 = [
     'all8', 'color0', 'deleteobjectswithcolor', 
     'firstobject',
-    #'color1',
-    #'bb2',
+    'color1',
+    'bb2',
+    'color0',
     'gravitydraw_bottom_to_top',
-    # 'drawrect',
+    'color0',
+    'drawrectoutside',
 ]
 
 available_actions = [
@@ -442,7 +454,7 @@ available_actions = [
     'color0', 'color1', 'color2', 'color3', 'color4', 'color5', 'color6', 'color7', 'color8', 'color9',
     'setrecta', 'setrectb', 'setrectc', 'setrectd',
     'userecta', 'userectb', 'userectc', 'userectd',
-    'drawrect',
+    'drawrectinside', 'drawrectoutside',
     'crop',
     'copyrect',
     'paste',
