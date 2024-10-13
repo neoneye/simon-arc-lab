@@ -8,6 +8,7 @@ from simon_arc_lab.task import Task
 from simon_arc_lab.image_scale import *
 from simon_arc_lab.image_util import *
 from simon_arc_lab.image_rect import *
+from simon_arc_lab.image_gravity_move import *
 from simon_arc_lab.find_bounding_box import *
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_similarity import ImageSimilarity, Feature, FeatureType
@@ -200,6 +201,11 @@ def apply_action_to_image(image: np.array, inventory: dict, s: list) -> Tuple[np
         current_image = image.copy()
     elif s == 'saveimage':
         inventory['current_image'] = current_image.copy()
+    elif s == 'collapse':
+        current_color = inventory.get('current_color', None)
+        if current_color is None:
+            raise Exception("No current_color in inventory")
+        current_image = image_collapse_color(current_image, current_color)
     else:
         raise Exception(f"Unknown action: {s}")
     return (current_image, inventory)
@@ -315,6 +321,7 @@ useimagea: set current_image to image 'a'
 useimageb: set current_image to image 'b'
 loadimage: load current_image from the inventory current_image
 saveimage: save current_image in the inventory current_image
+collapse: collapse a color
 """
 
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/009d5c81.json'
@@ -344,7 +351,7 @@ action_list_9f27f097 = [
 
 action_list_12997ef3 = [
     'setimagea', 'color1', 'bb2', 'copyrect', 'loadimage', 'useimagea', 
-    'loadimage', 'color0', 'drawrect', 'color0', 'bb1', 'crop',
+    'loadimage', 'color0', 'drawrect', 'color0', 'bb1', 'crop', 'collapse',
 ]
 
 available_actions = [
@@ -362,6 +369,7 @@ available_actions = [
     'useimagea', 'useimageb',
     'loadimage',
     'saveimage',
+    'collapse',
 ]
 
 action_list = []
