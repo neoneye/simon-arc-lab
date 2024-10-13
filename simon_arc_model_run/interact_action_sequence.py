@@ -106,6 +106,26 @@ def apply_manipulation_to_image(image: np.array, inventory: dict, s: list) -> Tu
         inventory['color'] = 8
     elif s == 'color9':
         inventory['color'] = 9
+    elif s == 'setrecta':
+        rect = inventory.get('rect', None)
+        if rect is None:
+            raise Exception("No rect in inventory")
+        inventory['recta'] = rect
+    elif s == 'setrectb':
+        rect = inventory.get('rect', None)
+        if rect is None:
+            raise Exception("No rect in inventory")
+        inventory['rectb'] = rect
+    elif s == 'setrectc':
+        rect = inventory.get('rect', None)
+        if rect is None:
+            raise Exception("No rect in inventory")
+        inventory['rectc'] = rect
+    elif s == 'setrectd':
+        rect = inventory.get('rect', None)
+        if rect is None:
+            raise Exception("No rect in inventory")
+        inventory['rectd'] = rect
     else:
         raise Exception(f"Unknown manipulation: {s}")
     return (current_image, inventory)
@@ -204,6 +224,10 @@ color6: set color to 6
 color7: set color to 7
 color8: set color to 8
 color9: set color to 9
+setrecta: set rectangle 'a' to inventory['rect']
+setrectb: set rectangle 'b' to inventory['rect']
+setrectc: set rectangle 'c' to inventory['rect']
+setrectd: set rectangle 'd' to inventory['rect']
 """
 
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/009d5c81.json'
@@ -218,7 +242,8 @@ available_manipulations = [
     'cw', 'ccw', '180', 'fx', 'fy', 'fa', 'fb', 'mu', 'md', 'ml', 'mr',
     'x2', 'x3', 'x4', 'x5', 'y2', 'y3', 'y4', 'y5', 'xy2', 'xy3', 'xy4', 'xy5',
     'mpc', 'lpc', 'bb1', 'bb2',
-    'color0', 'color1', 'color2', 'color3', 'color4', 'color5', 'color6', 'color7', 'color8', 'color9'
+    'color0', 'color1', 'color2', 'color3', 'color4', 'color5', 'color6', 'color7', 'color8', 'color9',
+    'setrecta', 'setrectb', 'setrectc', 'setrectd',
 ]
 
 current_task = apply_manipulations_to_task(original_task, manipulation_list)
