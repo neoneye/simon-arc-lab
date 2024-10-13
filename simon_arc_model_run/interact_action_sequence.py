@@ -299,7 +299,7 @@ userecta: set current_rect to rectangle 'a'
 userectb: set current_rect to rectangle 'b'
 userectc: set current_rect to rectangle 'c'
 userectd: set current_rect to rectangle 'd'
-copyrect: copy pixels from current_rectangle to inventory named 'image'
+copyrect: copy pixels from current_rectangle to inventory named 'current_image'
 paste: paste pixels from inventory named 'image' inside the area specified by 'current_rectangle'
 setimagea: set image 'a' to current_image
 setimageb: set image 'b' to current_image
