@@ -51,6 +51,14 @@ def apply_manipulation_to_image(image: np.array, inventory: dict, s: list) -> Tu
         _, current_image = image_scale(current_image, 'up', 1, 'up', 4)
     elif s == 'y5':
         _, current_image = image_scale(current_image, 'up', 1, 'up', 5)
+    elif s == 'xy2':
+        _, current_image = image_scale(current_image, 'up', 2, 'up', 2)
+    elif s == 'xy3':
+        _, current_image = image_scale(current_image, 'up', 3, 'up', 3)
+    elif s == 'xy4':
+        _, current_image = image_scale(current_image, 'up', 4, 'up', 4)
+    elif s == 'xy5':
+        _, current_image = image_scale(current_image, 'up', 5, 'up', 5)
     elif s == 'mpc':
         h = Histogram.create_with_image(current_image)
         color = h.most_popular_color()
@@ -143,6 +151,10 @@ y2: scale y-axis by 2
 y3: scale y-axis by 3
 y4: scale y-axis by 4
 y5: scale y-axis by 5
+xy2: scale x-axis and y-axis by 2
+xy3: scale x-axis and y-axis by 3
+xy4: scale x-axis and y-axis by 4
+xy5: scale x-axis and y-axis by 5
 mpc: take most popular color from input image and save in inventory
 lpc: take least popular color from input image and save in inventory
 """
@@ -156,7 +168,8 @@ manipulation_list = []
 
 available_manipulations = [
     'cw', 'ccw', '180', 'fx', 'fy', 'fa', 'fb', 'mu', 'md', 'ml', 'mr',
-    'x2', 'x3', 'x4', 'x5', 'y2', 'y3', 'y4', 'y5', 'mpc', 'lpc'
+    'x2', 'x3', 'x4', 'x5', 'y2', 'y3', 'y4', 'y5', 'xy2', 'xy3', 'xy4', 'xy5',
+    'mpc', 'lpc'
 ]
 
 current_task = apply_manipulations_to_task(original_task, manipulation_list)
