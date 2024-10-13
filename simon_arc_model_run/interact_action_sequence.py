@@ -78,7 +78,7 @@ def apply_manipulation_to_image(image: np.array, inventory: dict, s: list) -> Tu
             raise Exception("No current_color in inventory")
         ignore_color = current_color
         rect = find_bounding_box_ignoring_color(current_image, ignore_color)
-        inventory['rect'] = rect
+        inventory['current_rect'] = rect
     elif s == 'bb2':
         current_color = inventory.get('current_color', None)
         if current_color is None:
@@ -86,7 +86,7 @@ def apply_manipulation_to_image(image: np.array, inventory: dict, s: list) -> Tu
         ignore_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         ignore_colors.remove(current_color)
         rect = find_bounding_box_multiple_ignore_colors(current_image, ignore_colors)
-        inventory['rect'] = rect
+        inventory['current_rect'] = rect
     elif s == 'color0':
         inventory['current_color'] = 0
     elif s == 'color1':
@@ -108,24 +108,24 @@ def apply_manipulation_to_image(image: np.array, inventory: dict, s: list) -> Tu
     elif s == 'color9':
         inventory['current_color'] = 9
     elif s == 'setrecta':
-        rect = inventory.get('rect', None)
+        rect = inventory.get('current_rect', None)
         if rect is None:
-            raise Exception("No rect in inventory")
+            raise Exception("No current_rect in inventory")
         inventory['recta'] = rect
     elif s == 'setrectb':
-        rect = inventory.get('rect', None)
+        rect = inventory.get('current_rect', None)
         if rect is None:
-            raise Exception("No rect in inventory")
+            raise Exception("No current_rect in inventory")
         inventory['rectb'] = rect
     elif s == 'setrectc':
-        rect = inventory.get('rect', None)
+        rect = inventory.get('current_rect', None)
         if rect is None:
-            raise Exception("No rect in inventory")
+            raise Exception("No current_rect in inventory")
         inventory['rectc'] = rect
     elif s == 'setrectd':
-        rect = inventory.get('rect', None)
+        rect = inventory.get('current_rect', None)
         if rect is None:
-            raise Exception("No rect in inventory")
+            raise Exception("No current_rect in inventory")
         inventory['rectd'] = rect
     else:
         raise Exception(f"Unknown manipulation: {s}")
