@@ -223,7 +223,13 @@ def apply_action_to_image(image: np.array, inventory: dict, s: list) -> Tuple[np
         imagea = inventory.get('imagea', None)
         if imagea is None:
             raise Exception("No imagea in inventory")
-        current_image = image_tile_template(imagea, current_image)
+        current_color = inventory.get('current_color', None)
+        if current_color is None:
+            raise Exception("No current_color in inventory")
+        def callback(tile, layout, x, y):
+            color_map = {0: layout[y, x], 1: current_color}
+            return image_replace_colors(tile, color_map)
+        current_image = image_tile_template(imagea, current_image, callback)
     elif s == 'maskinvert':
         current_image = np.where(current_image != 0, 0, 1)
     else:
@@ -382,7 +388,7 @@ action_list_12997ef3 = [
     'useimaged', 
     'loadimage', 
     'color0', 'drawrect', 'color0', 'bb1', 'crop', 'collapse',
-    'setimageb',
+    'color0',
     'tile',
 ]
 
