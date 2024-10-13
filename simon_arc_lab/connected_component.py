@@ -6,19 +6,20 @@ from .pixel_connectivity import PixelConnectivity
 from .image_fill import *
 
 class ConnectedComponentItem:
-    def __init__(self, mask: np.array, mass: int, x: int, y: int):
+    def __init__(self, mask: np.array, color: int, mass: int, x: int, y: int):
         self.mask = mask
+        self.color = color
         self.mass = mass
         self.x = x
         self.y = y
 
     def __eq__(self, other):
         if isinstance(other, ConnectedComponentItem):
-            return (self.mask == other.mask).all() and self.mass == other.mass and self.x == other.x and self.y == other.y
+            return (self.mask == other.mask).all() and self.color == other.color and self.mass == other.mass and self.x == other.x and self.y == other.y
         return False
 
     def __repr__(self):
-        return f"ConnectedComponentItem(mask=..., mass={self.mass}, x={self.x}, y={self.y})"
+        return f"ConnectedComponentItem(mask=..., color={self.color}, mass={self.mass}, x={self.x}, y={self.y})"
 
 class ConnectedComponent:
     @staticmethod
@@ -68,6 +69,7 @@ class ConnectedComponent:
 
                 item = ConnectedComponentItem(
                     mask=object_mask,
+                    color=color,
                     mass=min(mass, 2**16 - 1),
                     x=first_nonzero_pixel_x,
                     y=first_nonzero_pixel_y
