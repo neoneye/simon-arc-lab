@@ -7,6 +7,7 @@ sys.path.insert(0, PROJECT_ROOT)
 from simon_arc_lab.task import Task
 from simon_arc_lab.image_scale import *
 from simon_arc_lab.image_util import *
+from simon_arc_lab.find_bounding_box import *
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_similarity import ImageSimilarity, Feature, FeatureType
 from simon_arc_lab.task_similarity import TaskSimilarity
@@ -71,6 +72,40 @@ def apply_manipulation_to_image(image: np.array, inventory: dict, s: list) -> Tu
         if color is not None:
             color = int(color)
         inventory['color'] = int(color)
+    elif s == 'bb1':
+        ignore_color = inventory.get('color', None)
+        if ignore_color is None:
+            raise Exception("No color in inventory")
+        rect = find_bounding_box_ignoring_color(current_image, ignore_color)
+        inventory['rect'] = rect
+    elif s == 'bb2':
+        the_color = inventory.get('color', None)
+        if the_color is None:
+            raise Exception("No color in inventory")
+        ignore_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        ignore_colors.remove(the_color)
+        rect = find_bounding_box_multiple_ignore_colors(current_image, ignore_colors)
+        inventory['rect'] = rect
+    elif s == 'color0':
+        inventory['color'] = 0
+    elif s == 'color1':
+        inventory['color'] = 1
+    elif s == 'color2':
+        inventory['color'] = 2
+    elif s == 'color3':
+        inventory['color'] = 3
+    elif s == 'color4':
+        inventory['color'] = 4
+    elif s == 'color5':
+        inventory['color'] = 5
+    elif s == 'color6':
+        inventory['color'] = 6
+    elif s == 'color7':
+        inventory['color'] = 7
+    elif s == 'color8':
+        inventory['color'] = 8
+    elif s == 'color9':
+        inventory['color'] = 9
     else:
         raise Exception(f"Unknown manipulation: {s}")
     return (current_image, inventory)
@@ -157,11 +192,24 @@ xy4: scale x-axis and y-axis by 4
 xy5: scale x-axis and y-axis by 5
 mpc: take most popular color from input image and save in inventory
 lpc: take least popular color from input image and save in inventory
+bb1: find bounding box ignoring a particular color
+bb2: find bounding box of a particular color
+color0: set color to 0
+color1: set color to 1
+color2: set color to 2
+color3: set color to 3
+color4: set color to 4
+color5: set color to 5
+color6: set color to 6
+color7: set color to 7
+color8: set color to 8
+color9: set color to 9
 """
 
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/009d5c81.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/00dbd492.json'
-task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/0692e18c.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/0692e18c.json'
+task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/9f27f097.json'
 original_task = Task.load_arcagi1(task_path)
 
 manipulation_list = []
@@ -169,7 +217,8 @@ manipulation_list = []
 available_manipulations = [
     'cw', 'ccw', '180', 'fx', 'fy', 'fa', 'fb', 'mu', 'md', 'ml', 'mr',
     'x2', 'x3', 'x4', 'x5', 'y2', 'y3', 'y4', 'y5', 'xy2', 'xy3', 'xy4', 'xy5',
-    'mpc', 'lpc'
+    'mpc', 'lpc', 'bb1', 'bb2',
+    'color0', 'color1', 'color2', 'color3', 'color4', 'color5', 'color6', 'color7', 'color8', 'color9'
 ]
 
 current_task = apply_manipulations_to_task(original_task, manipulation_list)
