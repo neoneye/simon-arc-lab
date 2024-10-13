@@ -65,47 +65,48 @@ def apply_manipulation_to_image(image: np.array, inventory: dict, s: list) -> Tu
         color = h.most_popular_color()
         if color is not None:
             color = int(color)
-        inventory['color'] = color
+        inventory['current_color'] = color
     elif s == 'lpc':
         h = Histogram.create_with_image(current_image)
         color = h.least_popular_color()
         if color is not None:
             color = int(color)
-        inventory['color'] = int(color)
+        inventory['current_color'] = int(color)
     elif s == 'bb1':
-        ignore_color = inventory.get('color', None)
-        if ignore_color is None:
-            raise Exception("No color in inventory")
+        current_color = inventory.get('current_color', None)
+        if current_color is None:
+            raise Exception("No current_color in inventory")
+        ignore_color = current_color
         rect = find_bounding_box_ignoring_color(current_image, ignore_color)
         inventory['rect'] = rect
     elif s == 'bb2':
-        the_color = inventory.get('color', None)
-        if the_color is None:
-            raise Exception("No color in inventory")
+        current_color = inventory.get('current_color', None)
+        if current_color is None:
+            raise Exception("No current_color in inventory")
         ignore_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-        ignore_colors.remove(the_color)
+        ignore_colors.remove(current_color)
         rect = find_bounding_box_multiple_ignore_colors(current_image, ignore_colors)
         inventory['rect'] = rect
     elif s == 'color0':
-        inventory['color'] = 0
+        inventory['current_color'] = 0
     elif s == 'color1':
-        inventory['color'] = 1
+        inventory['current_color'] = 1
     elif s == 'color2':
-        inventory['color'] = 2
+        inventory['current_color'] = 2
     elif s == 'color3':
-        inventory['color'] = 3
+        inventory['current_color'] = 3
     elif s == 'color4':
-        inventory['color'] = 4
+        inventory['current_color'] = 4
     elif s == 'color5':
-        inventory['color'] = 5
+        inventory['current_color'] = 5
     elif s == 'color6':
-        inventory['color'] = 6
+        inventory['current_color'] = 6
     elif s == 'color7':
-        inventory['color'] = 7
+        inventory['current_color'] = 7
     elif s == 'color8':
-        inventory['color'] = 8
+        inventory['current_color'] = 8
     elif s == 'color9':
-        inventory['color'] = 9
+        inventory['current_color'] = 9
     elif s == 'setrecta':
         rect = inventory.get('rect', None)
         if rect is None:
@@ -212,22 +213,22 @@ xy4: scale x-axis and y-axis by 4
 xy5: scale x-axis and y-axis by 5
 mpc: take most popular color from input image and save in inventory
 lpc: take least popular color from input image and save in inventory
-bb1: find bounding box ignoring a particular color
-bb2: find bounding box of a particular color
-color0: set color to 0
-color1: set color to 1
-color2: set color to 2
-color3: set color to 3
-color4: set color to 4
-color5: set color to 5
-color6: set color to 6
-color7: set color to 7
-color8: set color to 8
-color9: set color to 9
-setrecta: set rectangle 'a' to inventory['rect']
-setrectb: set rectangle 'b' to inventory['rect']
-setrectc: set rectangle 'c' to inventory['rect']
-setrectd: set rectangle 'd' to inventory['rect']
+bb1: find bounding box ignoring the current color
+bb2: find bounding box of the current color
+color0: set current_color to 0
+color1: set current_color to 1
+color2: set current_color to 2
+color3: set current_color to 3
+color4: set current_color to 4
+color5: set current_color to 5
+color6: set current_color to 6
+color7: set current_color to 7
+color8: set current_color to 8
+color9: set current_color to 9
+setrecta: set rectangle 'a' to current_rect
+setrectb: set rectangle 'b' to current_rect
+setrectc: set rectangle 'c' to current_rect
+setrectd: set rectangle 'd' to current_rect
 """
 
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/009d5c81.json'
