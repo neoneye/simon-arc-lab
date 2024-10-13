@@ -7,64 +7,96 @@ sys.path.insert(0, PROJECT_ROOT)
 from simon_arc_lab.task import Task
 from simon_arc_lab.image_scale import *
 from simon_arc_lab.image_util import *
+from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_similarity import ImageSimilarity, Feature, FeatureType
 from simon_arc_lab.task_similarity import TaskSimilarity
 
-def apply_manipulations_to_image(image: np.array, manipulation_list: list) -> np.array:
+def apply_manipulation_to_image(image: np.array, inventory: dict, s: list) -> Tuple[np.array, dict]:
     current_image = image.copy()
-    for s in manipulation_list:
-        if s == 'cw':
-            current_image = image_rotate_cw(current_image)
-        elif s == 'ccw':
-            current_image = image_rotate_ccw(current_image)
-        elif s == '180':
-            current_image = image_rotate_180(current_image)
-        elif s == 'fx':
-            current_image = image_flipx(current_image)
-        elif s == 'fy':
-            current_image = image_flipy(current_image)
-        elif s == 'fa':
-            current_image = image_flip_diagonal_a(current_image)
-        elif s == 'fb':
-            current_image = image_flip_diagonal_b(current_image)
-        elif s == 'mu':
-            current_image = image_translate_wrap(current_image, 0, -1)
-        elif s == 'md':
-            current_image = image_translate_wrap(current_image, 0, 1)
-        elif s == 'ml':
-            current_image = image_translate_wrap(current_image, -1, 0)
-        elif s == 'mr':
-            current_image = image_translate_wrap(current_image, 1, 0)
-        elif s == 'x2':
-            _, current_image = image_scale(current_image, 'up', 2, 'up', 1)
-        elif s == 'x3':
-            _, current_image = image_scale(current_image, 'up', 3, 'up', 1)
-        elif s == 'x4':
-            _, current_image = image_scale(current_image, 'up', 4, 'up', 1)
-        elif s == 'x5':
-            _, current_image = image_scale(current_image, 'up', 5, 'up', 1)
-        elif s == 'y2':
-            _, current_image = image_scale(current_image, 'up', 1, 'up', 2)
-        elif s == 'y3':
-            _, current_image = image_scale(current_image, 'up', 1, 'up', 3)
-        elif s == 'y4':
-            _, current_image = image_scale(current_image, 'up', 1, 'up', 4)
-        elif s == 'y5':
-            _, current_image = image_scale(current_image, 'up', 1, 'up', 5)
-        else:
-            raise Exception(f"Unknown manipulation: {s}")
-    return current_image
+    if s == 'cw':
+        current_image = image_rotate_cw(current_image)
+    elif s == 'ccw':
+        current_image = image_rotate_ccw(current_image)
+    elif s == '180':
+        current_image = image_rotate_180(current_image)
+    elif s == 'fx':
+        current_image = image_flipx(current_image)
+    elif s == 'fy':
+        current_image = image_flipy(current_image)
+    elif s == 'fa':
+        current_image = image_flip_diagonal_a(current_image)
+    elif s == 'fb':
+        current_image = image_flip_diagonal_b(current_image)
+    elif s == 'mu':
+        current_image = image_translate_wrap(current_image, 0, -1)
+    elif s == 'md':
+        current_image = image_translate_wrap(current_image, 0, 1)
+    elif s == 'ml':
+        current_image = image_translate_wrap(current_image, -1, 0)
+    elif s == 'mr':
+        current_image = image_translate_wrap(current_image, 1, 0)
+    elif s == 'x2':
+        _, current_image = image_scale(current_image, 'up', 2, 'up', 1)
+    elif s == 'x3':
+        _, current_image = image_scale(current_image, 'up', 3, 'up', 1)
+    elif s == 'x4':
+        _, current_image = image_scale(current_image, 'up', 4, 'up', 1)
+    elif s == 'x5':
+        _, current_image = image_scale(current_image, 'up', 5, 'up', 1)
+    elif s == 'y2':
+        _, current_image = image_scale(current_image, 'up', 1, 'up', 2)
+    elif s == 'y3':
+        _, current_image = image_scale(current_image, 'up', 1, 'up', 3)
+    elif s == 'y4':
+        _, current_image = image_scale(current_image, 'up', 1, 'up', 4)
+    elif s == 'y5':
+        _, current_image = image_scale(current_image, 'up', 1, 'up', 5)
+    elif s == 'mpc':
+        h = Histogram.create_with_image(current_image)
+        color = h.most_popular_color()
+        if color is not None:
+            color = int(color)
+        inventory['color'] = color
+    elif s == 'lpc':
+        h = Histogram.create_with_image(current_image)
+        color = h.least_popular_color()
+        if color is not None:
+            color = int(color)
+        inventory['color'] = int(color)
+    else:
+        raise Exception(f"Unknown manipulation: {s}")
+    return (current_image, inventory)
 
 def apply_manipulations_to_task(task: Task, manipulation_list: list) -> Task:
-    current_task = task.clone()
+    buffer_image_list = []
     for pair_index in range(task.count()):
         input_image = task.input_images[pair_index]
-        predicted_output_image = apply_manipulations_to_image(input_image, manipulation_list)
-        current_task.output_images[pair_index] = predicted_output_image
-        if pair_index >= task.count_examples:
-            continue
+        buffer_image_list.append(input_image.copy())
+
+    inventory_dict_list = []
+    for pair_index in range(task.count()):
+        inventory_dict_list.append({})
+            
+    for manipulation in manipulation_list:
+        for pair_index in range(task.count()):
+            new_output_image, new_inventory_dict = apply_manipulation_to_image(
+                buffer_image_list[pair_index], 
+                inventory_dict_list[pair_index], 
+                manipulation
+            )
+            buffer_image_list[pair_index] = new_output_image
+            inventory_dict_list[pair_index] = new_inventory_dict
+
+    current_task = task.clone()
+    for pair_index in range(task.count()):
+        new_output_image = buffer_image_list[pair_index]
+        current_task.output_images[pair_index] = new_output_image
+
+    # IDEA: the inventory colors, measure how close they are to the missing colors of the output images.
+    for pair_index in range(task.count_examples):
         output_image = task.output_images[pair_index]
-        image_similarity = ImageSimilarity.create_with_images(output_image, predicted_output_image)
+        new_output_image = current_task.output_images[pair_index]
+        image_similarity = ImageSimilarity.create_with_images(output_image, new_output_image)
         score = image_similarity.jaccard_index()
         unsatisfied_features = image_similarity.get_unsatisfied_features()
         issues = []
@@ -73,7 +105,8 @@ def apply_manipulations_to_task(task: Task, manipulation_list: list) -> Task:
         if Feature(FeatureType.SAME_HEIGHT) in unsatisfied_features:
             issues.append('height')
         issue_str = ','.join(issues)
-        print(f"pair: {pair_index} score: {score} issues: {issue_str}")
+        inventory = inventory_dict_list[pair_index]
+        print(f"pair: {pair_index} score: {score} issues: {issue_str} inventory: {inventory}")
     return current_task
 
 def print_features(task: Task):
@@ -82,6 +115,7 @@ def print_features(task: Task):
     print(f"task_similarity pair features: {task_similarity.example_pair_feature_set_intersection}")
 
 available_commands = """
+Commands:
 q: quit
 s: show current task
 so: show original task
@@ -89,6 +123,7 @@ u: undo
 pf: print features of current task
 pfo: print features of original task
 
+Manipulations:
 cw: rotate clockwise
 ccw: rotate counter clockwise
 180: rotate 180
@@ -108,6 +143,8 @@ y2: scale y-axis by 2
 y3: scale y-axis by 3
 y4: scale y-axis by 4
 y5: scale y-axis by 5
+mpc: take most popular color from input image and save in inventory
+lpc: take least popular color from input image and save in inventory
 """
 
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/009d5c81.json'
@@ -119,7 +156,7 @@ manipulation_list = []
 
 available_manipulations = [
     'cw', 'ccw', '180', 'fx', 'fy', 'fa', 'fb', 'mu', 'md', 'ml', 'mr',
-    'x2', 'x3', 'x4', 'x5', 'y2', 'y3', 'y4', 'y5'
+    'x2', 'x3', 'x4', 'x5', 'y2', 'y3', 'y4', 'y5', 'mpc', 'lpc'
 ]
 
 current_task = apply_manipulations_to_task(original_task, manipulation_list)
