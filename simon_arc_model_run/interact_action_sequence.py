@@ -329,9 +329,6 @@ manipulation_list_9f27f097 = [
     'paste' 
 ]
 
-manipulation_list = []
-manipulation_list = manipulation_list_9f27f097
-
 available_manipulations = [
     'cw', 'ccw', '180', 'fx', 'fy', 'fa', 'fb', 'mu', 'md', 'ml', 'mr',
     'x2', 'x3', 'x4', 'x5', 'y2', 'y3', 'y4', 'y5', 'xy2', 'xy3', 'xy4', 'xy5',
@@ -347,7 +344,19 @@ available_manipulations = [
     'useimagea', 'useimageb',
 ]
 
-current_task = apply_manipulations_to_task(original_task, manipulation_list)
+manipulation_list = []
+replay_manipulation_list = []
+replay_manipulation_list = manipulation_list_9f27f097
+
+current_task = original_task.clone()
+if len(replay_manipulation_list) > 0:
+    current_task.show()
+for manipulation in replay_manipulation_list:
+    print(f"Applying manipulation: {manipulation}")
+    manipulation_list.append(manipulation)
+    current_task = apply_manipulations_to_task(original_task, manipulation_list)
+    current_task.show()
+
 for i in range(100):
     print(f"manipulation_list: {manipulation_list}")
     value = input("Please enter command:\n")
