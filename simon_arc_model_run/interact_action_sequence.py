@@ -5,8 +5,10 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
 from simon_arc_lab.task import Task
+from simon_arc_lab.image_scale import *
 from simon_arc_lab.image_util import *
-from simon_arc_lab.image_similarity import ImageSimilarity
+from simon_arc_lab.image_similarity import ImageSimilarity, Feature, FeatureType
+from simon_arc_lab.task_similarity import TaskSimilarity
 
 def apply_manipulations_to_image(image: np.array, manipulation_list: list) -> np.array:
     current_image = image.copy()
@@ -33,6 +35,22 @@ def apply_manipulations_to_image(image: np.array, manipulation_list: list) -> np
             current_image = image_translate_wrap(current_image, -1, 0)
         elif s == 'mr':
             current_image = image_translate_wrap(current_image, 1, 0)
+        elif s == 'x2':
+            _, current_image = image_scale(current_image, 'up', 2, 'up', 1)
+        elif s == 'x3':
+            _, current_image = image_scale(current_image, 'up', 3, 'up', 1)
+        elif s == 'x4':
+            _, current_image = image_scale(current_image, 'up', 4, 'up', 1)
+        elif s == 'x5':
+            _, current_image = image_scale(current_image, 'up', 5, 'up', 1)
+        elif s == 'y2':
+            _, current_image = image_scale(current_image, 'up', 1, 'up', 2)
+        elif s == 'y3':
+            _, current_image = image_scale(current_image, 'up', 1, 'up', 3)
+        elif s == 'y4':
+            _, current_image = image_scale(current_image, 'up', 1, 'up', 4)
+        elif s == 'y5':
+            _, current_image = image_scale(current_image, 'up', 1, 'up', 5)
         else:
             raise Exception(f"Unknown manipulation: {s}")
     return current_image
@@ -48,15 +66,28 @@ def apply_manipulations_to_task(task: Task, manipulation_list: list) -> Task:
         output_image = task.output_images[pair_index]
         image_similarity = ImageSimilarity.create_with_images(output_image, predicted_output_image)
         score = image_similarity.jaccard_index()
-        print(f"pair: {pair_index} score: {score}")
+        unsatisfied_features = image_similarity.get_unsatisfied_features()
+        issues = []
+        if Feature(FeatureType.SAME_WIDTH) in unsatisfied_features:
+            issues.append('width')
+        if Feature(FeatureType.SAME_HEIGHT) in unsatisfied_features:
+            issues.append('height')
+        issue_str = ','.join(issues)
+        print(f"pair: {pair_index} score: {score} issues: {issue_str}")
     return current_task
 
+def print_features(task: Task):
+    task_similarity = TaskSimilarity.create_with_task(task)
+    print(f"task_similarity summary: {task_similarity.summary()}")
+    print(f"task_similarity pair features: {task_similarity.example_pair_feature_set_intersection}")
 
 available_commands = """
 q: quit
 s: show current task
 so: show original task
 u: undo
+pf: print features of current task
+pfo: print features of original task
 
 cw: rotate clockwise
 ccw: rotate counter clockwise
@@ -69,17 +100,29 @@ mu: move up
 md: move down
 ml: move left
 mr: move right
+x2: scale x-axis by 2
+x3: scale x-axis by 3
+x4: scale x-axis by 4
+x5: scale x-axis by 5
+y2: scale y-axis by 2
+y3: scale y-axis by 3
+y4: scale y-axis by 4
+y5: scale y-axis by 5
 """
 
-task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/009d5c81.json'
-task = Task.load_arcagi1(task_path)
-# task.show()
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/009d5c81.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/00dbd492.json'
+task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/0692e18c.json'
+original_task = Task.load_arcagi1(task_path)
 
-manipulation_list = ['cw']
+manipulation_list = []
 
-available_manipulations = ['cw', 'ccw', '180', 'fx', 'fy', 'fa', 'fb', 'mu', 'md', 'ml', 'mr']
+available_manipulations = [
+    'cw', 'ccw', '180', 'fx', 'fy', 'fa', 'fb', 'mu', 'md', 'ml', 'mr',
+    'x2', 'x3', 'x4', 'x5', 'y2', 'y3', 'y4', 'y5'
+]
 
-current_task = apply_manipulations_to_task(task, manipulation_list)
+current_task = apply_manipulations_to_task(original_task, manipulation_list)
 for i in range(100):
     print(f"manipulation_list: {manipulation_list}")
     value = input("Please enter command:\n")
@@ -89,15 +132,23 @@ for i in range(100):
 
     if value in available_manipulations:
         manipulation_list.append(value)
-        current_task = apply_manipulations_to_task(task, manipulation_list)
+        current_task = apply_manipulations_to_task(original_task, manipulation_list)
         continue
 
     if value == 'so':
-        task.show()
+        original_task.show()
         continue
 
     if value == 's':
         current_task.show()
+        continue
+
+    if value == 'pf':
+        print_features(current_task)
+        continue
+
+    if value == 'pfo':
+        print_features(original_task)
         continue
 
     if value == 'u':
