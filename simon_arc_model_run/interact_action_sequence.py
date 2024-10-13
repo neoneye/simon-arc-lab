@@ -323,6 +323,9 @@ saveimage: save current_image in the inventory current_image
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/9f27f097.json'
 task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/12997ef3.json'
 original_task = Task.load_arcagi1(task_path)
+task_id = os.path.splitext(os.path.basename(task_path))[0]
+original_task.metadata_task_id = task_id
+
 
 manipulation_list_9f27f097 = [
     'setimagea',
@@ -373,6 +376,7 @@ for manipulation in replay_manipulation_list:
     print(f"Applying manipulation: {manipulation}")
     manipulation_list.append(manipulation)
     current_task = apply_manipulations_to_task(original_task, manipulation_list)
+    current_task.metadata_task_id = f'{task_id} {manipulation}'
     current_task.show()
 
 for i in range(100):
@@ -384,6 +388,7 @@ for i in range(100):
 
     if value in available_manipulations:
         manipulation_list.append(value)
+        current_task.metadata_task_id = f'{task_id} {manipulation}'
         current_task = apply_manipulations_to_task(original_task, manipulation_list)
         continue
 
