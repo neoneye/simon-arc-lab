@@ -235,7 +235,25 @@ def apply_action_to_image(image: np.array, inventory: dict, s: list) -> Tuple[np
     elif s == 'maskinvert':
         current_image = np.where(current_image != 0, 0, 1)
     elif s == 'all8':
-        current_objects = ConnectedComponent.find_objects(PixelConnectivity.ALL8, current_image)
+        ignore_mask = np.zeros_like(current_image)
+        current_objects = ConnectedComponent.find_objects_with_ignore_mask_inner(PixelConnectivity.ALL8, current_image, ignore_mask)
+        inventory['current_objects'] = current_objects
+    elif s == 'firstobject':
+        current_objects = inventory.get('current_objects', None)
+        if current_objects is None:
+            raise Exception("No current_objects in inventory")
+        if len(current_objects) == 0:
+            raise Exception("No objects found")
+        object = current_objects[0]
+        current_image = object.mask.copy()
+    elif s == 'deleteobjectswithcolor':
+        current_color = inventory.get('current_color', None)
+        if current_color is None:
+            raise Exception("No current_color in inventory")
+        current_objects = inventory.get('current_objects', None)
+        if current_objects is None:
+            raise Exception("No current_objects in inventory")
+        current_objects = [object for object in current_objects if object.color != current_color]
         inventory['current_objects'] = current_objects
     else:
         raise Exception(f"Unknown action: {s}")
@@ -360,13 +378,16 @@ collapse: collapse a color
 tile: create a repeated pattern using image 'a' as the base tile and image 'b' as the tile layout
 maskinvert: convert non-zero pixels to zero and zero pixels to one.
 all8: enumerate connected components with PixelConnectivity.ALL8
+firstobject: set current_image to the first object found in the inventory current_objects
+deleteobjectswithcolor: delete objects with the current_color from the inventory current_objects
 """
 
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/009d5c81.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/00dbd492.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/0692e18c.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/9f27f097.json'
-task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/12997ef3.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/12997ef3.json'
+task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/22168020.json'
 original_task = Task.load_arcagi1(task_path)
 task_id = os.path.splitext(os.path.basename(task_path))[0]
 original_task.metadata_task_id = task_id
@@ -398,6 +419,11 @@ action_list_12997ef3 = [
     'tile',
 ]
 
+action_list_22168020 = [
+    'all8', 'color0', 'deleteobjectswithcolor', 
+    'firstobject',
+]
+
 available_actions = [
     'cw', 'ccw', '180', 'fx', 'fy', 'fa', 'fb', 'mu', 'md', 'ml', 'mr',
     'x2', 'x3', 'x4', 'x5', 'y2', 'y3', 'y4', 'y5', 'xy2', 'xy3', 'xy4', 'xy5',
@@ -417,12 +443,15 @@ available_actions = [
     'tile',
     'maskinvert',
     'all8',
+    'firstobject',
+    'deleteobjectswithcolor',
 ]
 
 action_list = []
 replay_action_list = []
 # replay_action_list = action_list_9f27f097
-replay_action_list = action_list_12997ef3
+# replay_action_list = action_list_12997ef3
+replay_action_list = action_list_22168020
 
 current_task = apply_actions_to_task(original_task, [])
 # if len(replay_action_list) > 0:
