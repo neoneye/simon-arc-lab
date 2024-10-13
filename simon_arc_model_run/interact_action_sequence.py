@@ -9,6 +9,8 @@ from simon_arc_lab.image_scale import *
 from simon_arc_lab.image_util import *
 from simon_arc_lab.image_rect import *
 from simon_arc_lab.image_gravity_move import *
+from simon_arc_lab.pixel_connectivity import *
+from simon_arc_lab.connected_component import *
 from simon_arc_lab.image_tile_template import image_tile_template
 from simon_arc_lab.find_bounding_box import *
 from simon_arc_lab.histogram import Histogram
@@ -232,6 +234,9 @@ def apply_action_to_image(image: np.array, inventory: dict, s: list) -> Tuple[np
         current_image = image_tile_template(imagea, current_image, callback)
     elif s == 'maskinvert':
         current_image = np.where(current_image != 0, 0, 1)
+    elif s == 'all8':
+        current_objects = ConnectedComponent.find_objects(PixelConnectivity.ALL8, current_image)
+        inventory['current_objects'] = current_objects
     else:
         raise Exception(f"Unknown action: {s}")
     return (current_image, inventory)
@@ -354,6 +359,7 @@ saveimage: save current_image in the inventory current_image
 collapse: collapse a color
 tile: create a repeated pattern using image 'a' as the base tile and image 'b' as the tile layout
 maskinvert: convert non-zero pixels to zero and zero pixels to one.
+all8: enumerate connected components with PixelConnectivity.ALL8
 """
 
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/009d5c81.json'
@@ -410,6 +416,7 @@ available_actions = [
     'collapse',
     'tile',
     'maskinvert',
+    'all8',
 ]
 
 action_list = []
