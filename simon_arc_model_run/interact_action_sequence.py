@@ -9,6 +9,7 @@ from simon_arc_lab.image_scale import *
 from simon_arc_lab.image_util import *
 from simon_arc_lab.image_rect import *
 from simon_arc_lab.image_gravity_move import *
+from simon_arc_lab.image_tile_template import image_tile_template
 from simon_arc_lab.find_bounding_box import *
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_similarity import ImageSimilarity, Feature, FeatureType
@@ -179,11 +180,13 @@ def apply_action_to_image(image: np.array, inventory: dict, s: list) -> Tuple[np
             raise Exception("Image size does not match the rectangle size")
         current_image[(rect.y):(rect.y + rect.height), (rect.x):(rect.x + rect.width)] = image
     elif s == 'setimagea':
-        image = current_image.copy()
-        inventory['imagea'] = image
+        inventory['imagea'] = current_image.copy()
     elif s == 'setimageb':
-        image = current_image.copy()
-        inventory['imageb'] = image
+        inventory['imageb'] = current_image.copy()
+    elif s == 'setimagec':
+        inventory['imagec'] = current_image.copy()
+    elif s == 'setimaged':
+        inventory['imaged'] = current_image.copy()
     elif s == 'useimagea':
         image = inventory.get('imagea', None)
         if image is None:
@@ -193,6 +196,16 @@ def apply_action_to_image(image: np.array, inventory: dict, s: list) -> Tuple[np
         image = inventory.get('imageb', None)
         if image is None:
             raise Exception("No imageb in inventory")
+        inventory['current_image'] = image.copy()
+    elif s == 'useimagec':
+        image = inventory.get('imagec', None)
+        if image is None:
+            raise Exception("No imagec in inventory")
+        inventory['current_image'] = image.copy()
+    elif s == 'useimaged':
+        image = inventory.get('imaged', None)
+        if image is None:
+            raise Exception("No imaged in inventory")
         inventory['current_image'] = image.copy()
     elif s == 'loadimage':
         image = inventory.get('current_image', None)
@@ -206,6 +219,11 @@ def apply_action_to_image(image: np.array, inventory: dict, s: list) -> Tuple[np
         if current_color is None:
             raise Exception("No current_color in inventory")
         current_image = image_collapse_color(current_image, current_color)
+    elif s == 'tile':
+        imagea = inventory.get('imagea', None)
+        if imagea is None:
+            raise Exception("No imagea in inventory")
+        current_image = image_tile_template(imagea, current_image)
     else:
         raise Exception(f"Unknown action: {s}")
     return (current_image, inventory)
@@ -317,11 +335,16 @@ copyrect: copy pixels from current_rectangle to inventory named 'current_image'
 paste: paste pixels from inventory named 'image' inside the area specified by 'current_rectangle'
 setimagea: set image 'a' to current_image
 setimageb: set image 'b' to current_image
+setimagec: set image 'c' to current_image
+setimaged: set image 'd' to current_image
 useimagea: set current_image to image 'a'
 useimageb: set current_image to image 'b'
+useimagec: set current_image to image 'c'
+useimaged: set current_image to image 'd'
 loadimage: load current_image from the inventory current_image
 saveimage: save current_image in the inventory current_image
 collapse: collapse a color
+tile: create a repeated pattern using image 'a' as the base tile and image 'b' as the tile layout
 """
 
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/009d5c81.json'
@@ -350,8 +373,14 @@ action_list_9f27f097 = [
 ]
 
 action_list_12997ef3 = [
-    'setimagea', 'color1', 'bb2', 'copyrect', 'loadimage', 'useimagea', 
-    'loadimage', 'color0', 'drawrect', 'color0', 'bb1', 'crop', 'collapse',
+    'setimaged', 
+    'color1', 'bb2', 'crop',
+    'setimagea', 
+    'useimaged', 
+    'loadimage', 
+    'color0', 'drawrect', 'color0', 'bb1', 'crop', 'collapse',
+    'setimageb',
+    'tile',
 ]
 
 available_actions = [
@@ -365,11 +394,12 @@ available_actions = [
     'crop',
     'copyrect',
     'paste',
-    'setimagea', 'setimageb',
-    'useimagea', 'useimageb',
+    'setimagea', 'setimageb', 'setimagec', 'setimaged',
+    'useimagea', 'useimageb', 'useimagec', 'useimaged',
     'loadimage',
     'saveimage',
     'collapse',
+    'tile',
 ]
 
 action_list = []
@@ -378,14 +408,16 @@ replay_action_list = []
 replay_action_list = action_list_12997ef3
 
 current_task = apply_actions_to_task(original_task, [])
-if len(replay_action_list) > 0:
-    current_task.show()
+# if len(replay_action_list) > 0:
+#     current_task.show()
 for action_index, action in enumerate(replay_action_list):
     print(f"Applying action: {action}")
     action_list.append(action)
     current_task = apply_actions_to_task(original_task, action_list)
     current_task.metadata_task_id = f'{task_id} {action}, {action_index+1} of {len(replay_action_list)}'
-    current_task.show()
+    # current_task.show()
+
+current_task.show()
 
 for i in range(100):
     print(f"action_list: {action_list}")
