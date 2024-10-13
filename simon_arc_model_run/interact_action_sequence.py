@@ -128,6 +128,26 @@ def apply_manipulation_to_image(image: np.array, inventory: dict, s: list) -> Tu
         if rect is None:
             raise Exception("No current_rect in inventory")
         inventory['rectd'] = rect
+    elif s == 'userecta':
+        rect = inventory.get('recta', None)
+        if rect is None:
+            raise Exception("No recta in inventory")
+        inventory['current_rect'] = rect
+    elif s == 'userectb':
+        rect = inventory.get('rectb', None)
+        if rect is None:
+            raise Exception("No rectb in inventory")
+        inventory['current_rect'] = rect
+    elif s == 'userectc':
+        rect = inventory.get('rectc', None)
+        if rect is None:
+            raise Exception("No rectc in inventory")
+        inventory['current_rect'] = rect
+    elif s == 'userectd':
+        rect = inventory.get('rectd', None)
+        if rect is None:
+            raise Exception("No rectd in inventory")
+        inventory['current_rect'] = rect
     elif s == 'drawrect':
         rect = inventory.get('current_rect', None)
         if rect is None:
@@ -135,7 +155,23 @@ def apply_manipulation_to_image(image: np.array, inventory: dict, s: list) -> Tu
         current_color = inventory.get('current_color', None)
         if current_color is None:
             raise Exception("No current_color in inventory")
-        current_image = image_rect(current_image, inventory['recta'], current_color)
+        current_image = image_rect(current_image, rect, current_color)
+    elif s == 'copyrect':
+        rect = inventory.get('current_rect', None)
+        if rect is None:
+            raise Exception("No current_rect in inventory")
+        image = current_image[(rect.y):(rect.y + rect.height), (rect.x):(rect.x + rect.width)]
+        inventory['image'] = image
+    elif s == 'paste':
+        rect = inventory.get('current_rect', None)
+        if rect is None:
+            raise Exception("No current_rect in inventory")
+        image = inventory.get('image', None)
+        if image is None:
+            raise Exception("No image in inventory")
+        if image.shape != (rect.height, rect.width):
+            raise Exception("Image size does not match the rectangle size")
+        current_image[(rect.y):(rect.y + rect.height), (rect.x):(rect.x + rect.width)] = image
     else:
         raise Exception(f"Unknown manipulation: {s}")
     return (current_image, inventory)
@@ -238,6 +274,12 @@ setrecta: set rectangle 'a' to current_rect
 setrectb: set rectangle 'b' to current_rect
 setrectc: set rectangle 'c' to current_rect
 setrectd: set rectangle 'd' to current_rect
+userecta: set current_rect to rectangle 'a'
+userectb: set current_rect to rectangle 'b'
+userectc: set current_rect to rectangle 'c'
+userectd: set current_rect to rectangle 'd'
+copyrect: copy pixels from current_rectangle to inventory named 'image'
+paste: paste pixels from inventory named 'image' inside the area specified by 'current_rectangle'
 """
 
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/009d5c81.json'
@@ -247,6 +289,7 @@ task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluati
 original_task = Task.load_arcagi1(task_path)
 
 manipulation_list = []
+manipulation_list = ['color0', 'bb2', 'setrecta', 'mpc', 'drawrect', 'mpc', 'bb1', 'copyrect', 'userecta', 'paste']
 
 available_manipulations = [
     'cw', 'ccw', '180', 'fx', 'fy', 'fa', 'fb', 'mu', 'md', 'ml', 'mr',
@@ -254,7 +297,10 @@ available_manipulations = [
     'mpc', 'lpc', 'bb1', 'bb2',
     'color0', 'color1', 'color2', 'color3', 'color4', 'color5', 'color6', 'color7', 'color8', 'color9',
     'setrecta', 'setrectb', 'setrectc', 'setrectd',
-    'drawrect'
+    'userecta', 'userectb', 'userectc', 'userectd',
+    'drawrect',
+    'copyrect',
+    'paste',
 ]
 
 current_task = apply_manipulations_to_task(original_task, manipulation_list)
