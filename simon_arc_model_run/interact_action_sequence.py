@@ -311,7 +311,8 @@ updateimage: assign current_image with inventory current_image
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/009d5c81.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/00dbd492.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/0692e18c.json'
-task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/9f27f097.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/9f27f097.json'
+task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/12997ef3.json'
 original_task = Task.load_arcagi1(task_path)
 
 manipulation_list_9f27f097 = [
@@ -327,6 +328,10 @@ manipulation_list_9f27f097 = [
     'userecta', 
     'useimageb',
     'paste' 
+]
+
+manipulation_list_12997ef3 = [
+    'color1', 'bb2', 'copyrect'
 ]
 
 available_manipulations = [
@@ -346,9 +351,10 @@ available_manipulations = [
 
 manipulation_list = []
 replay_manipulation_list = []
-replay_manipulation_list = manipulation_list_9f27f097
+# replay_manipulation_list = manipulation_list_9f27f097
+replay_manipulation_list = manipulation_list_12997ef3
 
-current_task = original_task.clone()
+current_task = apply_manipulations_to_task(original_task, [])
 if len(replay_manipulation_list) > 0:
     current_task.show()
 for manipulation in replay_manipulation_list:
