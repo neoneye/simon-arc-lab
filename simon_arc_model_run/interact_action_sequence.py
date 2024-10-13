@@ -224,6 +224,8 @@ def apply_action_to_image(image: np.array, inventory: dict, s: list) -> Tuple[np
         if imagea is None:
             raise Exception("No imagea in inventory")
         current_image = image_tile_template(imagea, current_image)
+    elif s == 'maskinvert':
+        current_image = np.where(current_image != 0, 0, 1)
     else:
         raise Exception(f"Unknown action: {s}")
     return (current_image, inventory)
@@ -345,6 +347,7 @@ loadimage: load current_image from the inventory current_image
 saveimage: save current_image in the inventory current_image
 collapse: collapse a color
 tile: create a repeated pattern using image 'a' as the base tile and image 'b' as the tile layout
+maskinvert: convert non-zero pixels to zero and zero pixels to one.
 """
 
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/009d5c81.json'
@@ -374,7 +377,7 @@ action_list_9f27f097 = [
 
 action_list_12997ef3 = [
     'setimaged', 
-    'color1', 'bb2', 'crop',
+    'color1', 'bb2', 'crop', 'maskinvert',
     'setimagea', 
     'useimaged', 
     'loadimage', 
@@ -400,6 +403,7 @@ available_actions = [
     'saveimage',
     'collapse',
     'tile',
+    'maskinvert',
 ]
 
 action_list = []
