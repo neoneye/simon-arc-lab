@@ -13,7 +13,7 @@ from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_similarity import ImageSimilarity, Feature, FeatureType
 from simon_arc_lab.task_similarity import TaskSimilarity
 
-def apply_manipulation_to_image(image: np.array, inventory: dict, s: list) -> Tuple[np.array, dict]:
+def apply_action_to_image(image: np.array, inventory: dict, s: list) -> Tuple[np.array, dict]:
     current_image = image.copy()
     if s == 'cw':
         current_image = image_rotate_cw(current_image)
@@ -201,10 +201,10 @@ def apply_manipulation_to_image(image: np.array, inventory: dict, s: list) -> Tu
     elif s == 'saveimage':
         inventory['current_image'] = current_image.copy()
     else:
-        raise Exception(f"Unknown manipulation: {s}")
+        raise Exception(f"Unknown action: {s}")
     return (current_image, inventory)
 
-def apply_manipulations_to_task(task: Task, manipulation_list: list) -> Task:
+def apply_actions_to_task(task: Task, action_list: list) -> Task:
     buffer_image_list = []
     for pair_index in range(task.count()):
         input_image = task.input_images[pair_index]
@@ -214,12 +214,12 @@ def apply_manipulations_to_task(task: Task, manipulation_list: list) -> Task:
     for pair_index in range(task.count()):
         inventory_dict_list.append({})
             
-    for manipulation in manipulation_list:
+    for action in action_list:
         for pair_index in range(task.count()):
-            new_output_image, new_inventory_dict = apply_manipulation_to_image(
+            new_output_image, new_inventory_dict = apply_action_to_image(
                 buffer_image_list[pair_index], 
                 inventory_dict_list[pair_index], 
-                manipulation
+                action
             )
             buffer_image_list[pair_index] = new_output_image
             inventory_dict_list[pair_index] = new_inventory_dict
@@ -260,7 +260,7 @@ u: undo
 pf: print features of current task
 pfo: print features of original task
 
-Manipulations:
+Actions:
 cw: rotate clockwise
 ccw: rotate counter clockwise
 180: rotate 180
@@ -327,7 +327,7 @@ task_id = os.path.splitext(os.path.basename(task_path))[0]
 original_task.metadata_task_id = task_id
 
 
-manipulation_list_9f27f097 = [
+action_list_9f27f097 = [
     'setimagea',
     'color0', 'bb2', 'setrecta', 
     'mpc', 'drawrect', 
@@ -342,12 +342,12 @@ manipulation_list_9f27f097 = [
     'paste' 
 ]
 
-manipulation_list_12997ef3 = [
+action_list_12997ef3 = [
     'setimagea', 'color1', 'bb2', 'copyrect', 'loadimage', 'useimagea', 
     'loadimage', 'color0', 'drawrect', 'color0', 'bb1', 'crop',
 ]
 
-available_manipulations = [
+available_actions = [
     'cw', 'ccw', '180', 'fx', 'fy', 'fa', 'fb', 'mu', 'md', 'ml', 'mr',
     'x2', 'x3', 'x4', 'x5', 'y2', 'y3', 'y4', 'y5', 'xy2', 'xy3', 'xy4', 'xy5',
     'mpc', 'lpc', 'bb1', 'bb2',
@@ -364,32 +364,32 @@ available_manipulations = [
     'saveimage',
 ]
 
-manipulation_list = []
-replay_manipulation_list = []
-# replay_manipulation_list = manipulation_list_9f27f097
-replay_manipulation_list = manipulation_list_12997ef3
+action_list = []
+replay_action_list = []
+# replay_action_list = action_list_9f27f097
+replay_action_list = action_list_12997ef3
 
-current_task = apply_manipulations_to_task(original_task, [])
-if len(replay_manipulation_list) > 0:
+current_task = apply_actions_to_task(original_task, [])
+if len(replay_action_list) > 0:
     current_task.show()
-for manipulation in replay_manipulation_list:
-    print(f"Applying manipulation: {manipulation}")
-    manipulation_list.append(manipulation)
-    current_task = apply_manipulations_to_task(original_task, manipulation_list)
-    current_task.metadata_task_id = f'{task_id} {manipulation}'
+for action_index, action in enumerate(replay_action_list):
+    print(f"Applying action: {action}")
+    action_list.append(action)
+    current_task = apply_actions_to_task(original_task, action_list)
+    current_task.metadata_task_id = f'{task_id} {action}, {action_index+1} of {len(replay_action_list)}'
     current_task.show()
 
 for i in range(100):
-    print(f"manipulation_list: {manipulation_list}")
+    print(f"action_list: {action_list}")
     value = input("Please enter command:\n")
     if len(value) == 0:
         print(available_commands)
         continue
 
-    if value in available_manipulations:
-        manipulation_list.append(value)
-        current_task.metadata_task_id = f'{task_id} {manipulation}'
-        current_task = apply_manipulations_to_task(original_task, manipulation_list)
+    if value in available_actions:
+        action_list.append(value)
+        current_task.metadata_task_id = f'{task_id} {action}'
+        current_task = apply_actions_to_task(original_task, action_list)
         continue
 
     if value == 'so':
@@ -409,7 +409,7 @@ for i in range(100):
         continue
 
     if value == 'u':
-        manipulation_list.pop()
+        action_list.pop()
         continue
 
     if value == 'q':
