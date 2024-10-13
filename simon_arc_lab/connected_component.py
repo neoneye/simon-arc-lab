@@ -83,6 +83,8 @@ class ConnectedComponent:
         
         Each object is a mask, where it's 1 the object is present, where it's 0 there is no object.
         """
+        if not isinstance(connectivity, PixelConnectivity):
+            raise ValueError("connectivity must be a PixelConnectivity enum")
         ignore_mask = np.zeros_like(image)
         return ConnectedComponent.find_objects_with_ignore_mask(connectivity, image, ignore_mask)
 
@@ -93,5 +95,7 @@ class ConnectedComponent:
         
         Each object is a mask, where it's 1 the object is present, where it's 0 there is no object.
         """
+        if not isinstance(connectivity, PixelConnectivity):
+            raise ValueError("connectivity must be a PixelConnectivity enum")
         items = ConnectedComponent.find_objects_with_ignore_mask_inner(connectivity, image, ignore_mask)
         return [item.mask for item in items]
