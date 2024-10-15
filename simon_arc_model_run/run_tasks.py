@@ -14,7 +14,7 @@ from simon_arc_model.work_manager_simple import WorkManagerSimple
 CONTEXT_SIZE_LIMIT = (512, 500)
 # CONTEXT_SIZE_LIMIT = (1024, 1000)
 
-model_iteration = 663
+model_iteration = 682
 model_name = f'simon-arc-lab-model{model_iteration}'
 model_directory = f'/Users/neoneye/nobackup/git/{model_name}'
 
