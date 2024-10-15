@@ -22,7 +22,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn import tree
 import matplotlib.pyplot as plt
 
-task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/22168020.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/22168020.json'
+task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/692cd3b6.json'
 task = Task.load_arcagi1(task_path)
 task_id = os.path.splitext(os.path.basename(task_path))[0]
 task.metadata_task_id = task_id
@@ -31,11 +32,42 @@ task.metadata_task_id = task_id
 
 def xs_for_input_image(image: int, pair_index: int):
     height, width = image.shape
-    values = []
+
+    ignore_mask = np.zeros_like(image)
+    components = ConnectedComponent.find_objects_with_ignore_mask_inner(PixelConnectivity.ALL8, image, ignore_mask)
+
+    # Image with object ids
+    object_ids = np.zeros((height, width), dtype=np.uint32)
+    object_id_start = (pair_index + 1) * 1000
+    for component_index, component in enumerate(components):
+        object_id = object_id_start + component_index
+        for y in range(height):
+            for x in range(width):
+                mask_value = component.mask[y, x]
+                if mask_value == 1:
+                    object_ids[y, x] = object_id
+
+    # Image with object mass
+    object_masses = np.zeros((height, width), dtype=np.uint32)
+    for component_index, component in enumerate(components):
+        for y in range(height):
+            for x in range(width):
+                mask_value = component.mask[y, x]
+                if mask_value == 1:
+                    object_masses[y, x] = component.mass
+
+    values_list = []
     for y in range(height):
         for x in range(width):
-            values.append([pair_index, image[y, x]])
-    return values
+            values = []
+            values.append(pair_index)
+            values.append(image[y, x])
+
+            values.append(object_ids[y, x])
+            values.append(object_masses[y, x])
+
+            values_list.append(values)
+    return values_list
 
 def ys_for_output_image(image: int):
     height, width = image.shape
