@@ -5,19 +5,7 @@ from simon_arc_lab.image_distort import *
 from simon_arc_lab.image_noise import *
 from simon_arc_lab.rle.deserialize import *
 from simon_arc_model.model import Model, ModelProcessMode
-
-class PredictOutputBase:
-    def prompt(self) -> str:
-        raise NotImplementedError()
-
-    def execute(self, context: dict):
-        raise NotImplementedError()
-
-    def predicted_image(self) -> np.array:
-        raise NotImplementedError()
-    
-    def name(self) -> str:
-        raise NotImplementedError()
+from .predict_output_base import PredictOutputBase
 
 class PredictOutputV1(PredictOutputBase):
     def __init__(self, task: Task, test_index: int, task_mutator_class: type, previous_predicted_image: np.array = None):
