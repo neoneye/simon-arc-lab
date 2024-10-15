@@ -108,6 +108,9 @@ class WorkManager:
                         print(f'Error cannot construct prompt for {task.metadata_task_id} test={test_index}. Error: {e}')
         return work_items
 
+    def truncate_work_items(self, max_count: int):
+        self.work_items = self.work_items[:max_count]
+
     def discard_items_with_too_long_prompts(self, max_prompt_length: int):
         """
         Ignore those where the prompt longer than what the model can handle.
