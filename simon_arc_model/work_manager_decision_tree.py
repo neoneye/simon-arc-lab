@@ -62,7 +62,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
             os.makedirs(save_dir, exist_ok=True)
 
         # noise_levels = [95, 90, 85, 80, 75, 70, 65]
-        noise_levels = [95, 90]
+        # noise_levels = [95, 90]
+        noise_levels = [95]
         number_of_refinements = len(noise_levels)
 
         correct_count = 0
