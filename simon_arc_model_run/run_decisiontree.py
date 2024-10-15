@@ -12,6 +12,7 @@ from simon_arc_lab.image_create_random_advanced import image_create_random_advan
 from simon_arc_lab.image_shape3x3_opposite import ImageShape3x3Opposite
 from simon_arc_lab.image_shape3x3_center import ImageShape3x3Center
 from simon_arc_lab.image_distort import image_distort
+from simon_arc_lab.image_raytrace_probecolor import *
 from simon_arc_lab.pixel_connectivity import *
 from simon_arc_lab.connected_component import *
 from simon_arc_lab.find_bounding_box import *
@@ -73,6 +74,21 @@ def xs_for_input_image(image: int, pair_index: int, is_earlier_prediction: bool)
 
     outside_color = 10
 
+    ray_directions = [
+        ImageRaytraceProbeColorDirection.TOP,
+        ImageRaytraceProbeColorDirection.BOTTOM,
+        ImageRaytraceProbeColorDirection.LEFT,
+        ImageRaytraceProbeColorDirection.RIGHT,
+        ImageRaytraceProbeColorDirection.TOPLEFT,
+        ImageRaytraceProbeColorDirection.TOPRIGHT,
+        ImageRaytraceProbeColorDirection.BOTTOMLEFT,
+        ImageRaytraceProbeColorDirection.BOTTOMRIGHT,
+    ]
+    image_ray_list = []
+    for direction in ray_directions:
+        image_ray = image_raytrace_probecolor_direction(image, outside_color, direction)
+        image_ray_list.append(image_ray)
+
     values_list = []
     for y in range(height):
         for x in range(width):
@@ -106,6 +122,9 @@ def xs_for_input_image(image: int, pair_index: int, is_earlier_prediction: bool)
 
             for i in range(8):
                 values.append((image_shape3x3_center[y, x] >> i) & 1)
+
+            for image_ray in image_ray_list:
+                values.append(image_ray[y, x])
 
             values_list.append(values)
     return values_list
