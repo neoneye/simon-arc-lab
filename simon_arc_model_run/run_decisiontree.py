@@ -10,6 +10,8 @@ from simon_arc_lab.image_util import *
 from simon_arc_lab.image_rect import *
 from simon_arc_lab.image_gravity_move import *
 from simon_arc_lab.image_gravity_draw import *
+from simon_arc_lab.image_shape3x3_opposite import ImageShape3x3Opposite
+from simon_arc_lab.image_shape3x3_center import ImageShape3x3Center
 from simon_arc_lab.pixel_connectivity import *
 from simon_arc_lab.connected_component import *
 from simon_arc_lab.find_bounding_box import *
@@ -23,7 +25,8 @@ from sklearn import tree
 import matplotlib.pyplot as plt
 
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/22168020.json'
-task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/692cd3b6.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/692cd3b6.json'
+task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/9772c176.json'
 task = Task.load_arcagi1(task_path)
 task_id = os.path.splitext(os.path.basename(task_path))[0]
 task.metadata_task_id = task_id
@@ -56,15 +59,39 @@ def xs_for_input_image(image: int, pair_index: int):
                 if mask_value == 1:
                     object_masses[y, x] = component.mass
 
+    image_shape3x3_opposite = ImageShape3x3Opposite.apply(image)
+    image_shape3x3_center = ImageShape3x3Center.apply(image)
+
+    outside_color = 10
+
     values_list = []
     for y in range(height):
         for x in range(width):
             values = []
             values.append(pair_index)
+            # values.append(x)
+            # values.append(y)
             values.append(image[y, x])
+
+            for dy in range(-1, 2):
+                for dx in range(-1, 2):
+                    if dx == 0 and dy == 0:
+                        continue
+                    xx = x + dx
+                    yy = y + dy
+                    if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                        values.append(outside_color)
+                    else:
+                        values.append(image[yy, xx])
 
             values.append(object_ids[y, x])
             values.append(object_masses[y, x])
+
+            for i in range(3):
+                values.append((image_shape3x3_opposite[y, x] >> i) & 1)
+
+            for i in range(8):
+                values.append((image_shape3x3_center[y, x] >> i) & 1)
 
             values_list.append(values)
     return values_list
@@ -89,11 +116,37 @@ for pair_index in range(task.count_examples):
     if input_height != output_height or input_width != output_width:
         raise ValueError('Input and output image must have the same size')
     
-    xs_image = xs_for_input_image(input_image, pair_index)
-    xs.extend(xs_image)
+    for i in range(8):
+        if i == 0:
+            input_image_mutated = input_image.copy()
+            output_image_mutated = output_image.copy()
+        elif i == 1:
+            input_image_mutated = image_rotate_cw(input_image)
+            output_image_mutated = image_rotate_cw(output_image)
+        elif i == 2:
+            input_image_mutated = image_rotate_ccw(input_image)
+            output_image_mutated = image_rotate_ccw(output_image)
+        elif i == 3:
+            input_image_mutated = image_rotate_180(input_image)
+            output_image_mutated = image_rotate_180(output_image)
+        elif i == 4:
+            input_image_mutated = image_flipx(input_image)
+            output_image_mutated = image_flipx(output_image)
+        elif i == 5:
+            input_image_mutated = image_flipy(input_image)
+            output_image_mutated = image_flipy(output_image)
+        elif i == 6:
+            input_image_mutated = image_flip_diagonal_a(input_image)
+            output_image_mutated = image_flip_diagonal_a(output_image)
+        elif i == 7:
+            input_image_mutated = image_flip_diagonal_b(input_image)
+            output_image_mutated = image_flip_diagonal_b(output_image)
 
-    ys_image = ys_for_output_image(output_image)
-    ys.extend(ys_image)
+        xs_image = xs_for_input_image(input_image_mutated, pair_index * 8 + i)
+        xs.extend(xs_image)
+
+        ys_image = ys_for_output_image(output_image_mutated)
+        ys.extend(ys_image)
 
 clf = DecisionTreeClassifier(random_state=42)
 clf.fit(xs, ys)
@@ -121,14 +174,7 @@ for y in range(height):
 
 show_prediction_result(input_image, predicted_image, expected_image, title = task.metadata_task_id)
 
-plt.figure()
-tree.plot_tree(clf, filled=True)
-plt.show()
-
-
-
-
-
-
-
+# plt.figure()
+# tree.plot_tree(clf, filled=True)
+# plt.show()
 
