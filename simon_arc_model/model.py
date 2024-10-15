@@ -4,6 +4,14 @@
 from transformers import T5ForConditionalGeneration, RobertaTokenizer
 import torch
 from safetensors.torch import load_file
+from enum import Enum
+
+class ModelProcessMode(Enum):
+    TEMPERATURE_ZERO_BEAM5 = 'temperature_zero_beam5'
+    TEMPERATURE_LOW = 'temperature_low'
+    TEMPERATURE_MEDIUM = 'temperature_medium'
+    TEMPERATURE_HIGH = 'temperature_high'
+    TEMPERATURE_LAB1 = 'temperature_lab1'
 
 class Model:
     def __init__(self, pretrained_model_name_or_path: str, input_max_length: int):
@@ -50,7 +58,11 @@ class Model:
         """
         return T5ForConditionalGeneration.from_pretrained(pretrained_model_name_or_path)
     
-    def process(self, prompt: str) -> str:
+    def process(self, prompt: str, mode: ModelProcessMode) -> str:
+        responses = self.process_multiple(prompt, mode, num_return_sequences=1)
+        return responses[0]
+    
+    def process_multiple(self, prompt: str, mode: ModelProcessMode, num_return_sequences: int) -> list[str]:
         input_ids = self.tokenizer(
             prompt, 
             return_tensors='pt',
@@ -65,15 +77,53 @@ class Model:
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
 
-        # Tweaking these parameters, may yield better results:
-        # num_beams=3,
-        # do_sample=True,
-        # temperature=0.7,
-        outputs = self.model.generate(
-            input_ids,
-            max_length=128,
-            num_beams=5,
-            early_stopping=True
-        )
-        response = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        return response
+        generate_options = {}
+        if mode == ModelProcessMode.TEMPERATURE_ZERO_BEAM5:
+            generate_options = {
+                'num_beams': 5,
+                'early_stopping': True
+            }
+        elif mode == ModelProcessMode.TEMPERATURE_LOW:
+            generate_options = {
+                'temperature': 0.1,
+                'num_beams': 5,
+                'do_sample': True,
+                'early_stopping': True
+            }
+        elif mode == ModelProcessMode.TEMPERATURE_MEDIUM:
+            generate_options = {
+                'temperature': 0.7,
+                'num_beams': 3,
+                'do_sample': True,
+                'early_stopping': True
+            }
+        elif mode == ModelProcessMode.TEMPERATURE_HIGH:
+            generate_options = {
+                'temperature': 4.4,
+                'num_beams': 3,
+                'do_sample': True,
+                'early_stopping': True
+            }
+        elif mode == ModelProcessMode.TEMPERATURE_LAB1:
+            generate_options = {
+                'temperature': 0.7,
+                'num_beams': 3,
+                'do_sample': True,
+                'early_stopping': True,
+                'top_k': 50,
+                'top_p': 0.95,
+            }
+        else:
+            raise ValueError(f"Unknown mode: {mode}")
+
+        generate_options['max_length'] = 128
+        generate_options['num_return_sequences'] = num_return_sequences
+
+        outputs = self.model.generate(input_ids, **generate_options)
+
+        # Decode all the generated sequences
+        responses = [
+            self.tokenizer.decode(output, skip_special_tokens=True) 
+            for output in outputs
+        ]
+        return responses

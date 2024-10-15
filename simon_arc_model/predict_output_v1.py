@@ -4,7 +4,7 @@ from simon_arc_lab.task_mutator import *
 from simon_arc_lab.image_distort import *
 from simon_arc_lab.image_noise import *
 from simon_arc_lab.rle.deserialize import *
-from simon_arc_model.model import Model
+from simon_arc_model.model import Model, ModelProcessMode
 
 class PredictOutputBase:
     def prompt(self) -> str:
@@ -61,7 +61,7 @@ class PredictOutputV1(PredictOutputBase):
         if self.cached_response is not None:
             return
         prompt = self.prompt()
-        response = model.process(prompt)
+        response = model.process(prompt, ModelProcessMode.TEMPERATURE_ZERO_BEAM5)
         self.cached_response = response
 
     def predicted_image(self) -> np.array:
