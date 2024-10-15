@@ -132,6 +132,31 @@ def xs_for_input_image(image: int, pair_index: int, is_earlier_prediction: bool)
             else:
                 values.append(1)
 
+            x_rev = width - x - 1
+            y_rev = height - y - 1
+
+            steps = [1, 3, 7]
+            for step in steps:
+                if (x + y) & step > 0:
+                    values.append(1)
+                else:
+                    values.append(0)
+
+                if (x_rev + y) & step > 0:
+                    values.append(1)
+                else:
+                    values.append(0)
+
+                if (x + y_rev) & step > 0:
+                    values.append(1)
+                else:
+                    values.append(0)
+
+                if (x_rev + y_rev) & step > 0:
+                    values.append(1)
+                else:
+                    values.append(0)
+
             for dy in range(-1, 2):
                 for dx in range(-1, 2):
                     if dx == 0 and dy == 0:
