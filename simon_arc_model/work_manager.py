@@ -14,7 +14,7 @@ from simon_arc_lab.task_mutator import *
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.show_prediction_result import show_prediction_result
 from .model import Model, ModelProcessMode
-from .predict_output_v1 import *
+from .predict_output_v2 import *
 
 class WorkItemStatus(Enum):
     UNASSIGNED = 0
@@ -111,7 +111,7 @@ class WorkManager:
             for test_index in range(task.count_tests):
                 for task_mutator_class in task_mutator_class_list:
                     previous_predicted_image = None
-                    predictor = PredictOutputV1(task, test_index, task_mutator_class, previous_predicted_image)
+                    predictor = PredictOutputV2(task, test_index, task_mutator_class, previous_predicted_image)
                     work_item = WorkItem(task, test_index, refinement_step, predictor)
                     try:
                         prompt = work_item.predictor.prompt()
@@ -236,7 +236,7 @@ class WorkManager:
                 iteration_seed = 42 + refinement_step
                 previous_predicted_image = image_distort(previous_predicted_image, 1, 10, iteration_seed + 1)
                 previous_predicted_image = image_noise_one_pixel(previous_predicted_image, iteration_seed + 2)
-                predictor = PredictOutputV1(new_task, work_item.test_index, task_mutator_class, previous_predicted_image)
+                predictor = PredictOutputV2(new_task, work_item.test_index, task_mutator_class, previous_predicted_image)
                 next_work_item = WorkItem(new_task, work_item.test_index, refinement_step+1, predictor)
                 work_item = next_work_item
 

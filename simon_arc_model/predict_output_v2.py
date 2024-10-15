@@ -7,7 +7,7 @@ from simon_arc_lab.rle.deserialize import *
 from simon_arc_model.model import Model, ModelProcessMode
 from .predict_output_base import PredictOutputBase
 
-class PredictOutputV1(PredictOutputBase):
+class PredictOutputV2(PredictOutputBase):
     def __init__(self, task: Task, test_index: int, task_mutator_class: type, previous_predicted_image: np.array = None):
         if not issubclass(task_mutator_class, TaskMutatorBase):
             raise TypeError(f"{task_mutator_class.__name__} must be a subclass of TaskMutatorBase")
