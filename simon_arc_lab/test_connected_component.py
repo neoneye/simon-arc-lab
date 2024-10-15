@@ -274,12 +274,12 @@ class TestConnectedComponent(unittest.TestCase):
                 [1, 0, 0],
                 [0, 1, 0],
                 [0, 0, 1],
-            ], dtype=np.uint8), 3, 0, 0),
+            ], dtype=np.uint8), 9, 3, 0, 0),
             ConnectedComponentItem(np.array([
                 [0, 1, 1],
                 [1, 0, 1],
                 [1, 1, 0],
-            ], dtype=np.uint8), 6, 1, 0)
+            ], dtype=np.uint8), 5, 6, 1, 0)
         ]
         self.assertEqual(mask_vec, expected)
 
@@ -308,13 +308,13 @@ class TestConnectedComponent(unittest.TestCase):
                 [0, 0, 1, 1],
                 [0, 0, 0, 0],
                 [0, 0, 0, 0],
-            ], dtype=np.uint8), 2, 2, 1),
+            ], dtype=np.uint8), 9, 2, 2, 1),
             ConnectedComponentItem(np.array([
                 [0, 0, 0, 0],
                 [0, 0, 0, 0],
                 [1, 0, 0, 0],
                 [1, 1, 0, 0],
-            ], dtype=np.uint8), 3, 0, 2)
+            ], dtype=np.uint8), 9, 3, 0, 2)
         ]
         self.assertEqual(mask_vec, expected)
 

@@ -23,7 +23,7 @@ from simon_arc_lab.image_mix import *
 from simon_arc_lab.image_util import *
 from simon_arc_lab.task import *
 from simon_arc_lab.image_create_random_simple import *
-from simon_arc_lab.image_rect import image_rect, image_rect_hollow
+from simon_arc_lab.image_rect import image_rect_inside, image_rect_hollow
 from simon_arc_lab.benchmark import *
 from simon_arc_lab.image_paste import *
 from simon_arc_lab.rectangle import Rectangle
@@ -99,16 +99,16 @@ def generate_task_with_rectangles(seed: int, transformation_id: str) -> Task:
             if transformation_id == "fill_the_hollow_rectangles":
                 for rect_index, rect in enumerate(rects):
                     result_input_image = image_rect_hollow(result_input_image, rect, color_rect, 1)
-                    result_output_image = image_rect(result_output_image, rect, color_rect)
+                    result_output_image = image_rect_inside(result_output_image, rect, color_rect)
             elif transformation_id == "hollow_out_the_filled_rectangles":
                 for rect_index, rect in enumerate(rects):
-                    result_input_image = image_rect(result_input_image, rect, color_rect)
+                    result_input_image = image_rect_inside(result_input_image, rect, color_rect)
                     result_output_image = image_rect_hollow(result_output_image, rect, color_rect, 1)
             elif transformation_id == "mask_of_the_hollow_areas":
                 for rect_index, rect in enumerate(rects):
                     result_input_image = image_rect_hollow(result_input_image, rect, color_rect, 1)
                     rect2 = Rectangle(rect.x + 1, rect.y + 1, rect.width - 2, rect.height - 2)
-                    result_output_image = image_rect(result_output_image, rect2, color_rect)
+                    result_output_image = image_rect_inside(result_output_image, rect2, color_rect)
             elif transformation_id == "mask_outside_the_hollow_rectangles":
                 for rect_index, rect in enumerate(rects):
                     result_input_image = image_rect_hollow(result_input_image, rect, color_rect, 1)
@@ -116,7 +116,7 @@ def generate_task_with_rectangles(seed: int, transformation_id: str) -> Task:
                     result_output_image = image_rect_hollow(result_output_image, rect2, color_rect, 1)
             elif transformation_id == "mask_outside_the_filled_rectangles":
                 for rect_index, rect in enumerate(rects):
-                    result_input_image = image_rect(result_input_image, rect, color_rect)
+                    result_input_image = image_rect_inside(result_input_image, rect, color_rect)
                     rect2 = Rectangle(rect.x - 1, rect.y - 1, rect.width + 2, rect.height + 2)
                     result_output_image = image_rect_hollow(result_output_image, rect2, color_rect, 1)
             else:
@@ -161,7 +161,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=7385000031,
+    seed=7386000031,
     max_num_samples=1000,
     max_byte_size=1024*1024*100
 )

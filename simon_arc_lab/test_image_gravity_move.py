@@ -184,3 +184,74 @@ class TestImageGravityMove(unittest.TestCase):
             [0, 0, 0, 0, 5],
             [0, 0, 0, 0, 0]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
+
+    def test_90000_image_collapse_color_horizontal(self):
+        # Arrange
+        input = np.array([[5, 0, 6, 0, 7]], dtype=np.uint8)
+        # Act
+        actual = image_collapse_color(input, 0)
+        # Assert
+        expected = np.array([[5, 6, 7]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_90001_image_collapse_color_horizontal(self):
+        # Arrange
+        input = np.array([
+            [5, 0, 6, 0, 7],
+            [3, 0, 2, 0, 1]], dtype=np.uint8)
+        # Act
+        actual = image_collapse_color(input, 0)
+        # Assert
+        expected = np.array([[5, 6, 7], [3, 2, 1]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_90002_image_collapse_color_vertical(self):
+        # Arrange
+        input = np.array([
+            [5], 
+            [0], 
+            [6], 
+            [0], 
+            [7]], dtype=np.uint8)
+        # Act
+        actual = image_collapse_color(input, 0)
+        # Assert
+        expected = np.array([
+            [5], 
+            [6], 
+            [7]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_90003_image_collapse_color_vertical(self):
+        # Arrange
+        input = np.array([
+            [5, 3], 
+            [0, 0], 
+            [6, 2], 
+            [0, 0], 
+            [7, 1]], dtype=np.uint8)
+        # Act
+        actual = image_collapse_color(input, 0)
+        # Assert
+        expected = np.array([
+            [5, 3], 
+            [6, 2], 
+            [7, 1]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_90004_image_collapse_color_both_horizontal_and_vertical(self):
+        # Arrange
+        input = np.array([
+            [5, 0, 3, 0, 8], 
+            [0, 0, 0, 0, 0], 
+            [6, 0, 2, 0, 8], 
+            [0, 0, 0, 0, 0], 
+            [7, 0, 1, 0, 8]], dtype=np.uint8)
+        # Act
+        actual = image_collapse_color(input, 0)
+        # Assert
+        expected = np.array([
+            [5, 3, 8], 
+            [6, 2, 8], 
+            [7, 1, 8]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)

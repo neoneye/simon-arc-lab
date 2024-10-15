@@ -36,7 +36,7 @@ from simon_arc_lab.image_mask import *
 from simon_arc_lab.image_util import *
 from simon_arc_lab.task import *
 from simon_arc_lab.rectangle import Rectangle
-from simon_arc_lab.image_rect import image_rect, image_rect_hollow
+from simon_arc_lab.image_rect import image_rect_inside, image_rect_hollow
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.image_gravity_move import *
@@ -273,7 +273,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=35100194,
+    seed=35200194,
     max_num_samples=1000,
     max_byte_size=1024*1024*100
 )

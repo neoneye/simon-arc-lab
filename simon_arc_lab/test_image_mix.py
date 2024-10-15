@@ -21,7 +21,7 @@ class TestImageMix(unittest.TestCase):
             [5, 8, 5, 8], 
             [7, 6, 7, 6], 
             [5, 8, 5, 8]], dtype=np.uint8)
-        self.assertTrue(np.array_equal(actual, expected))
+        np.testing.assert_array_equal(actual, expected)
 
     def test_success_value_bigger_than_one(self):
         mask = np.array([
@@ -41,7 +41,7 @@ class TestImageMix(unittest.TestCase):
             [5, 8, 5, 8], 
             [7, 6, 7, 6], 
             [5, 8, 5, 8]], dtype=np.uint8)
-        self.assertTrue(np.array_equal(actual, expected))
+        np.testing.assert_array_equal(actual, expected)
 
     def test_size_mismatch0(self):
         mask = np.array([

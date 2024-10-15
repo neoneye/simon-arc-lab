@@ -1,7 +1,9 @@
+from typing import Optional
 import numpy as np
 from enum import Enum
 from .image_util import *
 from .image_skew import *
+from .find_bounding_box import *
 
 GRAVITY_MOVE_SKEW_PADDING_COLOR = 255
 
@@ -92,3 +94,27 @@ def _image_gravity_move_bottomright_to_topleft(image: np.array, background_color
     skewed_image = image_skew(image, GRAVITY_MOVE_SKEW_PADDING_COLOR, SkewDirection.UP)
     transformed_image = _image_gravity_move_left(skewed_image, background_color)
     return image_unskew(transformed_image, SkewDirection.UP)
+
+def image_collapse_color(image: np.array, background_color: int) -> Optional[np.array]:
+    """
+    Collapse the image into the background color.
+
+    :param image: The image to collapse
+    :param background_color: The color that is to be removed
+    :return: The result image with the colors collapsed
+    """
+    image_a0 = image_gravity_move(image, background_color, GravityMoveDirection.TOP_TO_BOTTOM)
+    image_a = image_gravity_move(image_a0, background_color, GravityMoveDirection.LEFT_TO_RIGHT)
+
+    image_b0 = image_gravity_move(image_a0, background_color, GravityMoveDirection.LEFT_TO_RIGHT)
+    image_b = image_gravity_move(image_b0, background_color, GravityMoveDirection.TOP_TO_BOTTOM)
+    if np.array_equal(image_a, image_b) == False:
+        # The operation is ambiguous
+        return None
+
+    rect = find_bounding_box_ignoring_color(image_a, background_color)
+    if rect.is_empty():
+        return None
+
+    cropped_image = image_a[(rect.y):(rect.y + rect.height), (rect.x):(rect.x + rect.width)]
+    return cropped_image

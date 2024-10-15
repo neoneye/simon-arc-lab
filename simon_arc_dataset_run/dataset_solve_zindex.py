@@ -93,10 +93,10 @@ def generate_task_mask_of_primary_rectangle(seed: int) -> Task:
                 layer0_height
             )
             # print(f"layer0_rect: {layer0_rect}")
-            layer0_image = image_rect(image, layer0_rect, 2)
+            layer0_image = image_rect_inside(image, layer0_rect, 2)
 
             mask_image = image_create(image_width, image_height, 0)
-            layer0_mask = image_rect(mask_image, layer0_rect, 1)
+            layer0_mask = image_rect_inside(mask_image, layer0_rect, 1)
 
             input_image = image_replace_colors(layer0_image, color_mapping_input)
             output_image = image_replace_colors(layer0_mask, color_mapping_output)
@@ -168,10 +168,10 @@ def generate_task_mask_of_obscured_rectangle(seed: int) -> Task:
                 layer0_height
             )
             # print(f"layer0_rect: {layer0_rect}")
-            layer0_image = image_rect(image, layer0_rect, 2)
+            layer0_image = image_rect_inside(image, layer0_rect, 2)
 
             mask_image = image_create(image_width, image_height, 0)
-            layer0_mask = image_rect(mask_image, layer0_rect, 1)
+            layer0_mask = image_rect_inside(mask_image, layer0_rect, 1)
 
             layer1_width = random.Random(input_seed + 8).randint(1, image_width)
             layer1_height = random.Random(input_seed + 9).randint(1, image_height)
@@ -210,7 +210,7 @@ def generate_task_mask_of_obscured_rectangle(seed: int) -> Task:
                 # The obscured area is not repairable.
                 continue
 
-            layer1_image = image_rect(layer0_image, layer1_rect, 3)
+            layer1_image = image_rect_inside(layer0_image, layer1_rect, 3)
 
             input_image = image_replace_colors(layer1_image, color_mapping_input)
             output_image = image_replace_colors(layer0_mask, color_mapping_output)
@@ -283,7 +283,7 @@ def generate_task_mask_of_intersection_rectangle(seed: int) -> Task:
                 layer0_height
             )
             # print(f"layer0_rect: {layer0_rect}")
-            layer0_image = image_rect(image, layer0_rect, 2)
+            layer0_image = image_rect_inside(image, layer0_rect, 2)
 
             layer1_width = random.Random(input_seed + 8).randint(1, image_width)
             layer1_height = random.Random(input_seed + 9).randint(1, image_height)
@@ -324,9 +324,9 @@ def generate_task_mask_of_intersection_rectangle(seed: int) -> Task:
 
             # Create a mask for the intersection rectangle.
             zero_image = np.zeros_like(image)
-            mask_intersection = image_rect(zero_image, overlap_rect, 1)
+            mask_intersection = image_rect_inside(zero_image, overlap_rect, 1)
 
-            layer1_image = image_rect(layer0_image, layer1_rect, 3)
+            layer1_image = image_rect_inside(layer0_image, layer1_rect, 3)
 
             input_image = image_replace_colors(layer1_image, color_mapping_input)
             output_image = image_replace_colors(mask_intersection, color_mapping_output)
@@ -427,12 +427,12 @@ def generate_task_move_obscured_rectangle_to_top(seed: int) -> Task:
                 # The obscured area is not repairable.
                 continue
 
-            input_layer0_image = image_rect(random_image, layer0_rect, 2)
-            input_layer1_image = image_rect(input_layer0_image, layer1_rect, 3)
+            input_layer0_image = image_rect_inside(random_image, layer0_rect, 2)
+            input_layer1_image = image_rect_inside(input_layer0_image, layer1_rect, 3)
             input_image = image_replace_colors(input_layer1_image, color_mapping)
 
-            output_layer0_image = image_rect(random_image, layer1_rect, 3)
-            output_layer1_image = image_rect(output_layer0_image, layer0_rect, 2)
+            output_layer0_image = image_rect_inside(random_image, layer1_rect, 3)
+            output_layer1_image = image_rect_inside(output_layer0_image, layer0_rect, 2)
             output_image = image_replace_colors(output_layer1_image, color_mapping)
 
             histogram = Histogram.create_with_image(output_image)
@@ -474,7 +474,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=218100911,
+    seed=218200911,
     max_num_samples=1000,
     max_byte_size=1024*1024*100
 )

@@ -17,7 +17,7 @@ from simon_arc_lab.image_mask import *
 from simon_arc_lab.image_util import *
 from simon_arc_lab.task import *
 from simon_arc_lab.rectangle import Rectangle
-from simon_arc_lab.image_rect import image_rect, image_rect_hollow
+from simon_arc_lab.image_rect import image_rect_inside, image_rect_hollow
 from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.find_bounding_box import find_bounding_box_ignoring_color
 from simon_arc_lab.image_bresenham_line import image_bresenham_line
@@ -108,13 +108,13 @@ def generate_task_emit_rays_from_lonely_pixels(seed: int) -> Task:
                 if draw_box3x3_hollow:
                     accumulated_mask = image_rect_hollow(accumulated_mask, Rectangle(x - 1, y - 1, 3, 3), 1, 1)
                 if draw_box3x3_filled:
-                    accumulated_mask = image_rect(accumulated_mask, Rectangle(x - 1, y - 1, 3, 3), 1)
+                    accumulated_mask = image_rect_inside(accumulated_mask, Rectangle(x - 1, y - 1, 3, 3), 1)
                 if draw_box5x5_hollow1:
                     accumulated_mask = image_rect_hollow(accumulated_mask, Rectangle(x - 2, y - 2, 5, 5), 1, 1)
                 if draw_box5x5_hollow2:
                     accumulated_mask = image_rect_hollow(accumulated_mask, Rectangle(x - 2, y - 2, 5, 5), 1, 2)
                 if draw_box5x5_filled:
-                    accumulated_mask = image_rect(accumulated_mask, Rectangle(x - 2, y - 2, 5, 5), 1)
+                    accumulated_mask = image_rect_inside(accumulated_mask, Rectangle(x - 2, y - 2, 5, 5), 1)
                 if draw_from_topleft_to_bottomright:
                     accumulated_mask = image_bresenham_line(accumulated_mask, x - size, y - size, x + size, y + size, 1)
                 if draw_from_topright_to_bottomleft:
@@ -150,7 +150,7 @@ generator = DatasetGenerator(
     generate_dataset_item_list_fn=generate_dataset_item_list
 )
 generator.generate(
-    seed=152055117,
+    seed=153055117,
     max_num_samples=1000,
     max_byte_size=1024*1024*100
 )
