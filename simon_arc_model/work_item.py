@@ -32,11 +32,14 @@ class WorkItem:
             # print(f'RLE decoding error for task {task_id} test={test_index}. Error: {e} score={e.score}')
             self.status = WorkItemStatus.PROBLEM_DESERIALIZE
             return
-        
+        self.assign_status()
+
+    def assign_status(self):
         if self.predicted_output_image is None:
             self.status = WorkItemStatus.PROBLEM_MISSING_PREDICTION_IMAGE
             return
         
+        expected_output_image = self.task.test_output(self.test_index)
         if expected_output_image is None:
             self.status = WorkItemStatus.UNVERIFIED
             return
@@ -47,6 +50,9 @@ class WorkItem:
             self.status = WorkItemStatus.INCORRECT
 
     def show(self, save_dir_path: Optional[str] = None):
+        self.show_predicted_output_image(self.predicted_output_image, save_dir_path)
+
+    def show_predicted_output_image(self, predicted_output_image: np.array, save_dir_path: Optional[str] = None):
         task = self.task
         test_index = self.test_index
         input_image = task.test_input(test_index)
@@ -54,7 +60,6 @@ class WorkItem:
         status_string = self.status.to_string()
 
         expected_output_image = task.test_output(test_index)
-        predicted_output_image = self.predicted_output_image
 
         # Human readable title
         if self.refinement_step is not None:
