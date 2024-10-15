@@ -49,6 +49,9 @@ class WorkManager:
     def discard_items_with_too_short_prompts(self, min_prompt_length: int):
         self.work_items = WorkItemList.discard_items_with_too_short_prompts(self.work_items, min_prompt_length)
 
+    def discard_items_where_predicted_output_is_identical_to_the_input(self):
+        self.work_items = WorkItemList.discard_items_where_predicted_output_is_identical_to_the_input(self.work_items)
+    
     def process_all_work_items(self, show: bool = False, save_dir: Optional[str] = None):
         if save_dir is not None:
             print(f'Saving images to directory: {save_dir}')
@@ -91,9 +94,6 @@ class WorkManager:
         for key, count in counters.items():
             print(f'{key}: {count}')
 
-    def discard_items_where_predicted_output_is_identical_to_the_input(self):
-        self.work_items = WorkItemList.discard_items_where_predicted_output_is_identical_to_the_input(self.work_items)
-    
     def save_arcprize2024_submission_file(self, path_to_json_file: str):
         json_dict = collect_predictions_as_arcprize2024_submission_dict(self.taskset, self.work_items)
         save_arcprize2024_submission_file(path_to_json_file, json_dict)
