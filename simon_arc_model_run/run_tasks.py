@@ -9,6 +9,7 @@ from simon_arc_lab.gallery_generator import gallery_generator_run
 from simon_arc_model.model import Model
 from simon_arc_model.work_manager_stepwise_refinement import WorkManagerStepwiseRefinement
 from simon_arc_model.work_manager_simple import WorkManagerSimple
+from simon_arc_model.work_manager_decision_tree import WorkManagerDecisionTree
 
 # A power of 2 value, and the max length of the input prompt
 CONTEXT_SIZE_LIMIT = (512, 500)
@@ -20,6 +21,7 @@ model_directory = f'/Users/neoneye/nobackup/git/{model_name}'
 
 work_manager_class = WorkManagerSimple
 # work_manager_class = WorkManagerStepwiseRefinement
+# work_manager_class = WorkManagerDecisionTree
 print(f"Using WorkManager of type: {work_manager_class.__name__}")
 
 # check if the model is a dir in the file system

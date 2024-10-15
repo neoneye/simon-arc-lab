@@ -1,0 +1,121 @@
+import os
+from tqdm import tqdm
+import numpy as np
+from typing import Optional
+from simon_arc_lab.rle.deserialize import DeserializeError
+from simon_arc_lab.image_distort import *
+from simon_arc_lab.image_noise import *
+from simon_arc_lab.image_vote import *
+from simon_arc_lab.task import Task
+from simon_arc_lab.task_mutator import *
+from simon_arc_lab.taskset import TaskSet
+from simon_arc_lab.show_prediction_result import show_prediction_result
+from .predict_output_donothing import PredictOutputDoNothing
+from .work_item import WorkItem
+from .work_item_list import WorkItemList
+from .work_item_status import WorkItemStatus
+from .save_arcprize2024_submission_file import *
+from .work_manager_base import WorkManagerBase
+from .decision_tree_util import DecisionTreeUtil
+
+class WorkManagerDecisionTree(WorkManagerBase):
+    def __init__(self, model: any, taskset: TaskSet):
+        self.taskset = taskset
+        self.work_items = WorkManagerDecisionTree.create_work_items(taskset)
+
+    @classmethod
+    def has_same_input_output_size_for_all_examples(cls, task: Task) -> bool:
+        for pair_index in range(task.count_examples):
+            input_image = task.example_input(pair_index)
+            output_image = task.example_output(pair_index)
+            if input_image.shape != output_image.shape:
+                return False
+        return True
+
+    @classmethod
+    def create_work_items(cls, taskset: TaskSet) -> list['WorkItem']:
+        work_items = []
+        for task in taskset.tasks:
+            if cls.has_same_input_output_size_for_all_examples(task) == False:
+                continue
+
+            for test_index in range(task.count_tests):
+                work_item = WorkItem(task, test_index, None, PredictOutputDoNothing())
+                work_items.append(work_item)
+        return work_items
+
+    def truncate_work_items(self, max_count: int):
+        self.work_items = self.work_items[:max_count]
+
+    def discard_items_with_too_long_prompts(self, max_prompt_length: int):
+        self.work_items = WorkItemList.discard_items_with_too_long_prompts(self.work_items, max_prompt_length)
+
+    def discard_items_with_too_short_prompts(self, min_prompt_length: int):
+        self.work_items = WorkItemList.discard_items_with_too_short_prompts(self.work_items, min_prompt_length)
+
+    def discard_items_where_predicted_output_is_identical_to_the_input(self):
+        self.work_items = WorkItemList.discard_items_where_predicted_output_is_identical_to_the_input(self.work_items)
+    
+    def process_all_work_items(self, show: bool = False, save_dir: Optional[str] = None):
+        if save_dir is not None:
+            print(f'Saving images to directory: {save_dir}')
+            os.makedirs(save_dir, exist_ok=True)
+
+        # noise_levels = [95, 90, 85, 80, 75, 70, 65]
+        noise_levels = [95, 90]
+        number_of_refinements = len(noise_levels)
+
+        correct_count = 0
+        correct_task_id_set = set()
+        pbar = tqdm(self.work_items, desc="Processing work items")
+        for original_work_item in pbar:
+            work_item = original_work_item
+
+            last_predicted_output = None
+            for refinement_index in range(number_of_refinements):
+                noise_level = noise_levels[refinement_index]
+                # print(f"Refinement {refinement_index+1}/{number_of_refinements} noise_level={noise_level}")
+                predicted_output = DecisionTreeUtil.predict_output(
+                    work_item.task, 
+                    work_item.test_index, 
+                    last_predicted_output, 
+                    refinement_index, 
+                    noise_level
+                )
+                last_predicted_output = predicted_output
+
+            work_item.predicted_output_image = last_predicted_output
+            work_item.assign_status()
+
+            if work_item.status == WorkItemStatus.CORRECT:
+                correct_task_id_set.add(work_item.task.metadata_task_id)
+                correct_count = len(correct_task_id_set)
+            pbar.set_postfix({'correct': correct_count})
+            if show:
+                work_item.show()
+            if save_dir is not None:
+                work_item.show(save_dir)
+
+    def summary(self):
+        correct_task_id_set = set()
+        for work_item in self.work_items:
+            if work_item.status == WorkItemStatus.CORRECT:
+                correct_task_id_set.add(work_item.task.metadata_task_id)
+        correct_count = len(correct_task_id_set)
+        print(f'Number of correct solutions: {correct_count}')
+
+        counters = {}
+        for work_item in self.work_items:
+            predictor_name = work_item.predictor_name
+            status_name = work_item.status.name
+            key = f'{predictor_name}_{status_name}'
+            if key in counters:
+                counters[key] += 1
+            else:
+                counters[key] = 1
+        for key, count in counters.items():
+            print(f'{key}: {count}')
+
+    def save_arcprize2024_submission_file(self, path_to_json_file: str):
+        json_dict = collect_predictions_as_arcprize2024_submission_dict(self.taskset, self.work_items)
+        save_arcprize2024_submission_file(path_to_json_file, json_dict)
