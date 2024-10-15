@@ -15,9 +15,6 @@ class PredictOutputV2(PredictOutputBase):
         self.task = task
         self.test_index = test_index
         self.task_mutator = task_mutator_class(task)
-        # self.task_mutator = TaskMutatorDoNothing(task)
-        # self.task_mutator = TaskMutatorTranspose(task)
-        # self.task_mutator = TaskMutatorTransposeSoInputIsMostCompact(task)
         self.previous_predicted_image = previous_predicted_image
         self.cached_prompt = None
         self.cached_response = None

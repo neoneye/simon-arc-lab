@@ -15,9 +15,6 @@ class PredictOutputV1(PredictOutputBase):
         self.task = task
         self.test_index = test_index
         self.task_mutator = task_mutator_class(task)
-        # self.task_mutator = TaskMutatorDoNothing(task)
-        # self.task_mutator = TaskMutatorTranspose(task)
-        # self.task_mutator = TaskMutatorTransposeSoInputIsMostCompact(task)
         self.cached_prompt = None
         self.cached_response = None
 
@@ -27,15 +24,6 @@ class PredictOutputV1(PredictOutputBase):
 
         task_without_test_output = self.task_mutator.transformed_task()
         task_without_test_output.set_all_test_outputs_to_none()
-
-        # Provide an earlier predicted output, as part of the prompt.
-        # image_index = self.task.count_examples + self.test_index
-        # expected_output = self.task.output_images[image_index].copy()
-        # expected_output = image_distort(expected_output, 1, 5, 42)
-        # expected_output = image_noise_one_pixel(expected_output, 0)
-        # if isinstance(self.task_mutator, TaskMutatorTranspose):
-        #     expected_output = np.transpose(expected_output)
-        # task_without_test_output.output_images[image_index] = expected_output
 
         task_formatter = TaskFormatterRLECompact(task_without_test_output)
         test_output_id = task_formatter.test_output_id(self.test_index)
