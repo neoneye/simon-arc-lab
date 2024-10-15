@@ -18,11 +18,11 @@ from .predict_output_v2 import *
 from .work_item import WorkItem
 from .work_item_status import WorkItemStatus
 
-class WorkManager:
+class WorkManagerStepwiseRefinement:
     def __init__(self, model: Model, taskset: TaskSet):
         self.model = model
         self.taskset = taskset
-        self.work_items = WorkManager.create_work_items(taskset)
+        self.work_items = WorkManagerStepwiseRefinement.create_work_items(taskset)
         self.work_items_finished = []
 
     @classmethod
@@ -180,7 +180,7 @@ class WorkManager:
                     status = 'correct'
                 else:
                     status = 'incorrect'
-                WorkManager.show_voted_image(original_work_item.task, original_work_item.test_index, the_image, status, save_dir)
+                WorkManagerStepwiseRefinement.show_voted_image(original_work_item.task, original_work_item.test_index, the_image, status, save_dir)
 
     @classmethod
     def show_voted_image(cls, task: Task, test_index: int, predicted_output_image: np.array, status_string: str, save_dir_path: Optional[str]):
