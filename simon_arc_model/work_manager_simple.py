@@ -15,17 +15,17 @@ from .work_item import WorkItem
 from .work_item_list import WorkItemList
 from .work_item_status import WorkItemStatus
 from .save_arcprize2024_submission_file import *
+from .work_manager_base import WorkManagerBase
 
-class WorkManager:
+class WorkManagerSimple(WorkManagerBase):
     def __init__(self, model: Model, taskset: TaskSet):
         self.model = model
         self.taskset = taskset
-        self.work_items = WorkManager.create_work_items(taskset)
+        self.work_items = WorkManagerSimple.create_work_items(taskset)
 
     @classmethod
     def create_work_items(cls, taskset: TaskSet) -> list['WorkItem']:
         task_mutator_class_list = [TaskMutatorOriginal, TaskMutatorTranspose]
-        # task_mutator_class_list = [TaskMutatorOriginal, TaskMutatorTranspose, TaskMutatorInputRotateCW, TaskMutatorInputRotateCCW, TaskMutatorInputRotate180, TaskMutatorTransposeSoInputIsMostCompact]
         refinement_step = None
         work_items = []
         for task in taskset.tasks:

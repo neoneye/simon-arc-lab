@@ -7,7 +7,7 @@ sys.path.insert(0, PROJECT_ROOT)
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.gallery_generator import gallery_generator_run
 from simon_arc_model.model import Model
-from simon_arc_model.work_manager import WorkManager
+from simon_arc_model.work_manager_simple import WorkManagerSimple
 
 # A power of 2 value, and the max length of the input prompt
 CONTEXT_SIZE_LIMIT = (512, 500)
@@ -54,7 +54,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
 
     taskset = TaskSet.load_directory(path_to_task_dir)
 
-    wm = WorkManager(model, taskset)
+    wm = WorkManagerSimple(model, taskset)
     # wm.discard_items_with_too_short_prompts(500)
     wm.discard_items_with_too_long_prompts(max_prompt_length)
     # wm.process_all_work_items()
