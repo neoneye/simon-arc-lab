@@ -44,9 +44,10 @@ class WorkItem:
 
     def process(self, model: Model, mode: ModelProcessMode):
         context = {
+            'model': model,
             'mode': mode,
         }
-        self.predictor.execute(model, context)
+        self.predictor.execute(context)
 
         task = self.task
         test_index = self.test_index

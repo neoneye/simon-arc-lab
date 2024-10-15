@@ -10,7 +10,7 @@ class PredictOutputBase:
     def prompt(self) -> str:
         raise NotImplementedError()
 
-    def execute(self, model: Model, context: dict):
+    def execute(self, context: dict):
         raise NotImplementedError()
 
     def predicted_image(self) -> np.array:
@@ -64,10 +64,15 @@ class PredictOutputV1(PredictOutputBase):
         self.cached_prompt = prompt
         return prompt
 
-    def execute(self, model: Model, context: dict):
+    def execute(self, context: dict):
         if self.cached_response is not None:
             return
         prompt = self.prompt()
+
+        model = context['model']
+        if model is None:
+            raise ValueError("Model not found in context.")
+
         mode = context.get('mode', ModelProcessMode.TEMPERATURE_ZERO_BEAM5)
         # IDEA: Save multiple responses. Currently only saves 1 response.
         response = model.process(prompt, mode)
