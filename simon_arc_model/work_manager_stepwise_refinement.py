@@ -1,8 +1,5 @@
 import os
-import sys
 from tqdm import tqdm
-import json
-from enum import Enum
 import numpy as np
 from typing import Optional
 from simon_arc_lab.rle.deserialize import DeserializeError
@@ -16,6 +13,7 @@ from simon_arc_lab.show_prediction_result import show_prediction_result
 from .model import Model, ModelProcessMode
 from .predict_output_v2 import *
 from .work_item import WorkItem
+from .work_item_list import WorkItemList
 from .work_item_status import WorkItemStatus
 from .save_arcprize2024_submission_file import *
 
@@ -50,33 +48,14 @@ class WorkManagerStepwiseRefinement:
         self.work_items = self.work_items[:max_count]
 
     def discard_items_with_too_long_prompts(self, max_prompt_length: int):
-        """
-        Ignore those where the prompt longer than what the model can handle.
-        """
-        count_before = len(self.work_items)
-        filtered_work_items = []
-        for work_item in self.work_items:
-            prompt_length = len(work_item.predictor.prompt())
-            if prompt_length <= max_prompt_length:
-                filtered_work_items.append(work_item)
-        count_after = len(filtered_work_items)
-        self.work_items = filtered_work_items
-        print(f'Removed {count_before - count_after} work items with too long prompt. Remaining are {count_after} work items.')
+        self.work_items = WorkItemList.discard_items_with_too_long_prompts(self.work_items, max_prompt_length)
 
     def discard_items_with_too_short_prompts(self, min_prompt_length: int):
-        """
-        Ignore those where the prompt shorter than N tokens.
-        """
-        count_before = len(self.work_items)
-        filtered_work_items = []
-        for work_item in self.work_items:
-            prompt_length = len(work_item.predictor.prompt())
-            if prompt_length >= min_prompt_length:
-                filtered_work_items.append(work_item)
-        count_after = len(filtered_work_items)
-        self.work_items = filtered_work_items
-        print(f'Removed {count_before - count_after} work items with too short prompt. Remaining are {count_after} work items.')
+        self.work_items = WorkItemList.discard_items_with_too_short_prompts(self.work_items, min_prompt_length)
 
+    def discard_items_where_predicted_output_is_identical_to_the_input(self):
+        self.work_items_finished = WorkItemList.discard_items_where_predicted_output_is_identical_to_the_input(self.work_items_finished)
+    
     def process_all_work_items(self, show: bool = False, save_dir: Optional[str] = None):
         if save_dir is not None:
             print(f'Saving images to directory: {save_dir}')
@@ -218,27 +197,6 @@ class WorkManagerStepwiseRefinement:
         for key, count in counters.items():
             print(f'{key}: {count}')
 
-    def discard_items_where_predicted_output_is_identical_to_the_input(self):
-        """
-        Usually in ARC-AGI the predicted output image is supposed to be different from the input image.
-        There are ARC like datasets where the input and output may be the same, but it's rare.
-        It's likely a mistake when input and output is the same.
-        """
-        count_before = len(self.work_items_finished)
-        filtered_work_items = []
-        for work_item in self.work_items_finished:
-            if work_item.predicted_output_image is None:
-                filtered_work_items.append(work_item)
-                continue
-            input_image = work_item.task.test_input(work_item.test_index)
-            predicted_image = work_item.predicted_output_image
-            is_identical = np.array_equal(input_image, predicted_image)
-            if not is_identical:
-                filtered_work_items.append(work_item)
-        count_after = len(filtered_work_items)
-        self.work_items_finished = filtered_work_items
-        print(f'Removed {count_before - count_after} work items where the input and output is identical. Remaining are {count_after} work items.')
-    
     def save_arcprize2024_submission_file(self, path_to_json_file: str):
         # IDEA: Extract the best predictions from work_items_finished. How to determine the best?
         json_dict = collect_predictions_as_arcprize2024_submission_dict(self.taskset, self.work_items_finished)
