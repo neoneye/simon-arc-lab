@@ -42,11 +42,7 @@ class WorkItem:
         self.predicted_output_image = None
         self.status = WorkItemStatus.UNASSIGNED
 
-    def process(self, model: Model, mode: ModelProcessMode):
-        context = {
-            'model': model,
-            'mode': mode,
-        }
+    def process(self, context: dict):
         self.predictor.execute(context)
 
         task = self.task
@@ -228,7 +224,11 @@ class WorkManager:
                 # else:
                 #     mode = ModelProcessMode.TEMPERATURE_HIGH
                 mode = refinement_mode_list[refinement_step]
-                work_item.process(self.model, mode)
+                context = {
+                    'model': self.model,
+                    'mode': mode,
+                }
+                work_item.process(context)
                 self.work_items_finished.append(work_item)
 
                 if work_item.status == WorkItemStatus.CORRECT:
