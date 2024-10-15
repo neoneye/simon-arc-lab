@@ -17,6 +17,7 @@ from .model import Model, ModelProcessMode
 from .predict_output_v2 import *
 from .work_item import WorkItem
 from .work_item_status import WorkItemStatus
+from .save_arcprize2024_submission_file import *
 
 class WorkManagerStepwiseRefinement:
     def __init__(self, model: Model, taskset: TaskSet):
@@ -237,47 +238,8 @@ class WorkManagerStepwiseRefinement:
         count_after = len(filtered_work_items)
         self.work_items_finished = filtered_work_items
         print(f'Removed {count_before - count_after} work items where the input and output is identical. Remaining are {count_after} work items.')
-
-    def collect_predictions_as_arcprize2024_submission_dict(self) -> dict:
-        # IDEA: Extract the best predictions from work_items_finished. How to determine the best?
-        result_dict = {}
-        # Kaggle requires all the original tasks to be present in the submission file.
-        # Create empty entries in the result_dict, with empty images, with the correct number of test pairs.
-        for task in self.taskset.tasks:
-            task_id = task.metadata_task_id
-            count_tests = task.count_tests
-            empty_image = []
-            attempts_dict = {
-                'attempt_1': empty_image,
-                'attempt_2': empty_image,
-            }
-            test_list = []
-            for _ in range(count_tests):
-                test_list.append(attempts_dict)
-            result_dict[task_id] = test_list
-                
-        # Update the result_dict with the predicted images
-        attempt1_set = set()
-        for work_item in self.work_items:
-            if work_item.predicted_output_image is None:
-                continue
-            task_id = work_item.task.metadata_task_id
-
-            if task_id in attempt1_set:
-                attempt_1or2 = 'attempt_2'
-                # print(f'Found multiple predictions for task {task_id}. Using attempt_2.')
-            else:
-                attempt_1or2 = 'attempt_1'
-                attempt1_set.add(task_id)
-
-            # Update the existing entry in the result_dict with the predicted image
-            image = work_item.predicted_output_image.tolist()
-            result_dict[task_id][work_item.test_index][attempt_1or2] = image
-        return result_dict
     
     def save_arcprize2024_submission_file(self, path_to_json_file: str):
-        dict = self.collect_predictions_as_arcprize2024_submission_dict()
-        with open(path_to_json_file, 'w') as f:
-            json.dump(dict, f)
-        file_size = os.path.getsize(path_to_json_file)
-        print(f"Wrote {file_size} bytes to file: {path_to_json_file}")
+        # IDEA: Extract the best predictions from work_items_finished. How to determine the best?
+        json_dict = collect_predictions_as_arcprize2024_submission_dict(self.taskset, self.work_items_finished)
+        save_arcprize2024_submission_file(path_to_json_file, json_dict)
