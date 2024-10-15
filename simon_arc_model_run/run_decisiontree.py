@@ -13,6 +13,7 @@ from simon_arc_lab.image_shape3x3_opposite import ImageShape3x3Opposite
 from simon_arc_lab.image_shape3x3_center import ImageShape3x3Center
 from simon_arc_lab.image_distort import image_distort
 from simon_arc_lab.image_raytrace_probecolor import *
+from simon_arc_lab.image_outline import *
 from simon_arc_lab.pixel_connectivity import *
 from simon_arc_lab.connected_component import *
 from simon_arc_lab.find_bounding_box import *
@@ -25,16 +26,32 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn import tree
 import matplotlib.pyplot as plt
 
-# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/22168020.json'
-# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/692cd3b6.json'
-# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/9772c176.json'
-task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/c97c0139.json'
-# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/4612dd53.json'
+# works with these
+task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/b6afb2da.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/6d75e8bb.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/a5313dff.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/bb43febb.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/c0f76784.json'
+# argh, almost correct
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/d364b489.json'
+# struggling with shape issues
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/a699fb00.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/a65b410d.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/4612dd53.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/c97c0139.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/9772c176.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/692cd3b6.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/b60334d2.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/bdad9b1f.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/d9f24cd1.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/db3e9e38.json'
+# struggling with color issues
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/aba27056.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/b782dc8a.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/22168020.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/b548a754.json'
+
+
 task = Task.load_arcagi1(task_path)
 task_id = os.path.splitext(os.path.basename(task_path))[0]
 task.metadata_task_id = task_id
@@ -89,6 +106,8 @@ def xs_for_input_image(image: int, pair_index: int, is_earlier_prediction: bool)
         image_ray = image_raytrace_probecolor_direction(image, outside_color, direction)
         image_ray_list.append(image_ray)
 
+    the_image_outline_all8 = image_outline_all8(image)
+
     values_list = []
     for y in range(height):
         for x in range(width):
@@ -125,6 +144,12 @@ def xs_for_input_image(image: int, pair_index: int, is_earlier_prediction: bool)
 
             for image_ray in image_ray_list:
                 values.append(image_ray[y, x])
+
+            is_outline = the_image_outline_all8[y, x]
+            if is_outline == 1:
+                values.append(100)
+            else:
+                values.append(-100)
 
             values_list.append(values)
     return values_list
@@ -201,6 +226,7 @@ for refinement_index in range(number_of_refinements):
             noisy_image[y, x] = input_image[y, x]
         noisy_image = image_distort(noisy_image, 1, 25, pair_seed + 1000)
 
+        # IDEA: shuffle the colors, so it's not always the same color. So all 10 colors gets used.
         for i in range(8):
             input_image_mutated = transform_image(input_image, i)
             output_image_mutated = transform_image(output_image, i)
