@@ -34,24 +34,27 @@ task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/a5313dff.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/bb43febb.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/c0f76784.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/b60334d2.json'
 # argh, almost correct
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/d364b489.json'
 # struggling with shape issues
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/692cd3b6.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/a699fb00.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/a65b410d.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/4612dd53.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/c97c0139.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/9772c176.json'
-# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/evaluation/692cd3b6.json'
-# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/b60334d2.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/bdad9b1f.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/d9f24cd1.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/db3e9e38.json'
 # struggling with color issues
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/e76a88a6.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/aba27056.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/b782dc8a.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/22168020.json'
 # task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/b548a754.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/e76a88a6.json'
+# task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/b8cdaf2b.json'
 
 
 task = Task.load_arcagi1(task_path)
@@ -171,9 +174,11 @@ def xs_for_input_image(image: int, pair_index: int, is_earlier_prediction: bool)
             values.append(object_ids[y, x])
             values.append(object_masses[y, x])
 
+            values.append(image_shape3x3_opposite[y, x])
             for i in range(3):
                 values.append((image_shape3x3_opposite[y, x] >> i) & 1)
 
+            values.append(image_shape3x3_center[y, x])
             for i in range(8):
                 values.append((image_shape3x3_center[y, x] >> i) & 1)
 
