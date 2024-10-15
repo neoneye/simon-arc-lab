@@ -39,7 +39,10 @@ class WorkItem:
         self.status = WorkItemStatus.UNASSIGNED
 
     def process(self, model: Model):
-        self.predictor.execute(model)
+        context = {
+            'model': model,
+        }
+        self.predictor.execute(context)
 
         task = self.task
         test_index = self.test_index

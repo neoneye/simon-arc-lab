@@ -5,19 +5,7 @@ from simon_arc_lab.image_distort import *
 from simon_arc_lab.image_noise import *
 from simon_arc_lab.rle.deserialize import *
 from simon_arc_model.model import Model, ModelProcessMode
-
-class PredictOutputBase:
-    def prompt(self) -> str:
-        raise NotImplementedError()
-
-    def execute(self, model: Model):
-        raise NotImplementedError()
-
-    def predicted_image(self) -> np.array:
-        raise NotImplementedError()
-    
-    def name(self) -> str:
-        raise NotImplementedError()
+from .predict_output_base import PredictOutputBase
 
 class PredictOutputV1(PredictOutputBase):
     def __init__(self, task: Task, test_index: int, task_mutator_class: type):
@@ -57,11 +45,16 @@ class PredictOutputV1(PredictOutputBase):
         self.cached_prompt = prompt
         return prompt
 
-    def execute(self, model: Model):
+    def execute(self, context: dict):
         if self.cached_response is not None:
             return
         prompt = self.prompt()
-        response = model.process(prompt, ModelProcessMode.TEMPERATURE_ZERO_BEAM5)
+        model = context['model']
+        if model is None:
+            raise ValueError("Model not found in context.")
+
+        mode = context.get('mode', ModelProcessMode.TEMPERATURE_ZERO_BEAM5)
+        response = model.process(prompt, mode)
         self.cached_response = response
 
     def predicted_image(self) -> np.array:
