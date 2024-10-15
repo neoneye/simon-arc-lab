@@ -16,8 +16,9 @@ from .work_item import WorkItem
 from .work_item_list import WorkItemList
 from .work_item_status import WorkItemStatus
 from .save_arcprize2024_submission_file import *
+from .work_manager_base import WorkManagerBase
 
-class WorkManagerStepwiseRefinement:
+class WorkManagerStepwiseRefinement(WorkManagerBase):
     def __init__(self, model: Model, taskset: TaskSet):
         self.model = model
         self.taskset = taskset
