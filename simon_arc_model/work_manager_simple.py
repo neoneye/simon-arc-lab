@@ -1,12 +1,7 @@
 import os
-import sys
 from tqdm import tqdm
-import json
-from enum import Enum
-import numpy as np
 from typing import Optional
 from simon_arc_lab.rle.deserialize import DeserializeError
-from simon_arc_lab.task import Task
 from simon_arc_lab.task_mutator import *
 from simon_arc_lab.taskset import TaskSet
 from .model import Model
