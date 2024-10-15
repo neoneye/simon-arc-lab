@@ -29,19 +29,17 @@ class WorkItemStatus(Enum):
         return self.name.lower()
 
 class WorkItem:
-    def __init__(self, task: Task, test_index: int, predictor: PredictOutputBase):
+    def __init__(self, task: Task, test_index: int, refinement_step: Optional[int], predictor: PredictOutputBase):
         self.predictor_name = predictor.name()
         # print(f'WorkItem: task={task.metadata_task_id} test={test_index} predictor={self.predictor_name}')
         self.task = task
         self.test_index = test_index
+        self.refinement_step = refinement_step
         self.predictor = predictor
         self.predicted_output_image = None
         self.status = WorkItemStatus.UNASSIGNED
 
-    def process(self, model: Model):
-        context = {
-            'model': model,
-        }
+    def process(self, context: dict):
         self.predictor.execute(context)
 
         task = self.task
@@ -75,12 +73,40 @@ class WorkItem:
         input_image = task.test_input(test_index)
         task_id = task.metadata_task_id
         status_string = self.status.to_string()
-        title = f'{task_id} test={test_index} {self.predictor_name} {status_string}'
 
         expected_output_image = task.test_output(test_index)
         predicted_output_image = self.predicted_output_image
 
-        filename = f'{task_id}_test{test_index}_{self.predictor_name}_{status_string}.png'
+        # Human readable title
+        if self.refinement_step is not None:
+            title_step = f'step={self.refinement_step} '
+        else:
+            title_step = None
+        title_items_optional = [
+            task_id,
+            f'test={test_index}',
+            title_step,
+            self.predictor_name,
+            status_string,
+        ]
+        title_items = [item for item in title_items_optional if item is not None]
+        title = ' '.join(title_items)
+
+        # Format filename
+        if self.refinement_step is not None:
+            filename_step = f'step{self.refinement_step} '
+        else:
+            filename_step = None
+        filename_items_optional = [
+            task_id,
+            f'test{test_index}',
+            filename_step,
+            self.predictor_name,
+            status_string,
+        ]
+        filename_items = [item for item in filename_items_optional if item is not None]
+        filename = '_'.join(filename_items) + '.png'
+
         if save_dir_path is not None:
             save_path = os.path.join(save_dir_path, filename)
         else:
@@ -98,12 +124,13 @@ class WorkManager:
     def create_work_items(cls, taskset: TaskSet) -> list['WorkItem']:
         task_mutator_class_list = [TaskMutatorOriginal, TaskMutatorTranspose]
         # task_mutator_class_list = [TaskMutatorOriginal, TaskMutatorTranspose, TaskMutatorInputRotateCW, TaskMutatorInputRotateCCW, TaskMutatorInputRotate180, TaskMutatorTransposeSoInputIsMostCompact]
+        refinement_step = None
         work_items = []
         for task in taskset.tasks:
             for test_index in range(task.count_tests):
                 for task_mutator_class in task_mutator_class_list:
                     predictor = PredictOutputV1(task, test_index, task_mutator_class)
-                    work_item = WorkItem(task, test_index, predictor)
+                    work_item = WorkItem(task, test_index, refinement_step, predictor)
                     try:
                         prompt = work_item.predictor.prompt()
                         work_items.append(work_item)
@@ -151,7 +178,10 @@ class WorkManager:
         correct_task_id_set = set()
         pbar = tqdm(self.work_items, desc="Processing work items")
         for work_item in pbar:
-            work_item.process(self.model)
+            context = {
+                'model': self.model,
+            }
+            work_item.process(context)
             if work_item.status == WorkItemStatus.CORRECT:
                 correct_task_id_set.add(work_item.task.metadata_task_id)
                 correct_count = len(correct_task_id_set)
