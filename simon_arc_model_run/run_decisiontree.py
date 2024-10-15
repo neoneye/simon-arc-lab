@@ -8,9 +8,11 @@ from simon_arc_lab.task import Task
 from simon_arc_lab.image_scale import *
 from simon_arc_lab.image_util import *
 from simon_arc_lab.image_rect import *
+from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.image_shape3x3_opposite import ImageShape3x3Opposite
 from simon_arc_lab.image_shape3x3_center import ImageShape3x3Center
+from simon_arc_lab.image_count3x3 import *
 from simon_arc_lab.image_distort import image_distort
 from simon_arc_lab.image_raytrace_probecolor import *
 from simon_arc_lab.image_outline import *
@@ -108,6 +110,14 @@ def xs_for_input_image(image: int, pair_index: int, is_earlier_prediction: bool)
 
     the_image_outline_all8 = image_outline_all8(image)
 
+    image_same_list = []
+    for dy in range(-1, 2):
+        for dx in range(-1, 2):
+            if dx == 0 and dy == 0:
+                continue
+            image_same = count_same_color_as_center_with_one_neighbor_nowrap(image, dx, dy)
+            image_same_list.append(image_same)
+
     values_list = []
     for y in range(height):
         for x in range(width):
@@ -150,6 +160,13 @@ def xs_for_input_image(image: int, pair_index: int, is_earlier_prediction: bool)
                 values.append(100)
             else:
                 values.append(-100)
+
+            for image_same in image_same_list:
+                is_same = image_same[y, x] == 1
+                if is_same:
+                    values.append(100)
+                else:
+                    values.append(-100)
 
             values_list.append(values)
     return values_list
@@ -220,24 +237,48 @@ for refinement_index in range(number_of_refinements):
         random.Random(pair_seed + 1).shuffle(positions)
         # take N percent of the positions
         count_positions = int(len(positions) * noise_level / 100)
-        noisy_image = output_image.copy()
+        noise_image = output_image.copy()
         for i in range(count_positions):
             x, y = positions[i]
-            noisy_image[y, x] = input_image[y, x]
-        noisy_image = image_distort(noisy_image, 1, 25, pair_seed + 1000)
+            noise_image[y, x] = input_image[y, x]
+        noise_image = image_distort(noise_image, 1, 25, pair_seed + 1000)
 
-        # IDEA: shuffle the colors, so it's not always the same color. So all 10 colors gets used.
+        input_noise_output = []
         for i in range(8):
             input_image_mutated = transform_image(input_image, i)
+            noise_image_mutated = transform_image(noise_image, i)
             output_image_mutated = transform_image(output_image, i)
-            noisy_image_mutated = transform_image(noisy_image, i)
+            input_noise_output.append((input_image_mutated, noise_image_mutated, output_image_mutated))
+
+        # Shuffle the colors, so it's not always the same color. So all 10 colors gets used.
+        h = Histogram.create_with_image(output_image)
+        used_colors = h.unique_colors()
+        random.Random(pair_seed + 1001).shuffle(used_colors)
+        for i in range(10):
+            if h.get_count_for_color(i) > 0:
+                continue
+            # cycle through the used colors
+            first_color = used_colors.pop(0)
+            used_colors.append(first_color)
+
+            color_mapping = {
+                first_color: i,
+            }
+            input_image2 = image_replace_colors(input_image, color_mapping)
+            output_image2 = image_replace_colors(output_image, color_mapping)
+            noise_image2 = image_replace_colors(noise_image, color_mapping)
+            input_noise_output.append((input_image2, noise_image2, output_image2))
+
+        count_mutations = len(input_noise_output)
+        for i in range(count_mutations):
+            input_image_mutated, noise_image_mutated, output_image_mutated = input_noise_output[i]
 
             if refinement_index == 0:
-                xs_image = xs_for_input_image(input_image_mutated, pair_index * 8 + i, is_earlier_prediction = False)
+                xs_image = xs_for_input_image(input_image_mutated, pair_index * count_mutations + i, is_earlier_prediction = False)
                 xs.extend(xs_image)
             else:
-                xs_image0 = xs_for_input_image(input_image_mutated, pair_index * 8 + i, is_earlier_prediction = False)
-                xs_image1 = xs_for_input_image(noisy_image_mutated, pair_index * 8 + i, is_earlier_prediction = True)
+                xs_image0 = xs_for_input_image(input_image_mutated, pair_index * count_mutations + i, is_earlier_prediction = False)
+                xs_image1 = xs_for_input_image(noise_image_mutated, pair_index * count_mutations + i, is_earlier_prediction = True)
                 xs_image = merge_xs_per_pixel(xs_image0, xs_image1)
                 xs.extend(xs_image)
 
@@ -250,16 +291,16 @@ for refinement_index in range(number_of_refinements):
     pair_index = 0
     test_pair_index = task.count_examples + pair_index
     input_image = task.test_input(pair_index)
-    noisy_image_mutated = input_image.copy()
+    noise_image_mutated = input_image.copy()
     if last_predicted_output is not None:
-        noisy_image_mutated = last_predicted_output.copy()
+        noise_image_mutated = last_predicted_output.copy()
     expected_image = task.test_output(pair_index)
 
     if refinement_index == 0:
         xs_image = xs_for_input_image(input_image, test_pair_index * 8, is_earlier_prediction = False)
     else:
         xs_image0 = xs_for_input_image(input_image, test_pair_index * 8, is_earlier_prediction = False)
-        xs_image1 = xs_for_input_image(noisy_image_mutated, test_pair_index * 8, is_earlier_prediction = True)
+        xs_image1 = xs_for_input_image(noise_image_mutated, test_pair_index * 8, is_earlier_prediction = True)
         xs_image = merge_xs_per_pixel(xs_image0, xs_image1)
     expected_ys = ys_for_output_image(task.test_output(pair_index))
 
