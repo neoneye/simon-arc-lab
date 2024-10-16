@@ -13,6 +13,7 @@ from simon_arc_lab.image_distort import image_distort
 from simon_arc_lab.image_raytrace_probecolor import *
 from simon_arc_lab.image_outline import *
 from simon_arc_lab.image_gravity_draw import *
+from simon_arc_lab.image_skew import *
 from simon_arc_lab.pixel_connectivity import *
 from simon_arc_lab.connected_component import *
 from simon_arc_lab.find_bounding_box import *
@@ -90,7 +91,6 @@ class DecisionTreeUtil:
             row = image[y, :]
             # convert to 2d image
             row_image = np.expand_dims(row, axis=0)
-            # histogram = Histogram.create_with_image(image[y, :])
             histogram = Histogram.create_with_image(row_image)
             row_histograms.append(histogram)
 
@@ -99,9 +99,32 @@ class DecisionTreeUtil:
             column = image[:, x]
             # convert to 2d image
             column_image = np.expand_dims(column, axis=0)
-            # histogram = Histogram.create_with_image(image[:, x])
             histogram = Histogram.create_with_image(column_image)
             column_histogram.append(histogram)
+
+        tlbr_histograms = []
+        skewed_image_down = image_skew(image, outside_color, SkewDirection.DOWN)
+        for y in range(skewed_image_down.shape[0]):
+            row = skewed_image_down[y, :]
+            # convert to 2d image
+            row_image = np.expand_dims(row, axis=0)
+            histogram = Histogram.create_with_image(row_image)
+            histogram.remove_color(outside_color)
+            # print(f'y={y} histogram={histogram.pretty()}')
+            tlbr_histograms.append(histogram)
+        # show_prediction_result(image, skewed_image_down, None)
+
+        trbl_histograms = []
+        skewed_image_up = image_skew(image, outside_color, SkewDirection.UP)
+        for y in range(skewed_image_up.shape[0]):
+            row = skewed_image_up[y, :]
+            # convert to 2d image
+            row_image = np.expand_dims(row, axis=0)
+            histogram = Histogram.create_with_image(row_image)
+            histogram.remove_color(outside_color)
+            # print(f'y={y} histogram={histogram.pretty()}')
+            trbl_histograms.append(histogram)
+        # show_prediction_result(image, skewed_image_up, None)
 
         # gravity_draw_directions = [
         #     GravityDrawDirection.TOP_TO_BOTTOM,
@@ -219,7 +242,11 @@ class DecisionTreeUtil:
                 assert len(row_histograms) == height
                 assert len(column_histogram) == width
 
+                tlbr_histogram = tlbr_histograms[x + y]
+                trbl_histogram = trbl_histograms[width - 1 - x + y]
                 histograms = []
+                histograms.append(tlbr_histogram)
+                histograms.append(trbl_histogram)
                 histograms.append(row_histograms[y])
                 histograms.append(column_histogram[x])
 
