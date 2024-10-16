@@ -472,5 +472,19 @@ class TestHistogram(unittest.TestCase):
             histogram.increment(color)
         self.assertEqual(histogram.first_available_color(), None)
 
+    def test_remove_color_existing(self):
+        histogram = Histogram({9:1,2:8,5:5,255:999})
+        histogram.remove_color(255)
+        actual = histogram.pretty()
+        expected = '2:8,5:5,9:1'
+        self.assertEqual(actual, expected)
+
+    def test_remove_color_nonexisting(self):
+        histogram = Histogram({9:1,2:8,5:5,255:999})
+        histogram.remove_color(42)
+        actual = histogram.pretty()
+        expected = '255:999,2:8,5:5,9:1'
+        self.assertEqual(actual, expected)
+
 if __name__ == '__main__':
     unittest.main()

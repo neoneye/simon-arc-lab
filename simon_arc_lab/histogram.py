@@ -360,3 +360,11 @@ class Histogram:
         if len(colors) == 0:
             return None
         return colors[0]
+
+    def remove_color(self, color: int):
+        """
+        Remove a color from the histogram.
+        """
+        self.color_count[color] = 0
+        self.purge_mutable()
+
