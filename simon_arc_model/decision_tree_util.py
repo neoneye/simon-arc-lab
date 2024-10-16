@@ -276,8 +276,25 @@ class DecisionTreeUtil:
                         else:
                             values.append(image[yy, xx])
 
-                values.append(object_ids[y, x])
-                values.append(object_masses[y, x])
+                n = 2
+                for dy in range(-n, n * 2):
+                    for dx in range(-n, n * 2):
+                        xx = x + dx
+                        yy = y + dy
+                        if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                            values.append(0)
+                        else:
+                            values.append(object_ids[yy, xx])
+
+                n = 2
+                for dy in range(-n, n * 2):
+                    for dx in range(-n, n * 2):
+                        xx = x + dx
+                        yy = y + dy
+                        if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                            values.append(10)
+                        else:
+                            values.append(object_masses[yy, xx])
 
                 values.append(image_shape3x3_opposite[y, x])
                 for i in range(3):
@@ -288,7 +305,15 @@ class DecisionTreeUtil:
                     values.append((image_shape3x3_center[y, x] >> i) & 1)
 
                 for image_ray in image_ray_list:
-                    values.append(image_ray[y, x])
+                    n = 3
+                    for dy in range(-n, n * 2):
+                        for dx in range(-n, n * 2):
+                            xx = x + dx
+                            yy = y + dy
+                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                                values.append(10)
+                            else:
+                                values.append(image_ray[yy, xx])
 
                 is_outline = the_image_outline_all8[y, x]
                 if is_outline == 1:
@@ -498,7 +523,7 @@ class DecisionTreeUtil:
                 ys_image = cls.ys_for_output_image(output_image_mutated)
                 ys.extend(ys_image)
 
-        clf = DecisionTreeClassifier(random_state=42)
+        clf = DecisionTreeClassifier(random_state=refinement_index + 42)
         clf.fit(xs, ys)
 
         input_image = task.test_input(test_index)
