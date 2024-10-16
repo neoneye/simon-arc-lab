@@ -32,6 +32,7 @@ class DecisionTreeFeature(Enum):
     HISTOGRAM_DIAGONAL = 'histogram_diagonal'
     HISTOGRAM_ROWCOL = 'histogram_rowcol'
     HISTOGRAM_VALUE = 'histogram_value'
+    IMAGE_MASS_COMPARE_ADJACENT_ROWCOL = 'image_mass_compare_adjacent_rowcol'
     NUMBER_OF_UNIQUE_COLORS_ALL9 = 'number_of_unique_colors_all9'
     NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER = 'number_of_unique_colors_around_center'
     NUMBER_OF_UNIQUE_COLORS_IN_CORNERS = 'number_of_unique_colors_in_corners'
@@ -192,10 +193,15 @@ class DecisionTreeUtil:
             image_number_of_unique_colors_in_diamond5 = ImageShape3x3Histogram.number_of_unique_colors_in_diamond5(image)
             shape3x3_images.append(image_number_of_unique_colors_in_diamond5)
 
-        mass_compare_adjacent_rows = image_mass_compare_adjacent_rows(image, 0, 1, 2)
-        mass_compare_adjacent_rows_height = mass_compare_adjacent_rows.shape[0]
-        mass_compare_adjacent_columns = image_mass_compare_adjacent_columns(image, 0, 1, 2)
-        mass_compare_adjacent_columns_width = mass_compare_adjacent_columns.shape[1]
+        mass_compare_adjacent_rows = None
+        mass_compare_adjacent_rows_height = 0
+        mass_compare_adjacent_columns = None
+        mass_compare_adjacent_columns_width = 0
+        if DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL in features:
+            mass_compare_adjacent_rows = image_mass_compare_adjacent_rows(image, 0, 1, 2)
+            mass_compare_adjacent_rows_height = mass_compare_adjacent_rows.shape[0]
+            mass_compare_adjacent_columns = image_mass_compare_adjacent_columns(image, 0, 1, 2)
+            mass_compare_adjacent_columns_width = mass_compare_adjacent_columns.shape[1]
 
         values_list = []
         for y in range(height):
@@ -313,27 +319,27 @@ class DecisionTreeUtil:
                         else:
                             values.append(0)
 
-                if y > 0:
-                    comp = mass_compare_adjacent_rows[y - 1, x]
-                else:
-                    comp = 4
-                values.append(comp)
-                if x > 0:
-                    comp = mass_compare_adjacent_columns[y, x - 1]
-                else:
-                    comp = 4
-                values.append(comp)
-
-                if y < mass_compare_adjacent_rows_height - 1:
-                    comp = mass_compare_adjacent_rows[y + 1, x]
-                else:
-                    comp = 5
-                values.append(comp)
-                if x < mass_compare_adjacent_columns_width - 1:
-                    comp = mass_compare_adjacent_columns[y, x + 1]
-                else:
-                    comp = 5
-                values.append(comp)
+                if DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL in features:
+                    if y > 0:
+                        comp = mass_compare_adjacent_rows[y - 1, x]
+                    else:
+                        comp = 4
+                    values.append(comp)
+                    if x > 0:
+                        comp = mass_compare_adjacent_columns[y, x - 1]
+                    else:
+                        comp = 4
+                    values.append(comp)
+                    if y < mass_compare_adjacent_rows_height - 1:
+                        comp = mass_compare_adjacent_rows[y + 1, x]
+                    else:
+                        comp = 5
+                    values.append(comp)
+                    if x < mass_compare_adjacent_columns_width - 1:
+                        comp = mass_compare_adjacent_columns[y, x + 1]
+                    else:
+                        comp = 5
+                    values.append(comp)
 
                 values_list.append(values)
         return values_list
