@@ -9,6 +9,7 @@ from simon_arc_lab.image_vote import *
 from simon_arc_lab.task import Task
 from simon_arc_lab.task_mutator import *
 from simon_arc_lab.taskset import TaskSet
+from simon_arc_lab.task_similarity import TaskSimilarity
 from simon_arc_lab.show_prediction_result import show_prediction_result
 from .predict_output_donothing import PredictOutputDoNothing
 from .work_item import WorkItem
@@ -63,7 +64,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
 
         # noise_levels = [95, 90, 85, 80, 75, 70, 65]
         # noise_levels = [95, 90]
-        noise_levels = [95]
+        noise_levels = [100, 95, 90]
         number_of_refinements = len(noise_levels)
 
         correct_count = 0
@@ -71,6 +72,10 @@ class WorkManagerDecisionTree(WorkManagerBase):
         pbar = tqdm(self.work_items, desc="Processing work items")
         for original_work_item in pbar:
             work_item = original_work_item
+
+            ts = TaskSimilarity.create_with_task(work_item.task)
+
+            image_and_score = []
 
             last_predicted_output = None
             for refinement_index in range(number_of_refinements):
@@ -84,8 +89,14 @@ class WorkManagerDecisionTree(WorkManagerBase):
                     noise_level
                 )
                 last_predicted_output = predicted_output
+                score = ts.measure_test_prediction(predicted_output, work_item.test_index)
+                # print(f"task: {work_item.task.metadata_task_id} score: {score} refinement_index: {refinement_index} noise_level: {noise_level}")
+                image_and_score.append((predicted_output, score))
 
-            work_item.predicted_output_image = last_predicted_output
+            best_image, best_score = max(image_and_score, key=lambda x: x[1])
+            # print(f"task: {work_item.task.metadata_task_id} best_score: {best_score}")
+
+            work_item.predicted_output_image = best_image
             work_item.assign_status()
 
             if work_item.status == WorkItemStatus.CORRECT:
