@@ -481,7 +481,8 @@ class DecisionTreeUtil:
             for i in range(count_positions):
                 x, y = positions[i]
                 noise_image[y, x] = input_image[y, x]
-            noise_image = image_distort(noise_image, 1, 25, pair_seed + 1000)
+            if refinement_index >= 2:
+                noise_image = image_distort(noise_image, 1, 25, pair_seed + 1000)
 
             input_noise_output = []
             transform_count = 8
