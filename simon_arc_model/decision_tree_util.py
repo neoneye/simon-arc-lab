@@ -16,6 +16,7 @@ from simon_arc_lab.image_outline import *
 from simon_arc_lab.image_gravity_draw import *
 from simon_arc_lab.image_skew import *
 from simon_arc_lab.image_mass_compare import *
+from simon_arc_lab.image_rotate45 import *
 from simon_arc_lab.pixel_connectivity import *
 from simon_arc_lab.connected_component import *
 from simon_arc_lab.find_bounding_box import *
@@ -38,6 +39,7 @@ class DecisionTreeFeature(Enum):
     NUMBER_OF_UNIQUE_COLORS_IN_CORNERS = 'number_of_unique_colors_in_corners'
     NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4 = 'number_of_unique_colors_in_diamond4'
     NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5 = 'number_of_unique_colors_in_diamond5'
+    ROTATE45 = 'image_rotate45'
 
 class DecisionTreeUtil:
 
@@ -390,6 +392,12 @@ class DecisionTreeUtil:
             return image_flip_diagonal_a(image)
         elif transformation_index == 7:
             return image_flip_diagonal_b(image)
+        elif transformation_index == 8:
+            fill_color = 10
+            return image_rotate_cw_45(image, fill_color)
+        elif transformation_index == 9:
+            fill_color = 10
+            return image_rotate_ccw_45(image, fill_color)
         else:
             raise ValueError(f'Unknown transformation_index: {transformation_index}')
 
@@ -427,7 +435,10 @@ class DecisionTreeUtil:
             noise_image = image_distort(noise_image, 1, 25, pair_seed + 1000)
 
             input_noise_output = []
-            for i in range(8):
+            transform_count = 8
+            if DecisionTreeFeature.ROTATE45 in features:
+                transform_count = 10
+            for i in range(transform_count):
                 input_image_mutated = cls.transform_image(input_image, i)
                 noise_image_mutated = cls.transform_image(noise_image, i)
                 output_image_mutated = cls.transform_image(output_image, i)
