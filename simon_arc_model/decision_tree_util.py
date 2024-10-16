@@ -48,6 +48,7 @@ class DecisionTreeFeature(Enum):
     EROSION_DIAGONAL = 'erosion_diagonal'
     CORNER = 'corner'
     CENTER = 'center'
+    BOUNDING_BOXES = 'bounding_boxes'
 
 class DecisionTreeUtil:
 
@@ -226,6 +227,15 @@ class DecisionTreeUtil:
             mass_compare_adjacent_columns = image_mass_compare_adjacent_columns(image, 0, 1, 2)
             mass_compare_adjacent_columns_width = mass_compare_adjacent_columns.shape[1]
 
+        bounding_box_list = []
+        for color in range(10):
+            ignore_colors = []
+            for ignore_color in range(10):
+                if ignore_color != color:
+                    ignore_colors.append(ignore_color)
+            rect = find_bounding_box_multiple_ignore_colors(image, ignore_colors)
+            bounding_box_list.append(rect)
+
         values_list = []
         for y in range(height):
             for x in range(width):
@@ -264,6 +274,11 @@ class DecisionTreeUtil:
                         values.append(1)
                     else:
                         values.append(0)
+
+                if DecisionTreeFeature.BOUNDING_BOXES in features:
+                    for rect in bounding_box_list:
+                        is_inside = x >= rect.x and x < rect.x + rect.width and y >= rect.y and y < rect.y + rect.height
+                        values.append(int(is_inside))
 
                 if DecisionTreeFeature.CORNER in features:
                     corner_topleft = x == 0 and y == 0
