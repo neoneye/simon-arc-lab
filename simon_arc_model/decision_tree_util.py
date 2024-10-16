@@ -11,6 +11,7 @@ from simon_arc_lab.image_count3x3 import *
 from simon_arc_lab.image_distort import image_distort
 from simon_arc_lab.image_raytrace_probecolor import *
 from simon_arc_lab.image_outline import *
+from simon_arc_lab.image_gravity_draw import *
 from simon_arc_lab.pixel_connectivity import *
 from simon_arc_lab.connected_component import *
 from simon_arc_lab.find_bounding_box import *
@@ -82,6 +83,23 @@ class DecisionTreeUtil:
                     continue
                 image_same = count_same_color_as_center_with_one_neighbor_nowrap(image, dx, dy)
                 image_same_list.append(image_same)
+
+        gravity_draw_directions = [
+            GravityDrawDirection.TOP_TO_BOTTOM,
+            GravityDrawDirection.BOTTOM_TO_TOP,
+            GravityDrawDirection.LEFT_TO_RIGHT,
+            GravityDrawDirection.RIGHT_TO_LEFT,
+            GravityDrawDirection.TOPLEFT_TO_BOTTOMRIGHT,
+            GravityDrawDirection.BOTTOMRIGHT_TO_TOPLEFT,
+            GravityDrawDirection.TOPRIGHT_TO_BOTTOMLEFT,
+            GravityDrawDirection.BOTTOMLEFT_TO_TOPRIGHT,
+        ]
+
+        gravity_background_color = 0
+        gravity_draw_image_list = []
+        for direction in gravity_draw_directions:
+            gd_image = image_gravity_draw(image, gravity_background_color, direction)
+            gravity_draw_image_list.append(gd_image)
 
         values_list = []
         for y in range(height):
@@ -159,6 +177,9 @@ class DecisionTreeUtil:
                         values.append(100)
                     else:
                         values.append(-100)
+                
+                for gd_image in gravity_draw_image_list:
+                    values.append(gd_image[y, x])
 
                 values_list.append(values)
         return values_list
