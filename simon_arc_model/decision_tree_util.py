@@ -280,6 +280,16 @@ class DecisionTreeUtil:
         return xs_list
 
     @classmethod
+    def xs_for_input_noise_images(cls, refinement_index: int, input_image: np.array, noise_image: np.array, pair_index: int) -> list:
+        if refinement_index == 0:
+            xs_image = cls.xs_for_input_image(input_image, pair_index, is_earlier_prediction = False)
+        else:
+            xs_image0 = cls.xs_for_input_image(input_image, pair_index, is_earlier_prediction = False)
+            xs_image1 = cls.xs_for_input_image(noise_image, pair_index, is_earlier_prediction = True)
+            xs_image = cls.merge_xs_per_pixel(xs_image0, xs_image1)
+        return xs_image
+
+    @classmethod
     def ys_for_output_image(cls, image: int):
         height, width = image.shape
         values = []
@@ -370,15 +380,9 @@ class DecisionTreeUtil:
             for i in range(count_mutations):
                 input_image_mutated, noise_image_mutated, output_image_mutated = input_noise_output[i]
 
-                if refinement_index == 0:
-                    xs_image = cls.xs_for_input_image(input_image_mutated, pair_index * count_mutations + i, is_earlier_prediction = False)
-                    xs.extend(xs_image)
-                else:
-                    xs_image0 = cls.xs_for_input_image(input_image_mutated, pair_index * count_mutations + i, is_earlier_prediction = False)
-                    xs_image1 = cls.xs_for_input_image(noise_image_mutated, pair_index * count_mutations + i, is_earlier_prediction = True)
-                    xs_image = cls.merge_xs_per_pixel(xs_image0, xs_image1)
-                    xs.extend(xs_image)
-
+                pair_id = pair_index * 1000 + i
+                xs_image = cls.xs_for_input_noise_images(refinement_index, input_image_mutated, noise_image_mutated, pair_id)
+                xs.extend(xs_image)
                 ys_image = cls.ys_for_output_image(output_image_mutated)
                 ys.extend(ys_image)
 
@@ -391,13 +395,8 @@ class DecisionTreeUtil:
         if previous_prediction is not None:
             noise_image_mutated = previous_prediction.copy()
 
-        if refinement_index == 0:
-            xs_image = cls.xs_for_input_image(input_image, test_pair_index * 8, is_earlier_prediction = False)
-        else:
-            xs_image0 = cls.xs_for_input_image(input_image, test_pair_index * 8, is_earlier_prediction = False)
-            xs_image1 = cls.xs_for_input_image(noise_image_mutated, test_pair_index * 8, is_earlier_prediction = True)
-            xs_image = cls.merge_xs_per_pixel(xs_image0, xs_image1)
-
+        pair_id = test_pair_index * 1000
+        xs_image = cls.xs_for_input_noise_images(refinement_index, input_image, noise_image_mutated, pair_id)
         result = clf.predict(xs_image)
 
         height, width = input_image.shape
