@@ -8,6 +8,7 @@ from simon_arc_lab.image_create_random_advanced import image_create_random_advan
 from simon_arc_lab.image_shape3x3_opposite import ImageShape3x3Opposite
 from simon_arc_lab.image_shape3x3_center import ImageShape3x3Center
 from simon_arc_lab.image_count3x3 import *
+from simon_arc_lab.image_erosion_multicolor import image_erosion_multicolor
 from simon_arc_lab.image_distort import image_distort
 from simon_arc_lab.image_raytrace_probecolor import *
 from simon_arc_lab.image_outline import *
@@ -84,22 +85,53 @@ class DecisionTreeUtil:
                 image_same = count_same_color_as_center_with_one_neighbor_nowrap(image, dx, dy)
                 image_same_list.append(image_same)
 
-        gravity_draw_directions = [
-            GravityDrawDirection.TOP_TO_BOTTOM,
-            GravityDrawDirection.BOTTOM_TO_TOP,
-            GravityDrawDirection.LEFT_TO_RIGHT,
-            GravityDrawDirection.RIGHT_TO_LEFT,
-            GravityDrawDirection.TOPLEFT_TO_BOTTOMRIGHT,
-            GravityDrawDirection.BOTTOMRIGHT_TO_TOPLEFT,
-            GravityDrawDirection.TOPRIGHT_TO_BOTTOMLEFT,
-            GravityDrawDirection.BOTTOMLEFT_TO_TOPRIGHT,
-        ]
+        row_histograms = []
+        for y in range(height):
+            row = image[y, :]
+            # convert to 2d image
+            row_image = np.expand_dims(row, axis=0)
+            # histogram = Histogram.create_with_image(image[y, :])
+            histogram = Histogram.create_with_image(row_image)
+            row_histograms.append(histogram)
 
-        gravity_background_color = 0
-        gravity_draw_image_list = []
-        for direction in gravity_draw_directions:
-            gd_image = image_gravity_draw(image, gravity_background_color, direction)
-            gravity_draw_image_list.append(gd_image)
+        column_histogram = []
+        for x in range(width):
+            column = image[:, x]
+            # convert to 2d image
+            column_image = np.expand_dims(column, axis=0)
+            # histogram = Histogram.create_with_image(image[:, x])
+            histogram = Histogram.create_with_image(column_image)
+            column_histogram.append(histogram)
+
+        # gravity_draw_directions = [
+        #     GravityDrawDirection.TOP_TO_BOTTOM,
+        #     GravityDrawDirection.BOTTOM_TO_TOP,
+        #     GravityDrawDirection.LEFT_TO_RIGHT,
+        #     GravityDrawDirection.RIGHT_TO_LEFT,
+        #     GravityDrawDirection.TOPLEFT_TO_BOTTOMRIGHT,
+        #     GravityDrawDirection.BOTTOMRIGHT_TO_TOPLEFT,
+        #     GravityDrawDirection.TOPRIGHT_TO_BOTTOMLEFT,
+        #     GravityDrawDirection.BOTTOMLEFT_TO_TOPRIGHT,
+        # ]
+        # gravity_background_color = 0
+        # gravity_draw_image_list = []
+        # for direction in gravity_draw_directions:
+        #     gd_image = image_gravity_draw(image, gravity_background_color, direction)
+        #     gravity_draw_image_list.append(gd_image)
+
+        # erosion_pixel_connectivity_list = [
+        #     PixelConnectivity.ALL8,
+        #     PixelConnectivity.NEAREST4,
+        #     PixelConnectivity.CORNER4,
+        #     PixelConnectivity.LR2,
+        #     PixelConnectivity.TB2,
+        #     PixelConnectivity.TLBR2,
+        #     PixelConnectivity.TRBL2,
+        # ]
+        # erosion_image_list = []
+        # for erosion_connectivity in erosion_pixel_connectivity_list:
+        #     erosion_image = image_erosion_multicolor(image, erosion_connectivity)
+        #     erosion_image_list.append(erosion_image)
 
         values_list = []
         for y in range(height):
@@ -178,8 +210,31 @@ class DecisionTreeUtil:
                     else:
                         values.append(-100)
                 
-                for gd_image in gravity_draw_image_list:
-                    values.append(gd_image[y, x])
+                # for gd_image in gravity_draw_image_list:
+                #     values.append(gd_image[y, x])
+
+                # for erosion_image in erosion_image_list:
+                #     values.append(erosion_image[y, x])
+
+                assert len(row_histograms) == height
+                assert len(column_histogram) == width
+
+                histograms = []
+                histograms.append(row_histograms[y])
+                histograms.append(column_histogram[x])
+
+                for histogram in histograms:
+                    unique_colors = histogram.unique_colors()
+                    number_of_unique_colors = len(unique_colors)
+                    values.append(number_of_unique_colors)
+                    for i in range(10):
+                        count = histogram.get_count_for_color(i)
+                        values.append(count)
+                        if i in unique_colors:
+                            values.append(1)
+                        else:
+                            values.append(0)
+
 
                 values_list.append(values)
         return values_list
