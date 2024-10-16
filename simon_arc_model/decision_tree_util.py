@@ -257,6 +257,10 @@ class DecisionTreeUtil:
                     for i in range(10):
                         count = histogram.get_count_for_color(i)
                         values.append(count)
+                        if count > 0:
+                            values.append(i)
+                        else:
+                            values.append(-1)
                         if i in unique_colors:
                             values.append(1)
                         else:
