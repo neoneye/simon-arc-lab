@@ -4,219 +4,277 @@ from .pixel_connectivity import PixelConnectivity
 class FloodFill:
     @staticmethod
     def _flood_fill_nearest4(image: np.array, x: int, y: int, from_color: int, to_color: int):
-        if x < 0 or y < 0 or x >= image.shape[1] or y >= image.shape[0]:
-            return
-        value = image[y, x]
-        if value == to_color:
-            return
-        if value != from_color:
-            return
-        image[y, x] = to_color
-        FloodFill._flood_fill_nearest4(image, x-1, y, from_color, to_color)
-        FloodFill._flood_fill_nearest4(image, x+1, y, from_color, to_color)
-        FloodFill._flood_fill_nearest4(image, x, y-1, from_color, to_color)
-        FloodFill._flood_fill_nearest4(image, x, y+1, from_color, to_color)
+        if from_color == to_color:
+            return  # No action needed if the colors are the same
+
+        stack = [(x, y)]
+        while stack:
+            x, y = stack.pop()
+            # Check if the coordinates are within the image bounds
+            if x < 0 or y < 0 or x >= image.shape[1] or y >= image.shape[0]:
+                continue
+            value = image[y, x]
+            if value == to_color:
+                continue # Already filled with the target color
+            if value != from_color:
+                continue # Not the color we're looking to replace
+            image[y, x] = to_color  # Fill the pixel with the target color
+            # Add the 4-connected neighbors to the stack
+            neighbors = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
+            stack.extend(neighbors)
 
     @staticmethod
     def _flood_fill_all8(image: np.array, x: int, y: int, from_color: int, to_color: int):
-        if x < 0 or y < 0 or x >= image.shape[1] or y >= image.shape[0]:
-            return
-        value = image[y, x]
-        if value == to_color:
-            return
-        if value != from_color:
-            return
-        image[y, x] = to_color
-        FloodFill._flood_fill_all8(image, x-1, y-1, from_color, to_color)
-        FloodFill._flood_fill_all8(image, x, y-1, from_color, to_color)
-        FloodFill._flood_fill_all8(image, x+1, y-1, from_color, to_color)
-        FloodFill._flood_fill_all8(image, x-1, y, from_color, to_color)
-        FloodFill._flood_fill_all8(image, x+1, y, from_color, to_color)
-        FloodFill._flood_fill_all8(image, x-1, y+1, from_color, to_color)
-        FloodFill._flood_fill_all8(image, x, y+1, from_color, to_color)
-        FloodFill._flood_fill_all8(image, x+1, y+1, from_color, to_color)
+        if from_color == to_color:
+            return  # No action needed if the colors are the same
+
+        stack = [(x, y)]
+        while stack:
+            x, y = stack.pop()
+            # Check if the coordinates are within the image bounds
+            if x < 0 or y < 0 or x >= image.shape[1] or y >= image.shape[0]:
+                continue
+            value = image[y, x]
+            if value == to_color:
+                continue # Already filled with the target color
+            if value != from_color:
+                continue # Not the color we're looking to replace
+            image[y, x] = to_color  # Fill the pixel with the target color
+            # Add all 8-connected neighbors to the stack
+            neighbors = [
+                (x-1, y-1), (x, y-1), (x+1, y-1),
+                (x-1, y),             (x+1, y),
+                (x-1, y+1), (x, y+1), (x+1, y+1)
+            ]
+            stack.extend(neighbors)
 
     @staticmethod
     def _flood_fill_corner4(image: np.array, x: int, y: int, from_color: int, to_color: int):
-        if x < 0 or y < 0 or x >= image.shape[1] or y >= image.shape[0]:
-            return
-        value = image[y, x]
-        if value == to_color:
-            return
-        if value != from_color:
-            return
-        image[y, x] = to_color
-        FloodFill._flood_fill_corner4(image, x-1, y-1, from_color, to_color)
-        FloodFill._flood_fill_corner4(image, x+1, y-1, from_color, to_color)
-        FloodFill._flood_fill_corner4(image, x-1, y+1, from_color, to_color)
-        FloodFill._flood_fill_corner4(image, x+1, y+1, from_color, to_color)
+        if from_color == to_color:
+            return  # No action needed if the colors are the same
+
+        stack = [(x, y)]
+        while stack:
+            x, y = stack.pop()
+            # Check if the coordinates are within the image bounds
+            if x < 0 or y < 0 or x >= image.shape[1] or y >= image.shape[0]:
+                continue
+            value = image[y, x]
+            if value == to_color:
+                continue # Already filled with the target color
+            if value != from_color:
+                continue # Not the color we're looking to replace
+            image[y, x] = to_color  # Fill the pixel with the target color
+            # Add all 4 corners to the stack
+            neighbors = [(x-1, y-1), (x+1, y-1), (x-1, y+1), (x+1, y+1)]
+            stack.extend(neighbors)
 
     @staticmethod
     def _flood_fill_lr2(image: np.array, x: int, y: int, from_color: int, to_color: int):
-        if x < 0 or y < 0 or x >= image.shape[1] or y >= image.shape[0]:
-            return
-        value = image[y, x]
-        if value == to_color:
-            return
-        if value != from_color:
-            return
-        image[y, x] = to_color
-        FloodFill._flood_fill_lr2(image, x-1, y, from_color, to_color)
-        FloodFill._flood_fill_lr2(image, x+1, y, from_color, to_color)
+        if from_color == to_color:
+            return  # No action needed if the colors are the same
+
+        stack = [(x, y)]
+        while stack:
+            x, y = stack.pop()
+            # Check if the coordinates are within the image bounds
+            if x < 0 or y < 0 or x >= image.shape[1] or y >= image.shape[0]:
+                continue
+            value = image[y, x]
+            if value == to_color:
+                continue # Already filled with the target color
+            if value != from_color:
+                continue # Not the color we're looking to replace
+            image[y, x] = to_color  # Fill the pixel with the target color
+            # Add two neighbors to the stack
+            neighbors = [(x-1, y), (x+1, y)]
+            stack.extend(neighbors)
 
     @staticmethod
     def _flood_fill_tb2(image: np.array, x: int, y: int, from_color: int, to_color: int):
-        if x < 0 or y < 0 or x >= image.shape[1] or y >= image.shape[0]:
-            return
-        value = image[y, x]
-        if value == to_color:
-            return
-        if value != from_color:
-            return
-        image[y, x] = to_color
-        FloodFill._flood_fill_tb2(image, x, y-1, from_color, to_color)
-        FloodFill._flood_fill_tb2(image, x, y+1, from_color, to_color)
+        if from_color == to_color:
+            return  # No action needed if the colors are the same
+
+        stack = [(x, y)]
+        while stack:
+            x, y = stack.pop()
+            # Check if the coordinates are within the image bounds
+            if x < 0 or y < 0 or x >= image.shape[1] or y >= image.shape[0]:
+                continue
+            value = image[y, x]
+            if value == to_color:
+                continue # Already filled with the target color
+            if value != from_color:
+                continue # Not the color we're looking to replace
+            image[y, x] = to_color  # Fill the pixel with the target color
+            # Add two neighbors to the stack
+            neighbors = [(x, y-1), (x, y+1)]
+            stack.extend(neighbors)
 
     @staticmethod
     def _flood_fill_tlbr2(image: np.array, x: int, y: int, from_color: int, to_color: int):
-        if x < 0 or y < 0 or x >= image.shape[1] or y >= image.shape[0]:
-            return
-        value = image[y, x]
-        if value == to_color:
-            return
-        if value != from_color:
-            return
-        image[y, x] = to_color
-        FloodFill._flood_fill_tlbr2(image, x-1, y-1, from_color, to_color)
-        FloodFill._flood_fill_tlbr2(image, x+1, y+1, from_color, to_color)
+        if from_color == to_color:
+            return  # No action needed if the colors are the same
+
+        stack = [(x, y)]
+        while stack:
+            x, y = stack.pop()
+            # Check if the coordinates are within the image bounds
+            if x < 0 or y < 0 or x >= image.shape[1] or y >= image.shape[0]:
+                continue
+            value = image[y, x]
+            if value == to_color:
+                continue # Already filled with the target color
+            if value != from_color:
+                continue # Not the color we're looking to replace
+            image[y, x] = to_color  # Fill the pixel with the target color
+            # Add two neighbors to the stack
+            neighbors = [(x-1, y-1), (x+1, y+1)]
+            stack.extend(neighbors)
 
     @staticmethod
     def _flood_fill_trbl2(image: np.array, x: int, y: int, from_color: int, to_color: int):
-        if x < 0 or y < 0 or x >= image.shape[1] or y >= image.shape[0]:
-            return
-        value = image[y, x]
-        if value == to_color:
-            return
-        if value != from_color:
-            return
-        image[y, x] = to_color
-        FloodFill._flood_fill_trbl2(image, x+1, y-1, from_color, to_color)
-        FloodFill._flood_fill_trbl2(image, x-1, y+1, from_color, to_color)
+        if from_color == to_color:
+            return  # No action needed if the colors are the same
+
+        stack = [(x, y)]
+        while stack:
+            x, y = stack.pop()
+            # Check if the coordinates are within the image bounds
+            if x < 0 or y < 0 or x >= image.shape[1] or y >= image.shape[0]:
+                continue
+            value = image[y, x]
+            if value == to_color:
+                continue # Already filled with the target color
+            if value != from_color:
+                continue # Not the color we're looking to replace
+            image[y, x] = to_color  # Fill the pixel with the target color
+            # Add two neighbors to the stack
+            neighbors = [(x+1, y-1), (x-1, y+1)]
+            stack.extend(neighbors)
 
     @staticmethod
     def _mask_flood_fill_nearest4(mask: np.array, image: np.array, x: int, y: int, color: int):
         assert mask.shape == image.shape, "Both images must have the same size"
-        if x < 0 or y < 0 or x >= mask.shape[1] or y >= mask.shape[0]:
-            return
-        mask_value = mask[y, x]
-        if mask_value > 0:
-            return  # already visited
-        value = image[y, x]
-        if value != color:
-            return
-        mask[y, x] = 1  # flag as visited
-        FloodFill._mask_flood_fill_nearest4(mask, image, x-1, y, color)
-        FloodFill._mask_flood_fill_nearest4(mask, image, x+1, y, color)
-        FloodFill._mask_flood_fill_nearest4(mask, image, x, y-1, color)
-        FloodFill._mask_flood_fill_nearest4(mask, image, x, y+1, color)
+        stack = [(x, y)]
+        while stack:
+            x, y = stack.pop()
+            if x < 0 or y < 0 or x >= mask.shape[1] or y >= mask.shape[0]:
+                continue
+            if mask[y, x] > 0:
+                continue # already visited
+            if image[y, x] != color:
+                continue
+            mask[y, x] = 1 # flag as visited
+            # Add the 4-connected neighbors to the stack
+            neighbors = [(x, y-1), (x-1, y), (x+1, y), (x, y+1)]
+            stack.extend(neighbors)
 
     @staticmethod
     def _mask_flood_fill_all8(mask: np.array, image: np.array, x: int, y: int, color: int):
         assert mask.shape == image.shape, "Both images must have the same size"
-        if x < 0 or y < 0 or x >= mask.shape[1] or y >= mask.shape[0]:
-            return
-        mask_value = mask[y, x]
-        if mask_value > 0:
-            return  # already visited
-        value = image[y, x]
-        if value != color:
-            return
-        mask[y, x] = 1  # flag as visited
-        FloodFill._mask_flood_fill_all8(mask, image, x-1, y-1, color)
-        FloodFill._mask_flood_fill_all8(mask, image, x, y-1, color)
-        FloodFill._mask_flood_fill_all8(mask, image, x+1, y-1, color)
-        FloodFill._mask_flood_fill_all8(mask, image, x-1, y, color)
-        FloodFill._mask_flood_fill_all8(mask, image, x+1, y, color)
-        FloodFill._mask_flood_fill_all8(mask, image, x-1, y+1, color)
-        FloodFill._mask_flood_fill_all8(mask, image, x, y+1, color)
-        FloodFill._mask_flood_fill_all8(mask, image, x+1, y+1, color)
+        stack = [(x, y)]
+        while stack:
+            x, y = stack.pop()
+            if x < 0 or y < 0 or x >= mask.shape[1] or y >= mask.shape[0]:
+                continue
+            if mask[y, x] > 0:
+                continue # already visited
+            if image[y, x] != color:
+                continue
+            mask[y, x] = 1 # flag as visited
+            # Add all 8-connected neighbors to the stack
+            neighbors = [
+                (x-1, y-1), (x, y-1), (x+1, y-1),
+                (x-1, y),             (x+1, y),
+                (x-1, y+1), (x, y+1), (x+1, y+1)
+            ]
+            stack.extend(neighbors)
 
     @staticmethod
     def _mask_flood_fill_corner4(mask: np.array, image: np.array, x: int, y: int, color: int):
         assert mask.shape == image.shape, "Both images must have the same size"
-        if x < 0 or y < 0 or x >= mask.shape[1] or y >= mask.shape[0]:
-            return
-        mask_value = mask[y, x]
-        if mask_value > 0:
-            return  # already visited
-        value = image[y, x]
-        if value != color:
-            return
-        mask[y, x] = 1  # flag as visited
-        FloodFill._mask_flood_fill_corner4(mask, image, x-1, y-1, color)
-        FloodFill._mask_flood_fill_corner4(mask, image, x+1, y-1, color)
-        FloodFill._mask_flood_fill_corner4(mask, image, x-1, y+1, color)
-        FloodFill._mask_flood_fill_corner4(mask, image, x+1, y+1, color)
+        stack = [(x, y)]
+        while stack:
+            x, y = stack.pop()
+            if x < 0 or y < 0 or x >= mask.shape[1] or y >= mask.shape[0]:
+                continue
+            if mask[y, x] > 0:
+                continue  # already visited
+            if image[y, x] != color:
+                continue
+            mask[y, x] = 1 # flag as visited
+            # Add corner neighbors to the stack
+            neighbors = [(x-1, y-1), (x+1, y-1), (x-1, y+1), (x+1, y+1)]
+            stack.extend(neighbors)
 
     @staticmethod
     def _mask_flood_fill_lr2(mask: np.array, image: np.array, x: int, y: int, color: int):
         assert mask.shape == image.shape, "Both images must have the same size"
-        if x < 0 or y < 0 or x >= mask.shape[1] or y >= mask.shape[0]:
-            return
-        mask_value = mask[y, x]
-        if mask_value > 0:
-            return  # already visited
-        value = image[y, x]
-        if value != color:
-            return
-        mask[y, x] = 1  # flag as visited
-        FloodFill._mask_flood_fill_lr2(mask, image, x-1, y, color)
-        FloodFill._mask_flood_fill_lr2(mask, image, x+1, y, color)
+        stack = [(x, y)]
+        while stack:
+            x, y = stack.pop()
+            if x < 0 or y < 0 or x >= mask.shape[1] or y >= mask.shape[0]:
+                continue
+            if mask[y, x] > 0:
+                continue  # already visited
+            if image[y, x] != color:
+                continue
+            mask[y, x] = 1 # flag as visited
+            # Add two neighbors to the stack
+            neighbors = [(x-1, y), (x+1, y)]
+            stack.extend(neighbors)
 
     @staticmethod
     def _mask_flood_fill_tb2(mask: np.array, image: np.array, x: int, y: int, color: int):
         assert mask.shape == image.shape, "Both images must have the same size"
-        if x < 0 or y < 0 or x >= mask.shape[1] or y >= mask.shape[0]:
-            return
-        mask_value = mask[y, x]
-        if mask_value > 0:
-            return  # already visited
-        value = image[y, x]
-        if value != color:
-            return
-        mask[y, x] = 1  # flag as visited
-        FloodFill._mask_flood_fill_tb2(mask, image, x, y-1, color)
-        FloodFill._mask_flood_fill_tb2(mask, image, x, y+1, color)
+        stack = [(x, y)]
+        while stack:
+            x, y = stack.pop()
+            if x < 0 or y < 0 or x >= mask.shape[1] or y >= mask.shape[0]:
+                continue
+            if mask[y, x] > 0:
+                continue  # already visited
+            if image[y, x] != color:
+                continue
+            mask[y, x] = 1 # flag as visited
+            # Add two neighbors to the stack
+            neighbors = [(x, y-1), (x, y+1)]
+            stack.extend(neighbors)
 
     @staticmethod
     def _mask_flood_fill_tlbr2(mask: np.array, image: np.array, x: int, y: int, color: int):
         assert mask.shape == image.shape, "Both images must have the same size"
-        if x < 0 or y < 0 or x >= mask.shape[1] or y >= mask.shape[0]:
-            return
-        mask_value = mask[y, x]
-        if mask_value > 0:
-            return  # already visited
-        value = image[y, x]
-        if value != color:
-            return
-        mask[y, x] = 1  # flag as visited
-        FloodFill._mask_flood_fill_tlbr2(mask, image, x-1, y-1, color)
-        FloodFill._mask_flood_fill_tlbr2(mask, image, x+1, y+1, color)
+        stack = [(x, y)]
+        while stack:
+            x, y = stack.pop()
+            if x < 0 or y < 0 or x >= mask.shape[1] or y >= mask.shape[0]:
+                continue
+            if mask[y, x] > 0:
+                continue  # already visited
+            if image[y, x] != color:
+                continue
+            mask[y, x] = 1 # flag as visited
+            # Add two neighbors to the stack
+            neighbors = [(x-1, y-1), (x+1, y+1)]
+            stack.extend(neighbors)
 
     @staticmethod
     def _mask_flood_fill_trbl2(mask: np.array, image: np.array, x: int, y: int, color: int):
         assert mask.shape == image.shape, "Both images must have the same size"
-        if x < 0 or y < 0 or x >= mask.shape[1] or y >= mask.shape[0]:
-            return
-        mask_value = mask[y, x]
-        if mask_value > 0:
-            return  # already visited
-        value = image[y, x]
-        if value != color:
-            return
-        mask[y, x] = 1  # flag as visited
-        FloodFill._mask_flood_fill_trbl2(mask, image, x+1, y-1, color)
-        FloodFill._mask_flood_fill_trbl2(mask, image, x-1, y+1, color)
+        stack = [(x, y)]
+        while stack:
+            x, y = stack.pop()
+            if x < 0 or y < 0 or x >= mask.shape[1] or y >= mask.shape[0]:
+                continue
+            if mask[y, x] > 0:
+                continue  # already visited
+            if image[y, x] != color:
+                continue
+            mask[y, x] = 1 # flag as visited
+            # Add two neighbors to the stack
+            neighbors = [(x+1, y-1), (x-1, y+1)]
+            stack.extend(neighbors)
 
 def image_flood_fill(image: np.array, x: int, y: int, from_color: int, to_color: int, connectivity: PixelConnectivity):
     """
