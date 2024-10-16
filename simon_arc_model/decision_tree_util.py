@@ -24,11 +24,17 @@ from simon_arc_lab.show_prediction_result import show_prediction_result
 from sklearn.tree import DecisionTreeClassifier
 from sklearn import tree
 import matplotlib.pyplot as plt
+from enum import Enum
+
+class DecisionTreeFeature(Enum):
+    HISTOGRAM_DIAGONAL = 'histogram_diagonal'
+    HISTOGRAM_ROWCOL = 'histogram_rowcol'
+    HISTOGRAM_VALUE = 'histogram_value'
 
 class DecisionTreeUtil:
 
     @classmethod
-    def xs_for_input_image(cls, image: int, pair_index: int, is_earlier_prediction: bool):
+    def xs_for_input_image(cls, image: int, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> list:
         height, width = image.shape
 
         ignore_mask = np.zeros_like(image)
@@ -36,7 +42,7 @@ class DecisionTreeUtil:
 
         # Image with object ids
         object_ids = np.zeros((height, width), dtype=np.uint32)
-        object_id_start = (pair_index + 1) * 1000
+        object_id_start = (pair_id + 1) * 1000
         if is_earlier_prediction:
             object_id_start += 500
         for component_index, component in enumerate(components):
@@ -160,7 +166,7 @@ class DecisionTreeUtil:
         for y in range(height):
             for x in range(width):
                 values = []
-                values.append(pair_index)
+                values.append(pair_id)
                 # values.append(x)
                 # values.append(y)
                 values.append(image[y, x])
@@ -278,14 +284,14 @@ class DecisionTreeUtil:
             xs = xs_list0[i] + xs_list1[i]
             xs_list.append(xs)
         return xs_list
-
+    
     @classmethod
-    def xs_for_input_noise_images(cls, refinement_index: int, input_image: np.array, noise_image: np.array, pair_index: int) -> list:
+    def xs_for_input_noise_images(cls, refinement_index: int, input_image: np.array, noise_image: np.array, pair_id: int, features: set[DecisionTreeFeature]) -> list:
         if refinement_index == 0:
-            xs_image = cls.xs_for_input_image(input_image, pair_index, is_earlier_prediction = False)
+            xs_image = cls.xs_for_input_image(input_image, pair_id, features, False)
         else:
-            xs_image0 = cls.xs_for_input_image(input_image, pair_index, is_earlier_prediction = False)
-            xs_image1 = cls.xs_for_input_image(noise_image, pair_index, is_earlier_prediction = True)
+            xs_image0 = cls.xs_for_input_image(input_image, pair_id, features, False)
+            xs_image1 = cls.xs_for_input_image(noise_image, pair_id, features, True)
             xs_image = cls.merge_xs_per_pixel(xs_image0, xs_image1)
         return xs_image
 
@@ -320,7 +326,7 @@ class DecisionTreeUtil:
             raise ValueError(f'Unknown transformation_index: {transformation_index}')
 
     @classmethod
-    def predict_output(cls, task: Task, test_index: int, previous_prediction: Optional[np.array], refinement_index: int, noise_level: int) -> np.array:
+    def predict_output(cls, task: Task, test_index: int, previous_prediction: Optional[np.array], refinement_index: int, noise_level: int, features: set[DecisionTreeFeature]) -> np.array:
         xs = []
         ys = []
 
@@ -384,7 +390,7 @@ class DecisionTreeUtil:
 
                 pair_id = current_pair_id * count_mutations + i
                 current_pair_id += 1
-                xs_image = cls.xs_for_input_noise_images(refinement_index, input_image_mutated, noise_image_mutated, pair_id)
+                xs_image = cls.xs_for_input_noise_images(refinement_index, input_image_mutated, noise_image_mutated, pair_id, features)
                 xs.extend(xs_image)
                 ys_image = cls.ys_for_output_image(output_image_mutated)
                 ys.extend(ys_image)
@@ -397,9 +403,9 @@ class DecisionTreeUtil:
         if previous_prediction is not None:
             noise_image_mutated = previous_prediction.copy()
 
-        # pair_id = current_pair_id
+        # Picking a pair_id that has already been used, performs better than picking a new unseen pair_id.
         pair_id = random.Random(refinement_index + 42).randint(0, current_pair_id - 1)
-        xs_image = cls.xs_for_input_noise_images(refinement_index, input_image, noise_image_mutated, pair_id)
+        xs_image = cls.xs_for_input_noise_images(refinement_index, input_image, noise_image_mutated, pair_id, features)
         result = clf.predict(xs_image)
 
         height, width = input_image.shape

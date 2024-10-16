@@ -17,7 +17,7 @@ from .work_item_list import WorkItemList
 from .work_item_status import WorkItemStatus
 from .save_arcprize2024_submission_file import *
 from .work_manager_base import WorkManagerBase
-from .decision_tree_util import DecisionTreeUtil
+from .decision_tree_util import DecisionTreeUtil, DecisionTreeFeature
 
 class WorkManagerDecisionTree(WorkManagerBase):
     def __init__(self, model: any, taskset: TaskSet):
@@ -64,8 +64,14 @@ class WorkManagerDecisionTree(WorkManagerBase):
 
         # noise_levels = [95, 90, 85, 80, 75, 70, 65]
         # noise_levels = [95, 90]
-        noise_levels = [100, 95, 90]
+        # noise_levels = [100, 95, 90]
+        noise_levels = [100]
         number_of_refinements = len(noise_levels)
+
+        features = set()
+        # features.add(DecisionTreeFeature.HISTOGRAM_DIAGONAL)
+        # features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
+        # features.add(DecisionTreeFeature.HISTOGRAM_VALUE)
 
         correct_count = 0
         correct_task_id_set = set()
@@ -86,7 +92,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
                     work_item.test_index, 
                     last_predicted_output, 
                     refinement_index, 
-                    noise_level
+                    noise_level,
+                    features
                 )
                 last_predicted_output = predicted_output
                 score = ts.measure_test_prediction(predicted_output, work_item.test_index)
