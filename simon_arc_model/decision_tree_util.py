@@ -41,6 +41,12 @@ class DecisionTreeFeature(Enum):
     NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5 = 'number_of_unique_colors_in_diamond5'
     ROTATE45 = 'image_rotate45'
     COUNT_NEIGHBORS_WITH_SAME_COLOR = 'count_neighbors_with_same_color'
+    EROSION_ALL8 = 'erosion_all8'
+    EROSION_NEAREST4 = 'erosion_nearest4'
+    EROSION_CORNER4 = 'erosion_corner4'
+    EROSION_ROWCOL = 'erosion_rowcol'
+    EROSION_DIAGONAL = 'erosion_diagonal'
+
 
 class DecisionTreeUtil:
 
@@ -166,19 +172,23 @@ class DecisionTreeUtil:
         #     gd_image = image_gravity_draw(image, gravity_background_color, direction)
         #     gravity_draw_image_list.append(gd_image)
 
-        # erosion_pixel_connectivity_list = [
-        #     PixelConnectivity.ALL8,
-        #     PixelConnectivity.NEAREST4,
-        #     PixelConnectivity.CORNER4,
-        #     PixelConnectivity.LR2,
-        #     PixelConnectivity.TB2,
-        #     PixelConnectivity.TLBR2,
-        #     PixelConnectivity.TRBL2,
-        # ]
-        # erosion_image_list = []
-        # for erosion_connectivity in erosion_pixel_connectivity_list:
-        #     erosion_image = image_erosion_multicolor(image, erosion_connectivity)
-        #     erosion_image_list.append(erosion_image)
+        erosion_pixel_connectivity_list = []
+        if DecisionTreeFeature.EROSION_ALL8 in features:
+            erosion_pixel_connectivity_list.append(PixelConnectivity.ALL8)
+        if DecisionTreeFeature.EROSION_NEAREST4 in features:
+            erosion_pixel_connectivity_list.append(PixelConnectivity.NEAREST4)
+        if DecisionTreeFeature.EROSION_CORNER4 in features:
+            erosion_pixel_connectivity_list.append(PixelConnectivity.CORNER4)
+        if DecisionTreeFeature.EROSION_ROWCOL in features:
+            erosion_pixel_connectivity_list.append(PixelConnectivity.LR2)
+            erosion_pixel_connectivity_list.append(PixelConnectivity.TB2)
+        if DecisionTreeFeature.EROSION_DIAGONAL in features:
+            erosion_pixel_connectivity_list.append(PixelConnectivity.TLBR2)
+            erosion_pixel_connectivity_list.append(PixelConnectivity.TRBL2)
+        erosion_image_list = []
+        for erosion_connectivity in erosion_pixel_connectivity_list:
+            erosion_image = image_erosion_multicolor(image, erosion_connectivity)
+            erosion_image_list.append(erosion_image)
 
         shape3x3_images = []
         if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_ALL9 in features:
@@ -291,8 +301,8 @@ class DecisionTreeUtil:
                 # for gd_image in gravity_draw_image_list:
                 #     values.append(gd_image[y, x])
 
-                # for erosion_image in erosion_image_list:
-                #     values.append(erosion_image[y, x])
+                for erosion_image in erosion_image_list:
+                    values.append(erosion_image[y, x])
 
                 for image_shape3x3 in shape3x3_images:
                     values.append(image_shape3x3[y, x] + 100)

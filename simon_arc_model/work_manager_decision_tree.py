@@ -80,6 +80,11 @@ class WorkManagerDecisionTree(WorkManagerBase):
         # features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4)
         # features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5)
         # features.add(DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR)
+        # features.add(DecisionTreeFeature.EROSION_ALL8)
+        # features.add(DecisionTreeFeature.EROSION_NEAREST4)
+        # features.add(DecisionTreeFeature.EROSION_CORNER4)
+        # features.add(DecisionTreeFeature.EROSION_ROWCOL)
+        # features.add(DecisionTreeFeature.EROSION_DIAGONAL)
 
         correct_count = 0
         correct_task_id_set = set()
