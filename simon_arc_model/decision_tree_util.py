@@ -324,6 +324,8 @@ class DecisionTreeUtil:
         xs = []
         ys = []
 
+        current_pair_id = 0
+
         for pair_index in range(task.count_examples):
             pair_seed = pair_index * 1000 + refinement_index * 10000
             input_image = task.example_input(pair_index)
@@ -380,7 +382,8 @@ class DecisionTreeUtil:
             for i in range(count_mutations):
                 input_image_mutated, noise_image_mutated, output_image_mutated = input_noise_output[i]
 
-                pair_id = pair_index * 1000 + i
+                pair_id = current_pair_id * count_mutations + i
+                current_pair_id += 1
                 xs_image = cls.xs_for_input_noise_images(refinement_index, input_image_mutated, noise_image_mutated, pair_id)
                 xs.extend(xs_image)
                 ys_image = cls.ys_for_output_image(output_image_mutated)
@@ -389,13 +392,13 @@ class DecisionTreeUtil:
         clf = DecisionTreeClassifier(random_state=42)
         clf.fit(xs, ys)
 
-        test_pair_index = task.count_examples + test_index
         input_image = task.test_input(test_index)
         noise_image_mutated = input_image.copy()
         if previous_prediction is not None:
             noise_image_mutated = previous_prediction.copy()
 
-        pair_id = test_pair_index * 1000
+        # pair_id = current_pair_id
+        pair_id = random.Random(refinement_index + 42).randint(0, current_pair_id - 1)
         xs_image = cls.xs_for_input_noise_images(refinement_index, input_image, noise_image_mutated, pair_id)
         result = clf.predict(xs_image)
 
