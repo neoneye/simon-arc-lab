@@ -54,6 +54,8 @@ class DecisionTreeUtil:
     def xs_for_input_image(cls, image: int, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> list:
         height, width = image.shape
 
+        lookaround_size = 1
+
         ignore_mask = np.zeros_like(image)
         components = ConnectedComponent.find_objects_with_ignore_mask_inner(PixelConnectivity.ALL8, image, ignore_mask)
 
@@ -260,8 +262,9 @@ class DecisionTreeUtil:
                     else:
                         values.append(0)
 
-                for dy in range(-1, 2):
-                    for dx in range(-1, 2):
+                n = lookaround_size
+                for dy in range(-n, n * 2):
+                    for dx in range(-n, n * 2):
                         if dx == 0 and dy == 0:
                             continue
                         xx = x + dx
