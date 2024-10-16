@@ -93,44 +93,46 @@ class DecisionTreeUtil:
                 image_same_list.append(image_same)
 
         row_histograms = []
-        for y in range(height):
-            row = image[y, :]
-            # convert to 2d image
-            row_image = np.expand_dims(row, axis=0)
-            histogram = Histogram.create_with_image(row_image)
-            row_histograms.append(histogram)
-
         column_histogram = []
-        for x in range(width):
-            column = image[:, x]
-            # convert to 2d image
-            column_image = np.expand_dims(column, axis=0)
-            histogram = Histogram.create_with_image(column_image)
-            column_histogram.append(histogram)
+        if DecisionTreeFeature.HISTOGRAM_ROWCOL in features:
+            for y in range(height):
+                row = image[y, :]
+                # convert to 2d image
+                row_image = np.expand_dims(row, axis=0)
+                histogram = Histogram.create_with_image(row_image)
+                row_histograms.append(histogram)
+
+            for x in range(width):
+                column = image[:, x]
+                # convert to 2d image
+                column_image = np.expand_dims(column, axis=0)
+                histogram = Histogram.create_with_image(column_image)
+                column_histogram.append(histogram)
 
         tlbr_histograms = []
-        skewed_image_down = image_skew(image, outside_color, SkewDirection.DOWN)
-        for y in range(skewed_image_down.shape[0]):
-            row = skewed_image_down[y, :]
-            # convert to 2d image
-            row_image = np.expand_dims(row, axis=0)
-            histogram = Histogram.create_with_image(row_image)
-            histogram.remove_color(outside_color)
-            # print(f'y={y} histogram={histogram.pretty()}')
-            tlbr_histograms.append(histogram)
-        # show_prediction_result(image, skewed_image_down, None)
-
         trbl_histograms = []
-        skewed_image_up = image_skew(image, outside_color, SkewDirection.UP)
-        for y in range(skewed_image_up.shape[0]):
-            row = skewed_image_up[y, :]
-            # convert to 2d image
-            row_image = np.expand_dims(row, axis=0)
-            histogram = Histogram.create_with_image(row_image)
-            histogram.remove_color(outside_color)
-            # print(f'y={y} histogram={histogram.pretty()}')
-            trbl_histograms.append(histogram)
-        # show_prediction_result(image, skewed_image_up, None)
+        if DecisionTreeFeature.HISTOGRAM_DIAGONAL in features:
+            skewed_image_down = image_skew(image, outside_color, SkewDirection.DOWN)
+            for y in range(skewed_image_down.shape[0]):
+                row = skewed_image_down[y, :]
+                # convert to 2d image
+                row_image = np.expand_dims(row, axis=0)
+                histogram = Histogram.create_with_image(row_image)
+                histogram.remove_color(outside_color)
+                # print(f'y={y} histogram={histogram.pretty()}')
+                tlbr_histograms.append(histogram)
+            # show_prediction_result(image, skewed_image_down, None)
+
+            skewed_image_up = image_skew(image, outside_color, SkewDirection.UP)
+            for y in range(skewed_image_up.shape[0]):
+                row = skewed_image_up[y, :]
+                # convert to 2d image
+                row_image = np.expand_dims(row, axis=0)
+                histogram = Histogram.create_with_image(row_image)
+                histogram.remove_color(outside_color)
+                # print(f'y={y} histogram={histogram.pretty()}')
+                trbl_histograms.append(histogram)
+            # show_prediction_result(image, skewed_image_up, None)
 
         # gravity_draw_directions = [
         #     GravityDrawDirection.TOP_TO_BOTTOM,
@@ -245,16 +247,17 @@ class DecisionTreeUtil:
                 # for erosion_image in erosion_image_list:
                 #     values.append(erosion_image[y, x])
 
-                assert len(row_histograms) == height
-                assert len(column_histogram) == width
 
-                tlbr_histogram = tlbr_histograms[x + y]
-                trbl_histogram = trbl_histograms[width - 1 - x + y]
                 histograms = []
-                histograms.append(tlbr_histogram)
-                histograms.append(trbl_histogram)
-                histograms.append(row_histograms[y])
-                histograms.append(column_histogram[x])
+                if DecisionTreeFeature.HISTOGRAM_ROWCOL in features:
+                    histograms.append(row_histograms[y])
+                    histograms.append(column_histogram[x])
+
+                if DecisionTreeFeature.HISTOGRAM_DIAGONAL in features:
+                    tlbr_histogram = tlbr_histograms[x + y]
+                    trbl_histogram = trbl_histograms[width - 1 - x + y]
+                    histograms.append(tlbr_histogram)
+                    histograms.append(trbl_histogram)
 
                 for histogram in histograms:
                     unique_colors = histogram.unique_colors()
@@ -263,10 +266,13 @@ class DecisionTreeUtil:
                     for i in range(10):
                         count = histogram.get_count_for_color(i)
                         values.append(count)
-                        if count > 0:
-                            values.append(i)
-                        else:
-                            values.append(-1)
+
+                        if DecisionTreeFeature.HISTOGRAM_VALUE in features:
+                            if count > 0:
+                                values.append(i)
+                            else:
+                                values.append(-1)
+
                         if i in unique_colors:
                             values.append(1)
                         else:

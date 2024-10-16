@@ -69,9 +69,9 @@ class WorkManagerDecisionTree(WorkManagerBase):
         number_of_refinements = len(noise_levels)
 
         features = set()
-        # features.add(DecisionTreeFeature.HISTOGRAM_DIAGONAL)
-        # features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
-        # features.add(DecisionTreeFeature.HISTOGRAM_VALUE)
+        features.add(DecisionTreeFeature.HISTOGRAM_DIAGONAL)
+        features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
+        features.add(DecisionTreeFeature.HISTOGRAM_VALUE)
 
         correct_count = 0
         correct_task_id_set = set()
