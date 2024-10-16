@@ -7,6 +7,7 @@ from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.image_shape3x3_opposite import ImageShape3x3Opposite
 from simon_arc_lab.image_shape3x3_center import ImageShape3x3Center
+from simon_arc_lab.image_shape3x3_histogram import *
 from simon_arc_lab.image_count3x3 import *
 from simon_arc_lab.image_erosion_multicolor import image_erosion_multicolor
 from simon_arc_lab.image_distort import image_distort
@@ -30,6 +31,11 @@ class DecisionTreeFeature(Enum):
     HISTOGRAM_DIAGONAL = 'histogram_diagonal'
     HISTOGRAM_ROWCOL = 'histogram_rowcol'
     HISTOGRAM_VALUE = 'histogram_value'
+    NUMBER_OF_UNIQUE_COLORS_ALL9 = 'number_of_unique_colors_all9'
+    NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER = 'number_of_unique_colors_around_center'
+    NUMBER_OF_UNIQUE_COLORS_IN_CORNERS = 'number_of_unique_colors_in_corners'
+    NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4 = 'number_of_unique_colors_in_diamond4'
+    NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5 = 'number_of_unique_colors_in_diamond5'
 
 class DecisionTreeUtil:
 
@@ -164,6 +170,27 @@ class DecisionTreeUtil:
         #     erosion_image = image_erosion_multicolor(image, erosion_connectivity)
         #     erosion_image_list.append(erosion_image)
 
+        shape3x3_images = []
+        if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_ALL9 in features:
+            image_number_of_unique_colors_all9 = ImageShape3x3Histogram.number_of_unique_colors_all9(image)
+            shape3x3_images.append(image_number_of_unique_colors_all9)
+
+        if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER in features:
+            image_number_of_unique_colors_around_center = ImageShape3x3Histogram.number_of_unique_colors_around_center(image)
+            shape3x3_images.append(image_number_of_unique_colors_around_center)
+
+        if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_CORNERS in features:
+            image_number_of_unique_colors_in_corners = ImageShape3x3Histogram.number_of_unique_colors_in_corners(image)
+            shape3x3_images.append(image_number_of_unique_colors_in_corners)
+        
+        if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4 in features:
+            image_number_of_unique_colors_in_diamond4 = ImageShape3x3Histogram.number_of_unique_colors_in_diamond4(image)
+            shape3x3_images.append(image_number_of_unique_colors_in_diamond4)
+        
+        if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5 in features:
+            image_number_of_unique_colors_in_diamond5 = ImageShape3x3Histogram.number_of_unique_colors_in_diamond5(image)
+            shape3x3_images.append(image_number_of_unique_colors_in_diamond5)
+
         values_list = []
         for y in range(height):
             for x in range(width):
@@ -247,6 +274,8 @@ class DecisionTreeUtil:
                 # for erosion_image in erosion_image_list:
                 #     values.append(erosion_image[y, x])
 
+                for image_shape3x3 in shape3x3_images:
+                    values.append(image_shape3x3[y, x] + 100)
 
                 histograms = []
                 if DecisionTreeFeature.HISTOGRAM_ROWCOL in features:

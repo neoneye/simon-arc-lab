@@ -72,6 +72,11 @@ class WorkManagerDecisionTree(WorkManagerBase):
         features.add(DecisionTreeFeature.HISTOGRAM_DIAGONAL)
         features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
         features.add(DecisionTreeFeature.HISTOGRAM_VALUE)
+        # features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_ALL9)
+        # features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER)
+        # features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_CORNERS)
+        # features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4)
+        # features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5)
 
         correct_count = 0
         correct_task_id_set = set()
