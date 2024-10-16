@@ -40,6 +40,7 @@ class DecisionTreeFeature(Enum):
     NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4 = 'number_of_unique_colors_in_diamond4'
     NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5 = 'number_of_unique_colors_in_diamond5'
     ROTATE45 = 'image_rotate45'
+    COUNT_NEIGHBORS_WITH_SAME_COLOR = 'count_neighbors_with_same_color'
 
 class DecisionTreeUtil:
 
@@ -101,6 +102,11 @@ class DecisionTreeUtil:
                     continue
                 image_same = count_same_color_as_center_with_one_neighbor_nowrap(image, dx, dy)
                 image_same_list.append(image_same)
+
+        if DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR in features:
+            image_count_neightbors_with_same_color = count_neighbors_with_same_color_nowrap(image)
+        else:
+            image_count_neightbors_with_same_color = None
 
         row_histograms = []
         column_histogram = []
@@ -290,6 +296,9 @@ class DecisionTreeUtil:
 
                 for image_shape3x3 in shape3x3_images:
                     values.append(image_shape3x3[y, x] + 100)
+
+                if DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR in features:
+                    values.append(image_count_neightbors_with_same_color[y, x])
 
                 histograms = []
                 if DecisionTreeFeature.HISTOGRAM_ROWCOL in features:

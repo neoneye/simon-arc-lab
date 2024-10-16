@@ -79,6 +79,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
         # features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_CORNERS)
         # features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4)
         # features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5)
+        # features.add(DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR)
 
         correct_count = 0
         correct_task_id_set = set()
