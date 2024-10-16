@@ -54,6 +54,7 @@ class DecisionTreeUtil:
     def xs_for_input_image(cls, image: int, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> list:
         height, width = image.shape
 
+        lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 1
         lookaround_size = 1
 
         ignore_mask = np.zeros_like(image)
@@ -104,8 +105,9 @@ class DecisionTreeUtil:
         the_image_outline_all8 = image_outline_all8(image)
 
         image_same_list = []
-        for dy in range(-1, 2):
-            for dx in range(-1, 2):
+        n = lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap
+        for dy in range(-n, n * 2):
+            for dx in range(-n, n * 2):
                 if dx == 0 and dy == 0:
                     continue
                 image_same = count_same_color_as_center_with_one_neighbor_nowrap(image, dx, dy)
