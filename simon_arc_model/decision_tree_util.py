@@ -46,7 +46,8 @@ class DecisionTreeFeature(Enum):
     EROSION_CORNER4 = 'erosion_corner4'
     EROSION_ROWCOL = 'erosion_rowcol'
     EROSION_DIAGONAL = 'erosion_diagonal'
-
+    CORNER = 'corner'
+    CENTER = 'center'
 
 class DecisionTreeUtil:
 
@@ -263,6 +264,22 @@ class DecisionTreeUtil:
                         values.append(1)
                     else:
                         values.append(0)
+
+                if DecisionTreeFeature.CORNER in features:
+                    corner_topleft = x == 0 and y == 0
+                    corner_topright = x_rev == 0 and y == 0
+                    corner_bottomleft = x == 0 and y_rev == 0
+                    corner_bottomright = x_rev == 0 and y_rev == 0
+                    corner_values = [corner_topleft, corner_topright, corner_bottomleft, corner_bottomright]
+                    # convert bools to 0 or 1
+                    corner_values = [int(x) for x in corner_values]
+                    values.extend(corner_values)
+                
+                if DecisionTreeFeature.CENTER in features:
+                    is_center_column = abs(x - x_rev) < 2
+                    is_center_row = abs(y - y_rev) < 2
+                    values.append(int(is_center_column))
+                    values.append(int(is_center_row))
 
                 n = lookaround_size
                 for dy in range(-n, n * 2):

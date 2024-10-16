@@ -73,6 +73,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
         features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
         features.add(DecisionTreeFeature.HISTOGRAM_VALUE)
         features.add(DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL)
+        # features.add(DecisionTreeFeature.CORNER)
+        # features.add(DecisionTreeFeature.CENTER)
         # features.add(DecisionTreeFeature.ROTATE45)
         # features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_ALL9)
         # features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER)
