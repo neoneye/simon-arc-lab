@@ -15,6 +15,7 @@ from simon_arc_lab.image_raytrace_probecolor import *
 from simon_arc_lab.image_outline import *
 from simon_arc_lab.image_gravity_draw import *
 from simon_arc_lab.image_skew import *
+from simon_arc_lab.image_mass_compare import *
 from simon_arc_lab.pixel_connectivity import *
 from simon_arc_lab.connected_component import *
 from simon_arc_lab.find_bounding_box import *
@@ -191,6 +192,11 @@ class DecisionTreeUtil:
             image_number_of_unique_colors_in_diamond5 = ImageShape3x3Histogram.number_of_unique_colors_in_diamond5(image)
             shape3x3_images.append(image_number_of_unique_colors_in_diamond5)
 
+        mass_compare_adjacent_rows = image_mass_compare_adjacent_rows(image, 0, 1, 2)
+        mass_compare_adjacent_rows_height = mass_compare_adjacent_rows.shape[0]
+        mass_compare_adjacent_columns = image_mass_compare_adjacent_columns(image, 0, 1, 2)
+        mass_compare_adjacent_columns_width = mass_compare_adjacent_columns.shape[1]
+
         values_list = []
         for y in range(height):
             for x in range(width):
@@ -307,6 +313,27 @@ class DecisionTreeUtil:
                         else:
                             values.append(0)
 
+                if y > 0:
+                    comp = mass_compare_adjacent_rows[y - 1, x]
+                else:
+                    comp = 4
+                values.append(comp)
+                if x > 0:
+                    comp = mass_compare_adjacent_columns[y, x - 1]
+                else:
+                    comp = 4
+                values.append(comp)
+
+                if y < mass_compare_adjacent_rows_height - 1:
+                    comp = mass_compare_adjacent_rows[y + 1, x]
+                else:
+                    comp = 5
+                values.append(comp)
+                if x < mass_compare_adjacent_columns_width - 1:
+                    comp = mass_compare_adjacent_columns[y, x + 1]
+                else:
+                    comp = 5
+                values.append(comp)
 
                 values_list.append(values)
         return values_list
