@@ -103,6 +103,12 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
             # if there was some problem, add it to the issues list
             jsonissues = []
 
+            # An undesired issue is when the predicted output is the same as the input image
+            is_same_as_input = np.array_equal(predicted_output, input_image)
+            if is_correct == False and is_same_as_input:
+                # pbar.write("predicted output is the same as input")
+                jsonissues.append("predicted output is the same as input")
+
             # JSON representation of the prediction result
             jsondata = {
                 "correct": is_correct,
