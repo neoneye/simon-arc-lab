@@ -109,6 +109,7 @@ for combo_index, combo in enumerate(featurecomboitem_list):
     print(f"Feature combo {combo_index+1} of {len(featurecomboitem_list)}, features: {combo.feature_names_sorted()}")
     save_dir = f'run_tasks_result/measure_decisiontree_features/{combo.run_index}'
     jsonl_filepath = f'{save_dir}/results.jsonl'
+    summary_filepath = f'{save_dir}/summary.json'
 
     job_list = []
     for (groupname, tasks) in groupname_task_list:
@@ -119,6 +120,8 @@ for combo_index, combo in enumerate(featurecomboitem_list):
 
     correct_count = 0
     total_elapsed_float = 0
+    count_score9599 = 0
+    count_score9094 = 0
     with tqdm(job_list, desc="Processing tasks", leave=False, position=0) as pbar:
         for (groupname, task) in pbar:
             desc = task.metadata_task_id
@@ -162,6 +165,13 @@ for combo_index, combo in enumerate(featurecomboitem_list):
                 else:
                     score = 0
 
+                if score == 100:
+                    pass
+                elif score >= 95:
+                    count_score9599 += 1
+                elif score >= 90:
+                    count_score9094 += 1
+
                 # if there was some problem, add it to the issues list
                 jsonissues = []
 
@@ -201,6 +211,18 @@ for combo_index, combo in enumerate(featurecomboitem_list):
     # format the average elapsed time as a string with 1 decimal
     total_elapsed_str = "{:.2f}".format(total_elapsed_float)
     average_elapsed_str = "{:.2f}".format(average_elapsed)
-    print(f"correct: {correct_count} elapsed_total: {total_elapsed_str} elapsed_average: {average_elapsed_str}")
+    print(f"correct: {correct_count} score95_99: {count_score9599} score90_94: {count_score9094} elapsed_total: {total_elapsed_str} elapsed_average: {average_elapsed_str}")
+    summary_data = {
+        "correct": correct_count,
+        "score95_99": count_score9599,
+        "score90_94": count_score9094,
+        "elapsed_total": total_elapsed_str,
+        "elapsed_average": average_elapsed_str,
+        "task_count": len(job_list),
+        "features": feature_name_list,
+    }
+    os.makedirs(save_dir, exist_ok=True)
+    with open(summary_filepath, 'w') as f:
+        json.dump(summary_data, f)
 
 print("Done")
