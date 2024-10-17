@@ -33,6 +33,35 @@ def load_summaryjson_files(directory):
             })
     return feature_data
 
+def find_resultsjsonl_files(directory) -> list:
+    paths = []
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.endswith("results.jsonl"):
+                paths.append(os.path.join(root, file))
+    return sorted(paths)
+
+def process_resultsjsonl_files(paths: list) -> list:
+    feature_data = []
+    for path in paths:
+        correct_count = 0
+        features = None
+        with open(path, 'r') as file:
+            lines = file.readlines()
+            for line_index, line in enumerate(lines):
+                data = json.loads(line)
+                if line_index == 0:
+                    features = data["features"]
+                if data["correct"] == True:
+                    correct_count += 1
+
+        feature_data.append({
+            "correct": correct_count,
+            "features": features
+        })
+    return feature_data
+
 analyze_dir = f'run_tasks_result/measure_decisiontree_features/202410180010'
-feature_data = load_summaryjson_files(analyze_dir)
+paths = find_resultsjsonl_files(analyze_dir)
+feature_data = process_resultsjsonl_files(paths)
 print(f"Feature {feature_data}")
