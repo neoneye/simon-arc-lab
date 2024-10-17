@@ -9,10 +9,24 @@ import json
 import numpy as np
 import datetime
 import time
+import random
+from random import sample
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.image_pixel_similarity import image_pixel_similarity_overall
 from simon_arc_model.model import Model
 from simon_arc_model.decision_tree_util import DecisionTreeUtil, DecisionTreeFeature
+
+def featureset_id(features: set):
+    names = sorted([feature.name for feature in features])
+    return '_'.join(names)
+
+class FeatureComboItem:
+    def __init__(self, run_index: int, features: set):
+        self.run_index = run_index
+        self.features = features
+    
+    def feature_names_sorted(self):
+        return sorted([feature.name for feature in self.features])
 
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
 if not os.path.isdir(path_to_arc_dataset_collection_dataset):
@@ -43,6 +57,35 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
 
+available_features = list(DecisionTreeFeature)
+print(f"Number of features: {len(available_features)}")
+
+available_feature_names = [feature.name for feature in available_features]
+print(f"Feature names: {sorted(available_feature_names)}")
+
+already_seen_featureids = set()
+featurecomboitem_list = []
+for i in range(20):
+    features = None
+    for retry_index in range(100):
+        number_of_features_to_select = random.randint(1, 2)
+        candidate_features = set(random.sample(available_features, number_of_features_to_select))
+        fid = featureset_id(candidate_features)
+        if fid in already_seen_featureids:
+            continue
+        already_seen_featureids.add(fid)
+        features = candidate_features
+        break
+    if features is None:
+        print(f"Failed to find a new feature set after 100 retries")
+        exit()
+    featurecomboitem = FeatureComboItem(i, features)
+    featurecomboitem_list.append(featurecomboitem)
+
+for featurecomboitem in featurecomboitem_list:
+    print(f"FeatureComboItem {featurecomboitem.run_index}: {featurecomboitem.feature_names_sorted()}")
+
+exit()
 number_of_items_in_list = len(groupname_pathtotaskdir_list)
 for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
     save_dir = f'run_tasks_result/measure_decisiontree_features/{groupname}'
