@@ -10,6 +10,7 @@ import numpy as np
 import datetime
 import time
 from simon_arc_lab.taskset import TaskSet
+from simon_arc_lab.image_pixel_similarity import image_pixel_similarity_overall
 from simon_arc_model.model import Model
 from simon_arc_model.decision_tree_util import DecisionTreeUtil, DecisionTreeFeature
 
@@ -92,9 +93,20 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                 correct_count += 1
             pbar.set_postfix({'correct': correct_count})
 
+            count_good, count_total = image_pixel_similarity_overall(predicted_output, expected_output_image)
+            count_bad = count_total - count_good
+            if count_total > 0:
+                score = count_good * 100 // count_total
+            else:
+                score = 0
+
+            # if there was some problem, add it to the issues list
+            jsonissues = []
+
             # JSON representation of the prediction result
             jsondata = {
                 "correct": is_correct,
+                "score": score,
                 "task_id": task.metadata_task_id,
                 "path": task.metadata_path,
                 "date": current_datetime,
@@ -109,12 +121,17 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                     "LOOKAROUND_WINDOW_HEIGHT": 1
                 },
                 "test_index": test_index,
-                "issues": [],  # Add any issues if relevant
-                "similarity": ["AGREE_ON_COLOR 3", "SAME_UNIQUE_COLORS"],
+                "issues": jsonissues,
+                "similarity": {
+                    "score_type": "pixelwise",
+                    "count_good": count_good,
+                    "count_bad": count_bad,
+                    "count_total": count_total,
+                },
                 "input": input_image.tolist(), # Convert numpy arrays to lists
                 "expected_output": expected_output_image.tolist(), # Convert numpy arrays to lists
                 "predicted_output": predicted_output.tolist(), # Convert numpy arrays to lists
-                "version": "simon_arc_lab feature_metric 2024-oct-17"
+                "version": "simon_arc_lab measure_decisiontree_features 2024-oct-17"
             }
 
             # Save the result to a jsonl file
