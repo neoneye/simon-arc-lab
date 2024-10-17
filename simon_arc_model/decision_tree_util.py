@@ -60,7 +60,7 @@ class DecisionTreeUtil:
         lookaround_size = 1
 
         ignore_mask = np.zeros_like(image)
-        components = ConnectedComponent.find_objects_with_ignore_mask_inner(PixelConnectivity.ALL8, image, ignore_mask)
+        components = ConnectedComponent.find_objects_with_ignore_mask_inner(PixelConnectivity.NEAREST4, image, ignore_mask)
 
         # Image with object ids
         object_ids = np.zeros((height, width), dtype=np.uint32)
