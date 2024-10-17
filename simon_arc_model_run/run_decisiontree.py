@@ -45,6 +45,8 @@ task.metadata_task_id = task_id
 
 test_index = 0
 
+features = []
+
 noise_levels = [95, 90, 85, 80, 75, 70, 65]
 number_of_refinements = len(noise_levels)
 last_predicted_output = None
@@ -57,7 +59,8 @@ for refinement_index in range(number_of_refinements):
         test_index, 
         last_predicted_output, 
         refinement_index, 
-        noise_level
+        noise_level,
+        features
     )
 
     input_image = task.test_input(test_index)
