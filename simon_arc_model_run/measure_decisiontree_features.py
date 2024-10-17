@@ -6,6 +6,7 @@ sys.path.insert(0, PROJECT_ROOT)
 
 from tqdm import tqdm
 import json
+from math import ceil
 import numpy as np
 import datetime
 import time
@@ -105,7 +106,7 @@ for (groupname, path_to_task_dir) in groupname_pathtotaskdir_list:
     groupname_task_list.append((groupname, pending_tasks))
 
 for combo_index, combo in enumerate(featurecomboitem_list):
-    print(f"Processing feature combo {combo_index+1} of {len(featurecomboitem_list)}")
+    print(f"Feature combo {combo_index+1} of {len(featurecomboitem_list)}, features: {combo.feature_names_sorted()}")
     save_dir = f'run_tasks_result/measure_decisiontree_features/{combo.run_index}'
     jsonl_filepath = f'{save_dir}/results.jsonl'
 
@@ -114,7 +115,10 @@ for combo_index, combo in enumerate(featurecomboitem_list):
         for task in tasks:
             job_list.append((groupname, task))
 
+    feature_name_list = combo.feature_names_sorted()
+
     correct_count = 0
+    total_elapsed_float = 0
     with tqdm(job_list, desc="Processing tasks", leave=False, position=0) as pbar:
         for (groupname, task) in pbar:
             desc = task.metadata_task_id
@@ -139,7 +143,9 @@ for combo_index, combo in enumerate(featurecomboitem_list):
                 )
 
                 end_time = time.perf_counter()
-                elapsed_seconds = int(end_time - start_time)
+                elapsed_float = end_time - start_time
+                total_elapsed_float += elapsed_float
+                elapsed_seconds = int(ceil(elapsed_float))
 
                 input_image = task.test_input(test_index)
                 expected_output_image = task.test_output(test_index)
@@ -173,15 +179,7 @@ for combo_index, combo in enumerate(featurecomboitem_list):
                     "path": task.metadata_path,
                     "date": current_datetime,
                     "elapsed_seconds": elapsed_seconds,
-                    "parameters": {
-                        "CONNECTED_COMPONENTS_ALL8": True,
-                        "HISTOGRAM_DIAGONAL": True,
-                        "HISTOGRAM_ROWCOL": True,
-                        "ROTATE45": True,
-                        "EROSION_ALL8": False,
-                        "LOOKAROUND_WINDOW_WIDTH": 3,
-                        "LOOKAROUND_WINDOW_HEIGHT": 1
-                    },
+                    "features": feature_name_list,
                     "test_index": test_index,
                     "issues": jsonissues,
                     "similarity": {
@@ -198,5 +196,11 @@ for combo_index, combo in enumerate(featurecomboitem_list):
 
                 # Save the result to a jsonl file
                 append_to_jsonl_file(jsonl_filepath, jsondata)
+    # Print summary
+    average_elapsed = total_elapsed_float / len(job_list)
+    # format the average elapsed time as a string with 1 decimal
+    total_elapsed_str = "{:.2f}".format(total_elapsed_float)
+    average_elapsed_str = "{:.2f}".format(average_elapsed)
+    print(f"correct: {correct_count} elapsed_total: {total_elapsed_str} elapsed_average: {average_elapsed_str}")
 
 print("Done")
