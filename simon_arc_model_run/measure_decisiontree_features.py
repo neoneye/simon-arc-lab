@@ -104,20 +104,23 @@ for (groupname, path_to_task_dir) in groupname_pathtotaskdir_list:
     print(f"After filtering, number of tasks in group '{groupname}': {len(pending_tasks)}")
     groupname_task_list.append((groupname, pending_tasks))
 
-# exit()
-pbar_combo = tqdm(featurecomboitem_list, desc="Processing combos")
-for combo in pbar_combo:
+for combo_index, combo in enumerate(featurecomboitem_list):
+    print(f"Processing feature combo {combo_index+1} of {len(featurecomboitem_list)}")
     save_dir = f'run_tasks_result/measure_decisiontree_features/{combo.run_index}'
     jsonl_filepath = f'{save_dir}/results.jsonl'
 
-    number_of_items_in_list = len(groupname_pathtotaskdir_list)
-    pbar_group = tqdm(groupname_task_list, desc="Processing groups")
-    for (groupname, tasks) in pbar_group:
- 
-        correct_count = 0
-        pbar_task = tqdm(pending_tasks, desc="Processing tasks")
-        for task in pbar_task:
-            pbar_task.set_description(f"{groupname} {task.metadata_task_id}")
+    job_list = []
+    for (groupname, tasks) in groupname_task_list:
+        for task in tasks:
+            job_list.append((groupname, task))
+
+    correct_count = 0
+    with tqdm(job_list, desc="Processing tasks", leave=False, position=0) as pbar:
+        for (groupname, task) in pbar:
+            desc = task.metadata_task_id
+            # truncate string to 20 characters, if it's longer add ...
+            desc = (desc[:20] + '...') if len(desc) > 20 else desc
+            pbar.set_description(desc)
 
             features = set()
 
@@ -144,7 +147,7 @@ for combo in pbar_combo:
                 is_correct = np.array_equal(predicted_output, expected_output_image)
                 if is_correct:
                     correct_count += 1
-                pbar_task.set_postfix({'correct': correct_count})
+                pbar.set_postfix({'correct': correct_count})
 
                 count_good, count_total = image_pixel_similarity_overall(predicted_output, expected_output_image)
                 count_bad = count_total - count_good
@@ -195,3 +198,5 @@ for combo in pbar_combo:
 
                 # Save the result to a jsonl file
                 append_to_jsonl_file(jsonl_filepath, jsondata)
+
+print("Done")
