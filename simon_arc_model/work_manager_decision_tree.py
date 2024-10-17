@@ -25,19 +25,10 @@ class WorkManagerDecisionTree(WorkManagerBase):
         self.work_items = WorkManagerDecisionTree.create_work_items(taskset)
 
     @classmethod
-    def has_same_input_output_size_for_all_examples(cls, task: Task) -> bool:
-        for pair_index in range(task.count_examples):
-            input_image = task.example_input(pair_index)
-            output_image = task.example_output(pair_index)
-            if input_image.shape != output_image.shape:
-                return False
-        return True
-
-    @classmethod
     def create_work_items(cls, taskset: TaskSet) -> list['WorkItem']:
         work_items = []
         for task in taskset.tasks:
-            if cls.has_same_input_output_size_for_all_examples(task) == False:
+            if DecisionTreeUtil.has_same_input_output_size_for_all_examples(task) == False:
                 continue
 
             for test_index in range(task.count_tests):
