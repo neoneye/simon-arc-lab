@@ -69,7 +69,7 @@ featurecomboitem_list = []
 for i in range(20):
     features = None
     for retry_index in range(100):
-        number_of_features_to_select = random.randint(1, 2)
+        number_of_features_to_select = random.randint(1, 3)
         candidate_features = set(random.sample(available_features, number_of_features_to_select))
         fid = featureset_id(candidate_features)
         if fid in already_seen_featureids:
@@ -98,7 +98,8 @@ for (groupname, path_to_task_dir) in groupname_pathtotaskdir_list:
         else:
             number_of_tasks_with_different_input_output_size += 1
     
-    # truncate the list to 5 tasks
+    random.Random(0).shuffle(pending_tasks)
+    # truncate the list to a few tasks
     pending_tasks = pending_tasks[:5]
     # print(f"Number of tasks with different input/output size: {number_of_tasks_with_different_input_output_size}")
     # print(f"Number of tasks with same input/output size: {len(pending_tasks)}")
@@ -129,8 +130,6 @@ for combo_index, combo in enumerate(featurecomboitem_list):
             desc = (desc[:20] + '...') if len(desc) > 20 else desc
             pbar.set_description(desc)
 
-            features = set()
-
             for test_index in range(task.count_tests):
                 current_datetime = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
                 
@@ -142,7 +141,7 @@ for combo_index, combo in enumerate(featurecomboitem_list):
                     previous_prediction=None,
                     refinement_index=0, 
                     noise_level=100,
-                    features=features,
+                    features=combo.features,
                 )
 
                 end_time = time.perf_counter()
