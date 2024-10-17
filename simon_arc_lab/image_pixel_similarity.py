@@ -8,6 +8,26 @@
 from typing import Dict, Tuple
 import numpy as np
 
+def image_pixel_similarity_overall(image0: np.array, image1: np.array) -> Tuple[int, int]:
+    """
+    Count how many pixels are the same in both images.
+
+    return: (count_intersection, count_union)
+    """
+    if (image0.shape != image1.shape):
+        raise ValueError("The images must have the same shape.")
+
+    height, width = image0.shape
+    count_same = 0
+    total_pixel_count = width * height
+    for y in range(height):
+        for x in range(width):
+            color0 = image0[y, x]
+            color1 = image1[y, x]
+            if color0 == color1:
+                count_same += 1
+    return (count_same, total_pixel_count)
+
 def image_pixel_similarity_dict(image0: np.array, image1: np.array) -> Dict[int, Tuple[int, int]]:
     """
     Measure how many pixels are the same in both images.
