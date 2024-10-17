@@ -45,6 +45,7 @@ def process_resultsjsonl_files(paths: list) -> list:
     feature_data = []
     for path in paths:
         correct_count = 0
+        correct_path_set = set()
         features = None
         with open(path, 'r') as file:
             lines = file.readlines()
@@ -52,12 +53,15 @@ def process_resultsjsonl_files(paths: list) -> list:
                 data = json.loads(line)
                 if line_index == 0:
                     features = data["features"]
+                field_path = data["path"]
                 if data["correct"] == True:
                     correct_count += 1
+                    correct_path_set.add(field_path)
 
         feature_data.append({
-            "correct": correct_count,
-            "features": features
+            # "correct": correct_count,
+            "features": features,
+            "correct_path_set": correct_path_set,
         })
     return feature_data
 
