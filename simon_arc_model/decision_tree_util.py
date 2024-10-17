@@ -51,6 +51,14 @@ class DecisionTreeFeature(Enum):
     BOUNDING_BOXES = 'bounding_boxes'
 
 class DecisionTreeUtil:
+    @classmethod
+    def has_same_input_output_size_for_all_examples(cls, task: Task) -> bool:
+        for pair_index in range(task.count_examples):
+            input_image = task.example_input(pair_index)
+            output_image = task.example_output(pair_index)
+            if input_image.shape != output_image.shape:
+                return False
+        return True
 
     @classmethod
     def xs_for_input_image(cls, image: int, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> list:
