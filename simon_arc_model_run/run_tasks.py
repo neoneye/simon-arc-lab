@@ -19,9 +19,9 @@ model_iteration = 682
 model_name = f'simon-arc-lab-model{model_iteration}'
 model_directory = f'/Users/neoneye/nobackup/git/{model_name}'
 
-work_manager_class = WorkManagerSimple
+# work_manager_class = WorkManagerSimple
 # work_manager_class = WorkManagerStepwiseRefinement
-# work_manager_class = WorkManagerDecisionTree
+work_manager_class = WorkManagerDecisionTree
 print(f"Using WorkManager of type: {work_manager_class.__name__}")
 
 # check if the model is a dir in the file system
@@ -65,7 +65,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
 
     wm = work_manager_class(model, taskset)
     # wm.discard_items_with_too_short_prompts(500)
-    wm.discard_items_with_too_long_prompts(max_prompt_length)
+    # wm.discard_items_with_too_long_prompts(max_prompt_length)
     # wm.truncate_work_items(50)
     # wm.process_all_work_items()
     wm.process_all_work_items(save_dir=save_dir)
