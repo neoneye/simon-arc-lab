@@ -86,24 +86,21 @@ def greedy_maximum_coverage(sets, k):
         
     return selected_sets, len(covered)
 
+def analyze_with_limit(paths, minimum_score: int, title: str):
+    print(f"# {title} - minimum score: {minimum_score}")
+    paths = find_resultsjsonl_files(analyze_dir)
+    feature_data = process_resultsjsonl_files(paths, minimum_score)
+    sets = []
+    for data in feature_data:
+        correct_path_set = data["path_set"]
+        sets.append(correct_path_set)
+
+    for number_of_sets in range(1, len(sets)+1):
+        selected_sets, covered = greedy_maximum_coverage(sets, number_of_sets)
+        print(f"Score: {minimum_score}, Number of sets: {number_of_sets}, covered: {covered}")
+
 analyze_dir = f'run_tasks_result/measure_decisiontree_features/202410181028'
 paths = find_resultsjsonl_files(analyze_dir)
-feature_data = process_resultsjsonl_files(paths, 100)
-# feature_data = process_resultsjsonl_files(paths, 95)
-# feature_data = process_resultsjsonl_files(paths, 90)
-#print(f"Feature {feature_data}")
-
-
-sets = []
-for data in feature_data:
-    correct_path_set = data["path_set"]
-    sets.append(correct_path_set)
-
-for number_of_sets in range(1, len(sets)+1):
-    selected_sets, covered = greedy_maximum_coverage(sets, number_of_sets)
-    print(f"Number of sets: {number_of_sets}, covered: {covered}")
-#selected_sets, covered = greedy_maximum_coverage(sets, 2)
-#print(f"Covered: {covered}")
-#print(f"Number of items: {len(covered)}")
-#print(f"Selected sets: {selected_sets}")
-
+analyze_with_limit(paths, 100, 'Solution must be perfect')
+analyze_with_limit(paths, 95, 'Allow near perfect solutions')
+analyze_with_limit(paths, 90, 'Allow for crappy solutions')
