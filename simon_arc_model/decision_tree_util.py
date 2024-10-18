@@ -68,6 +68,7 @@ class DecisionTreeUtil:
         lookaround_size_image_pixel = 1
         lookaround_size_object_ids = 0
         lookaround_size_mass = 0
+        lookaround_size_shape3x3 = 0
 
         ignore_mask = np.zeros_like(image)
         components = ConnectedComponent.find_objects_with_ignore_mask_inner(PixelConnectivity.NEAREST4, image, ignore_mask)
@@ -371,7 +372,16 @@ class DecisionTreeUtil:
                     values.append(erosion_image[y, x])
 
                 for image_shape3x3 in shape3x3_images:
-                    values.append(image_shape3x3[y, x] + 100)
+                    k = lookaround_size_shape3x3
+                    n = k * 2 + 1
+                    for ry in range(n):
+                        for rx in range(n):
+                            xx = x + rx - k
+                            yy = y + ry - k
+                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                                values.append(0)
+                            else:
+                                values.append(image_shape3x3[yy, xx] + 100)
 
                 if DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR in features:
                     values.append(image_count_neightbors_with_same_color[y, x])
