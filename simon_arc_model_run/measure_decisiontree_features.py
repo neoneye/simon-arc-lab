@@ -29,7 +29,7 @@ class FeatureComboItem:
     def feature_names_sorted(self):
         return sorted([feature.name for feature in self.features])
 
-seed = 44
+seed = 45
 
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
 if not os.path.isdir(path_to_arc_dataset_collection_dataset):
@@ -68,7 +68,21 @@ print(f"Feature names: {sorted(available_feature_names)}")
 
 already_seen_featureids = set()
 featurecomboitem_list = []
+if True:
+    features = set()
+    features.add(DecisionTreeFeature.HISTOGRAM_DIAGONAL)
+    features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
+    features.add(DecisionTreeFeature.HISTOGRAM_VALUE)
+    features.add(DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL)
+    features.add(DecisionTreeFeature.BOUNDING_BOXES)
+    fid = featureset_id(features)
+    already_seen_featureids.add(fid)
+    featurecomboitem = FeatureComboItem(1, features)
+    featurecomboitem_list.append(featurecomboitem)
+
 for i in range(60):
+    if i < len(featurecomboitem_list):
+        continue
     features = None
     for retry_index in range(100):
         iteration_seed = seed + (i + retry_index) * 10000
