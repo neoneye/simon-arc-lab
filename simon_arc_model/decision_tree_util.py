@@ -65,7 +65,7 @@ class DecisionTreeUtil:
         height, width = image.shape
 
         lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 1
-        lookaround_size = 1
+        lookaround_size_image_pixel = 1
         lookaround_size_object_ids = 0
         lookaround_size_mass = 0
 
@@ -307,13 +307,12 @@ class DecisionTreeUtil:
                     values.append(int(is_center_column))
                     values.append(int(is_center_row))
 
-                n = lookaround_size
-                for dy in range(-n, n * 2):
-                    for dx in range(-n, n * 2):
-                        if dx == 0 and dy == 0:
-                            continue
-                        xx = x + dx
-                        yy = y + dy
+                k = lookaround_size_image_pixel
+                n = k * 2 + 1
+                for ry in range(n):
+                    for rx in range(n):
+                        xx = x + rx - k
+                        yy = y + ry - k
                         if xx < 0 or xx >= width or yy < 0 or yy >= height:
                             values.append(outside_color)
                         else:
