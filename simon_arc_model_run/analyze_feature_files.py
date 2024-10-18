@@ -65,7 +65,45 @@ def process_resultsjsonl_files(paths: list) -> list:
         })
     return feature_data
 
-analyze_dir = f'run_tasks_result/measure_decisiontree_features/202410180010'
+def greedy_maximum_coverage(sets, k):
+    """
+    https://en.wikipedia.org/wiki/Maximum_coverage_problem
+    """
+    covered = set()
+    selected_sets = []
+    
+    for _ in range(k):
+        best_set = None
+        best_coverage = 0
+        
+        for s in sets:
+            coverage = len(s - covered)  # Elements not yet covered
+            if coverage > best_coverage:
+                best_coverage = coverage
+                best_set = s
+                
+        if best_set is not None:
+            selected_sets.append(best_set)
+            covered.update(best_set)
+        
+    return selected_sets, len(covered)
+
+analyze_dir = f'run_tasks_result/measure_decisiontree_features/202410181028'
 paths = find_resultsjsonl_files(analyze_dir)
 feature_data = process_resultsjsonl_files(paths)
-print(f"Feature {feature_data}")
+#print(f"Feature {feature_data}")
+
+
+sets = []
+for data in feature_data:
+    correct_path_set = data["correct_path_set"]
+    sets.append(correct_path_set)
+
+for number_of_sets in range(1, len(sets)+1):
+    selected_sets, covered = greedy_maximum_coverage(sets, number_of_sets)
+    print(f"Number of sets: {number_of_sets}, covered: {covered}")
+#selected_sets, covered = greedy_maximum_coverage(sets, 2)
+#print(f"Covered: {covered}")
+#print(f"Number of items: {len(covered)}")
+#print(f"Selected sets: {selected_sets}")
+
