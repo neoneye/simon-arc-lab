@@ -29,7 +29,7 @@ class FeatureComboItem:
     def feature_names_sorted(self):
         return sorted([feature.name for feature in self.features])
 
-seed = 45
+seed = 46
 
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
 if not os.path.isdir(path_to_arc_dataset_collection_dataset):
@@ -70,6 +70,13 @@ already_seen_featureids = set()
 featurecomboitem_list = []
 if True:
     features = set()
+    fid = featureset_id(features)
+    already_seen_featureids.add(fid)
+    featurecomboitem = FeatureComboItem(1, features)
+    featurecomboitem_list.append(featurecomboitem)
+
+if True:
+    features = set()
     features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
     features.add(DecisionTreeFeature.HISTOGRAM_DIAGONAL)
     features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
@@ -78,12 +85,15 @@ if True:
     features.add(DecisionTreeFeature.BOUNDING_BOXES)
     fid = featureset_id(features)
     already_seen_featureids.add(fid)
-    featurecomboitem = FeatureComboItem(1, features)
+    featurecomboitem = FeatureComboItem(2, features)
     featurecomboitem_list.append(featurecomboitem)
 
 for i in range(60):
-    if i < len(featurecomboitem_list):
-        continue
+    run_index = i + 1
+    for featurecomboitem in featurecomboitem_list:
+        if run_index <= featurecomboitem.run_index:
+            run_index = featurecomboitem.run_index + 1
+
     features = None
     for retry_index in range(100):
         iteration_seed = seed + (i + retry_index) * 10000
@@ -98,7 +108,7 @@ for i in range(60):
         break
     if features is None:
         raise Exception("Failed to find a new feature set after 100 retries")
-    featurecomboitem = FeatureComboItem(i + 1, features)
+    featurecomboitem = FeatureComboItem(run_index, features)
     featurecomboitem_list.append(featurecomboitem)
 
 for featurecomboitem in featurecomboitem_list:
