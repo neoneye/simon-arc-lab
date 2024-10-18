@@ -41,11 +41,10 @@ def find_resultsjsonl_files(directory) -> list:
                 paths.append(os.path.join(root, file))
     return sorted(paths)
 
-def process_resultsjsonl_files(paths: list) -> list:
+def process_resultsjsonl_files(paths: list, minimum_score: int) -> list:
     feature_data = []
     for path in paths:
-        correct_count = 0
-        correct_path_set = set()
+        path_set = set()
         features = None
         with open(path, 'r') as file:
             lines = file.readlines()
@@ -54,14 +53,13 @@ def process_resultsjsonl_files(paths: list) -> list:
                 if line_index == 0:
                     features = data["features"]
                 field_path = data["path"]
-                if data["correct"] == True:
-                    correct_count += 1
-                    correct_path_set.add(field_path)
+                score = int(data["score"])
+                if score >= minimum_score:
+                    path_set.add(field_path)
 
         feature_data.append({
-            # "correct": correct_count,
             "features": features,
-            "correct_path_set": correct_path_set,
+            "path_set": path_set,
         })
     return feature_data
 
@@ -90,13 +88,15 @@ def greedy_maximum_coverage(sets, k):
 
 analyze_dir = f'run_tasks_result/measure_decisiontree_features/202410181028'
 paths = find_resultsjsonl_files(analyze_dir)
-feature_data = process_resultsjsonl_files(paths)
+feature_data = process_resultsjsonl_files(paths, 100)
+# feature_data = process_resultsjsonl_files(paths, 95)
+# feature_data = process_resultsjsonl_files(paths, 90)
 #print(f"Feature {feature_data}")
 
 
 sets = []
 for data in feature_data:
-    correct_path_set = data["correct_path_set"]
+    correct_path_set = data["path_set"]
     sets.append(correct_path_set)
 
 for number_of_sets in range(1, len(sets)+1):
