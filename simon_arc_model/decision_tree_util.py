@@ -33,6 +33,8 @@ class DecisionTreeFeature(Enum):
     COMPONENT_NEAREST4 = 'component_nearest4'
     COMPONENT_ALL8 = 'component_all8'
     COMPONENT_CORNER4 = 'component_corner4'
+    SUPPRESS_CENTER_PIXEL_ONCE = 'suppress_center_pixel_once'
+    SUPPRESS_CENTER_PIXEL_LOOKAROUND = 'suppress_center_pixel_lookaround'
     HISTOGRAM_DIAGONAL = 'histogram_diagonal'
     HISTOGRAM_ROWCOL = 'histogram_rowcol'
     HISTOGRAM_VALUE = 'histogram_value'
@@ -277,7 +279,8 @@ class DecisionTreeUtil:
                 values.append(pair_id)
                 # values.append(x)
                 # values.append(y)
-                values.append(image[y, x])
+                if DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE not in features:
+                    values.append(image[y, x])
 
                 if is_earlier_prediction:
                     values.append(0)
@@ -330,10 +333,13 @@ class DecisionTreeUtil:
                     values.append(int(is_center_column))
                     values.append(int(is_center_row))
 
+                suppress_center_pixel_lookaround = DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND in features
                 k = lookaround_size_image_pixel
                 n = k * 2 + 1
                 for ry in range(n):
                     for rx in range(n):
+                        if suppress_center_pixel_lookaround and rx == k and ry == k:
+                            continue
                         xx = x + rx - k
                         yy = y + ry - k
                         if xx < 0 or xx >= width or yy < 0 or yy >= height:
