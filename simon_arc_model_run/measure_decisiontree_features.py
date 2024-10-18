@@ -70,6 +70,7 @@ already_seen_featureids = set()
 featurecomboitem_list = []
 if True:
     features = set()
+    features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
     features.add(DecisionTreeFeature.HISTOGRAM_DIAGONAL)
     features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
     features.add(DecisionTreeFeature.HISTOGRAM_VALUE)

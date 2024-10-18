@@ -30,6 +30,9 @@ import matplotlib.pyplot as plt
 from enum import Enum
 
 class DecisionTreeFeature(Enum):
+    COMPONENT_NEAREST4 = 'component_nearest4'
+    COMPONENT_ALL8 = 'component_all8'
+    COMPONENT_CORNER4 = 'component_corner4'
     HISTOGRAM_DIAGONAL = 'histogram_diagonal'
     HISTOGRAM_ROWCOL = 'histogram_rowcol'
     HISTOGRAM_VALUE = 'histogram_value'
@@ -70,11 +73,15 @@ class DecisionTreeUtil:
         lookaround_size_mass = 0
         lookaround_size_shape3x3 = 0
 
-        component_pixel_connectivity_list = [
-            PixelConnectivity.NEAREST4,
-            # PixelConnectivity.ALL8,
-            # PixelConnectivity.CORNER4,
-        ]
+        component_pixel_connectivity_list = []
+        if DecisionTreeFeature.COMPONENT_NEAREST4 in features:
+            component_pixel_connectivity_list.append(PixelConnectivity.NEAREST4)
+        if DecisionTreeFeature.COMPONENT_ALL8 in features:
+            component_pixel_connectivity_list.append(PixelConnectivity.ALL8)
+        if DecisionTreeFeature.COMPONENT_CORNER4 in features:
+            component_pixel_connectivity_list.append(PixelConnectivity.CORNER4)
+
+        # Connected components
         ignore_mask = np.zeros_like(image)
         components_list = []
         for component_pixel_connectivity in component_pixel_connectivity_list:
