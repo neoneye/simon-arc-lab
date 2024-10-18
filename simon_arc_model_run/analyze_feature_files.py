@@ -1,5 +1,6 @@
 import os
 import sys
+from pathlib import Path
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
@@ -118,7 +119,7 @@ def analyze_with_limit(paths, minimum_score: int, title: str):
         selected_sets, covered = greedy_maximum_coverage(sets, number_of_sets)
         print(f"Score: {minimum_score}, Number of sets: {number_of_sets}, covered: {len(covered)}")
 
-def identify_files_with_barely_any_coverage(paths, minimum_score: int, number_of_sets: int):
+def print_filenames_with_barely_any_coverage(paths, minimum_score: int, number_of_sets: int):
     paths = find_resultsjsonl_files(analyze_dir)
     feature_data = process_resultsjsonl_files(paths, minimum_score)
     sets = []
@@ -136,14 +137,41 @@ def identify_files_with_barely_any_coverage(paths, minimum_score: int, number_of
     print(f"Remaining paths: {len(remaining_paths)}")
     sorted_paths = sorted(list(remaining_paths))
     for path in sorted_paths:
-        print(path)
+        filename = Path(path).stem
+        print(filename)
 
+def identify_filenames_with_maximum_coverage(paths: list, minimum_score: int, number_of_sets: int, save_csv_file: str):
+    paths = find_resultsjsonl_files(analyze_dir)
+    feature_data = process_resultsjsonl_files(paths, minimum_score)
+    sets = []
+    for data in feature_data:
+        correct_path_set = data["path_set"]
+        sets.append(correct_path_set)
+
+    selected_sets, covered = greedy_maximum_coverage(sets, number_of_sets)
+    #print(f"Score: {minimum_score}, Number of sets: {number_of_sets}, covered: {len(covered)}")
+
+    sorted_paths = sorted(list(covered))
+    filenames = []
+    for path in sorted_paths:
+        filename = Path(path).stem
+        # print(filename)
+        filenames.append(filename)
+    sorted_filenames = sorted(filenames)
+    #print(sorted_filenames)
+
+    # save as a csv file
+    with open(save_csv_file, 'w') as f:
+        for filename in sorted_filenames:
+            f.write(f"{filename}\n")
+    print(f"Saved '{save_csv_file}' with {len(sorted_filenames)} rows")
 
 analyze_dir = f'run_tasks_result/measure_decisiontree_features/202410181028'
 paths = find_resultsjsonl_files(analyze_dir)
 analyze_with_limit(paths, 100, 'Solution must be perfect')
 analyze_with_limit(paths, 95, 'Allow near perfect solutions')
 #analyze_with_limit(paths, 90, 'Allow for crappy solutions')
-#analyze_with_limit(paths, 80, 'Allow for very crappy solutions')
 
-identify_files_with_barely_any_coverage(paths, 100, 9)
+#print_filenames_with_barely_any_coverage(paths, 100, 9)
+identify_filenames_with_maximum_coverage(paths, 100, 9, 'finetune/taskids_with_score100.csv')
+identify_filenames_with_maximum_coverage(paths, 95, 11, 'finetune/taskids_with_score95_or_better.csv')
