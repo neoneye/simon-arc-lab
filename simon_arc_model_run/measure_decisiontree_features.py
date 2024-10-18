@@ -29,7 +29,7 @@ class FeatureComboItem:
     def feature_names_sorted(self):
         return sorted([feature.name for feature in self.features])
 
-seed = 42
+seed = 44
 
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
 if not os.path.isdir(path_to_arc_dataset_collection_dataset):
@@ -68,11 +68,11 @@ print(f"Feature names: {sorted(available_feature_names)}")
 
 already_seen_featureids = set()
 featurecomboitem_list = []
-for i in range(20):
+for i in range(60):
     features = None
     for retry_index in range(100):
         iteration_seed = seed + (i + retry_index) * 10000
-        number_of_features_to_select = random.Random(iteration_seed + 1).randint(1, 4)
+        number_of_features_to_select = random.Random(iteration_seed + 1).randint(2, 5)
         feature_list = random.Random(iteration_seed + 2).sample(available_features, number_of_features_to_select)
         candidate_features = set(feature_list)
         fid = featureset_id(candidate_features)
@@ -104,7 +104,7 @@ for (groupname, path_to_task_dir) in groupname_pathtotaskdir_list:
     
     random.Random(seed + 2).shuffle(pending_tasks)
     # truncate the list to a few tasks
-    pending_tasks = pending_tasks[:20]
+    # pending_tasks = pending_tasks[:20]
     # print(f"Number of tasks with different input/output size: {number_of_tasks_with_different_input_output_size}")
     # print(f"Number of tasks with same input/output size: {len(pending_tasks)}")
     print(f"After filtering, number of tasks in group '{groupname}': {len(pending_tasks)}")
