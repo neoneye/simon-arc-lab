@@ -66,6 +66,8 @@ class DecisionTreeUtil:
 
         lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 1
         lookaround_size = 1
+        lookaround_size_object_ids = 0
+        lookaround_size_mass = 0
 
         ignore_mask = np.zeros_like(image)
         components = ConnectedComponent.find_objects_with_ignore_mask_inner(PixelConnectivity.NEAREST4, image, ignore_mask)
@@ -317,8 +319,27 @@ class DecisionTreeUtil:
                         else:
                             values.append(image[yy, xx])
 
-                values.append(object_ids[y, x])
-                values.append(object_masses[y, x])
+                k = lookaround_size_object_ids
+                n = k * 2 + 1
+                for ry in range(n):
+                    for rx in range(n):
+                        xx = x + rx - k
+                        yy = y + ry - k
+                        if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                            values.append(0)
+                        else:
+                            values.append(object_ids[yy, xx])
+
+                k = lookaround_size_mass
+                n = k * 2 + 1
+                for ry in range(n):
+                    for rx in range(n):
+                        xx = x + rx - k
+                        yy = y + ry - k
+                        if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                            values.append(0)
+                        else:
+                            values.append(object_masses[yy, xx])
 
                 values.append(image_shape3x3_opposite[y, x])
                 for i in range(3):
