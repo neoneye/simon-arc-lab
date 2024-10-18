@@ -236,13 +236,14 @@ class DecisionTreeUtil:
             mass_compare_adjacent_columns_width = mass_compare_adjacent_columns.shape[1]
 
         bounding_box_list = []
-        for color in range(10):
-            ignore_colors = []
-            for ignore_color in range(10):
-                if ignore_color != color:
-                    ignore_colors.append(ignore_color)
-            rect = find_bounding_box_multiple_ignore_colors(image, ignore_colors)
-            bounding_box_list.append(rect)
+        if DecisionTreeFeature.BOUNDING_BOXES in features:
+            for color in range(10):
+                ignore_colors = []
+                for ignore_color in range(10):
+                    if ignore_color != color:
+                        ignore_colors.append(ignore_color)
+                rect = find_bounding_box_multiple_ignore_colors(image, ignore_colors)
+                bounding_box_list.append(rect)
 
         values_list = []
         for y in range(height):
