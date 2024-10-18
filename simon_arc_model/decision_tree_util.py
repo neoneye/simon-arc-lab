@@ -70,30 +70,45 @@ class DecisionTreeUtil:
         lookaround_size_mass = 0
         lookaround_size_shape3x3 = 0
 
+        component_pixel_connectivity_list = [
+            PixelConnectivity.NEAREST4,
+            # PixelConnectivity.ALL8,
+            # PixelConnectivity.CORNER4,
+        ]
         ignore_mask = np.zeros_like(image)
-        components = ConnectedComponent.find_objects_with_ignore_mask_inner(PixelConnectivity.NEAREST4, image, ignore_mask)
+        components_list = []
+        for component_pixel_connectivity in component_pixel_connectivity_list:
+            components = ConnectedComponent.find_objects_with_ignore_mask_inner(component_pixel_connectivity, image, ignore_mask)
+            components_list.append(components)
 
         # Image with object ids
-        object_ids = np.zeros((height, width), dtype=np.uint32)
-        object_id_start = (pair_id + 1) * 1000
-        if is_earlier_prediction:
-            object_id_start += 500
-        for component_index, component in enumerate(components):
-            object_id = object_id_start + component_index
-            for y in range(height):
-                for x in range(width):
-                    mask_value = component.mask[y, x]
-                    if mask_value == 1:
-                        object_ids[y, x] = object_id
+        object_ids_list = []
+        for component_index, components in enumerate(components_list):
+            object_ids = np.zeros((height, width), dtype=np.uint32)
+            object_id_start = (pair_id + 1) * 1000
+            if is_earlier_prediction:
+                object_id_start += 500
+            object_id_start += component_index * 777
+            for component_index, component in enumerate(components):
+                object_id = object_id_start + component_index
+                for y in range(height):
+                    for x in range(width):
+                        mask_value = component.mask[y, x]
+                        if mask_value == 1:
+                            object_ids[y, x] = object_id
+            object_ids_list.append(object_ids)
 
         # Image with object mass
-        object_masses = np.zeros((height, width), dtype=np.uint32)
-        for component_index, component in enumerate(components):
-            for y in range(height):
-                for x in range(width):
-                    mask_value = component.mask[y, x]
-                    if mask_value == 1:
-                        object_masses[y, x] = component.mass
+        object_masses_list = []
+        for components in components_list:
+            object_masses = np.zeros((height, width), dtype=np.uint32)
+            for component_index, component in enumerate(components):
+                for y in range(height):
+                    for x in range(width):
+                        mask_value = component.mask[y, x]
+                        if mask_value == 1:
+                            object_masses[y, x] = component.mass
+            object_masses_list.append(object_masses)
 
         image_shape3x3_opposite = ImageShape3x3Opposite.apply(image)
         image_shape3x3_center = ImageShape3x3Center.apply(image)
@@ -319,27 +334,29 @@ class DecisionTreeUtil:
                         else:
                             values.append(image[yy, xx])
 
-                k = lookaround_size_object_ids
-                n = k * 2 + 1
-                for ry in range(n):
-                    for rx in range(n):
-                        xx = x + rx - k
-                        yy = y + ry - k
-                        if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                            values.append(0)
-                        else:
-                            values.append(object_ids[yy, xx])
+                for object_ids in object_ids_list:
+                    k = lookaround_size_object_ids
+                    n = k * 2 + 1
+                    for ry in range(n):
+                        for rx in range(n):
+                            xx = x + rx - k
+                            yy = y + ry - k
+                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                                values.append(0)
+                            else:
+                                values.append(object_ids[yy, xx])
 
-                k = lookaround_size_mass
-                n = k * 2 + 1
-                for ry in range(n):
-                    for rx in range(n):
-                        xx = x + rx - k
-                        yy = y + ry - k
-                        if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                            values.append(0)
-                        else:
-                            values.append(object_masses[yy, xx])
+                for object_masses in object_masses_list:
+                    k = lookaround_size_mass
+                    n = k * 2 + 1
+                    for ry in range(n):
+                        for rx in range(n):
+                            xx = x + rx - k
+                            yy = y + ry - k
+                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                                values.append(0)
+                            else:
+                                values.append(object_masses[yy, xx])
 
                 values.append(image_shape3x3_opposite[y, x])
                 for i in range(3):
