@@ -42,6 +42,10 @@ def find_resultsjsonl_files(directory) -> list:
     return sorted(paths)
 
 def process_resultsjsonl_files(paths: list, minimum_score: int) -> list:
+    """
+    Traverse results.jsonl files.
+    Identify the rows with a score >= minimum_score.
+    """
     feature_data = []
     for path in paths:
         path_set = set()
@@ -62,6 +66,21 @@ def process_resultsjsonl_files(paths: list, minimum_score: int) -> list:
             "path_set": path_set,
         })
     return feature_data
+
+def extract_all_paths_from_resultsjsonl_files(paths: list) -> set:
+    """
+    Extract all the "path" fields from the results.jsonl files.
+    """
+    accumulated_paths = set()
+    for path in paths:
+        with open(path, 'r') as file:
+            lines = file.readlines()
+            for line in lines:
+                data = json.loads(line)
+                field_path = data["path"]
+                accumulated_paths.add(field_path)
+
+    return accumulated_paths
 
 def greedy_maximum_coverage(sets, k):
     """
@@ -84,7 +103,7 @@ def greedy_maximum_coverage(sets, k):
             selected_sets.append(best_set)
             covered.update(best_set)
         
-    return selected_sets, len(covered)
+    return selected_sets, covered
 
 def analyze_with_limit(paths, minimum_score: int, title: str):
     print(f"# {title} - minimum score: {minimum_score}")
@@ -97,10 +116,34 @@ def analyze_with_limit(paths, minimum_score: int, title: str):
 
     for number_of_sets in range(1, len(sets)+1):
         selected_sets, covered = greedy_maximum_coverage(sets, number_of_sets)
-        print(f"Score: {minimum_score}, Number of sets: {number_of_sets}, covered: {covered}")
+        print(f"Score: {minimum_score}, Number of sets: {number_of_sets}, covered: {len(covered)}")
+
+def identify_files_with_barely_any_coverage(paths, minimum_score: int, number_of_sets: int):
+    paths = find_resultsjsonl_files(analyze_dir)
+    feature_data = process_resultsjsonl_files(paths, minimum_score)
+    sets = []
+    for data in feature_data:
+        correct_path_set = data["path_set"]
+        sets.append(correct_path_set)
+
+    all_paths = extract_all_paths_from_resultsjsonl_files(paths)
+    print(f"Total number of paths: {len(all_paths)}")
+
+    selected_sets, covered = greedy_maximum_coverage(sets, number_of_sets)
+    print(f"Score: {minimum_score}, Number of sets: {number_of_sets}, covered: {len(covered)}")
+
+    remaining_paths = all_paths - covered
+    print(f"Remaining paths: {len(remaining_paths)}")
+    sorted_paths = sorted(list(remaining_paths))
+    for path in sorted_paths:
+        print(path)
+
 
 analyze_dir = f'run_tasks_result/measure_decisiontree_features/202410181028'
 paths = find_resultsjsonl_files(analyze_dir)
 analyze_with_limit(paths, 100, 'Solution must be perfect')
 analyze_with_limit(paths, 95, 'Allow near perfect solutions')
-analyze_with_limit(paths, 90, 'Allow for crappy solutions')
+#analyze_with_limit(paths, 90, 'Allow for crappy solutions')
+#analyze_with_limit(paths, 80, 'Allow for very crappy solutions')
+
+identify_files_with_barely_any_coverage(paths, 100, 9)
