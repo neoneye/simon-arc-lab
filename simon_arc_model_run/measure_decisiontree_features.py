@@ -195,10 +195,27 @@ for i in range(60):
 for featurecomboitem in featurecomboitem_list:
     print(f"FeatureComboItem {featurecomboitem.run_index}: {featurecomboitem.feature_names_sorted()}")
 
+# The goal is to solve puzzles that have never been solved before.
+# Tasks that have previously been solved fine, are not interesting to solve again.
+# the csv is a list of task ids that have a score of 100, there are no other columns in the file, so it can be split by \n
+csv_file = 'finetune/taskids_with_score100.csv'
+taskids_to_ignore = set()
+if os.path.isfile(csv_file):
+    with open(csv_file, 'r') as f:
+        taskids = f.read().split('\n')
+        taskids_to_ignore = set(taskids)
+print(f"Number of task ids to ignore: {len(taskids_to_ignore)}")
 
 groupname_task_list = []
 for (groupname, path_to_task_dir) in groupname_pathtotaskdir_list:
-    taskset = TaskSet.load_directory(path_to_task_dir)
+    taskset_all = TaskSet.load_directory(path_to_task_dir)
+    new_tasks = []
+    for task in taskset_all.tasks:
+        if task.metadata_task_id in taskids_to_ignore:
+            # print(f"Ignoring task id: {task.metadata_task_id}")
+            continue
+        new_tasks.append(task)
+    taskset = TaskSet(new_tasks)
 
     pending_tasks = []
     number_of_tasks_with_different_input_output_size = 0
