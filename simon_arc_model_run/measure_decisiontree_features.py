@@ -29,7 +29,7 @@ class FeatureComboItem:
     def feature_names_sorted(self):
         return sorted([feature.name for feature in self.features])
 
-seed = 47
+seed = 48
 
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
 if not os.path.isdir(path_to_arc_dataset_collection_dataset):
@@ -88,7 +88,7 @@ if False:
     featurecomboitem = FeatureComboItem(2, features)
     featurecomboitem_list.append(featurecomboitem)
 
-if True:
+if False:
     features = set()
     features.add(DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND)
     features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
@@ -102,7 +102,7 @@ if True:
     featurecomboitem = FeatureComboItem(1, features)
     featurecomboitem_list.append(featurecomboitem)
 
-if True:
+if False:
     features = set()
     features.add(DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND)
     features.add(DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE)
@@ -117,7 +117,7 @@ if True:
     featurecomboitem = FeatureComboItem(2, features)
     featurecomboitem_list.append(featurecomboitem)
 
-if True:
+if False:
     features = set()
     features.add(DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE)
     features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
@@ -129,6 +129,31 @@ if True:
     fid = featureset_id(features)
     already_seen_featureids.add(fid)
     featurecomboitem = FeatureComboItem(3, features)
+    featurecomboitem_list.append(featurecomboitem)
+
+if True:
+    features = set()
+    features.add(DecisionTreeFeature.CORNER)
+    features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
+    features.add(DecisionTreeFeature.HISTOGRAM_VALUE)
+    features.add(DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL)
+    features.add(DecisionTreeFeature.ROTATE45)
+    features.add(DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND)
+    fid = featureset_id(features)
+    already_seen_featureids.add(fid)
+    featurecomboitem = FeatureComboItem(1, features)
+    featurecomboitem_list.append(featurecomboitem)
+
+if True:
+    features = set()
+    features.add(DecisionTreeFeature.EROSION_ALL8)
+    features.add(DecisionTreeFeature.HISTOGRAM_DIAGONAL)
+    features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4)
+    features.add(DecisionTreeFeature.ROTATE45)
+    features.add(DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND)
+    fid = featureset_id(features)
+    already_seen_featureids.add(fid)
+    featurecomboitem = FeatureComboItem(2, features)
     featurecomboitem_list.append(featurecomboitem)
 
 for i in range(60):
