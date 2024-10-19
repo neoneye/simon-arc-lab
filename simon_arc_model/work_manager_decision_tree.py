@@ -19,6 +19,24 @@ from .save_arcprize2024_submission_file import *
 from .work_manager_base import WorkManagerBase
 from .decision_tree_util import DecisionTreeUtil, DecisionTreeFeature
 
+# Correct 60
+FEATURES_A = [
+    DecisionTreeFeature.BOUNDING_BOXES,
+    DecisionTreeFeature.COMPONENT_NEAREST4,
+    DecisionTreeFeature.EROSION_ALL8,
+    DecisionTreeFeature.HISTOGRAM_ROWCOL,
+]
+
+# Correct 59, Solves 1 of the hidden ARC tasks
+FEATURES_B = [
+    DecisionTreeFeature.COMPONENT_NEAREST4,
+    DecisionTreeFeature.HISTOGRAM_DIAGONAL,
+    DecisionTreeFeature.HISTOGRAM_ROWCOL,
+    DecisionTreeFeature.HISTOGRAM_VALUE,
+    DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL,
+    DecisionTreeFeature.BOUNDING_BOXES,
+]
+
 class WorkManagerDecisionTree(WorkManagerBase):
     def __init__(self, model: any, taskset: TaskSet):
         self.taskset = taskset
@@ -59,29 +77,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
         noise_levels = [100]
         number_of_refinements = len(noise_levels)
 
-        features = set()
-        features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
-        features.add(DecisionTreeFeature.HISTOGRAM_DIAGONAL)
-        features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
-        features.add(DecisionTreeFeature.HISTOGRAM_VALUE)
-        features.add(DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL)
-        features.add(DecisionTreeFeature.BOUNDING_BOXES)
-        # features.add(DecisionTreeFeature.COMPONENT_ALL8)
-        # features.add(DecisionTreeFeature.COMPONENT_CORNER4)
-        # features.add(DecisionTreeFeature.CORNER)
-        # features.add(DecisionTreeFeature.CENTER)
-        # features.add(DecisionTreeFeature.ROTATE45)
-        # features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_ALL9)
-        # features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER)
-        # features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_CORNERS)
-        # features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4)
-        # features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5)
-        # features.add(DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR)
-        # features.add(DecisionTreeFeature.EROSION_ALL8)
-        # features.add(DecisionTreeFeature.EROSION_NEAREST4)
-        # features.add(DecisionTreeFeature.EROSION_CORNER4)
-        # features.add(DecisionTreeFeature.EROSION_ROWCOL)
-        # features.add(DecisionTreeFeature.EROSION_DIAGONAL)
+        features = set(FEATURES_A)
 
         correct_count = 0
         correct_task_id_set = set()
