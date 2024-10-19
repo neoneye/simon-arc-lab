@@ -30,7 +30,7 @@ FEATURES_1 = [
     DecisionTreeFeature.BOUNDING_BOXES,
 ]
 
-# Correct 59. Not tested on hidden ARC tasks.
+# Correct 59, Solves 1 of the hidden ARC tasks
 # ARC-AGI training=39, evaluation=20
 FEATURES_2 = [
     DecisionTreeFeature.BOUNDING_BOXES,
