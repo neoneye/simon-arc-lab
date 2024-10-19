@@ -29,7 +29,7 @@ class FeatureComboItem:
     def feature_names_sorted(self):
         return sorted([feature.name for feature in self.features])
 
-seed = 49
+seed = 50
 
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
 if not os.path.isdir(path_to_arc_dataset_collection_dataset):
@@ -133,6 +133,7 @@ if False:
 
 if True:
     features = set()
+    features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
     features.add(DecisionTreeFeature.CORNER)
     features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
     features.add(DecisionTreeFeature.HISTOGRAM_VALUE)
@@ -145,6 +146,7 @@ if True:
 
 if True:
     features = set()
+    features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
     features.add(DecisionTreeFeature.EROSION_ALL8)
     features.add(DecisionTreeFeature.HISTOGRAM_DIAGONAL)
     features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4)
