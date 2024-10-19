@@ -196,6 +196,7 @@ for (groupname, path_to_task_dir) in groupname_pathtotaskdir_list:
     random.Random(seed + 2).shuffle(pending_tasks)
     # truncate the list to a few tasks
     # pending_tasks = pending_tasks[:20]
+    pending_tasks = sorted(pending_tasks, key=lambda task: task.metadata_task_id)
     # print(f"Number of tasks with different input/output size: {number_of_tasks_with_different_input_output_size}")
     # print(f"Number of tasks with same input/output size: {len(pending_tasks)}")
     print(f"After filtering, number of tasks in group '{groupname}': {len(pending_tasks)}")
