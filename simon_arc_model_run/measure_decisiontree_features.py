@@ -29,7 +29,7 @@ class FeatureComboItem:
     def feature_names_sorted(self):
         return sorted([feature.name for feature in self.features])
 
-seed = 50
+seed = 51
 
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
 if not os.path.isdir(path_to_arc_dataset_collection_dataset):
@@ -131,7 +131,7 @@ if False:
     featurecomboitem = FeatureComboItem(3, features)
     featurecomboitem_list.append(featurecomboitem)
 
-if True:
+if False:
     features = set()
     features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
     features.add(DecisionTreeFeature.CORNER)
@@ -144,7 +144,7 @@ if True:
     featurecomboitem = FeatureComboItem(1, features)
     featurecomboitem_list.append(featurecomboitem)
 
-if True:
+if False:
     features = set()
     features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
     features.add(DecisionTreeFeature.EROSION_ALL8)
@@ -154,6 +154,18 @@ if True:
     fid = featureset_id(features)
     already_seen_featureids.add(fid)
     featurecomboitem = FeatureComboItem(2, features)
+    featurecomboitem_list.append(featurecomboitem)
+
+if True:
+    features = set()
+    features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
+    features.add(DecisionTreeFeature.BOUNDING_BOXES)
+    features.add(DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR)
+    features.add(DecisionTreeFeature.EROSION_DIAGONAL)
+    features.add(DecisionTreeFeature.HISTOGRAM_VALUE)
+    fid = featureset_id(features)
+    already_seen_featureids.add(fid)
+    featurecomboitem = FeatureComboItem(1, features)
     featurecomboitem_list.append(featurecomboitem)
 
 for i in range(60):
