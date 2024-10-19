@@ -19,22 +19,24 @@ from .save_arcprize2024_submission_file import *
 from .work_manager_base import WorkManagerBase
 from .decision_tree_util import DecisionTreeUtil, DecisionTreeFeature
 
-# Correct 60
-FEATURES_A = [
-    DecisionTreeFeature.BOUNDING_BOXES,
-    DecisionTreeFeature.COMPONENT_NEAREST4,
-    DecisionTreeFeature.EROSION_ALL8,
-    DecisionTreeFeature.HISTOGRAM_ROWCOL,
-]
-
 # Correct 59, Solves 1 of the hidden ARC tasks
-FEATURES_B = [
+# ARC-AGI training=41, evaluation=17
+FEATURES_1 = [
     DecisionTreeFeature.COMPONENT_NEAREST4,
     DecisionTreeFeature.HISTOGRAM_DIAGONAL,
     DecisionTreeFeature.HISTOGRAM_ROWCOL,
     DecisionTreeFeature.HISTOGRAM_VALUE,
     DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL,
     DecisionTreeFeature.BOUNDING_BOXES,
+]
+
+# Correct 59. Not tested on hidden ARC tasks.
+# ARC-AGI training=39, evaluation=20
+FEATURES_2 = [
+    DecisionTreeFeature.BOUNDING_BOXES,
+    DecisionTreeFeature.COMPONENT_NEAREST4,
+    DecisionTreeFeature.EROSION_ALL8,
+    DecisionTreeFeature.HISTOGRAM_ROWCOL,
 ]
 
 class WorkManagerDecisionTree(WorkManagerBase):
@@ -77,7 +79,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
         noise_levels = [100]
         number_of_refinements = len(noise_levels)
 
-        features = set(FEATURES_A)
+        features = set(FEATURES_2)
 
         correct_count = 0
         correct_task_id_set = set()
