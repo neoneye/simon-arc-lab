@@ -163,6 +163,7 @@ if True:
     features.add(DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR)
     features.add(DecisionTreeFeature.EROSION_DIAGONAL)
     features.add(DecisionTreeFeature.HISTOGRAM_VALUE)
+    features.add(DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND)
     fid = featureset_id(features)
     already_seen_featureids.add(fid)
     featurecomboitem = FeatureComboItem(1, features)
