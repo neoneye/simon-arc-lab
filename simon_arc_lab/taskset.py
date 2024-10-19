@@ -28,6 +28,26 @@ class TaskSet:
             tasks.append(task)
         return TaskSet(tasks)
 
+    def remove_tasks_by_id(self, task_ids_to_remove: set[str], verbose: bool=False):
+        """
+        Remove tasks from the TaskSet by task id.
+
+        Sometime this is useful to remove tasks that have already been solved, to avoid solving them again.
+        So focus is on previously unsolved tasks.
+        """
+        new_tasks = []
+        count_remove = 0
+        for task in self.tasks:
+            if task.metadata_task_id in task_ids_to_remove:
+                count_remove += 1
+                if verbose:
+                    print(f"Removing task id: {task.metadata_task_id}")
+                continue
+            new_tasks.append(task)
+        if verbose:
+            print(f"Removed {count_remove} tasks. Remaining tasks: {len(new_tasks)}")
+        self.tasks = new_tasks
+
     def task_ids(self) -> list[str]:
         return [task.metadata_task_id for task in self.tasks]
 

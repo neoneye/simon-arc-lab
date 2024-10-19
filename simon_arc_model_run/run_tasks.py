@@ -72,14 +72,8 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
     save_dir = f'run_tasks_result/{model_iteration}/{groupname}'
     print(f"Processing {index+1} of {number_of_items_in_list}. Group name '{groupname}'. Results will be saved to '{save_dir}'")
 
-    taskset_all = TaskSet.load_directory(path_to_task_dir)
-    new_tasks = []
-    for task in taskset_all.tasks:
-        if task.metadata_task_id in taskids_to_ignore:
-            # print(f"Ignoring task id: {task.metadata_task_id}")
-            continue
-        new_tasks.append(task)
-    taskset = TaskSet(new_tasks)
+    taskset = TaskSet.load_directory(path_to_task_dir)
+    taskset.remove_tasks_by_id(taskids_to_ignore, verbose=False)
 
     wm = work_manager_class(model, taskset)
     # wm.discard_items_with_too_short_prompts(500)
