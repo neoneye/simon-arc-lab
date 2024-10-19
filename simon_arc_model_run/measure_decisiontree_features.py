@@ -29,7 +29,7 @@ class FeatureComboItem:
     def feature_names_sorted(self):
         return sorted([feature.name for feature in self.features])
 
-seed = 51
+seed = 52
 
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
 if not os.path.isdir(path_to_arc_dataset_collection_dataset):
@@ -156,7 +156,7 @@ if False:
     featurecomboitem = FeatureComboItem(2, features)
     featurecomboitem_list.append(featurecomboitem)
 
-if True:
+if False:
     features = set()
     features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
     features.add(DecisionTreeFeature.BOUNDING_BOXES)
