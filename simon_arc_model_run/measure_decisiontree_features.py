@@ -29,7 +29,7 @@ class FeatureComboItem:
     def feature_names_sorted(self):
         return sorted([feature.name for feature in self.features])
 
-seed = 52
+seed = 53
 
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
 if not os.path.isdir(path_to_arc_dataset_collection_dataset):
@@ -179,6 +179,7 @@ for i in range(60):
     for retry_index in range(100):
         iteration_seed = seed + (i + retry_index) * 10000
         number_of_features_to_select = random.Random(iteration_seed + 1).randint(2, 5)
+        number_of_features_to_select = 2
         feature_list = random.Random(iteration_seed + 2).sample(available_features, number_of_features_to_select)
         candidate_features = set(feature_list)
         fid = featureset_id(candidate_features)
