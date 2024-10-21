@@ -120,6 +120,8 @@ def analyze_with_limit(paths, minimum_score: int, title: str):
     for number_of_sets in range(1, len(sets)+1):
         selected_sets, covered = greedy_maximum_coverage(sets, number_of_sets)
         print(f"Score: {minimum_score}, Number of sets: {number_of_sets}, covered: {len(covered)}")
+    
+    # IDEA: Print the found feature sets.
 
 def print_filenames_with_barely_any_coverage(paths, minimum_score: int, number_of_sets: int):
     paths = find_resultsjsonl_files(analyze_dir)
