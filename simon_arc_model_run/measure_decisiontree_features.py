@@ -169,6 +169,41 @@ if False:
     featurecomboitem = FeatureComboItem(1, features)
     featurecomboitem_list.append(featurecomboitem)
 
+if False:
+    features = set()
+    features.add(DecisionTreeFeature.BOUNDING_BOXES)
+    features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
+    features.add(DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR)
+    features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_ALL9)
+    features.add(DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND)
+    features.add(DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE)
+    fid = featureset_id(features)
+    already_seen_featureids.add(fid)
+    featurecomboitem = FeatureComboItem(1, features)
+    featurecomboitem_list.append(featurecomboitem)
+
+if False:
+    features = set()
+    features.add(DecisionTreeFeature.EROSION_ROWCOL)
+    features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
+    features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_ALL9)
+    features.add(DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE)
+    fid = featureset_id(features)
+    already_seen_featureids.add(fid)
+    featurecomboitem = FeatureComboItem(2, features)
+    featurecomboitem_list.append(featurecomboitem)
+
+if False:
+    features = set()
+    features.add(DecisionTreeFeature.CORNER)
+    features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
+    features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4)
+    features.add(DecisionTreeFeature.ROTATE45)
+    fid = featureset_id(features)
+    already_seen_featureids.add(fid)
+    featurecomboitem = FeatureComboItem(3, features)
+    featurecomboitem_list.append(featurecomboitem)
+
 for i in range(60):
     run_index = i + 1
     for featurecomboitem in featurecomboitem_list:
