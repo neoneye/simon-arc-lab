@@ -1,3 +1,8 @@
+# Measure the performance of a decision tree model with different feature sets.
+# It's not possible to test all feature combos, so a few random combinations are selected.
+# It takes around 30m-2h to process all 800 puzzles in the ARC-AGI dataset.
+# Puzzles that have prevously never been solved are especially interesting.
+# Puzzles that have been solved with a score of 100 are not interesting to solve again.
 import os
 import sys
 

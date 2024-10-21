@@ -1,3 +1,5 @@
+# Find the best feature combinations.
+# Finding a sweet spot, with a few features that solves as many puzzles as possible.
 import os
 import sys
 from pathlib import Path
