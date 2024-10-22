@@ -41,8 +41,10 @@ FEATURES_2 = [
 
 FEATURES_3 = [
     DecisionTreeFeature.DISTANCE_INSIDE_OBJECT,
+    DecisionTreeFeature.COMPONENT_ALL8,
+    DecisionTreeFeature.COMPONENT_NEAREST4,
+    DecisionTreeFeature.COMPONENT_CORNER4,
     # DecisionTreeFeature.EROSION_ALL8,
-    # DecisionTreeFeature.COMPONENT_CORNER4,
 ]
 
 class WorkManagerDecisionTree(WorkManagerBase):

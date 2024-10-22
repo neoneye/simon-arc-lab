@@ -127,7 +127,7 @@ class DecisionTreeUtil:
 
         lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 2
         lookaround_size_image_pixel = 2
-        lookaround_size_object_ids = 1
+        lookaround_size_object_ids = 2
         lookaround_size_mass = 2
         lookaround_size_shape3x3 = 2
 
@@ -679,9 +679,19 @@ class DecisionTreeUtil:
                 pair_id = current_pair_id * count_mutations + i
                 current_pair_id += 1
                 xs_image = cls.xs_for_input_noise_images(refinement_index, input_image_mutated, noise_image_mutated, pair_id, features)
+                # random.Random(pair_seed + 1002 + i).shuffle(xs_image)
+                # xs_image = xs_image[:len(xs_image) * 2 // 3]
                 xs.extend(xs_image)
                 ys_image = cls.ys_for_output_image(output_image_mutated)
+                # random.Random(pair_seed + 1002 + i).shuffle(ys_image)
+                # ys_image = ys_image[:len(ys_image) * 2 // 3]
                 ys.extend(ys_image)
+
+        # Discard 1/3 of the data
+        # random.Random(refinement_index).shuffle(xs)
+        # xs = xs[:len(xs) * 2 // 3]
+        # random.Random(refinement_index).shuffle(ys)
+        # ys = ys[:len(ys) * 2 // 3]
 
         clf = DecisionTreeClassifier(random_state=42)
         clf.fit(xs, ys)
