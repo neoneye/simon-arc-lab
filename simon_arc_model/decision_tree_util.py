@@ -842,6 +842,10 @@ class DecisionTreeUtil:
         # Picking a pair_id that has already been used, performs better than picking a new unseen pair_id.
         pair_id = random.Random(refinement_index + 42).randint(0, current_pair_id - 1)
         xs_image = cls.xs_for_input_noise_images(refinement_index, input_image, noise_image_mutated, pair_id, features)
+        if False:
+            # Randomize the pair_id for the test image, so it doesn't reference a specific example pair
+            for i in range(len(xs_image)):
+                xs_image[i][0] = random.Random(refinement_index + 42 + i).randint(0, current_pair_id - 1)
         result = clf.predict(xs_image)
 
         height, width = input_image.shape
