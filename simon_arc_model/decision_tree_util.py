@@ -107,7 +107,9 @@ class DecisionTreeFeature(Enum):
     EROSION_CORNER4 = 'erosion_corner4'
     EROSION_ROWCOL = 'erosion_rowcol'
     EROSION_DIAGONAL = 'erosion_diagonal'
+    ANY_CORNER = 'any_corner'
     CORNER = 'corner'
+    ANY_EDGE = 'any_edge'
     CENTER = 'center'
     BOUNDING_BOXES = 'bounding_boxes'
     DISTANCE_INSIDE_OBJECT = 'distance_inside_object'
@@ -395,6 +397,14 @@ class DecisionTreeUtil:
 
                 x_rev = width - x - 1
                 y_rev = height - y - 1
+
+                if DecisionTreeFeature.ANY_EDGE not in features:
+                    is_edge = x == 0 or x_rev == 0 or y == 0 or y_rev == 0
+                    values.append(int(is_edge))
+
+                if DecisionTreeFeature.ANY_CORNER not in features:
+                    is_corner = (x == 0 and y == 0) or (x == 0 and y_rev == 0) or (x_rev == 0 and y == 0) or (x_rev == 0 and y_rev == 0)
+                    values.append(int(is_corner))
 
                 steps = [1, 3, 7]
                 for step in steps:
