@@ -125,6 +125,7 @@ class DecisionTreeFeature(Enum):
     POSITION_XY4 = 'position_xy4'
     OBJECT_ID_RAY_LIST = 'object_id_ray_list'
     IDENTIFY_OBJECT_SHAPE = 'identify_object_shape'
+    BIGRAM_ROWCOL = 'bigram_rowcol'
 
 class DecisionTreeUtil:
     @classmethod
@@ -417,6 +418,18 @@ class DecisionTreeUtil:
                 rect = find_bounding_box_multiple_ignore_colors(image, ignore_colors)
                 bounding_box_list.append(rect)
 
+        bigrams_top_bottom = None
+        bigrams_left_right = None
+        if DecisionTreeFeature.BIGRAM_ROWCOL in features:
+            bigrams_top_bottom = np.zeros((height-1, width), dtype=np.uint32)
+            bigrams_left_right = np.zeros((height, width-1), dtype=np.uint32)
+            for y in range(height-1):
+                for x in range(width):
+                    bigrams_top_bottom[y, x] = image[y, x] * 10 + image[y+1, x]
+            for y in range(height):
+                for x in range(width-1):
+                    bigrams_left_right[y, x] = image[y, x] * 10 + image[y, x+1]
+
         values_list = []
         for y in range(height):
             for x in range(width):
@@ -698,6 +711,25 @@ class DecisionTreeUtil:
                     else:
                         comp = 5
                     values.append(comp)
+
+                if bigrams_top_bottom is not None:
+                    if y > 0:
+                        values.append(bigrams_top_bottom[y - 1, x])
+                    else:
+                        values.append(256)
+                    if y < height - 1:
+                        values.append(bigrams_top_bottom[y, x])
+                    else:
+                        values.append(257)
+                if bigrams_left_right is not None:
+                    if x > 0:
+                        values.append(bigrams_left_right[y, x - 1])
+                    else:
+                        values.append(256)
+                    if x < width - 1:
+                        values.append(bigrams_left_right[y, x])
+                    else:
+                        values.append(257)
 
                 values_list.append(values)
         return values_list
