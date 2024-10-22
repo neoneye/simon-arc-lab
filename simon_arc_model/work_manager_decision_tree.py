@@ -40,11 +40,22 @@ FEATURES_2 = [
 ]
 
 FEATURES_3 = [
-    DecisionTreeFeature.DISTANCE_INSIDE_OBJECT,
-    DecisionTreeFeature.COMPONENT_ALL8,
+    # DecisionTreeFeature.DISTANCE_INSIDE_OBJECT,
+    # DecisionTreeFeature.BOUNDING_BOXES,
+    # DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER,
+    # DecisionTreeFeature.GRAVITY_DRAW_TOPLEFT_TO_BOTTOMRIGHT,
+    # DecisionTreeFeature.HISTOGRAM_ROWCOL,
+    # DecisionTreeFeature.COMPONENT_ALL8,
     DecisionTreeFeature.COMPONENT_NEAREST4,
-    DecisionTreeFeature.COMPONENT_CORNER4,
-    # DecisionTreeFeature.EROSION_ALL8,
+    # DecisionTreeFeature.IDENTIFY_OBJECT_SHAPE,
+    # DecisionTreeFeature.ANY_CORNER,
+    # DecisionTreeFeature.ANY_EDGE,
+    # DecisionTreeFeature.CENTER,
+    # DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_ALL9,
+    # DecisionTreeFeature.POSITION_XY0,
+    # DecisionTreeFeature.COMPONENT_CORNER4,
+    # DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL,
+    # DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2,
 ]
 
 class WorkManagerDecisionTree(WorkManagerBase):
@@ -91,7 +102,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
         # noise_levels = [100, 75, 50, 25]
         # noise_levels = [100, 25, 10, 5]
         # noise_levels = [100, 15, 5, 0]
-        noise_levels = [100, 25, 10, 5]
+        # noise_levels = [100, 25, 10, 5]
+        noise_levels = [100, 75, 10, 5]
         number_of_refinements = len(noise_levels)
 
         features = set(FEATURES_3)
