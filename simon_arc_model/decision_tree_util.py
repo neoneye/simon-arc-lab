@@ -563,7 +563,10 @@ class DecisionTreeUtil:
             transform_count = 8
             if DecisionTreeFeature.ROTATE45 in features:
                 transform_count = 10
-            for i in range(transform_count):
+            transformation_ids = list(range(transform_count))
+            random.Random(0 + refinement_index).shuffle(transformation_ids)
+
+            for i in transformation_ids:
                 input_image_mutated = cls.transform_image(input_image, i)
                 noise_image_mutated = cls.transform_image(noise_image, i)
                 output_image_mutated = cls.transform_image(output_image, i)
