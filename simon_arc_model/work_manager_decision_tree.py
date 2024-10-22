@@ -103,7 +103,9 @@ class WorkManagerDecisionTree(WorkManagerBase):
         # noise_levels = [100, 25, 10, 5]
         # noise_levels = [100, 15, 5, 0]
         # noise_levels = [100, 25, 10, 5]
-        noise_levels = [100, 75, 10, 5]
+        # noise_levels = [100, 75, 10, 5]
+        # noise_levels = [100, 85, 10, 5]
+        noise_levels = [100, 85, 85, 5]
         number_of_refinements = len(noise_levels)
 
         features = set(FEATURES_3)
