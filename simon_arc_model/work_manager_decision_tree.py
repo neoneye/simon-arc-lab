@@ -39,6 +39,12 @@ FEATURES_2 = [
     DecisionTreeFeature.HISTOGRAM_ROWCOL,
 ]
 
+FEATURES_3 = [
+    DecisionTreeFeature.DISTANCE_INSIDE_OBJECT,
+    # DecisionTreeFeature.EROSION_ALL8,
+    # DecisionTreeFeature.COMPONENT_CORNER4,
+]
+
 class WorkManagerDecisionTree(WorkManagerBase):
     def __init__(self, model: any, taskset: TaskSet, cache_dir: Optional[str] = None):
         self.taskset = taskset
@@ -81,10 +87,12 @@ class WorkManagerDecisionTree(WorkManagerBase):
         # noise_levels = [100, 99, 90, 85]
         # noise_levels = [100, 50, 25, 10]
         # noise_levels = [100, 75, 50, 25]
+        # noise_levels = [100, 25, 10, 5]
+        # noise_levels = [100, 15, 5, 0]
         noise_levels = [100, 25, 10, 5]
         number_of_refinements = len(noise_levels)
 
-        features = set(FEATURES_1)
+        features = set(FEATURES_3)
 
         correct_count = 0
         correct_task_id_set = set()

@@ -125,11 +125,11 @@ class DecisionTreeUtil:
     def xs_for_input_image(cls, image: int, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> list:
         height, width = image.shape
 
-        lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 1
-        lookaround_size_image_pixel = 1
-        lookaround_size_object_ids = 0
-        lookaround_size_mass = 0
-        lookaround_size_shape3x3 = 0
+        lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 2
+        lookaround_size_image_pixel = 2
+        lookaround_size_object_ids = 1
+        lookaround_size_mass = 2
+        lookaround_size_shape3x3 = 2
 
         component_pixel_connectivity_list = []
         if DecisionTreeFeature.COMPONENT_NEAREST4 in features:
@@ -656,7 +656,7 @@ class DecisionTreeUtil:
             # Shuffle the colors, so it's not always the same color. So all 10 colors gets used.
             h = Histogram.create_with_image(output_image)
             used_colors = h.unique_colors()
-            random.Random(pair_seed + 1001).shuffle(used_colors)
+            random.Random(pair_seed + 1001 + refinement_index).shuffle(used_colors)
             for i in range(10):
                 if h.get_count_for_color(i) > 0:
                     continue
