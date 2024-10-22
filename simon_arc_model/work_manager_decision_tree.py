@@ -77,7 +77,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
         # noise_levels = [95, 90, 85, 80, 75, 70, 65]
         # noise_levels = [95, 90]
         # noise_levels = [100, 95, 90]
-        noise_levels = [100]
+        # noise_levels = [100]
+        noise_levels = [100, 99]
         number_of_refinements = len(noise_levels)
 
         features = set(FEATURES_2)
@@ -121,6 +122,20 @@ class WorkManagerDecisionTree(WorkManagerBase):
                 # print(f"task: {work_item.task.metadata_task_id} score: {score} refinement_index: {refinement_index} noise_level: {noise_level}")
                 image_and_score.append((predicted_output, score))
 
+                # if refinement_index < number_of_refinements - 1:
+                temp_work_item = WorkItem(
+                    work_item.task.clone(), 
+                    work_item.test_index, 
+                    refinement_index, 
+                    PredictOutputDoNothing()
+                )
+                temp_work_item.predicted_output_image = predicted_output
+                if show:
+                    temp_work_item.show()
+                if save_dir is not None:
+                    temp_work_item.show(save_dir)
+
+
             best_image, best_score = max(image_and_score, key=lambda x: x[1])
             # print(f"task: {work_item.task.metadata_task_id} best_score: {best_score}")
 
@@ -131,10 +146,10 @@ class WorkManagerDecisionTree(WorkManagerBase):
                 correct_task_id_set.add(work_item.task.metadata_task_id)
                 correct_count = len(correct_task_id_set)
             pbar.set_postfix({'correct': correct_count})
-            if show:
-                work_item.show()
-            if save_dir is not None:
-                work_item.show(save_dir)
+            # if show:
+            #     work_item.show()
+            # if save_dir is not None:
+            #     work_item.show(save_dir)
 
     def summary(self):
         correct_task_id_set = set()

@@ -12,4 +12,4 @@ class PredictOutputDoNothing(PredictOutputBase):
         return np.zeros((1, 1), dtype=np.uint8)
     
     def name(self) -> str:
-        return 'PredictOutputDoNothing'
+        return None
