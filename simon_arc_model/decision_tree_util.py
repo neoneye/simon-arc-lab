@@ -126,6 +126,7 @@ class DecisionTreeFeature(Enum):
     OBJECT_ID_RAY_LIST = 'object_id_ray_list'
     IDENTIFY_OBJECT_SHAPE = 'identify_object_shape'
     BIGRAM_ROWCOL = 'bigram_rowcol'
+    COLOR_POPULARITY = 'color_popularity'
 
 class DecisionTreeUtil:
     @classmethod
@@ -294,6 +295,10 @@ class DecisionTreeUtil:
         else:
             image_count_neightbors_with_same_color = None
 
+        full_histogram = Histogram.create_with_image(image)
+        most_popular_color_set = set(full_histogram.most_popular_color_list())
+        least_popular_color_set = set(full_histogram.least_popular_color_list())
+
         row_histograms = []
         column_histogram = []
         if DecisionTreeFeature.HISTOGRAM_ROWCOL in features:
@@ -438,6 +443,26 @@ class DecisionTreeUtil:
 
                 if DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE not in features:
                     values.append(image[y, x])
+
+                if DecisionTreeFeature.COLOR_POPULARITY in features:
+                    k = 1
+                    n = k * 2 + 1
+                    for ry in range(n):
+                        for rx in range(n):
+                            xx = x + rx - k
+                            yy = y + ry - k
+                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                                values.append(0)
+                                values.append(0)
+                                values.append(0)
+                            else:
+                                color = image[yy, xx]
+                                is_most_popular = color in most_popular_color_set
+                                values.append(int(is_most_popular))
+                                is_least_popular = color in least_popular_color_set
+                                values.append(int(is_least_popular))
+                                is_medium_popular = is_most_popular == False and is_least_popular == False
+                                values.append(int(is_medium_popular))
 
                 if is_earlier_prediction:
                     values.append(0)
