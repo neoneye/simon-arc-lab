@@ -141,6 +141,8 @@ class DecisionTreeUtil:
         lookaround_size_object_ids = 2
         lookaround_size_mass = 2
         lookaround_size_shape3x3 = 2
+        lookaround_size_shape3x3_center = 0
+        lookaround_size_shape3x3_opposite = 0
 
         component_pixel_connectivity_list = []
         if DecisionTreeFeature.COMPONENT_NEAREST4 in features:
@@ -490,11 +492,33 @@ class DecisionTreeUtil:
                 for object_distance in object_distance_list:
                     values.append(object_distance[y, x])
 
-                values.append(image_shape3x3_opposite[y, x])
+                if True:
+                    k = lookaround_size_shape3x3_opposite
+                    n = k * 2 + 1
+                    for ry in range(n):
+                        for rx in range(n):
+                            xx = x + rx - k
+                            yy = y + ry - k
+                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                                values.append(0)
+                            else:
+                                values.append(image_shape3x3_opposite[yy, xx])
+
                 for i in range(3):
                     values.append((image_shape3x3_opposite[y, x] >> i) & 1)
 
-                values.append(image_shape3x3_center[y, x])
+                if True:
+                    k = lookaround_size_shape3x3_center
+                    n = k * 2 + 1
+                    for ry in range(n):
+                        for rx in range(n):
+                            xx = x + rx - k
+                            yy = y + ry - k
+                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                                values.append(0)
+                            else:
+                                values.append(image_shape3x3_center[yy, xx])
+
                 for i in range(8):
                     values.append((image_shape3x3_center[y, x] >> i) & 1)
 
