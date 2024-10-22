@@ -831,7 +831,7 @@ class DecisionTreeUtil:
 
             random.Random(pair_seed + 1).shuffle(positions)
             # take N percent of the positions
-            count_positions = int(len(positions) * noise_level / 100)
+            count_positions = len(positions) * noise_level // 100
             noise_image = output_image.copy()
             for i in range(count_positions):
                 x, y = positions[i]
