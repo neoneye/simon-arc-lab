@@ -273,8 +273,8 @@ class DecisionTreeUtil:
         if DecisionTreeFeature.OBJECT_ID_RAY_LIST in features:
             for object_ids in object_ids_list:
                 for direction in ray_directions:
-                    outside_color = 0
-                    object_id_ray = image_raytrace_probecolor_direction(object_ids, outside_color, direction)
+                    object_id_outside_color = 0
+                    object_id_ray = image_raytrace_probecolor_direction(object_ids, object_id_outside_color, direction)
                     object_id_ray_list.append(object_id_ray)
 
         the_image_outline_all8 = image_outline_all8(image)
