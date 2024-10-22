@@ -121,6 +121,8 @@ class DecisionTreeFeature(Enum):
     GRAVITY_DRAW_BOTTOMRIGHT_TO_TOPLEFT = 'gravity_draw_bottomright_to_topleft'
     GRAVITY_DRAW_TOPRIGHT_TO_BOTTOMLEFT = 'gravity_draw_topright_to_bottomleft'
     GRAVITY_DRAW_BOTTOMLEFT_TO_TOPRIGHT = 'gravity_draw_bottomleft_to_topright'
+    POSITION_XY0 = 'position_xy0'
+    POSITION_XY4 = 'position_xy4'
 
 class DecisionTreeUtil:
     @classmethod
@@ -136,11 +138,11 @@ class DecisionTreeUtil:
     def xs_for_input_image(cls, image: int, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> list:
         height, width = image.shape
 
-        lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 2
-        lookaround_size_image_pixel = 2
-        lookaround_size_object_ids = 2
-        lookaround_size_mass = 2
-        lookaround_size_shape3x3 = 2
+        lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 1
+        lookaround_size_image_pixel = 1
+        lookaround_size_object_ids = 1
+        lookaround_size_mass = 1
+        lookaround_size_shape3x3 = 1
         lookaround_size_shape3x3_center = 0
         lookaround_size_shape3x3_opposite = 0
 
@@ -387,8 +389,7 @@ class DecisionTreeUtil:
             for x in range(width):
                 values = []
                 values.append(pair_id)
-                # values.append(x)
-                # values.append(y)
+
                 if DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE not in features:
                     values.append(image[y, x])
 
@@ -399,6 +400,23 @@ class DecisionTreeUtil:
 
                 x_rev = width - x - 1
                 y_rev = height - y - 1
+
+                if DecisionTreeFeature.POSITION_XY0 not in features:
+                    values.append(x)
+                    values.append(y)
+                    values.append(x_rev)
+                    values.append(y_rev)
+                if DecisionTreeFeature.POSITION_XY4 not in features:
+                    for i in range(4):
+                        j = i + 1
+                        values.append(x + j)
+                        values.append(x - j)
+                        values.append(y + j)
+                        values.append(y - j)
+                        values.append(x_rev + j)
+                        values.append(x_rev - j)
+                        values.append(y_rev + j)
+                        values.append(y_rev - j)
 
                 if DecisionTreeFeature.ANY_EDGE not in features:
                     is_edge = x == 0 or x_rev == 0 or y == 0 or y_rev == 0
