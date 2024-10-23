@@ -94,6 +94,7 @@ class DecisionTreeFeature(Enum):
     HISTOGRAM_ROWCOL = 'histogram_rowcol'
     HISTOGRAM_VALUE = 'histogram_value'
     IMAGE_MASS_COMPARE_ADJACENT_ROWCOL = 'image_mass_compare_adjacent_rowcol'
+    IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2 = 'image_mass_compare_adjacent_rowcol2'
     NUMBER_OF_UNIQUE_COLORS_ALL9 = 'number_of_unique_colors_all9'
     NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER = 'number_of_unique_colors_around_center'
     NUMBER_OF_UNIQUE_COLORS_IN_CORNERS = 'number_of_unique_colors_in_corners'
@@ -311,7 +312,7 @@ class DecisionTreeUtil:
         mass_compare_adjacent_rows_height = 0
         mass_compare_adjacent_columns = None
         mass_compare_adjacent_columns_width = 0
-        if DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL in features:
+        if (DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL in features) or (DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2 in features):
             mass_compare_adjacent_rows = image_mass_compare_adjacent_rows(image, 0, 1, 2)
             mass_compare_adjacent_rows_height = mass_compare_adjacent_rows.shape[0]
             mass_compare_adjacent_columns = image_mass_compare_adjacent_columns(image, 0, 1, 2)
@@ -519,6 +520,28 @@ class DecisionTreeUtil:
                     values.append(comp)
                     if x < mass_compare_adjacent_columns_width - 1:
                         comp = mass_compare_adjacent_columns[y, x + 1]
+                    else:
+                        comp = 5
+                    values.append(comp)
+
+                if DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2 in features:
+                    if y > 1:
+                        comp = mass_compare_adjacent_rows[y - 2, x]
+                    else:
+                        comp = 4
+                    values.append(comp)
+                    if x > 1:
+                        comp = mass_compare_adjacent_columns[y, x - 2]
+                    else:
+                        comp = 4
+                    values.append(comp)
+                    if y < mass_compare_adjacent_rows_height - 2:
+                        comp = mass_compare_adjacent_rows[y + 2, x]
+                    else:
+                        comp = 5
+                    values.append(comp)
+                    if x < mass_compare_adjacent_columns_width - 2:
+                        comp = mass_compare_adjacent_columns[y, x + 2]
                     else:
                         comp = 5
                     values.append(comp)
