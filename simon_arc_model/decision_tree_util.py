@@ -110,6 +110,15 @@ class DecisionTreeFeature(Enum):
     CORNER = 'corner'
     CENTER = 'center'
     BOUNDING_BOXES = 'bounding_boxes'
+    GRAVITY_DRAW_TOP_TO_BOTTOM = 'gravity_draw_top_to_bottom'
+    GRAVITY_DRAW_BOTTOM_TO_TOP = 'gravity_draw_bottom_to_top'
+    GRAVITY_DRAW_LEFT_TO_RIGHT = 'gravity_draw_left_to_right'
+    GRAVITY_DRAW_RIGHT_TO_LEFT = 'gravity_draw_right_to_left'
+    GRAVITY_DRAW_TOPLEFT_TO_BOTTOMRIGHT = 'gravity_draw_topleft_to_bottomright'
+    GRAVITY_DRAW_BOTTOMRIGHT_TO_TOPLEFT = 'gravity_draw_bottomright_to_topleft'
+    GRAVITY_DRAW_TOPRIGHT_TO_BOTTOMLEFT = 'gravity_draw_topright_to_bottomleft'
+    GRAVITY_DRAW_BOTTOMLEFT_TO_TOPRIGHT = 'gravity_draw_bottomleft_to_topright'
+
 
 class DecisionTreeUtil:
     @classmethod
@@ -253,21 +262,28 @@ class DecisionTreeUtil:
                 trbl_histograms.append(histogram)
             # show_prediction_result(image, skewed_image_up, None)
 
-        # gravity_draw_directions = [
-        #     GravityDrawDirection.TOP_TO_BOTTOM,
-        #     GravityDrawDirection.BOTTOM_TO_TOP,
-        #     GravityDrawDirection.LEFT_TO_RIGHT,
-        #     GravityDrawDirection.RIGHT_TO_LEFT,
-        #     GravityDrawDirection.TOPLEFT_TO_BOTTOMRIGHT,
-        #     GravityDrawDirection.BOTTOMRIGHT_TO_TOPLEFT,
-        #     GravityDrawDirection.TOPRIGHT_TO_BOTTOMLEFT,
-        #     GravityDrawDirection.BOTTOMLEFT_TO_TOPRIGHT,
-        # ]
-        # gravity_background_color = 0
-        # gravity_draw_image_list = []
-        # for direction in gravity_draw_directions:
-        #     gd_image = image_gravity_draw(image, gravity_background_color, direction)
-        #     gravity_draw_image_list.append(gd_image)
+        gravity_draw_directions = []
+        if DecisionTreeFeature.GRAVITY_DRAW_TOP_TO_BOTTOM in features:
+            gravity_draw_directions.append(GravityDrawDirection.TOP_TO_BOTTOM)
+        if DecisionTreeFeature.GRAVITY_DRAW_BOTTOM_TO_TOP in features:
+            gravity_draw_directions.append(GravityDrawDirection.TOP_TO_BOTTOM)
+        if DecisionTreeFeature.GRAVITY_DRAW_LEFT_TO_RIGHT in features:
+            gravity_draw_directions.append(GravityDrawDirection.LEFT_TO_RIGHT)
+        if DecisionTreeFeature.GRAVITY_DRAW_RIGHT_TO_LEFT in features:
+            gravity_draw_directions.append(GravityDrawDirection.RIGHT_TO_LEFT)
+        if DecisionTreeFeature.GRAVITY_DRAW_TOPLEFT_TO_BOTTOMRIGHT in features:
+            gravity_draw_directions.append(GravityDrawDirection.TOPLEFT_TO_BOTTOMRIGHT)
+        if DecisionTreeFeature.GRAVITY_DRAW_TOPRIGHT_TO_BOTTOMLEFT in features:
+            gravity_draw_directions.append(GravityDrawDirection.TOPRIGHT_TO_BOTTOMLEFT)
+        if DecisionTreeFeature.GRAVITY_DRAW_BOTTOMLEFT_TO_TOPRIGHT in features:
+            gravity_draw_directions.append(GravityDrawDirection.BOTTOMLEFT_TO_TOPRIGHT)
+        if DecisionTreeFeature.GRAVITY_DRAW_BOTTOMRIGHT_TO_TOPLEFT in features:
+            gravity_draw_directions.append(GravityDrawDirection.BOTTOMRIGHT_TO_TOPLEFT)
+        gravity_draw_image_list = []
+        for direction in gravity_draw_directions:
+            for color in range(10):
+                gd_image = image_gravity_draw(image, color, direction)
+                gravity_draw_image_list.append(gd_image)
 
         erosion_pixel_connectivity_list = []
         if DecisionTreeFeature.EROSION_ALL8 in features:
@@ -451,8 +467,8 @@ class DecisionTreeUtil:
                     else:
                         values.append(-100)
                 
-                # for gd_image in gravity_draw_image_list:
-                #     values.append(gd_image[y, x])
+                for gd_image in gravity_draw_image_list:
+                    values.append(gd_image[y, x])
 
                 for erosion_image in erosion_image_list:
                     values.append(erosion_image[y, x])
