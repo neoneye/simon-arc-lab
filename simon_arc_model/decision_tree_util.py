@@ -29,6 +29,61 @@ from sklearn import tree
 import matplotlib.pyplot as plt
 from enum import Enum
 
+class Transformation(Enum):
+    DO_NOTHING = 'do_nothing'
+    ROTATE_CW = 'rotate_cw'
+    ROTATE_CCW = 'rotate_ccw'
+    ROTATE_180 = 'rotate_180'
+    FLIP_X = 'flip_x'
+    FLIP_Y = 'flip_y'
+    FLIP_A = 'flip_a'
+    FLIP_B = 'flip_b'
+    SKEW_UP = 'skew_up'
+    SKEW_DOWN = 'skew_down'
+    SKEW_LEFT = 'skew_left'
+    SKEW_RIGHT = 'skew_right'
+    ROTATE_CW_45 = 'rotate_cw_45'
+    ROTATE_CCW_45 = 'rotate_ccw_45'
+
+    def apply(self, image: np.array) -> np.array:
+        if self == Transformation.DO_NOTHING:
+            return image
+        elif self == Transformation.ROTATE_CW:
+            return image_rotate_cw(image)
+        elif self == Transformation.ROTATE_CCW:
+            return image_rotate_ccw(image)
+        elif self == Transformation.ROTATE_180:
+            return image_rotate_180(image)
+        elif self == Transformation.FLIP_X:
+            return image_flipx(image)
+        elif self == Transformation.FLIP_Y:
+            return image_flipy(image)
+        elif self == Transformation.FLIP_A:
+            return image_flip_diagonal_a(image)
+        elif self == Transformation.FLIP_B:
+            return image_flip_diagonal_b(image)
+        elif self == Transformation.SKEW_UP:
+            fill_color = 10
+            return image_skew(image, fill_color, SkewDirection.UP)
+        elif self == Transformation.SKEW_DOWN:
+            fill_color = 10
+            return image_skew(image, fill_color, SkewDirection.DOWN)
+        elif self == Transformation.SKEW_LEFT:
+            fill_color = 10
+            return image_skew(image, fill_color, SkewDirection.LEFT)
+        elif self == Transformation.SKEW_RIGHT:
+            fill_color = 10
+            return image_skew(image, fill_color, SkewDirection.RIGHT)
+        elif self == Transformation.ROTATE_CW_45:
+            fill_color = 10
+            return image_rotate_cw_45(image, fill_color)
+        elif self == Transformation.ROTATE_CCW_45:
+            fill_color = 10
+            return image_rotate_ccw_45(image, fill_color)
+        else:
+            raise ValueError(f'Unknown transformation_index: {self}')
+
+
 class DecisionTreeFeature(Enum):
     COMPONENT_NEAREST4 = 'component_nearest4'
     COMPONENT_ALL8 = 'component_all8'
@@ -500,38 +555,29 @@ class DecisionTreeUtil:
         return values
 
     @classmethod
-    def transform_image(cls, image: np.array, transformation_index: int) -> np.array:
-        if transformation_index == 0:
-            return image
-        elif transformation_index == 1:
-            return image_rotate_cw(image)
-        elif transformation_index == 2:
-            return image_rotate_ccw(image)
-        elif transformation_index == 3:
-            return image_rotate_180(image)
-        elif transformation_index == 4:
-            return image_flipx(image)
-        elif transformation_index == 5:
-            return image_flipy(image)
-        elif transformation_index == 6:
-            return image_flip_diagonal_a(image)
-        elif transformation_index == 7:
-            return image_flip_diagonal_b(image)
-        elif transformation_index == 8:
-            fill_color = 10
-            return image_rotate_cw_45(image, fill_color)
-        elif transformation_index == 9:
-            fill_color = 10
-            return image_rotate_ccw_45(image, fill_color)
-        else:
-            raise ValueError(f'Unknown transformation_index: {transformation_index}')
-
-    @classmethod
     def predict_output(cls, task: Task, test_index: int, previous_prediction: Optional[np.array], refinement_index: int, noise_level: int, features: set[DecisionTreeFeature]) -> np.array:
         xs = []
         ys = []
 
         current_pair_id = 0
+
+        transformation_ids = [
+            Transformation.DO_NOTHING,
+            Transformation.ROTATE_CW,
+            Transformation.ROTATE_CCW,
+            Transformation.ROTATE_180,
+            Transformation.FLIP_X,
+            Transformation.FLIP_Y,
+            Transformation.FLIP_A,
+            Transformation.FLIP_B,
+            # Transformation.SKEW_UP,
+            # Transformation.SKEW_DOWN,
+            # Transformation.SKEW_LEFT,
+            # Transformation.SKEW_RIGHT,
+        ]
+        if DecisionTreeFeature.ROTATE45 in features:
+            transformation_ids.append(Transformation.ROTATE_CW_45)
+            transformation_ids.append(Transformation.ROTATE_CCW_45)
 
         for pair_index in range(task.count_examples):
             pair_seed = pair_index * 1000 + refinement_index * 10000
@@ -560,13 +606,11 @@ class DecisionTreeUtil:
             noise_image = image_distort(noise_image, 1, 25, pair_seed + 1000)
 
             input_noise_output = []
-            transform_count = 8
-            if DecisionTreeFeature.ROTATE45 in features:
-                transform_count = 10
-            for i in range(transform_count):
-                input_image_mutated = cls.transform_image(input_image, i)
-                noise_image_mutated = cls.transform_image(noise_image, i)
-                output_image_mutated = cls.transform_image(output_image, i)
+            transformation_ids_randomized = transformation_ids.copy()
+            for transformation in transformation_ids_randomized:
+                input_image_mutated = transformation.apply(input_image)
+                noise_image_mutated = transformation.apply(noise_image)
+                output_image_mutated = transformation.apply(output_image)
                 input_noise_output.append((input_image_mutated, noise_image_mutated, output_image_mutated))
 
             # Shuffle the colors, so it's not always the same color. So all 10 colors gets used.
