@@ -119,6 +119,7 @@ class DecisionTreeFeature(Enum):
     GRAVITY_DRAW_BOTTOMRIGHT_TO_TOPLEFT = 'gravity_draw_bottomright_to_topleft'
     GRAVITY_DRAW_TOPRIGHT_TO_BOTTOMLEFT = 'gravity_draw_topright_to_bottomleft'
     GRAVITY_DRAW_BOTTOMLEFT_TO_TOPRIGHT = 'gravity_draw_bottomleft_to_topright'
+    OBJECT_ID_RAY_LIST = 'object_id_ray_list'
     IDENTIFY_OBJECT_SHAPE = 'identify_object_shape'
     BIGRAM_ROWCOL = 'bigram_rowcol'
 
@@ -262,6 +263,14 @@ class DecisionTreeUtil:
         for direction in ray_directions:
             image_ray = image_raytrace_probecolor_direction(image, outside_color, direction)
             image_ray_list.append(image_ray)
+
+        object_id_ray_list = []
+        if DecisionTreeFeature.OBJECT_ID_RAY_LIST in features:
+            for object_ids in object_ids_list:
+                for direction in ray_directions:
+                    object_id_outside_color = 0
+                    object_id_ray = image_raytrace_probecolor_direction(object_ids, object_id_outside_color, direction)
+                    object_id_ray_list.append(object_id_ray)
 
         the_image_outline_all8 = image_outline_all8(image)
 
@@ -539,6 +548,9 @@ class DecisionTreeUtil:
 
                 for image_ray in image_ray_list:
                     values.append(image_ray[y, x])
+
+                for object_ids in object_id_ray_list:
+                    values.append(object_ids[y, x])
 
                 is_outline = the_image_outline_all8[y, x]
                 if is_outline == 1:
