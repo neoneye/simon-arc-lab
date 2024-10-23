@@ -110,6 +110,7 @@ class DecisionTreeFeature(Enum):
     CORNER = 'corner'
     CENTER = 'center'
     BOUNDING_BOXES = 'bounding_boxes'
+    DISTANCE_INSIDE_OBJECT = 'distance_inside_object'
     GRAVITY_DRAW_TOP_TO_BOTTOM = 'gravity_draw_top_to_bottom'
     GRAVITY_DRAW_BOTTOM_TO_TOP = 'gravity_draw_bottom_to_top'
     GRAVITY_DRAW_LEFT_TO_RIGHT = 'gravity_draw_left_to_right'
@@ -207,6 +208,40 @@ class DecisionTreeUtil:
                         if mask_value == 1:
                             object_masses[y, x] = component.mass
             object_masses_list.append(object_masses)
+
+        object_distance_list = []
+        if DecisionTreeFeature.DISTANCE_INSIDE_OBJECT in features:
+            for component_index, components in enumerate(components_list):
+                object_distance_topleft = np.zeros((height, width), dtype=np.uint32)
+                object_distance_topright = np.zeros((height, width), dtype=np.uint32)
+                object_distance_bottomleft = np.zeros((height, width), dtype=np.uint32)
+                object_distance_bottomright = np.zeros((height, width), dtype=np.uint32)
+                object_distance_top = np.zeros((height, width), dtype=np.uint32)
+                object_distance_bottom = np.zeros((height, width), dtype=np.uint32)
+                object_distance_left = np.zeros((height, width), dtype=np.uint32)
+                object_distance_right = np.zeros((height, width), dtype=np.uint32)
+                for component in components:
+                    rect = find_bounding_box_ignoring_color(component.mask, 0)
+                    for y in range(rect.height):
+                        for x in range(rect.width):
+                            mask_value = component.mask[y + rect.y, x + rect.x]
+                            if mask_value == 1:
+                                object_distance_topleft[rect.y + y, rect.x + x] = x + y
+                                object_distance_topright[rect.y + y, (rect.x + rect.width - 1) - x] = rect.width - 1 - x + y
+                                object_distance_bottomleft[(rect.y + rect.height - 1) - y, rect.x + x] = x + rect.height - 1 - y
+                                object_distance_bottomright[(rect.y + rect.height - 1) - y, (rect.x + rect.width - 1) - x] = rect.width - 1 - x + rect.height - 1 - y
+                                object_distance_top[rect.y + y, rect.x + x] = y
+                                object_distance_bottom[rect.y + y, rect.x + x] = rect.height - 1 - y
+                                object_distance_left[rect.y + y, rect.x + x] = x
+                                object_distance_right[rect.y + y, rect.x + x] = rect.width - 1 - x
+                object_distance_list.append(object_distance_topleft)
+                object_distance_list.append(object_distance_topright)
+                object_distance_list.append(object_distance_bottomleft)
+                object_distance_list.append(object_distance_bottomright)
+                object_distance_list.append(object_distance_top)
+                object_distance_list.append(object_distance_bottom)
+                object_distance_list.append(object_distance_left)
+                object_distance_list.append(object_distance_right)
 
         image_shape3x3_opposite = ImageShape3x3Opposite.apply(image)
         image_shape3x3_center = ImageShape3x3Center.apply(image)
@@ -490,6 +525,9 @@ class DecisionTreeUtil:
                                 values.append(0)
                             else:
                                 values.append(object_masses[yy, xx])
+
+                for object_distance in object_distance_list:
+                    values.append(object_distance[y, x])
 
                 values.append(image_shape3x3_opposite[y, x])
                 for i in range(3):
