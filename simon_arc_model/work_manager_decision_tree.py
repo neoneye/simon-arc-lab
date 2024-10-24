@@ -39,6 +39,12 @@ FEATURES_2 = [
     DecisionTreeFeature.HISTOGRAM_ROWCOL,
 ]
 
+FEATURES_3 = [
+    DecisionTreeFeature.COMPONENT_ALL8,
+    DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2,
+    DecisionTreeFeature.OBJECT_ID_RAY_LIST,
+]
+
 class WorkManagerDecisionTree(WorkManagerBase):
     def __init__(self, model: any, taskset: TaskSet, cache_dir: Optional[str] = None):
         self.taskset = taskset
@@ -80,7 +86,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
         noise_levels = [100]
         number_of_refinements = len(noise_levels)
 
-        features = set(FEATURES_2)
+        features = set(FEATURES_3)
 
         correct_count = 0
         correct_task_id_set = set()
