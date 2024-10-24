@@ -917,13 +917,18 @@ class DecisionTreeUtil:
             #         v = (v + offset) % 10
             #         noise_image_mutated[y, x] = v
             #         # print(f'x={x} y={y} v={v}')
-            colors_available = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-            color_assign = random.Random(refinement_index + 42).choice(colors_available)
+            positions = []
             for y in range(height):
                 for x in range(width):
                     if mask_image[y, x] > 0:
                         continue
-                    noise_image_mutated[y, x] = color_assign
+                    positions.append((x, y))
+            random.Random(refinement_index + 42).shuffle(positions)
+            positions = positions[:3]
+            colors_available = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+            color_assign = random.Random(refinement_index + 42).choice(colors_available)
+            for x, y in positions:
+                noise_image_mutated[y, x] = color_assign
 
         # Picking a pair_id that has already been used, performs better than picking a new unseen pair_id.
         pair_id = random.Random(refinement_index + 42).randint(0, current_pair_id - 1)
