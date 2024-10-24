@@ -98,7 +98,7 @@ def show_multiple_images(cmap_title_image_list: list[Tuple[str, np.array, str]],
     save_path: The path to save the plot as a PNG file. If None, the plot will be displayed.
     """
     num_img = len(cmap_title_image_list)
-    fig, axs = plt.subplots(1, num_img, figsize=(9, num_img))
+    fig, axs = plt.subplots(1, num_img, figsize=(20, num_img))
     plt.suptitle(title, fontsize=20, fontweight='bold', y=0.96)
     
     cmap = colors.ListedColormap(ARCAGI_COLORS)

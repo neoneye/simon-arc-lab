@@ -130,14 +130,31 @@ class WorkManagerDecisionTree(WorkManagerBase):
                 # print(f"task: {work_item.task.metadata_task_id} score: {score} refinement_index: {refinement_index} noise_level: {noise_level}")
                 image_and_score.append((predicted_output, score))
 
+                expected_output = work_item.task.test_output(work_item.test_index)
+                assert expected_output.shape == predicted_output.shape
+                assert expected_output.shape == predicted_correctness.shape
+                height, width = predicted_output.shape
+
+                problem_image = np.zeros((height, width), dtype=np.float32)
+                for y in range(height):
+                    for x in range(width):
+                        is_same = predicted_output[y, x] == expected_output[y, x]
+                        is_correct = predicted_correctness[y, x] == 1
+                        if is_same == False and is_correct == True:
+                            # Worst case scenario, the validator was unable to identify this bad pixel.
+                            # Thus there is no way for the predictor to ever repair this pixel.
+                            value = 0.0
+                        else:
+                            value = 1.0
+                        problem_image[y, x] = value
+
                 temp_work_item = WorkItem(
                     work_item.task.clone(), 
                     work_item.test_index, 
                     refinement_index, 
                     PredictOutputDoNothing()
                 )
-                # temp_work_item.predicted_output_image = predicted_output
-                temp_work_item.predicted_output_image = predicted_correctness
+                temp_work_item.predicted_output_image = predicted_output
                 temp_work_item.assign_status()
                 if show:
                     temp_work_item.show()
@@ -149,6 +166,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                 title_image_list.append(('arc', 'Output', temp_work_item.task.test_output(temp_work_item.test_index)))
                 title_image_list.append(('arc', 'Predict', predicted_output))
                 title_image_list.append(('heatmap', 'Valid', predicted_correctness))
+                title_image_list.append(('heatmap', 'Problem', problem_image))
                 show_multiple_images(title_image_list, title=f'{work_item.task.metadata_task_id} test{work_item.test_index} step{refinement_index}', save_path=None)
 
             best_image, best_score = max(image_and_score, key=lambda x: x[1])
