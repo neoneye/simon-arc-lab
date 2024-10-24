@@ -140,7 +140,8 @@ class DecisionTreeUtil:
         return True
 
     @classmethod
-    def xs_for_input_image(cls, image: int, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> list:
+    def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> list:
+        # print(f'xs_for_input_image: pair_id={pair_id} features={features} is_earlier_prediction={is_earlier_prediction}')
         height, width = image.shape
 
         lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 1
@@ -789,7 +790,17 @@ class DecisionTreeUtil:
         return values
 
     @classmethod
-    def predict_output(cls, task: Task, test_index: int, previous_prediction: Optional[np.array], refinement_index: int, noise_level: int, features: set[DecisionTreeFeature]) -> np.array:
+    def predict_output(cls, task: Task, test_index: int, previous_prediction_image: Optional[np.array], previous_prediction_mask: Optional[np.array], refinement_index: int, noise_level: int, features: set[DecisionTreeFeature]) -> np.array:
+        has_previous_prediction_image = previous_prediction_image is not None
+        has_previous_prediction_mask = previous_prediction_mask is not None
+        if has_previous_prediction_image != has_previous_prediction_mask:
+            raise ValueError('Both previous_prediction_image and previous_prediction_mask must be set or be None')
+
+        has_previous = has_previous_prediction_image and has_previous_prediction_mask
+        if has_previous:
+            if previous_prediction_image.shape != previous_prediction_mask.shape:
+                raise ValueError('previous_prediction_image and previous_prediction_mask must have the same size')
+
         xs = []
         ys = []
 
@@ -837,7 +848,7 @@ class DecisionTreeUtil:
             for i in range(count_positions):
                 x, y = positions[i]
                 noise_image[y, x] = input_image[y, x]
-            noise_image = image_distort(noise_image, 1, 25, pair_seed + 1000)
+            # noise_image = image_distort(noise_image, 1, 25, pair_seed + 1000)
 
             input_noise_output = []
             transformation_ids_randomized = transformation_ids.copy()
@@ -889,8 +900,12 @@ class DecisionTreeUtil:
 
         input_image = task.test_input(test_index)
         noise_image_mutated = input_image.copy()
-        if previous_prediction is not None:
-            noise_image_mutated = previous_prediction.copy()
+        if previous_prediction_image is not None:
+            noise_image_mutated = previous_prediction_image.copy()
+
+        mask_image = np.ones_like(input_image)
+        if previous_prediction_mask is not None:
+            mask_image = previous_prediction_mask.copy()
 
         # Picking a pair_id that has already been used, performs better than picking a new unseen pair_id.
         pair_id = random.Random(refinement_index + 42).randint(0, current_pair_id - 1)
@@ -902,9 +917,14 @@ class DecisionTreeUtil:
         result = clf.predict(xs_image)
 
         height, width = input_image.shape
-        predicted_image = np.zeros_like(input_image)
+        # predicted_image = np.zeros_like(input_image)
+        predicted_image = input_image.copy()
+        if previous_prediction_image is not None:
+            predicted_image = previous_prediction_image.copy()
         for y in range(height):
             for x in range(width):
+                if mask_image[y, x] > 0:
+                    continue
                 value_raw = result[y * width + x]
                 value = int(value_raw)
                 if value < 0:
@@ -912,6 +932,12 @@ class DecisionTreeUtil:
                 if value > 9:
                     value = 9
                 predicted_image[y, x] = value
+
+        # if result_index != len(result):
+        #     print(f'result_index={result_index} len(result)={len(result)}')
+        #     raise ValueError('Inconsistent result length and the number of pixels in the mask')
+
+        # assert len(result) == result_index
 
         # plt.figure()
         # tree.plot_tree(clf, filled=True)

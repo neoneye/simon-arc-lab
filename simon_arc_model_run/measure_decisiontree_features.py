@@ -307,7 +307,7 @@ for combo_index, combo in enumerate(featurecomboitem_list):
                 predicted_output = DecisionTreeUtil.predict_output(
                     task, 
                     test_index, 
-                    previous_prediction=None,
+                    previous_prediction_image=None,
                     refinement_index=0, 
                     noise_level=100,
                     features=combo.features,

@@ -83,7 +83,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
         # noise_levels = [95, 90, 85, 80, 75, 70, 65]
         # noise_levels = [95, 90]
         # noise_levels = [100, 95, 90]
-        noise_levels = [100]
+        noise_levels = [100, 0]
         number_of_refinements = len(noise_levels)
 
         features = set(FEATURES_3)
@@ -99,6 +99,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
             image_and_score = []
 
             last_predicted_output = None
+            last_predicted_correctness = None
             for refinement_index in range(number_of_refinements):
                 noise_level = noise_levels[refinement_index]
                 # print(f"Refinement {refinement_index+1}/{number_of_refinements} noise_level={noise_level}")
@@ -111,10 +112,16 @@ class WorkManagerDecisionTree(WorkManagerBase):
                             predicted_output = np.load(cache_file)
                             # print(f"Loaded from cache: {cache_file}")
                 if predicted_output is None:
+                    # print(f"Predicting task: {work_item.task.metadata_task_id} test: {work_item.test_index} refinement: {refinement_index} last_predicted_output: {last_predicted_output is not None} last_predicted_correctness: {last_predicted_correctness is not None}")
+                    if last_predicted_output is not None:
+                        if last_predicted_correctness is not None:
+                            assert last_predicted_output.shape == last_predicted_correctness.shape
+                            
                     predicted_output = DecisionTreeUtil.predict_output(
                         work_item.task, 
                         work_item.test_index, 
-                        last_predicted_output, 
+                        last_predicted_output,
+                        last_predicted_correctness,
                         refinement_index, 
                         noise_level,
                         features
@@ -132,6 +139,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                 )
 
                 last_predicted_output = predicted_output
+                last_predicted_correctness = predicted_correctness
                 score = ts.measure_test_prediction(predicted_output, work_item.test_index)
                 # print(f"task: {work_item.task.metadata_task_id} score: {score} refinement_index: {refinement_index} noise_level: {noise_level}")
                 image_and_score.append((predicted_output, score))
