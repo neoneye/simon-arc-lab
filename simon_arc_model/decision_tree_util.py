@@ -107,7 +107,9 @@ class DecisionTreeFeature(Enum):
     EROSION_CORNER4 = 'erosion_corner4'
     EROSION_ROWCOL = 'erosion_rowcol'
     EROSION_DIAGONAL = 'erosion_diagonal'
+    ANY_CORNER = 'any_corner'
     CORNER = 'corner'
+    ANY_EDGE = 'any_edge'
     CENTER = 'center'
     BOUNDING_BOXES = 'bounding_boxes'
     DISTANCE_INSIDE_OBJECT = 'distance_inside_object'
@@ -119,9 +121,12 @@ class DecisionTreeFeature(Enum):
     GRAVITY_DRAW_BOTTOMRIGHT_TO_TOPLEFT = 'gravity_draw_bottomright_to_topleft'
     GRAVITY_DRAW_TOPRIGHT_TO_BOTTOMLEFT = 'gravity_draw_topright_to_bottomleft'
     GRAVITY_DRAW_BOTTOMLEFT_TO_TOPRIGHT = 'gravity_draw_bottomleft_to_topright'
+    POSITION_XY0 = 'position_xy0'
+    POSITION_XY4 = 'position_xy4'
     OBJECT_ID_RAY_LIST = 'object_id_ray_list'
     IDENTIFY_OBJECT_SHAPE = 'identify_object_shape'
     BIGRAM_ROWCOL = 'bigram_rowcol'
+    COLOR_POPULARITY = 'color_popularity'
 
 class DecisionTreeUtil:
     @classmethod
@@ -290,6 +295,10 @@ class DecisionTreeUtil:
         else:
             image_count_neightbors_with_same_color = None
 
+        full_histogram = Histogram.create_with_image(image)
+        most_popular_color_set = set(full_histogram.most_popular_color_list())
+        least_popular_color_set = set(full_histogram.least_popular_color_list())
+
         row_histograms = []
         column_histogram = []
         if DecisionTreeFeature.HISTOGRAM_ROWCOL in features:
@@ -431,10 +440,29 @@ class DecisionTreeUtil:
             for x in range(width):
                 values = []
                 values.append(pair_id)
-                # values.append(x)
-                # values.append(y)
+
                 if DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE not in features:
                     values.append(image[y, x])
+
+                if DecisionTreeFeature.COLOR_POPULARITY in features:
+                    k = 1
+                    n = k * 2 + 1
+                    for ry in range(n):
+                        for rx in range(n):
+                            xx = x + rx - k
+                            yy = y + ry - k
+                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                                values.append(0)
+                                values.append(0)
+                                values.append(0)
+                            else:
+                                color = image[yy, xx]
+                                is_most_popular = color in most_popular_color_set
+                                values.append(int(is_most_popular))
+                                is_least_popular = color in least_popular_color_set
+                                values.append(int(is_least_popular))
+                                is_medium_popular = is_most_popular == False and is_least_popular == False
+                                values.append(int(is_medium_popular))
 
                 if is_earlier_prediction:
                     values.append(0)
@@ -443,6 +471,31 @@ class DecisionTreeUtil:
 
                 x_rev = width - x - 1
                 y_rev = height - y - 1
+
+                if DecisionTreeFeature.POSITION_XY0 in features:
+                    values.append(x)
+                    values.append(y)
+                    values.append(x_rev)
+                    values.append(y_rev)
+                if DecisionTreeFeature.POSITION_XY4 in features:
+                    for i in range(4):
+                        j = i + 1
+                        values.append(x + j)
+                        values.append(x - j)
+                        values.append(y + j)
+                        values.append(y - j)
+                        values.append(x_rev + j)
+                        values.append(x_rev - j)
+                        values.append(y_rev + j)
+                        values.append(y_rev - j)
+
+                if DecisionTreeFeature.ANY_EDGE in features:
+                    is_edge = x == 0 or x_rev == 0 or y == 0 or y_rev == 0
+                    values.append(int(is_edge))
+
+                if DecisionTreeFeature.ANY_CORNER in features:
+                    is_corner = (x == 0 and y == 0) or (x == 0 and y_rev == 0) or (x_rev == 0 and y == 0) or (x_rev == 0 and y_rev == 0)
+                    values.append(int(is_corner))
 
                 steps = [1, 3, 7]
                 for step in steps:
