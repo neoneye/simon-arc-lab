@@ -156,10 +156,10 @@ class WorkManagerDecisionTree(WorkManagerBase):
                 )
                 temp_work_item.predicted_output_image = predicted_output
                 temp_work_item.assign_status()
-                if show:
-                    temp_work_item.show()
-                if save_dir is not None:
-                    temp_work_item.show(save_dir)
+                # if show:
+                #     temp_work_item.show()
+                # if save_dir is not None:
+                #     temp_work_item.show(save_dir)
                 
                 title_image_list = []
                 title_image_list.append(('arc', 'Input', temp_work_item.task.test_input(temp_work_item.test_index)))
@@ -167,7 +167,26 @@ class WorkManagerDecisionTree(WorkManagerBase):
                 title_image_list.append(('arc', 'Predict', predicted_output))
                 title_image_list.append(('heatmap', 'Valid', predicted_correctness))
                 title_image_list.append(('heatmap', 'Problem', problem_image))
-                show_multiple_images(title_image_list, title=f'{work_item.task.metadata_task_id} test{work_item.test_index} step{refinement_index}', save_path=None)
+
+                # Format the filename for the image, so it contains the task id, test index, and refinement index.
+                filename_items_optional = [
+                    work_item.task.metadata_task_id,
+                    f'test{work_item.test_index}',
+                    f'step{refinement_index}',
+                    temp_work_item.status.to_string(),
+                ]
+                filename_items = [item for item in filename_items_optional if item is not None]
+                filename = '_'.join(filename_items) + '.png'
+
+                # Format the title
+                title = f'{work_item.task.metadata_task_id} test{work_item.test_index} step{refinement_index}'
+
+                # Save the image to disk or show it.
+                if show:
+                    image_file_path = None
+                else:
+                    image_file_path = os.path.join(save_dir, filename)
+                show_multiple_images(title_image_list, title=title, save_path=image_file_path)
 
             best_image, best_score = max(image_and_score, key=lambda x: x[1])
             # print(f"task: {work_item.task.metadata_task_id} best_score: {best_score}")
