@@ -10,7 +10,7 @@ from simon_arc_lab.task import Task
 from simon_arc_lab.task_mutator import *
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.task_similarity import TaskSimilarity
-from simon_arc_lab.show_prediction_result import show_prediction_result
+from simon_arc_lab.show_prediction_result import show_prediction_result, show_multiple_images
 from .predict_output_donothing import PredictOutputDoNothing
 from .work_item import WorkItem
 from .work_item_list import WorkItemList
@@ -143,6 +143,13 @@ class WorkManagerDecisionTree(WorkManagerBase):
                     temp_work_item.show()
                 if save_dir is not None:
                     temp_work_item.show(save_dir)
+                
+                title_image_list = []
+                title_image_list.append(('Input', temp_work_item.task.test_input(temp_work_item.test_index)))
+                title_image_list.append(('Output', temp_work_item.task.test_output(temp_work_item.test_index)))
+                title_image_list.append(('Predict', predicted_output))
+                title_image_list.append(('Valid', predicted_correctness))
+                show_multiple_images(title_image_list, title=f'{work_item.task.metadata_task_id} test{work_item.test_index} step{refinement_index}', save_path=None)
 
             best_image, best_score = max(image_and_score, key=lambda x: x[1])
             # print(f"task: {work_item.task.metadata_task_id} best_score: {best_score}")
