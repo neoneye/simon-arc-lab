@@ -102,13 +102,14 @@ def show_multiple_images(cmap_title_image_list: list[Tuple[str, np.array, str]],
     plt.suptitle(title, fontsize=20, fontweight='bold', y=0.96)
     
     cmap = colors.ListedColormap(ARCAGI_COLORS)
-    norm = colors.Normalize(vmin=0, vmax=9)
+    norm09 = colors.Normalize(vmin=0, vmax=9)
+    norm01 = colors.Normalize(vmin=0, vmax=1, clip=True)
     
     for index, (image_cmap, image_title, image_data) in enumerate(cmap_title_image_list):
         if image_cmap == 'arc':
-            plot_single_image(axs[index], image_title, image_data, cmap, norm, show_grid)
+            plot_single_image(axs[index], image_title, image_data, cmap, norm09, show_grid)
         elif image_cmap == 'heatmap':
-            plot_single_image(axs[index], image_title, image_data, 'bone', None, show_grid)
+            plot_single_image(axs[index], image_title, image_data, 'bone', norm01, show_grid)
         else:
             raise ValueError('image_cmap must be either "arc" or "heatmap"')
     
