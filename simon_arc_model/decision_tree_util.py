@@ -899,6 +899,7 @@ class DecisionTreeUtil:
         clf.fit(xs, ys)
 
         input_image = task.test_input(test_index)
+        height, width = input_image.shape
         noise_image_mutated = input_image.copy()
         if previous_prediction_image is not None:
             noise_image_mutated = previous_prediction_image.copy()
@@ -906,6 +907,23 @@ class DecisionTreeUtil:
         mask_image = np.ones_like(input_image)
         if previous_prediction_mask is not None:
             mask_image = previous_prediction_mask.copy()
+            # colors_available_except_zero = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+            # for y in range(height):
+            #     for x in range(width):
+            #         if mask_image[y, x] > 0:
+            #             continue
+            #         offset = random.Random(refinement_index + 42 + y * width + x).choice(colors_available_except_zero)
+            #         v = noise_image_mutated[y, x]
+            #         v = (v + offset) % 10
+            #         noise_image_mutated[y, x] = v
+            #         # print(f'x={x} y={y} v={v}')
+            colors_available = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+            color_assign = random.Random(refinement_index + 42).choice(colors_available)
+            for y in range(height):
+                for x in range(width):
+                    if mask_image[y, x] > 0:
+                        continue
+                    noise_image_mutated[y, x] = color_assign
 
         # Picking a pair_id that has already been used, performs better than picking a new unseen pair_id.
         pair_id = random.Random(refinement_index + 42).randint(0, current_pair_id - 1)
@@ -916,8 +934,6 @@ class DecisionTreeUtil:
                 xs_image[i][0] = random.Random(refinement_index + 42 + i).randint(0, current_pair_id - 1)
         result = clf.predict(xs_image)
 
-        height, width = input_image.shape
-        # predicted_image = np.zeros_like(input_image)
         predicted_image = input_image.copy()
         if previous_prediction_image is not None:
             predicted_image = previous_prediction_image.copy()

@@ -83,10 +83,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
         # noise_levels = [95, 90, 85, 80, 75, 70, 65]
         # noise_levels = [95, 90]
         # noise_levels = [100, 95, 90]
-        noise_levels = [100, 0]
+        noise_levels = [100, 0, 0]
         number_of_refinements = len(noise_levels)
-
-        features = set(FEATURES_3)
 
         correct_count = 0
         correct_task_id_set = set()
@@ -124,7 +122,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                         last_predicted_correctness,
                         refinement_index, 
                         noise_level,
-                        features
+                        set(FEATURES_2)
                     )
                     if cache_file is not None:
                         np.save(cache_file, predicted_output)
@@ -135,7 +133,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                     predicted_output,
                     refinement_index, 
                     noise_level,
-                    features
+                    set(FEATURES_3)
                 )
 
                 last_predicted_output = predicted_output
