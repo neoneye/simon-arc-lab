@@ -145,10 +145,10 @@ class WorkManagerDecisionTree(WorkManagerBase):
                     temp_work_item.show(save_dir)
                 
                 title_image_list = []
-                title_image_list.append(('Input', temp_work_item.task.test_input(temp_work_item.test_index)))
-                title_image_list.append(('Output', temp_work_item.task.test_output(temp_work_item.test_index)))
-                title_image_list.append(('Predict', predicted_output))
-                title_image_list.append(('Valid', predicted_correctness))
+                title_image_list.append(('arc', 'Input', temp_work_item.task.test_input(temp_work_item.test_index)))
+                title_image_list.append(('arc', 'Output', temp_work_item.task.test_output(temp_work_item.test_index)))
+                title_image_list.append(('arc', 'Predict', predicted_output))
+                title_image_list.append(('heatmap', 'Valid', predicted_correctness))
                 show_multiple_images(title_image_list, title=f'{work_item.task.metadata_task_id} test{work_item.test_index} step{refinement_index}', save_path=None)
 
             best_image, best_score = max(image_and_score, key=lambda x: x[1])

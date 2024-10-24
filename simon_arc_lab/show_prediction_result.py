@@ -88,24 +88,29 @@ def show_prediction_result(input_image: np.array, predicted_image: Optional[np.a
     else:
         plt.show()
 
-def show_multiple_images(image_title_list: list[Tuple[str, np.array]], title: str = 'Task', show_grid: bool = True, save_path: Optional[str] = None):
+def show_multiple_images(cmap_title_image_list: list[Tuple[str, np.array, str]], title: str = 'Task', show_grid: bool = True, save_path: Optional[str] = None):
     """
-    Plots the multiple ARC images side by side, using the ARC color scheme.
+    Plots the multiple ARC images side by side.
 
-    image_title_list: List of tuples with title and image data.
+    cmap_title_image_list: List of tuples with image colormap, image title and image data.
     title: The title of the plot.
     show_grid: Whether to show the grid lines.
     save_path: The path to save the plot as a PNG file. If None, the plot will be displayed.
     """
-    num_img = len(image_title_list)
+    num_img = len(cmap_title_image_list)
     fig, axs = plt.subplots(1, num_img, figsize=(9, num_img))
     plt.suptitle(title, fontsize=20, fontweight='bold', y=0.96)
     
     cmap = colors.ListedColormap(ARCAGI_COLORS)
     norm = colors.Normalize(vmin=0, vmax=9)
     
-    for index, (image_title, image_data) in enumerate(image_title_list):
-        plot_single_image(axs[index], image_title, image_data, cmap, norm, show_grid)
+    for index, (image_cmap, image_title, image_data) in enumerate(cmap_title_image_list):
+        if image_cmap == 'arc':
+            plot_single_image(axs[index], image_title, image_data, cmap, norm, show_grid)
+        elif image_cmap == 'heatmap':
+            plot_single_image(axs[index], image_title, image_data, 'bone', None, show_grid)
+        else:
+            raise ValueError('image_cmap must be either "arc" or "heatmap"')
     
     fig.patch.set_facecolor(PLOT_BACKGROUND_COLOR)
 
