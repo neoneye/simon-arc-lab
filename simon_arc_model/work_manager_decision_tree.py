@@ -40,9 +40,10 @@ FEATURES_2 = [
 ]
 
 class WorkManagerDecisionTree(WorkManagerBase):
-    def __init__(self, model: any, taskset: TaskSet):
+    def __init__(self, model: any, taskset: TaskSet, cache_dir: Optional[str] = None):
         self.taskset = taskset
         self.work_items = WorkManagerDecisionTree.create_work_items(taskset)
+        self.cache_dir = cache_dir
 
     @classmethod
     def create_work_items(cls, taskset: TaskSet) -> list['WorkItem']:
@@ -95,14 +96,26 @@ class WorkManagerDecisionTree(WorkManagerBase):
             for refinement_index in range(number_of_refinements):
                 noise_level = noise_levels[refinement_index]
                 # print(f"Refinement {refinement_index+1}/{number_of_refinements} noise_level={noise_level}")
-                predicted_output = DecisionTreeUtil.predict_output(
-                    work_item.task, 
-                    work_item.test_index, 
-                    last_predicted_output, 
-                    refinement_index, 
-                    noise_level,
-                    features
-                )
+                predicted_output = None
+                cache_file = None
+                if self.cache_dir is not None:
+                    if refinement_index == 0:
+                        cache_file = os.path.join(self.cache_dir, f'{work_item.task.metadata_task_id}_{work_item.test_index}.npy')
+                        if os.path.isfile(cache_file):
+                            predicted_output = np.load(cache_file)
+                            # print(f"Loaded from cache: {cache_file}")
+                if predicted_output is None:
+                    predicted_output = DecisionTreeUtil.predict_output(
+                        work_item.task, 
+                        work_item.test_index, 
+                        last_predicted_output, 
+                        refinement_index, 
+                        noise_level,
+                        features
+                    )
+                    if cache_file is not None:
+                        np.save(cache_file, predicted_output)
+
                 last_predicted_output = predicted_output
                 score = ts.measure_test_prediction(predicted_output, work_item.test_index)
                 # print(f"task: {work_item.task.metadata_task_id} score: {score} refinement_index: {refinement_index} noise_level: {noise_level}")
