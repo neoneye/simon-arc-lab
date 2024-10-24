@@ -25,6 +25,7 @@ from simon_arc_lab.image_similarity import ImageSimilarity, Feature, FeatureType
 from simon_arc_lab.task_similarity import TaskSimilarity
 from simon_arc_lab.show_prediction_result import show_prediction_result
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn import tree
 import matplotlib.pyplot as plt
 from enum import Enum
@@ -898,6 +899,154 @@ class DecisionTreeUtil:
             # Randomize the pair_id for the test image, so it doesn't reference a specific example pair
             for i in range(len(xs_image)):
                 xs_image[i][0] = random.Random(refinement_index + 42 + i).randint(0, current_pair_id - 1)
+        result = clf.predict(xs_image)
+
+        height, width = input_image.shape
+        predicted_image = np.zeros_like(input_image)
+        for y in range(height):
+            for x in range(width):
+                value_raw = result[y * width + x]
+                value = int(value_raw)
+                if value < 0:
+                    value = 0
+                if value > 9:
+                    value = 9
+                predicted_image[y, x] = value
+
+        # plt.figure()
+        # tree.plot_tree(clf, filled=True)
+        # plt.show()
+
+        return predicted_image
+
+    @classmethod
+    def validate_output(cls, task: Task, test_index: int, prediction_to_verify: np.array, refinement_index: int, noise_level: int, features: set[DecisionTreeFeature]) -> np.array:
+        xs = []
+        ys = []
+
+        current_pair_id = 0
+
+        transformation_ids = [
+            Transformation.DO_NOTHING,
+            Transformation.ROTATE_CW,
+            Transformation.ROTATE_CCW,
+            Transformation.ROTATE_180,
+            Transformation.FLIP_X,
+            Transformation.FLIP_Y,
+            Transformation.FLIP_A,
+            Transformation.FLIP_B,
+            # Transformation.SKEW_UP,
+            # Transformation.SKEW_DOWN,
+            # Transformation.SKEW_LEFT,
+            # Transformation.SKEW_RIGHT,
+        ]
+        if DecisionTreeFeature.ROTATE45 in features:
+            transformation_ids.append(Transformation.ROTATE_CW_45)
+            transformation_ids.append(Transformation.ROTATE_CCW_45)
+
+        for pair_index in range(task.count_examples):
+            pair_seed = pair_index * 1000 + refinement_index * 10000
+            input_image = task.example_input(pair_index)
+            output_image = task.example_output(pair_index)
+
+            input_height, input_width = input_image.shape
+            output_height, output_width = output_image.shape
+            if input_height != output_height or input_width != output_width:
+                raise ValueError('Input and output image must have the same size')
+
+            width = input_width
+            height = input_height
+            positions = []
+            for y in range(height):
+                for x in range(width):
+                    positions.append((x, y))
+
+            random.Random(pair_seed + 1).shuffle(positions)
+            # take N percent of the positions
+            count_positions = int(len(positions) * noise_level / 100)
+            noise_image = output_image.copy()
+            for i in range(count_positions):
+                x, y = positions[i]
+                noise_image[y, x] = input_image[y, x]
+            noise_image = image_distort(noise_image, 1, 25, pair_seed + 1000)
+
+            input_noise_output = []
+            transformation_ids_randomized = transformation_ids.copy()
+            for transformation in transformation_ids_randomized:
+                input_image_mutated = transformation.apply(input_image)
+                noise_image_mutated = transformation.apply(noise_image)
+                output_image_mutated = transformation.apply(output_image)
+                input_noise_output.append((input_image_mutated, noise_image_mutated, output_image_mutated))
+
+            # Shuffle the colors, so it's not always the same color. So all 10 colors gets used.
+            h = Histogram.create_with_image(output_image)
+            used_colors = h.unique_colors()
+            random.Random(pair_seed + 1001).shuffle(used_colors)
+            for i in range(10):
+                if h.get_count_for_color(i) > 0:
+                    continue
+                # cycle through the used colors
+                first_color = used_colors.pop(0)
+                used_colors.append(first_color)
+
+                color_mapping = {
+                    first_color: i,
+                }
+                input_image2 = image_replace_colors(input_image, color_mapping)
+                output_image2 = image_replace_colors(output_image, color_mapping)
+                noise_image2 = image_replace_colors(noise_image, color_mapping)
+                input_noise_output.append((input_image2, noise_image2, output_image2))
+
+            count_mutations = len(input_noise_output)
+            for i in range(count_mutations):
+                input_image_mutated, noise_image_mutated, output_image_mutated = input_noise_output[i]
+
+                pair_id = current_pair_id * count_mutations + i
+                current_pair_id += 1
+                xs_image = cls.xs_for_input_image(input_image_mutated, pair_id, features, False)
+
+                assert input_image_mutated.shape == output_image_mutated.shape
+                height, width = output_image_mutated.shape
+
+                for color in range(10):
+                    xs_copy = []
+                    ys_copy = []
+                    for y in range(height):
+                        for x in range(width):
+                            value_list_index = y * width + x
+                            value_list = list(xs_image[value_list_index]) + [color]
+                            xs_copy.append(value_list)
+                            is_correct = output_image_mutated[y, x] == color
+                            ys_copy.append(int(is_correct))
+                    xs.extend(xs_copy)
+                    ys.extend(ys_copy)
+
+
+        if False:
+            # Discard 1/3 of the data
+            random.Random(refinement_index).shuffle(xs)
+            xs = xs[:len(xs) * 2 // 3]
+            random.Random(refinement_index).shuffle(ys)
+            ys = ys[:len(ys) * 2 // 3]
+
+        # clf = DecisionTreeClassifier(random_state=42)
+        clf = RandomForestClassifier(n_estimators=50, random_state=42)
+        clf.fit(xs, ys)
+
+        input_image = task.test_input(test_index)
+
+        # Picking a pair_id that has already been used, performs better than picking a new unseen pair_id.
+        pair_id = random.Random(refinement_index + 42).randint(0, current_pair_id - 1)
+
+        xs_image = cls.xs_for_input_image(input_image, pair_id, features, False)
+        assert input_image.shape == prediction_to_verify.shape
+        height, width = input_image.shape
+        for y in range(height):
+            for x in range(width):
+                value_list_index = y * width + x
+                predicted_color = prediction_to_verify[y, x]
+                xs_image[value_list_index].append(predicted_color)
+
         result = clf.predict(xs_image)
 
         height, width = input_image.shape

@@ -116,6 +116,15 @@ class WorkManagerDecisionTree(WorkManagerBase):
                     if cache_file is not None:
                         np.save(cache_file, predicted_output)
 
+                predicted_correctness = DecisionTreeUtil.validate_output(
+                    work_item.task, 
+                    work_item.test_index, 
+                    predicted_output,
+                    refinement_index, 
+                    noise_level,
+                    features
+                )
+
                 last_predicted_output = predicted_output
                 score = ts.measure_test_prediction(predicted_output, work_item.test_index)
                 # print(f"task: {work_item.task.metadata_task_id} score: {score} refinement_index: {refinement_index} noise_level: {noise_level}")
@@ -127,7 +136,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
                     refinement_index, 
                     PredictOutputDoNothing()
                 )
-                temp_work_item.predicted_output_image = predicted_output
+                # temp_work_item.predicted_output_image = predicted_output
+                temp_work_item.predicted_output_image = predicted_correctness
                 temp_work_item.assign_status()
                 if show:
                     temp_work_item.show()
