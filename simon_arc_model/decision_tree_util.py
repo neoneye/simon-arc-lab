@@ -939,8 +939,8 @@ class DecisionTreeUtil:
             positions = positions[:3]
             colors_available = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
             color_assign = random.Random(refinement_index + 42).choice(colors_available)
-            for x, y in positions:
-                noise_image_mutated[y, x] = color_assign
+            # for x, y in positions:
+            #     noise_image_mutated[y, x] = color_assign
 
         # Picking a pair_id that has already been used, performs better than picking a new unseen pair_id.
         pair_id = random.Random(refinement_index + 42).randint(0, current_pair_id - 1)
@@ -955,7 +955,7 @@ class DecisionTreeUtil:
         confidence_threshold = 0.7  # Adjust this value based on your needs
         low_confidence_indices = np.where(confidence_scores < confidence_threshold)[0]
         low_confidence_pixels = [(idx // width, idx % width) for idx in low_confidence_indices]
-        print(f'low_confidence_pixels={low_confidence_pixels}')
+        # print(f'low_confidence_pixels={low_confidence_pixels}')
 
         entropy_scores = entropy(probabilities.T)
         entropy_threshold = 0.5  # Adjust based on analysis
@@ -963,7 +963,7 @@ class DecisionTreeUtil:
         entropy_threshold = 0.5  # Adjust based on analysis
         high_entropy_indices = np.where(entropy_scores > entropy_threshold)[0]
         high_entropy_pixels = [(idx // width, idx % width) for idx in high_entropy_indices]
-        print(f'high_entropy_pixels={high_entropy_pixels}')
+        # print(f'high_entropy_pixels={high_entropy_pixels}')
 
         # confidence_map = confidence_scores.reshape(height, width)
         # confidence_map = entropy_scores.reshape(height, width)
