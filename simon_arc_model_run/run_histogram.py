@@ -20,6 +20,12 @@ class Metric(Enum):
     OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS = 'output_colors_is_subset_input_colors'
     COLOR_MAPPING = 'color_mapping'
 
+    def format_with_value(self, value: int) -> str:
+        suffix = ''
+        if self == Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS:
+            suffix = ' weak'
+        return f"{self.name.lower()}: {value}{suffix}"
+
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
 if not os.path.isdir(path_to_arc_dataset_collection_dataset):
     print(f"ARC dataset collection directory '{path_to_arc_dataset_collection_dataset}' does not exist.")
@@ -226,17 +232,13 @@ print(f"\nIssues: {count_issue}, puzzles where the transformation couldn't be id
 print(f"\nCorrect:")
 sorted_counters = sorted(count_correct.items(), key=lambda x: (-x[1], x[0].name))
 for key, count in sorted_counters:
-    suffix = ''
-    if key == Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS:
-        suffix = ' weak'
-    print(f"  {key.name.lower()}: {count}{suffix}")
+    s = key.format_with_value(count)
+    print(f"  {s}")
 
 print(f"\nIncorrect, where the wrong transformation was identified:")
 sorted_counters = sorted(count_incorrect.items(), key=lambda x: (-x[1], x[0].name))
 for key, count in sorted_counters:
-    suffix = ''
-    if key == Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS:
-        suffix = ' weak'
-    print(f"  {key.name.lower()}: {count}{suffix}")
+    s = key.format_with_value(count)
+    print(f"  {s}")
 
 print(f"\nTotal elapsed time: {total_elapsed_time:,.1f} seconds")
