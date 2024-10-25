@@ -125,6 +125,25 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                 output_colors_is_subset_input_colors = False
                 break
 
+        # Determines if there a color mapping between input and output histograms
+        # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6ea4a07e
+        # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=913fb3ed
+        # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=54d9e175
+        color_mapping = {}
+        has_color_mapping = True
+        for i in range(task.count_examples):
+            input_histogram = input_histogram_list[i]
+            output_histogram = output_histogram_list[i]
+            key = input_histogram.unique_colors_pretty()
+            value = output_histogram.unique_colors_set()
+            if key in color_mapping:
+                if color_mapping[key] != value:
+                    has_color_mapping = False
+                    break
+            color_mapping[key] = value
+        if has_color_mapping == False:
+            color_mapping = None
+
         for test_index in range(task.count_tests):
             input_image = task.test_input(test_index)
             output_image = task.test_output(test_index)
@@ -179,6 +198,15 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                 else:
                     count_incorrect += 1
                     print(f"output_colors_is_subset_input_colors: {task.metadata_task_id} test={test_index}")
+
+            if has_color_mapping:
+                key = input_histogram.unique_colors_pretty()
+                if key in color_mapping and output_histogram.unique_colors_set() == color_mapping[key]:
+                    count_correct += 1
+                    continue
+                else:
+                    count_incorrect += 1
+                    print(f"has_color_mapping: {task.metadata_task_id} test={test_index}")
 
             count_other += 1
             print(f"other: {task.metadata_task_id} test={test_index}")
