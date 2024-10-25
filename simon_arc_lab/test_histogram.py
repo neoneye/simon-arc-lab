@@ -30,6 +30,24 @@ class TestHistogram(unittest.TestCase):
         expected = '2:8,5:1'
         self.assertEqual(actual, expected)
 
+    def test_create_with_color_set_empty(self):
+        color_set = set()
+        actual = Histogram.create_with_color_set(color_set).pretty()
+        expected = 'empty'
+        self.assertEqual(actual, expected)
+
+    def test_create_with_color_set5(self):
+        color_set = set([5])
+        actual = Histogram.create_with_color_set(color_set).pretty()
+        expected = '5:1'
+        self.assertEqual(actual, expected)
+
+    def test_create_with_color_set57(self):
+        color_set = set([5, 7])
+        actual = Histogram.create_with_color_set(color_set).pretty()
+        expected = '5:1,7:1'
+        self.assertEqual(actual, expected)
+
     def test_create_random0(self):
         actual = Histogram.create_random(0, 1, 1, 55, 55).pretty()
         expected = '7:55'

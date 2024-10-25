@@ -43,6 +43,17 @@ class Histogram:
         return histogram
 
     @classmethod
+    def create_with_color_set(cls, color_set: set[int]) -> 'Histogram':
+        """
+        Populate a histogram with the colors from a set.
+        If the color is in the set, then the count is 1.
+        """
+        hist = {}
+        for color in color_set:
+            hist[color] = 1
+        return cls(hist)
+
+    @classmethod
     def create_random(cls, seed: int, min_colors: int, max_colors: int, min_count: int, max_count: int) -> 'Histogram':
         if min_colors > max_colors:
             raise Exception("min_colors must be less than or equal to max_colors")
