@@ -196,6 +196,14 @@ class Histogram:
         colors.sort()
         return colors
 
+    def unique_colors_set(self) -> set[int]:
+        """
+        Set of unique colors in the histogram.
+        """
+        histogram = self.clone()
+        histogram.purge_mutable()
+        return set(histogram.color_count.keys())
+
     def unique_colors_pretty(self) -> str:
         """
         Comma separated list of unique colors in the histogram.

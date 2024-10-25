@@ -241,6 +241,16 @@ class TestHistogram(unittest.TestCase):
         expected = [2, 5]
         self.assertEqual(actual, expected)
 
+    def test_unique_colors_set0(self):
+        actual = Histogram.empty().unique_colors_set()
+        expected = set()
+        self.assertEqual(actual, expected)
+
+    def test_unique_colors_set1(self):
+        actual = Histogram({5:1,2:8,9:0}).unique_colors_set()
+        expected = set([5, 2])
+        self.assertEqual(actual, expected)
+
     def test_unique_colors_pretty0(self):
         actual = Histogram.empty().unique_colors_pretty()
         expected = 'empty'
