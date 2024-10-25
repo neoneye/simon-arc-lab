@@ -94,6 +94,13 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
         
         has_color_insert = len(color_insert_intersection) > 0
 
+        color_insert_difference = color_insert_union - color_insert_intersection
+        optional_color_insert_set = set()
+        has_optional_color_insert = False
+        if len(color_insert_difference) in [1, 2]:
+            optional_color_insert_set = color_insert_difference
+            has_optional_color_insert = True
+
         color_remove_union = set()
         color_remove_intersection = set()
         for i in range(task.count_examples):
@@ -148,7 +155,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                     count_incorrect += 1
                     print(f"same_unique_colors_for_input_output: {task.metadata_task_id} test={test_index}")
 
-            if has_color_insert or has_color_remove:
+            if has_color_insert or has_color_remove or has_optional_color_insert:
                 predicted_colors = input_histogram.unique_colors_set()
                 if has_color_insert:
                     predicted_colors = predicted_colors | color_insert_intersection
@@ -157,9 +164,13 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                 if output_histogram.unique_colors_set() == predicted_colors:
                     count_correct += 1
                     break
-                else:
-                    count_incorrect += 1
-                    print(f"has_color_insert/has_color_remove: {task.metadata_task_id} test={test_index}")
+                if has_optional_color_insert:
+                    predicted_colors2 = predicted_colors | optional_color_insert_set
+                    if output_histogram.unique_colors_set() == predicted_colors2:
+                        count_correct += 1
+                        break
+                count_incorrect += 1
+                print(f"has_color_insert/has_color_remove/has_optional_color_insert: {task.metadata_task_id} test={test_index}")
 
             if output_colors_is_subset_input_colors:
                 if output_histogram.unique_colors_set().issubset(input_histogram.unique_colors_set()):
@@ -170,7 +181,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                     print(f"output_colors_is_subset_input_colors: {task.metadata_task_id} test={test_index}")
 
             count_other += 1
-            # print(f"other: {task.metadata_task_id} test={test_index}")
+            print(f"other: {task.metadata_task_id} test={test_index}")
 
 
     end_time = time.time()
