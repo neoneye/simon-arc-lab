@@ -23,10 +23,13 @@ class Metric(Enum):
     MOST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'most_popular_colors_of_input_are_present_in_output'
     MOST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT = 'most_popular_colors_of_input_are_not_present_in_output'
     LEAST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'least_popular_colors_of_input_are_present_in_output'
+    LEAST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT = 'least_popular_colors_of_input_are_not_present_in_output'
 
     def format_with_value(self, value: int) -> str:
         suffix = ''
         if self == Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS:
+            suffix = ' weak'
+        elif self == Metric.OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION:
             suffix = ' weak'
         return f"{self.name.lower()}: {value}{suffix}"
 
@@ -199,6 +202,10 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                 most_popular_colors_of_input_are_not_present_in_output = False
                 break
 
+        # Determines if the least popular colors of the input are present in the output
+        # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=50aad11f
+        # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=5289ad53
+        # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=5a5a2103
         least_popular_colors_of_input_are_present_in_output = True
         for i in range(task.count_examples):
             input_histogram = input_histogram_list[i]
@@ -207,6 +214,20 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
             output_colors = output_histogram.unique_colors_set()
             if special_colors.issubset(output_colors) == False:
                 least_popular_colors_of_input_are_present_in_output = False
+                break
+        
+        # Determines if the least popular colors of the input are not present in the output
+        # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=0a2355a6
+        # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=37d3e8b2
+        # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=604001fa
+        least_popular_colors_of_input_are_not_present_in_output = True
+        for i in range(task.count_examples):
+            input_histogram = input_histogram_list[i]
+            output_histogram = output_histogram_list[i]
+            special_colors = set(input_histogram.least_popular_color_list())
+            output_colors = output_histogram.unique_colors_set()
+            if special_colors.issubset(output_colors):
+                least_popular_colors_of_input_are_not_present_in_output = False
                 break
         
         for test_index in range(task.count_tests):
@@ -249,10 +270,8 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                 output_colors = output_histogram.unique_colors_set()
                 if special_colors.issubset(output_colors) == False:
                     count_correct_subitem[Metric.MOST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT] += 1
-                    print(f"yes most_popular_colors_of_input_are_not_present_in_output: {task.metadata_task_id} test={test_index}")
                 else:
                     count_incorrect_subitem[Metric.MOST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT] += 1
-                    print(f"no most_popular_colors_of_input_are_not_present_in_output: {task.metadata_task_id} test={test_index}")
 
             if least_popular_colors_of_input_are_present_in_output:
                 special_colors = set(input_histogram.least_popular_color_list())
@@ -261,6 +280,14 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                     count_correct_subitem[Metric.LEAST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
                 else:
                     count_incorrect_subitem[Metric.LEAST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
+
+            if least_popular_colors_of_input_are_not_present_in_output:
+                special_colors = set(input_histogram.least_popular_color_list())
+                output_colors = output_histogram.unique_colors_set()
+                if special_colors.issubset(output_colors) == False:
+                    count_correct_subitem[Metric.LEAST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT] += 1
+                else:
+                    count_incorrect_subitem[Metric.LEAST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT] += 1
 
             if has_color_insert or has_color_remove or has_optional_color_insert:
                 predicted_colors = input_histogram.unique_colors_set()
