@@ -104,6 +104,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
                 # print(f"Refinement {refinement_index+1}/{number_of_refinements} noise_level={noise_level}")
                 predicted_output = None
                 cache_file = None
+                best_image = None
+                second_best_image = None
                 # if self.cache_dir is not None:
                 #     if refinement_index == 0:
                 #         cache_file = os.path.join(self.cache_dir, f'{work_item.task.metadata_task_id}_{work_item.test_index}.npy')
@@ -115,8 +117,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
                     if last_predicted_output is not None:
                         if last_predicted_correctness is not None:
                             assert last_predicted_output.shape == last_predicted_correctness.shape
-                            
-                    predicted_output = DecisionTreeUtil.predict_output(
+
+                    best_image, second_best_image = DecisionTreeUtil.predict_output(
                         work_item.task, 
                         work_item.test_index, 
                         last_predicted_output,
@@ -125,6 +127,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                         noise_level,
                         set(FEATURES_2)
                     )
+                    predicted_output = best_image.copy()
                     # if cache_file is not None:
                     #     np.save(cache_file, predicted_output)
 
@@ -137,16 +140,25 @@ class WorkManagerDecisionTree(WorkManagerBase):
                     set(FEATURES_3)
                 )
 
+                expected_output = work_item.task.test_output(work_item.test_index)
+                assert expected_output.shape == predicted_output.shape
+                assert expected_output.shape == predicted_correctness.shape
+                height, width = predicted_output.shape
+
+                if second_best_image is not None:
+                    count_repair = 0
+                    for y in range(height):
+                        for x in range(width):
+                            if predicted_correctness[y, x] == 0:
+                                predicted_output[y, x] = second_best_image[y, x]
+                                count_repair += 1
+                    print(f'repaired {count_repair} pixels')
+
                 last_predicted_output = predicted_output
                 last_predicted_correctness = predicted_correctness
                 score = ts.measure_test_prediction(predicted_output, work_item.test_index)
                 # print(f"task: {work_item.task.metadata_task_id} score: {score} refinement_index: {refinement_index} noise_level: {noise_level}")
                 image_and_score.append((predicted_output, score))
-
-                expected_output = work_item.task.test_output(work_item.test_index)
-                assert expected_output.shape == predicted_output.shape
-                assert expected_output.shape == predicted_correctness.shape
-                height, width = predicted_output.shape
 
                 problem_image = np.zeros((height, width), dtype=np.float32)
                 for y in range(height):
@@ -177,6 +189,10 @@ class WorkManagerDecisionTree(WorkManagerBase):
                 title_image_list = []
                 title_image_list.append(('arc', 'Input', temp_work_item.task.test_input(temp_work_item.test_index)))
                 title_image_list.append(('arc', 'Output', temp_work_item.task.test_output(temp_work_item.test_index)))
+                if best_image is not None:
+                    title_image_list.append(('arc', 'Best', best_image))
+                if second_best_image is not None:
+                    title_image_list.append(('arc', 'Second', second_best_image))
                 title_image_list.append(('arc', 'Predict', predicted_output))
                 title_image_list.append(('heatmap', 'Valid', predicted_correctness))
                 title_image_list.append(('heatmap', 'Problem', problem_image))

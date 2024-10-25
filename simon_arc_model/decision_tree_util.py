@@ -792,7 +792,7 @@ class DecisionTreeUtil:
         return values
 
     @classmethod
-    def predict_output(cls, task: Task, test_index: int, previous_prediction_image: Optional[np.array], previous_prediction_mask: Optional[np.array], refinement_index: int, noise_level: int, features: set[DecisionTreeFeature]) -> np.array:
+    def predict_output(cls, task: Task, test_index: int, previous_prediction_image: Optional[np.array], previous_prediction_mask: Optional[np.array], refinement_index: int, noise_level: int, features: set[DecisionTreeFeature]) -> Tuple[np.array, np.array]:
         has_previous_prediction_image = previous_prediction_image is not None
         has_previous_prediction_mask = previous_prediction_mask is not None
         if has_previous_prediction_image != has_previous_prediction_mask:
@@ -982,7 +982,7 @@ class DecisionTreeUtil:
         # Reshape to image dimensions
         best_image = best_classes.reshape(height, width)
         second_best_image = second_best_classes.reshape(height, width)
-        return second_best_image
+        return (best_image, second_best_image)
 
         result = clf.predict(xs_image)
 
