@@ -496,5 +496,31 @@ class TestHistogram(unittest.TestCase):
         expected = '255:999,2:8,5:5,9:1'
         self.assertEqual(actual, expected)
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_union_intersection_with_empty_list(self):
+        histogram_list = []
+        union, intersection = Histogram.union_intersection(histogram_list)
+        self.assertEqual(union, set())
+        self.assertEqual(intersection, set())
+
+    def test_union_intersection_with_one_histogram(self):
+        histogram = Histogram({9:1,2:8,5:5,255:999})
+        histogram_list = [histogram]
+        union, intersection = Histogram.union_intersection(histogram_list)
+        self.assertEqual(union, set([2, 5, 9, 255]))
+        self.assertEqual(intersection, set([2, 5, 9, 255]))
+
+    def test_union_intersection_with_two_histograms_no_overlap(self):
+        histogram0 = Histogram({9:1,2:8,5:5,255:999})
+        histogram1 = Histogram({7:7})
+        histogram_list = [histogram0, histogram1]
+        union, intersection = Histogram.union_intersection(histogram_list)
+        self.assertEqual(union, set([2, 5, 7, 9, 255]))
+        self.assertEqual(intersection, set())
+
+    def test_union_intersection_with_two_histograms_some_overlap(self):
+        histogram0 = Histogram({9:1,2:8,5:5,255:999})
+        histogram1 = Histogram({7:7,255:1})
+        histogram_list = [histogram0, histogram1]
+        union, intersection = Histogram.union_intersection(histogram_list)
+        self.assertEqual(union, set([2, 5, 7, 9, 255]))
+        self.assertEqual(intersection, set([255]))

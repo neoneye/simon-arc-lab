@@ -376,3 +376,18 @@ class Histogram:
         self.color_count[color] = 0
         self.purge_mutable()
 
+    @classmethod
+    def union_intersection(cls, histogram_list: list['Histogram']) -> Tuple[set, set]:
+        """
+        Find the union and intersection of multiple histograms.
+        """
+        union = set()
+        intersection = set()
+        for index, histogram in enumerate(histogram_list):
+            color_set = histogram.unique_colors_set()
+            union = union | color_set
+            if index == 0:
+                intersection = color_set
+            else:
+                intersection = intersection & color_set
+        return (union, intersection)
