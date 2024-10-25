@@ -92,9 +92,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
             else:
                 color_insert_intersection = color_insert_intersection & color_insert
         
-        same_color_insert = len(color_insert_union) > 0 and color_insert_union == color_insert_intersection
-        # if same_color_insert:
-        #     print(f"same_color_insert: {task.metadata_task_id} {color_insert_intersection}")
+        has_color_insert = len(color_insert_intersection) > 0
 
         color_remove_union = set()
         color_remove_intersection = set()
@@ -108,9 +106,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
             else:
                 color_remove_intersection = color_remove_intersection & color_remove
         
-        same_color_remove = len(color_remove_union) > 0 and color_remove_union == color_remove_intersection
-        # if same_color_remove:
-        #     print(f"same_color_remove: {task.metadata_task_id} {color_remove_intersection}")
+        has_color_remove = len(color_remove_intersection) > 0
 
         for test_index in range(task.count_tests):
             input_image = task.test_input(test_index)
@@ -121,24 +117,41 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
             if same_histogram_for_input_output:
                 if output_histogram == input_histogram:
                     count_correct += 1
+                    break
                 else:
                     count_incorrect += 1
                     print(f"same_histogram_for_input_output: {task.metadata_task_id} test={test_index}")
-            elif same_histogram_for_all_outputs:
+            
+            if same_histogram_for_all_outputs:
                 if output_histogram.unique_colors_set() == output_intersection:
                     count_correct += 1
+                    break
                 else:
                     count_incorrect += 1
                     print(f"same_histogram_for_all_outputs: {task.metadata_task_id} test={test_index}")
-            elif same_unique_colors_for_input_output:
+            
+            if same_unique_colors_for_input_output:
                 if output_histogram.unique_colors_set() == input_histogram.unique_colors_set():
                     count_correct += 1
+                    break
                 else:
                     count_incorrect += 1
                     print(f"same_unique_colors_for_input_output: {task.metadata_task_id} test={test_index}")
+
+            predicted_colors = input_histogram.unique_colors_set()
+            if has_color_insert:
+                predicted_colors = predicted_colors | color_insert_intersection
+            if has_color_remove:
+                predicted_colors = predicted_colors - color_remove_intersection
+            if output_histogram.unique_colors_set() == predicted_colors:
+                count_correct += 1
+                break
             else:
-                count_other += 1
-                # print(f"other: {task.metadata_task_id} test={test_index}")
+                count_incorrect += 1
+                print(f"predicted_colors: {task.metadata_task_id} test={test_index}")
+
+            count_other += 1
+            # print(f"other: {task.metadata_task_id} test={test_index}")
 
 
     end_time = time.time()
