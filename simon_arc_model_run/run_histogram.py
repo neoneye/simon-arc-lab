@@ -165,25 +165,22 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                 if output_histogram == input_histogram:
                     count_correct[Metric.SAME_HISTOGRAM_FOR_INPUT_OUTPUT] += 1
                     continue
-                else:
-                    count_incorrect[Metric.SAME_HISTOGRAM_FOR_INPUT_OUTPUT] += 1
-                    print(f"same_histogram_for_input_output: {task.metadata_task_id} test={test_index}")
+                count_incorrect[Metric.SAME_HISTOGRAM_FOR_INPUT_OUTPUT] += 1
+                # print(f"same_histogram_for_input_output: {task.metadata_task_id} test={test_index}")
             
             if same_histogram_for_all_outputs:
                 if output_histogram.unique_colors_set() == output_intersection:
                     count_correct[Metric.SAME_HISTOGRAM_FOR_ALL_OUTPUTS] += 1
                     continue
-                else:
-                    count_incorrect[Metric.SAME_HISTOGRAM_FOR_ALL_OUTPUTS] += 1
-                    print(f"same_histogram_for_all_outputs: {task.metadata_task_id} test={test_index}")
+                count_incorrect[Metric.SAME_HISTOGRAM_FOR_ALL_OUTPUTS] += 1
+                # print(f"same_histogram_for_all_outputs: {task.metadata_task_id} test={test_index}")
             
             if same_unique_colors_for_input_output:
                 if output_histogram.unique_colors_set() == input_histogram.unique_colors_set():
                     count_correct[Metric.SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT] += 1
                     continue
-                else:
-                    count_incorrect[Metric.SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT] += 1
-                    print(f"same_unique_colors_for_input_output: {task.metadata_task_id} test={test_index}")
+                count_incorrect[Metric.SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT] += 1
+                # print(f"same_unique_colors_for_input_output: {task.metadata_task_id} test={test_index}")
             
             if has_color_insert or has_color_remove or has_optional_color_insert:
                 predicted_colors = input_histogram.unique_colors_set()
@@ -200,27 +197,32 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                         count_correct[Metric.SAME_INSERT_REMOVE] += 1
                         continue
                 count_incorrect[Metric.SAME_INSERT_REMOVE] += 1
-                print(f"has_color_insert/has_color_remove/has_optional_color_insert: {task.metadata_task_id} test={test_index}")
+                # print(f"has_color_insert/has_color_remove/has_optional_color_insert: {task.metadata_task_id} test={test_index}")
 
             if output_colors_is_subset_input_colors:
                 if output_histogram.unique_colors_set().issubset(input_histogram.unique_colors_set()):
                     count_correct[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS] += 1
                     continue
-                else:
-                    count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS] += 1
-                    print(f"output_colors_is_subset_input_colors: {task.metadata_task_id} test={test_index}")
+                count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS] += 1
+                # print(f"output_colors_is_subset_input_colors: {task.metadata_task_id} test={test_index}")
 
             if has_color_mapping:
                 key = input_histogram.unique_colors_pretty()
                 if key in color_mapping and output_histogram.unique_colors_set() == color_mapping[key]:
                     count_correct[Metric.COLOR_MAPPING] += 1
                     continue
-                else:
-                    count_incorrect[Metric.COLOR_MAPPING] += 1
-                    print(f"has_color_mapping: {task.metadata_task_id} test={test_index}")
+                count_incorrect[Metric.COLOR_MAPPING] += 1
+                # print(f"has_color_mapping: {task.metadata_task_id} test={test_index}")
 
             count_issue += 1
             print(f"issue: {task.metadata_task_id} test={test_index}")
+            # Color depends on shape
+            # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=37d3e8b2
+            # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=604001fa
+            # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ed74f2f2
+            #
+            # Count the number of clusters
+            # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=5289ad53
 
 
     end_time = time.time()
