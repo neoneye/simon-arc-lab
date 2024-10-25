@@ -1,6 +1,6 @@
 # Based on plot_xyt(), plot_single_image() by Minseo Kim
 # https://www.kaggle.com/code/minseo14/arc-task-00d62c1b-with-cnn
-from typing import Optional
+from typing import Optional, Tuple
 import matplotlib.pyplot as plt
 from matplotlib import colors
 import numpy as np
@@ -74,6 +74,44 @@ def show_prediction_result(input_image: np.array, predicted_image: Optional[np.a
     plot_single_image(axs[0], 'Input', input_image, cmap, norm, show_grid)
     plot_single_image(axs[1], 'Predicted', predicted_image, cmap, norm, show_grid)
     plot_single_image(axs[2], 'Expected', expected_image, cmap, norm, show_grid)
+    
+    fig.patch.set_facecolor(PLOT_BACKGROUND_COLOR)
+
+    fig.tight_layout()
+
+    if save_path is not None:
+        if not save_path.endswith('.png'):
+            raise ValueError('save_path must end with .png')    
+        plt.savefig(save_path)
+        plt.close()
+        # print('saved to: {}'.format(save_path))
+    else:
+        plt.show()
+
+def show_multiple_images(cmap_title_image_list: list[Tuple[str, np.array, str]], title: str = 'Task', show_grid: bool = True, save_path: Optional[str] = None):
+    """
+    Plots the multiple ARC images side by side.
+
+    cmap_title_image_list: List of tuples with image colormap, image title and image data.
+    title: The title of the plot.
+    show_grid: Whether to show the grid lines.
+    save_path: The path to save the plot as a PNG file. If None, the plot will be displayed.
+    """
+    num_img = len(cmap_title_image_list)
+    fig, axs = plt.subplots(1, num_img, figsize=(20, num_img))
+    plt.suptitle(title, fontsize=20, fontweight='bold', y=0.96)
+    
+    cmap = colors.ListedColormap(ARCAGI_COLORS)
+    norm09 = colors.Normalize(vmin=0, vmax=9)
+    norm01 = colors.Normalize(vmin=0, vmax=1, clip=True)
+    
+    for index, (image_cmap, image_title, image_data) in enumerate(cmap_title_image_list):
+        if image_cmap == 'arc':
+            plot_single_image(axs[index], image_title, image_data, cmap, norm09, show_grid)
+        elif image_cmap == 'heatmap':
+            plot_single_image(axs[index], image_title, image_data, 'bone', norm01, show_grid)
+        else:
+            raise ValueError('image_cmap must be either "arc" or "heatmap"')
     
     fig.patch.set_facecolor(PLOT_BACKGROUND_COLOR)
 
