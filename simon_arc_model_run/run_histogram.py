@@ -44,6 +44,8 @@ groupname_pathtotaskdir_list = [
     # ('testdata', os.path.join(PROJECT_ROOT, 'testdata', 'simple_arc_tasks')),
 ]
 
+invalid_task_id_list = ['a8610ef7']
+
 for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
     if not os.path.isdir(path_to_task_dir):
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
@@ -64,6 +66,8 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
     start_time = time.time()
 
     for task in taskset.tasks:
+        if task.metadata_task_id in invalid_task_id_list:
+            continue
 
         input_histogram_list = []
         for i in range(task.count_examples + task.count_tests):
