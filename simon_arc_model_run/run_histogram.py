@@ -4,6 +4,7 @@ import time
 from matplotlib import pyplot as plt
 import numpy as np
 from enum import Enum
+from collections import defaultdict
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
@@ -12,7 +13,12 @@ from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.histogram import Histogram
 
 class Metric(Enum):
-    EXAMPLES_HAVE_SAME_OUTPUT_HISTOGRAM = 'examples_have_same_output_histogram'
+    SAME_HISTOGRAM_FOR_INPUT_OUTPUT = 'same_histogram_for_input_output'
+    SAME_HISTOGRAM_FOR_ALL_OUTPUTS = 'same_histogram_for_all_outputs'
+    SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT = 'same_unique_colors_for_input_output'
+    SAME_INSERT_REMOVE = 'same_insert_remove'
+    OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS = 'output_colors_is_subset_input_colors'
+    COLOR_MAPPING = 'color_mapping'
 
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
 if not os.path.isdir(path_to_arc_dataset_collection_dataset):
@@ -36,7 +42,7 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
         sys.exit(1)
 
 summary_list = []
-count_correct = 0
+count_correct = defaultdict(int)
 count_incorrect = 0
 count_other = 0
 number_of_items_in_list = len(groupname_pathtotaskdir_list)
@@ -152,7 +158,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
 
             if same_histogram_for_input_output:
                 if output_histogram == input_histogram:
-                    count_correct += 1
+                    count_correct[Metric.SAME_HISTOGRAM_FOR_INPUT_OUTPUT] += 1
                     continue
                 else:
                     count_incorrect += 1
@@ -160,7 +166,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
             
             if same_histogram_for_all_outputs:
                 if output_histogram.unique_colors_set() == output_intersection:
-                    count_correct += 1
+                    count_correct[Metric.SAME_HISTOGRAM_FOR_ALL_OUTPUTS] += 1
                     continue
                 else:
                     count_incorrect += 1
@@ -168,7 +174,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
             
             if same_unique_colors_for_input_output:
                 if output_histogram.unique_colors_set() == input_histogram.unique_colors_set():
-                    count_correct += 1
+                    count_correct[Metric.SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT] += 1
                     continue
                 else:
                     count_incorrect += 1
@@ -181,19 +187,19 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                 if has_color_remove:
                     predicted_colors = predicted_colors - color_remove_intersection
                 if output_histogram.unique_colors_set() == predicted_colors:
-                    count_correct += 1
+                    count_correct[Metric.SAME_INSERT_REMOVE] += 1
                     continue
                 if has_optional_color_insert:
                     predicted_colors2 = predicted_colors | optional_color_insert_set
                     if output_histogram.unique_colors_set() == predicted_colors2:
-                        count_correct += 1
+                        count_correct[Metric.SAME_INSERT_REMOVE] += 1
                         continue
                 count_incorrect += 1
                 print(f"has_color_insert/has_color_remove/has_optional_color_insert: {task.metadata_task_id} test={test_index}")
 
             if output_colors_is_subset_input_colors:
                 if output_histogram.unique_colors_set().issubset(input_histogram.unique_colors_set()):
-                    count_correct += 1
+                    count_correct[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS] += 1
                     continue
                 else:
                     count_incorrect += 1
@@ -202,7 +208,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
             if has_color_mapping:
                 key = input_histogram.unique_colors_pretty()
                 if key in color_mapping and output_histogram.unique_colors_set() == color_mapping[key]:
-                    count_correct += 1
+                    count_correct[Metric.COLOR_MAPPING] += 1
                     continue
                 else:
                     count_incorrect += 1
@@ -216,8 +222,17 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
     elapsed_time = end_time - start_time
     total_elapsed_time += elapsed_time
 
-print(f"Correct: {count_correct}")
 print(f"Incorrect: {count_incorrect}")
-print(f"Other: {count_other}")
+print(f"Count other: {count_other}\n")
+
+print(f"Count correct:")
+# sort counters by count and then by keyname
+sorted_counters = sorted(count_correct.items(), key=lambda x: (-x[1], x[0].name))
+for key, count in sorted_counters:
+    suffix = ''
+    if key == Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS:
+        suffix = ' weak'
+    print(f"  {key.name.lower()}: {count}{suffix}")
+
 print("Summary:\n" + "\n".join(summary_list))
 print(f"Total elapsed time: {total_elapsed_time:,.1f} seconds")
