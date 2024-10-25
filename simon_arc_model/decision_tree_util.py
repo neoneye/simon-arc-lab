@@ -26,7 +26,9 @@ from simon_arc_lab.task_similarity import TaskSimilarity
 from simon_arc_lab.show_prediction_result import show_prediction_result
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn import tree
+from scipy.stats import entropy
 import matplotlib.pyplot as plt
 from enum import Enum
 
@@ -895,7 +897,8 @@ class DecisionTreeUtil:
             random.Random(refinement_index).shuffle(ys)
             ys = ys[:len(ys) * 2 // 3]
 
-        clf = DecisionTreeClassifier(random_state=42)
+        clf_inner = DecisionTreeClassifier(random_state=42)
+        clf = CalibratedClassifierCV(clf_inner, method='isotonic', cv=5)
         clf.fit(xs, ys)
 
         input_image = task.test_input(test_index)
@@ -937,6 +940,29 @@ class DecisionTreeUtil:
             # Randomize the pair_id for the test image, so it doesn't reference a specific example pair
             for i in range(len(xs_image)):
                 xs_image[i][0] = random.Random(refinement_index + 42 + i).randint(0, current_pair_id - 1)
+        
+        probabilities = clf.predict_proba(xs_image)
+        confidence_scores = np.max(probabilities, axis=1)
+        confidence_threshold = 0.7  # Adjust this value based on your needs
+        low_confidence_indices = np.where(confidence_scores < confidence_threshold)[0]
+        low_confidence_pixels = [(idx // width, idx % width) for idx in low_confidence_indices]
+        print(f'low_confidence_pixels={low_confidence_pixels}')
+
+        entropy_scores = entropy(probabilities.T)
+        entropy_threshold = 0.5  # Adjust based on analysis
+        high_entropy_indices = np.where(entropy_scores > entropy_threshold)[0]
+        entropy_threshold = 0.5  # Adjust based on analysis
+        high_entropy_indices = np.where(entropy_scores > entropy_threshold)[0]
+        high_entropy_pixels = [(idx // width, idx % width) for idx in high_entropy_indices]
+        print(f'high_entropy_pixels={high_entropy_pixels}')
+
+        # confidence_map = confidence_scores.reshape(height, width)
+        confidence_map = entropy_scores.reshape(height, width)
+        plt.imshow(confidence_map, cmap='hot')
+        plt.colorbar()
+        plt.title('Prediction Confidence Map')
+        plt.show()
+
         result = clf.predict(xs_image)
 
         predicted_image = input_image.copy()

@@ -83,7 +83,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
         # noise_levels = [95, 90, 85, 80, 75, 70, 65]
         # noise_levels = [95, 90]
         # noise_levels = [100, 95, 90]
-        noise_levels = [100, 0, 0, 0]
+        noise_levels = [100, 0]
+        noise_levels = [100]
         number_of_refinements = len(noise_levels)
 
         correct_count = 0
@@ -103,12 +104,12 @@ class WorkManagerDecisionTree(WorkManagerBase):
                 # print(f"Refinement {refinement_index+1}/{number_of_refinements} noise_level={noise_level}")
                 predicted_output = None
                 cache_file = None
-                if self.cache_dir is not None:
-                    if refinement_index == 0:
-                        cache_file = os.path.join(self.cache_dir, f'{work_item.task.metadata_task_id}_{work_item.test_index}.npy')
-                        if os.path.isfile(cache_file):
-                            predicted_output = np.load(cache_file)
-                            # print(f"Loaded from cache: {cache_file}")
+                # if self.cache_dir is not None:
+                #     if refinement_index == 0:
+                #         cache_file = os.path.join(self.cache_dir, f'{work_item.task.metadata_task_id}_{work_item.test_index}.npy')
+                #         if os.path.isfile(cache_file):
+                #             predicted_output = np.load(cache_file)
+                #             # print(f"Loaded from cache: {cache_file}")
                 if predicted_output is None:
                     # print(f"Predicting task: {work_item.task.metadata_task_id} test: {work_item.test_index} refinement: {refinement_index} last_predicted_output: {last_predicted_output is not None} last_predicted_correctness: {last_predicted_correctness is not None}")
                     if last_predicted_output is not None:
@@ -124,8 +125,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
                         noise_level,
                         set(FEATURES_2)
                     )
-                    if cache_file is not None:
-                        np.save(cache_file, predicted_output)
+                    # if cache_file is not None:
+                    #     np.save(cache_file, predicted_output)
 
                 predicted_correctness = DecisionTreeUtil.validate_output(
                     work_item.task, 
