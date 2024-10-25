@@ -25,6 +25,7 @@ class Metric(Enum):
     LEAST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'least_popular_colors_of_input_are_present_in_output'
     LEAST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT = 'least_popular_colors_of_input_are_not_present_in_output'
     INBETWEEN_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'inbetween_colors_of_input_are_present_in_output'
+    INBETWEEN_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT = 'inbetween_colors_of_input_are_not_present_in_output'
 
     def format_with_value(self, value: int) -> str:
         suffix = ''
@@ -248,6 +249,24 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                 inbetween_colors_of_input_are_present_in_output = False
                 break
         
+        # Determines if the inbetween colors of the input are not present in the output
+        # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=aabf363d
+        # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ddf7fa4f
+        # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=cf98881b
+        # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=7c008303
+        inbetween_colors_of_input_are_not_present_in_output = True
+        for i in range(task.count_examples):
+            input_histogram = input_histogram_list[i]
+            output_histogram = output_histogram_list[i]
+            special_colors = input_histogram.histogram_without_mostleast_popular_colors().unique_colors_set()
+            if len(special_colors) == 0:
+                inbetween_colors_of_input_are_not_present_in_output = False
+                continue
+            output_colors = output_histogram.unique_colors_set()
+            if special_colors.issubset(output_colors):
+                inbetween_colors_of_input_are_not_present_in_output = False
+                break
+        
         for test_index in range(task.count_tests):
             input_image = task.test_input(test_index)
             output_image = task.test_output(test_index)
@@ -314,6 +333,14 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                     count_correct_subitem[Metric.INBETWEEN_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
                 else:
                     count_incorrect_subitem[Metric.INBETWEEN_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
+
+            if inbetween_colors_of_input_are_not_present_in_output:
+                special_colors = input_histogram.histogram_without_mostleast_popular_colors().unique_colors_set()
+                output_colors = output_histogram.unique_colors_set()
+                if special_colors.issubset(output_colors) == False:
+                    count_correct_subitem[Metric.INBETWEEN_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT] += 1
+                else:
+                    count_incorrect_subitem[Metric.INBETWEEN_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT] += 1
 
             if has_color_insert or has_color_remove or has_optional_color_insert:
                 predicted_colors = input_histogram.unique_colors_set()
