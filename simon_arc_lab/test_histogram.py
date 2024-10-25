@@ -494,6 +494,36 @@ class TestHistogram(unittest.TestCase):
         actual = histogram.least_popular_color_list()
         self.assertEqual(actual, [])
 
+    def test_histogram_without_mostleast_popular_colors_empty(self):
+        histogram = Histogram.empty()
+        actual = histogram.histogram_without_mostleast_popular_colors()
+        self.assertEqual(actual.pretty(), 'empty')
+
+    def test_histogram_without_mostleast_popular_colors_one_color(self):
+        histogram = Histogram({3: 5})
+        actual = histogram.histogram_without_mostleast_popular_colors()
+        self.assertEqual(actual.pretty(), 'empty')
+
+    def test_histogram_without_mostleast_popular_colors_two_colors(self):
+        histogram = Histogram({3: 5, 4: 9})
+        actual = histogram.histogram_without_mostleast_popular_colors()
+        self.assertEqual(actual.pretty(), 'empty')
+
+    def test_histogram_without_mostleast_popular_colors_no_overlap1(self):
+        histogram = Histogram({3: 5, 4: 9, 7: 6})
+        actual = histogram.histogram_without_mostleast_popular_colors()
+        self.assertEqual(actual.pretty(), '7:6')
+
+    def test_histogram_without_mostleast_popular_colors_no_overlap2(self):
+        histogram = Histogram({3: 5, 6: 1, 4: 5, 7: 8})
+        actual = histogram.histogram_without_mostleast_popular_colors()
+        self.assertEqual(actual.pretty(), '3:5,4:5')
+
+    def test_histogram_without_mostleast_popular_colors_no_overlap_tie(self):
+        histogram = Histogram({3: 1, 6: 1, 4: 5, 7: 8, 8: 8})
+        actual = histogram.histogram_without_mostleast_popular_colors()
+        self.assertEqual(actual.pretty(), '4:5')
+
     def test_get_count_for_color(self):
         histogram = Histogram({0: 5, 6: 1, 7: 8})
         self.assertEqual(histogram.get_count_for_color(0), 5)

@@ -342,6 +342,18 @@ class Histogram:
         sorted_colors = sorted(found_colors)
         return sorted_colors
 
+    def histogram_without_mostleast_popular_colors(self) -> 'Histogram':
+        """
+        Ignore the most popular and the least popular colors.
+        Return a new histogram with the remaining colors.
+        """
+        histogram = self.clone()
+        for color in self.most_popular_color_list():
+            histogram.remove_color(color)
+        for color in self.least_popular_color_list():
+            histogram.remove_color(color)
+        return histogram
+
     def get_count_for_color(self, color: int) -> int:
         """
         Get the count for a specific color.
