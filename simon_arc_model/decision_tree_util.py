@@ -897,9 +897,18 @@ class DecisionTreeUtil:
             random.Random(refinement_index).shuffle(ys)
             ys = ys[:len(ys) * 2 // 3]
 
-        clf_inner = DecisionTreeClassifier(random_state=42)
-        clf = CalibratedClassifierCV(clf_inner, method='isotonic', cv=5)
-        clf.fit(xs, ys)
+        clf = None
+        try:
+            clf_inner = DecisionTreeClassifier(random_state=42)
+            current_clf = CalibratedClassifierCV(clf_inner, method='isotonic', cv=5)
+            current_clf.fit(xs, ys)
+            clf = current_clf
+        except Exception as e:
+            print(f'Error: {e}')
+        if clf is None:
+            print('Falling back to DecisionTreeClassifier')
+            clf = DecisionTreeClassifier(random_state=42)
+            clf.fit(xs, ys)
 
         input_image = task.test_input(test_index)
         height, width = input_image.shape
