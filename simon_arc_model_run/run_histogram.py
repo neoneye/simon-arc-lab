@@ -19,6 +19,7 @@ class Metric(Enum):
     SAME_INSERT_REMOVE = 'same_insert_remove'
     OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS = 'output_colors_is_subset_input_colors'
     COLOR_MAPPING = 'color_mapping'
+    OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION = 'output_colors_is_subset_example_output_union'
 
     def format_with_value(self, value: int) -> str:
         suffix = ''
@@ -136,6 +137,15 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                 output_colors_is_subset_input_colors = False
                 break
 
+        output_colors_is_subset_example_output_union = True
+        for i in range(task.count_examples):
+            input_histogram = input_histogram_list[i]
+            output_histogram = output_histogram_list[i]
+            output_colors = output_histogram.unique_colors_set()
+            if output_colors.issubset(output_union) == False:
+                output_colors_is_subset_example_output_union = False
+                break
+
         # Determines if there a color mapping between input and output histograms
         # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6ea4a07e
         # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=913fb3ed
@@ -213,16 +223,18 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                     continue
                 count_incorrect[Metric.COLOR_MAPPING] += 1
                 # print(f"has_color_mapping: {task.metadata_task_id} test={test_index}")
+            
+            if output_colors_is_subset_example_output_union:
+                if output_histogram.unique_colors_set().issubset(output_union):
+                    count_correct[Metric.OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION] += 1
+                    continue
+                count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION] += 1
+                # print(f"output_colors_is_subset_example_output_union: {task.metadata_task_id} test={test_index}")
 
             count_issue += 1
             print(f"issue: {task.metadata_task_id} test={test_index}")
-            # Color depends on shape
-            # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=37d3e8b2
-            # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=604001fa
-            # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ed74f2f2
-            #
-            # Count the number of clusters
-            # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=5289ad53
+            # most popular color manipulation
+            # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9565186b
 
 
     end_time = time.time()
