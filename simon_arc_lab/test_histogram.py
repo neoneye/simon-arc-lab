@@ -87,6 +87,29 @@ class TestHistogram(unittest.TestCase):
         expected = '7:6,5:5,8:5,9:2'
         self.assertEqual(actual, expected)
 
+    def test_eq_empty(self):
+        histogram0 = Histogram.empty()
+        histogram1 = Histogram.empty()
+        self.assertEqual(histogram0, histogram0)
+        self.assertEqual(histogram1, histogram1)
+        self.assertEqual(histogram0, histogram1)
+
+    def test_eq_empty_with_nonempty(self):
+        histogram0 = Histogram.empty()
+        histogram1 = Histogram({0: 7, 1: 2, 9: 1})
+        self.assertEqual(histogram0, histogram0)
+        self.assertEqual(histogram1, histogram1)
+        self.assertNotEqual(histogram0, histogram1)
+
+    def test_eq_nonempty(self):
+        histogram0 = Histogram({0: 8, 1: 2, 9: 1})
+        histogram1 = Histogram({0: 7, 1: 2, 9: 1})
+        self.assertEqual(histogram0, histogram0)
+        self.assertEqual(histogram1, histogram1)
+        self.assertNotEqual(histogram0, histogram1)
+        histogram1.increment(0)
+        self.assertEqual(histogram0, histogram1)
+
     def test_sorted_color_count_list_unambiguous(self):
         image = np.zeros((3, 2), dtype=np.uint8)
         image[0:3, 0:2] = [

@@ -77,6 +77,13 @@ class Histogram:
             hist[colors[color_index]] = count
         return cls(hist)
 
+    def __eq__(self, other):
+        if isinstance(other, Histogram):
+            self.purge_mutable()
+            other.purge_mutable()
+            return self.color_count == other.color_count
+        return False
+
     def sorted_color_count_list(self) -> list[Tuple[int, int]]:
         """
         sort by popularity, if there is a tie, sort by color
