@@ -20,6 +20,7 @@ class Metric(Enum):
     OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS = 'output_colors_is_subset_input_colors'
     COLOR_MAPPING = 'color_mapping'
     OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION = 'output_colors_is_subset_example_output_union'
+    MOST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'most_popular_colors_of_input_are_present_in_output'
 
     def format_with_value(self, value: int) -> str:
         suffix = ''
@@ -50,6 +51,8 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
 
 count_correct = defaultdict(int)
 count_incorrect = defaultdict(int)
+count_correct_subitem = defaultdict(int)
+count_incorrect_subitem = defaultdict(int)
 count_issue = 0
 number_of_items_in_list = len(groupname_pathtotaskdir_list)
 total_elapsed_time = 0
@@ -165,6 +168,18 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
         if has_color_mapping == False:
             color_mapping = None
 
+        # Determines if the most popular colors of the input gets passed onto the output
+        # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9565186b
+        most_popular_colors_of_input_are_present_in_output = True
+        for i in range(task.count_examples):
+            input_histogram = input_histogram_list[i]
+            output_histogram = output_histogram_list[i]
+            special_colors = set(input_histogram.most_popular_color_list())
+            output_colors = output_histogram.unique_colors_set()
+            if special_colors.issubset(output_colors) == False:
+                most_popular_colors_of_input_are_present_in_output = False
+                break
+
         for test_index in range(task.count_tests):
             input_image = task.test_input(test_index)
             output_image = task.test_output(test_index)
@@ -192,6 +207,14 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                 count_incorrect[Metric.SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT] += 1
                 # print(f"same_unique_colors_for_input_output: {task.metadata_task_id} test={test_index}")
             
+            if most_popular_colors_of_input_are_present_in_output:
+                special_colors = set(input_histogram.most_popular_color_list())
+                output_colors = output_histogram.unique_colors_set()
+                if special_colors.issubset(output_colors):
+                    count_correct_subitem[Metric.MOST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
+                else:
+                    count_incorrect_subitem[Metric.MOST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
+
             if has_color_insert or has_color_remove or has_optional_color_insert:
                 predicted_colors = input_histogram.unique_colors_set()
                 if has_color_insert:
@@ -249,8 +272,20 @@ for key, count in sorted_counters:
     s = key.format_with_value(count)
     print(f"  {s}")
 
-print(f"\nIncorrect, where the wrong transformation was identified:")
+print(f"\nIncorrect, where the check was triggered, but not satisfied, a false positive:")
 sorted_counters = sorted(count_incorrect.items(), key=lambda x: (-x[1], x[0].name))
+for key, count in sorted_counters:
+    s = key.format_with_value(count)
+    print(f"  {s}")
+
+print(f"\nCorrect subitems:")
+sorted_counters = sorted(count_correct_subitem.items(), key=lambda x: (-x[1], x[0].name))
+for key, count in sorted_counters:
+    s = key.format_with_value(count)
+    print(f"  {s}")
+
+print(f"\nIncorrect subitems, where the check was triggered, but not satisfied, a false positive:")
+sorted_counters = sorted(count_incorrect_subitem.items(), key=lambda x: (-x[1], x[0].name))
 for key, count in sorted_counters:
     s = key.format_with_value(count)
     print(f"  {s}")
