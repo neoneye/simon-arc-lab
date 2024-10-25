@@ -74,7 +74,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
         for i in range(task.count_examples):
             input_histogram = input_histogram_list[i]
             output_histogram = output_histogram_list[i]
-            if input_histogram.unique_colors_set() != output_histogram.unique_colors_set():
+            if input_histogram != output_histogram:
                 same_histogram_for_input_output = False
                 break
 
@@ -86,7 +86,13 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
             input_histogram = Histogram.create_with_image(input_image)
             output_histogram = Histogram.create_with_image(output_image)
 
-            if same_histogram_for_all_outputs:
+            if same_histogram_for_input_output:
+                if output_histogram == input_histogram:
+                    count_correct += 1
+                else:
+                    count_incorrect += 1
+                    print(f"same_histogram_for_input_output: {task.metadata_task_id} test={test_index}")
+            elif same_histogram_for_all_outputs:
                 if output_histogram.unique_colors_set() == output_intersection:
                     count_correct += 1
                 else:
@@ -97,7 +103,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                     count_correct += 1
                 else:
                     count_incorrect += 1
-                    print(f"same_histogram_for_input_output: {task.metadata_task_id} test={test_index}")
+                    print(f"same_unique_colors_for_input_output: {task.metadata_task_id} test={test_index}")
             else:
                 count_other += 1
 
