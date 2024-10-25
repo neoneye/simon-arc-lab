@@ -21,6 +21,7 @@ class Metric(Enum):
     COLOR_MAPPING = 'color_mapping'
     OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION = 'output_colors_is_subset_example_output_union'
     MOST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'most_popular_colors_of_input_are_present_in_output'
+    LEAST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'least_popular_colors_of_input_are_present_in_output'
 
     def format_with_value(self, value: int) -> str:
         suffix = ''
@@ -184,6 +185,16 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                 most_popular_colors_of_input_are_present_in_output = False
                 break
 
+        least_popular_colors_of_input_are_present_in_output = True
+        for i in range(task.count_examples):
+            input_histogram = input_histogram_list[i]
+            output_histogram = output_histogram_list[i]
+            special_colors = set(input_histogram.least_popular_color_list())
+            output_colors = output_histogram.unique_colors_set()
+            if special_colors.issubset(output_colors) == False:
+                least_popular_colors_of_input_are_present_in_output = False
+                break
+
         for test_index in range(task.count_tests):
             input_image = task.test_input(test_index)
             output_image = task.test_output(test_index)
@@ -218,6 +229,14 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                     count_correct_subitem[Metric.MOST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
                 else:
                     count_incorrect_subitem[Metric.MOST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
+
+            if least_popular_colors_of_input_are_present_in_output:
+                special_colors = set(input_histogram.least_popular_color_list())
+                output_colors = output_histogram.unique_colors_set()
+                if special_colors.issubset(output_colors):
+                    count_correct_subitem[Metric.LEAST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
+                else:
+                    count_incorrect_subitem[Metric.LEAST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
 
             if has_color_insert or has_color_remove or has_optional_color_insert:
                 predicted_colors = input_histogram.unique_colors_set()
