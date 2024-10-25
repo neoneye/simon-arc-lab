@@ -41,10 +41,9 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
 
-summary_list = []
 count_correct = defaultdict(int)
-count_incorrect = 0
-count_other = 0
+count_incorrect = defaultdict(int)
+count_issue = 0
 number_of_items_in_list = len(groupname_pathtotaskdir_list)
 total_elapsed_time = 0
 for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
@@ -161,7 +160,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                     count_correct[Metric.SAME_HISTOGRAM_FOR_INPUT_OUTPUT] += 1
                     continue
                 else:
-                    count_incorrect += 1
+                    count_incorrect[Metric.SAME_HISTOGRAM_FOR_INPUT_OUTPUT] += 1
                     print(f"same_histogram_for_input_output: {task.metadata_task_id} test={test_index}")
             
             if same_histogram_for_all_outputs:
@@ -169,7 +168,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                     count_correct[Metric.SAME_HISTOGRAM_FOR_ALL_OUTPUTS] += 1
                     continue
                 else:
-                    count_incorrect += 1
+                    count_incorrect[Metric.SAME_HISTOGRAM_FOR_ALL_OUTPUTS] += 1
                     print(f"same_histogram_for_all_outputs: {task.metadata_task_id} test={test_index}")
             
             if same_unique_colors_for_input_output:
@@ -177,7 +176,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                     count_correct[Metric.SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT] += 1
                     continue
                 else:
-                    count_incorrect += 1
+                    count_incorrect[Metric.SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT] += 1
                     print(f"same_unique_colors_for_input_output: {task.metadata_task_id} test={test_index}")
             
             if has_color_insert or has_color_remove or has_optional_color_insert:
@@ -194,7 +193,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                     if output_histogram.unique_colors_set() == predicted_colors2:
                         count_correct[Metric.SAME_INSERT_REMOVE] += 1
                         continue
-                count_incorrect += 1
+                count_incorrect[Metric.SAME_INSERT_REMOVE] += 1
                 print(f"has_color_insert/has_color_remove/has_optional_color_insert: {task.metadata_task_id} test={test_index}")
 
             if output_colors_is_subset_input_colors:
@@ -202,7 +201,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                     count_correct[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS] += 1
                     continue
                 else:
-                    count_incorrect += 1
+                    count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS] += 1
                     print(f"output_colors_is_subset_input_colors: {task.metadata_task_id} test={test_index}")
 
             if has_color_mapping:
@@ -211,22 +210,20 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                     count_correct[Metric.COLOR_MAPPING] += 1
                     continue
                 else:
-                    count_incorrect += 1
+                    count_incorrect[Metric.COLOR_MAPPING] += 1
                     print(f"has_color_mapping: {task.metadata_task_id} test={test_index}")
 
-            count_other += 1
-            print(f"other: {task.metadata_task_id} test={test_index}")
+            count_issue += 1
+            print(f"issue: {task.metadata_task_id} test={test_index}")
 
 
     end_time = time.time()
     elapsed_time = end_time - start_time
     total_elapsed_time += elapsed_time
 
-print(f"Incorrect: {count_incorrect}")
-print(f"Count other: {count_other}\n")
+print(f"\nIssues: {count_issue}, puzzles where the transformation couldn't be identified.")
 
-print(f"Count correct:")
-# sort counters by count and then by keyname
+print(f"\nCorrect:")
 sorted_counters = sorted(count_correct.items(), key=lambda x: (-x[1], x[0].name))
 for key, count in sorted_counters:
     suffix = ''
@@ -234,5 +231,12 @@ for key, count in sorted_counters:
         suffix = ' weak'
     print(f"  {key.name.lower()}: {count}{suffix}")
 
-print("Summary:\n" + "\n".join(summary_list))
-print(f"Total elapsed time: {total_elapsed_time:,.1f} seconds")
+print(f"\nIncorrect, where the wrong transformation was identified:")
+sorted_counters = sorted(count_incorrect.items(), key=lambda x: (-x[1], x[0].name))
+for key, count in sorted_counters:
+    suffix = ''
+    if key == Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS:
+        suffix = ' weak'
+    print(f"  {key.name.lower()}: {count}{suffix}")
+
+print(f"\nTotal elapsed time: {total_elapsed_time:,.1f} seconds")
