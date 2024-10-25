@@ -966,11 +966,23 @@ class DecisionTreeUtil:
         print(f'high_entropy_pixels={high_entropy_pixels}')
 
         # confidence_map = confidence_scores.reshape(height, width)
-        confidence_map = entropy_scores.reshape(height, width)
-        plt.imshow(confidence_map, cmap='hot')
-        plt.colorbar()
-        plt.title('Prediction Confidence Map')
-        plt.show()
+        # confidence_map = entropy_scores.reshape(height, width)
+        # plt.imshow(confidence_map, cmap='hot')
+        # plt.colorbar()
+        # plt.title('Prediction Confidence Map')
+        # plt.show()
+
+        # Sort probabilities to get class rankings
+        sorted_indices_desc = np.argsort(probabilities, axis=1)[:, ::-1]
+
+        # Extract best and second-best predictions
+        best_classes = sorted_indices_desc[:, 0]
+        second_best_classes = sorted_indices_desc[:, 1]
+
+        # Reshape to image dimensions
+        best_image = best_classes.reshape(height, width)
+        second_best_image = second_best_classes.reshape(height, width)
+        return second_best_image
 
         result = clf.predict(xs_image)
 
