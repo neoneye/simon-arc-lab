@@ -134,7 +134,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
             if same_histogram_for_input_output:
                 if output_histogram == input_histogram:
                     count_correct += 1
-                    break
+                    continue
                 else:
                     count_incorrect += 1
                     print(f"same_histogram_for_input_output: {task.metadata_task_id} test={test_index}")
@@ -142,7 +142,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
             if same_histogram_for_all_outputs:
                 if output_histogram.unique_colors_set() == output_intersection:
                     count_correct += 1
-                    break
+                    continue
                 else:
                     count_incorrect += 1
                     print(f"same_histogram_for_all_outputs: {task.metadata_task_id} test={test_index}")
@@ -150,11 +150,11 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
             if same_unique_colors_for_input_output:
                 if output_histogram.unique_colors_set() == input_histogram.unique_colors_set():
                     count_correct += 1
-                    break
+                    continue
                 else:
                     count_incorrect += 1
                     print(f"same_unique_colors_for_input_output: {task.metadata_task_id} test={test_index}")
-
+            
             if has_color_insert or has_color_remove or has_optional_color_insert:
                 predicted_colors = input_histogram.unique_colors_set()
                 if has_color_insert:
@@ -163,19 +163,19 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                     predicted_colors = predicted_colors - color_remove_intersection
                 if output_histogram.unique_colors_set() == predicted_colors:
                     count_correct += 1
-                    break
+                    continue
                 if has_optional_color_insert:
                     predicted_colors2 = predicted_colors | optional_color_insert_set
                     if output_histogram.unique_colors_set() == predicted_colors2:
                         count_correct += 1
-                        break
+                        continue
                 count_incorrect += 1
                 print(f"has_color_insert/has_color_remove/has_optional_color_insert: {task.metadata_task_id} test={test_index}")
 
             if output_colors_is_subset_input_colors:
                 if output_histogram.unique_colors_set().issubset(input_histogram.unique_colors_set()):
                     count_correct += 1
-                    break
+                    continue
                 else:
                     count_incorrect += 1
                     print(f"output_colors_is_subset_input_colors: {task.metadata_task_id} test={test_index}")
