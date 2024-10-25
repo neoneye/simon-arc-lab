@@ -83,9 +83,9 @@ class WorkManagerDecisionTree(WorkManagerBase):
         # noise_levels = [95, 90, 85, 80, 75, 70, 65]
         # noise_levels = [95, 90]
         # noise_levels = [100, 95, 90]
-        # noise_levels = [100]
+        noise_levels = [100]
         # noise_levels = [100, 0]
-        noise_levels = [100, 0, 0]
+        # noise_levels = [100, 0, 0]
         number_of_refinements = len(noise_levels)
 
         correct_count = 0
@@ -107,6 +107,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
                 cache_file = None
                 best_image = None
                 second_best_image = None
+                third_best_image = None
+                fourth_best_image = None
                 # if self.cache_dir is not None:
                 #     if refinement_index == 0:
                 #         cache_file = os.path.join(self.cache_dir, f'{work_item.task.metadata_task_id}_{work_item.test_index}.npy')
@@ -119,7 +121,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                         if last_predicted_correctness is not None:
                             assert last_predicted_output.shape == last_predicted_correctness.shape
 
-                    best_image, second_best_image = DecisionTreeUtil.predict_output(
+                    best_image, second_best_image, third_best_image, fourth_best_image = DecisionTreeUtil.predict_output(
                         work_item.task, 
                         work_item.test_index, 
                         last_predicted_output,
@@ -153,7 +155,49 @@ class WorkManagerDecisionTree(WorkManagerBase):
                             if predicted_correctness[y, x] == 0:
                                 predicted_output[y, x] = second_best_image[y, x]
                                 count_repair += 1
-                    print(f'repaired {count_repair} pixels')
+                    # print(f'repaired {count_repair} pixels')
+
+                if best_image is not None:
+                    if second_best_image is not None:
+                        if third_best_image is not None:
+                            if fourth_best_image is not None:
+                                count_correct1 = 0
+                                count_correct2 = 0
+                                count_correct3 = 0
+                                count_correct4 = 0
+                                count_incorrect = 0
+                                for y in range(height):
+                                    for x in range(width):
+                                        color = expected_output[y, x]
+                                        if best_image[y, x] == color:
+                                            count_correct1 += 1
+                                        elif second_best_image[y, x] == color:
+                                            count_correct2 += 1
+                                        elif third_best_image[y, x] == color:
+                                            count_correct3 += 1
+                                        elif fourth_best_image[y, x] == color:
+                                            count_correct4 += 1
+                                        else:
+                                            count_incorrect += 1
+                                # print(f'correct {count_correct} incorrect {count_incorrect}')
+                                correct_list = [count_correct1, count_correct2, count_correct3, count_correct4]
+                                if count_incorrect == 0:
+                                    if count_correct4 > 0:
+                                        rank = 4
+                                    if count_correct3 > 0:
+                                        rank = 3
+                                    elif count_correct2 > 0:
+                                        rank = 2
+                                    elif count_correct1 > 0:
+                                        rank = 1
+                                    else:
+                                        rank = None
+                                    print(f'good task: {work_item.task.metadata_task_id} test: {work_item.test_index} correct_list: {correct_list} rank: {rank}')
+                                else:
+                                    count_correct = count_correct1 + count_correct2 + count_correct3 + count_correct4
+                                    percent = count_correct * 100 // (count_correct + count_incorrect)
+                                    print(f'bad task: {work_item.task.metadata_task_id} test: {work_item.test_index} count_incorrect: {count_incorrect} correct_list: {correct_list} correctness_percentage: {percent}')
+
 
                 last_predicted_output = predicted_output
                 last_predicted_correctness = predicted_correctness
