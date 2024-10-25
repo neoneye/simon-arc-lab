@@ -80,6 +80,38 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
 
         same_histogram_for_all_outputs = output_union == output_intersection
 
+        color_insert_union = set()
+        color_insert_intersection = set()
+        for i in range(task.count_examples):
+            input_histogram = input_histogram_list[i]
+            output_histogram = output_histogram_list[i]
+            color_insert = output_histogram.unique_colors_set() - input_histogram.unique_colors_set()
+            color_insert_union = color_insert_union | color_insert
+            if i == 0:
+                color_insert_intersection = color_insert
+            else:
+                color_insert_intersection = color_insert_intersection & color_insert
+        
+        same_color_insert = len(color_insert_union) > 0 and color_insert_union == color_insert_intersection
+        # if same_color_insert:
+        #     print(f"same_color_insert: {task.metadata_task_id} {color_insert_intersection}")
+
+        color_remove_union = set()
+        color_remove_intersection = set()
+        for i in range(task.count_examples):
+            input_histogram = input_histogram_list[i]
+            output_histogram = output_histogram_list[i]
+            color_remove = input_histogram.unique_colors_set() - output_histogram.unique_colors_set()
+            color_remove_union = color_remove_union | color_remove
+            if i == 0:
+                color_remove_intersection = color_remove
+            else:
+                color_remove_intersection = color_remove_intersection & color_remove
+        
+        same_color_remove = len(color_remove_union) > 0 and color_remove_union == color_remove_intersection
+        # if same_color_remove:
+        #     print(f"same_color_remove: {task.metadata_task_id} {color_remove_intersection}")
+
         for test_index in range(task.count_tests):
             input_image = task.test_input(test_index)
             output_image = task.test_output(test_index)
@@ -106,6 +138,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                     print(f"same_unique_colors_for_input_output: {task.metadata_task_id} test={test_index}")
             else:
                 count_other += 1
+                # print(f"other: {task.metadata_task_id} test={test_index}")
 
 
     end_time = time.time()
