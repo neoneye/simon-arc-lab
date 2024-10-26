@@ -24,6 +24,7 @@ class TaskColorProfile:
 
         self.prepare_histograms()
         self.compute_color_insert_remove()
+        self.compute_optional_color_insert()
         self.compute_color_mapping()
 
     def prepare_histograms(self):
@@ -41,7 +42,14 @@ class TaskColorProfile:
         self.output_union, self.output_intersection = Histogram.union_intersection(self.output_histograms)
 
     def compute_color_insert_remove(self):
-        """Compute color insertions and removals between inputs and outputs."""
+        """
+        Compute color insertions and removals between inputs and outputs.
+        
+        Examples:
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2bcee788
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=54d9e175
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=7b6016b9
+        """
         color_insert_union = set()
         color_insert_intersection = set()
         color_remove_union = set()
@@ -71,7 +79,17 @@ class TaskColorProfile:
         self.color_remove_union = color_remove_union
         self.color_remove_intersection = color_remove_intersection
 
-        color_insert_difference = color_insert_union - color_insert_intersection
+    def compute_optional_color_insert(self):
+        """
+        Determine if a color sometimes gets inserted.
+        Where some outputs have a particular color, and others outputs does not.
+
+        Examples:
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=253bf280
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=44d8ac46
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=44f52bb0
+        """
+        color_insert_difference = self.color_insert_union - self.color_insert_intersection
         optional_color_insert_set = set()
         has_optional_color_insert = False
         if len(color_insert_difference) in [1, 2]:
@@ -106,11 +124,16 @@ class TaskColorProfile:
         else:
             self.color_mapping = {}  # Reset to empty if inconsistent
 
-    # Constraint methods (do not have side effects)
-
     @cached_property
     def same_histogram_for_input_output(self):
-        """Check if input and output have the same exact same histogram for each example."""
+        """
+        Check if input and output have the same exact same histogram for each example.
+        
+        Examples:
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6150a2bd
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=952a094c
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e9afcf9a
+        """
         for i in range(self.task.count_examples):
             input_histogram = self.input_histograms[i]
             output_histogram = self.output_histograms[i]
@@ -119,8 +142,18 @@ class TaskColorProfile:
         return True
 
     @cached_property
-    def same_histogram_for_all_outputs(self):
-        """Check if all example outputs agree on the same unique colors."""
+    def same_unique_colors_for_all_outputs(self):
+        """
+        Check if all example outputs agree on the same unique colors.
+        
+        Examples:
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e179c5f4
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=dbc1a6ce
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=db93a21d
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=db3e9e38
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d364b489
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=d2abd087
+        """
         return self.output_union == self.output_intersection
 
     @cached_property
@@ -343,7 +376,7 @@ class TaskColorProfile:
 
 class Metric(Enum):
     SAME_HISTOGRAM_FOR_INPUT_OUTPUT = 'same_histogram_for_input_output'
-    SAME_HISTOGRAM_FOR_ALL_OUTPUTS = 'same_histogram_for_all_outputs'
+    SAME_UNIQUE_COLORS_FOR_ALL_OUTPUTS = 'same_unique_colors_for_all_outputs'
     SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT = 'same_unique_colors_for_input_output'
     SAME_INSERT_REMOVE = 'same_insert_remove'
     OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS = 'output_colors_is_subset_input_colors'
@@ -446,9 +479,9 @@ class BenchmarkTaskColorProfile:
             if self.check_and_track_full(Metric.SAME_HISTOGRAM_FOR_INPUT_OUTPUT, correct):
                 return
 
-        if profile.same_histogram_for_all_outputs:
+        if profile.same_unique_colors_for_all_outputs:
             correct = output_histogram.unique_colors_set() == profile.output_intersection
-            if self.check_and_track_full(Metric.SAME_HISTOGRAM_FOR_ALL_OUTPUTS, correct):
+            if self.check_and_track_full(Metric.SAME_UNIQUE_COLORS_FOR_ALL_OUTPUTS, correct):
                 return
         
         if profile.same_unique_colors_for_input_output:
