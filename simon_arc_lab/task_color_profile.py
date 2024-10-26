@@ -368,12 +368,13 @@ class Metric(Enum):
         return f"{self.name.lower()}: {value}{suffix}"
 
 class BenchmarkTaskColorProfile:
-    def __init__(self):
+    def __init__(self, verbose: bool = True):
         self.count_full_correct = defaultdict(int)
         self.count_full_incorrect = defaultdict(int)
         self.count_label_correct = defaultdict(int)
         self.count_label_incorrect = defaultdict(int)
         self.count_issue = 0
+        self.verbose = verbose
     
     def track_full(self, metric: Metric, value: bool):
         if value:
@@ -391,17 +392,19 @@ class BenchmarkTaskColorProfile:
         else:
             self.count_label_incorrect[metric] += 1
     
-    def measure_task(self, task):
+    def measure_task(self, task: Task):
         profile = TaskColorProfile(task)
         for test_index in range(task.count_tests):
-            self.measure_test(task, test_index, profile)
+            self.measure_test(profile, task, test_index)
 
-    def measure_test(self, task: Task, test_index: int, profile: TaskColorProfile):
+    def measure_test(self, profile: TaskColorProfile, task: Task, test_index: int):
         input_image = task.test_input(test_index)
         output_image = task.test_output(test_index)
         input_histogram = Histogram.create_with_image(input_image)
         output_histogram = Histogram.create_with_image(output_image)
+        self.measure_histograms(profile, task, test_index, input_histogram, output_histogram)
 
+    def measure_histograms(self, profile: TaskColorProfile, task: Task, test_index: int, input_histogram: Histogram, output_histogram: Histogram):
         if profile.most_popular_colors_of_input_are_present_in_output:
             special_colors = set(input_histogram.most_popular_color_list())
             output_colors = output_histogram.unique_colors_set()
@@ -505,6 +508,5 @@ class BenchmarkTaskColorProfile:
                 return
 
         self.count_issue += 1
-        print(f"issue: {task.metadata_task_id} test={test_index}")
-
-        
+        if self.verbose:
+            print(f"issue: {task.metadata_task_id} test={test_index}")
