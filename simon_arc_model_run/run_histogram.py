@@ -6,7 +6,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
 from simon_arc_lab.taskset import TaskSet
-from simon_arc_lab.color_constraint_analyzer import BenchmarkColorConstraintAnalyzer
+from simon_arc_lab.task_color_profile import BenchmarkTaskColorProfile
 
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
 if not os.path.isdir(path_to_arc_dataset_collection_dataset):
@@ -48,7 +48,7 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
 
-benchmark = BenchmarkColorConstraintAnalyzer()
+benchmark = BenchmarkTaskColorProfile()
 number_of_items_in_list = len(groupname_pathtotaskdir_list)
 total_elapsed_time = 0
 for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
