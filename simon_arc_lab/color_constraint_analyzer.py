@@ -369,22 +369,28 @@ class Metric(Enum):
 
 class BenchmarkColorConstraintAnalyzer:
     def __init__(self):
-        self.count_correct = defaultdict(int)
-        self.count_incorrect = defaultdict(int)
-        self.count_correct_subitem = defaultdict(int)
-        self.count_incorrect_subitem = defaultdict(int)
+        self.count_full_correct = defaultdict(int)
+        self.count_full_incorrect = defaultdict(int)
+        self.count_label_correct = defaultdict(int)
+        self.count_label_incorrect = defaultdict(int)
         self.count_issue = 0
     
     def track_full(self, metric: Metric, value: bool):
         if value:
-            self.count_correct[metric] += 1
+            self.count_full_correct[metric] += 1
         else:
-            self.count_incorrect[metric] += 1
+            self.count_full_incorrect[metric] += 1
     
     def check_and_track_full(self, metric: Metric, condition: bool) -> bool:
         self.track_full(metric, condition)
         return condition
 
+    def track_label(self, metric: Metric, value: bool):
+        if value:
+            self.count_label_correct[metric] += 1
+        else:
+            self.count_label_incorrect[metric] += 1
+    
     def measure_task(self, task):
         analyzer = ColorConstraintAnalyzer(task)
         for test_index in range(task.count_tests):
@@ -414,50 +420,38 @@ class BenchmarkColorConstraintAnalyzer:
         if analyzer.most_popular_colors_of_input_are_present_in_output:
             special_colors = set(input_histogram.most_popular_color_list())
             output_colors = output_histogram.unique_colors_set()
-            if special_colors.issubset(output_colors):
-                self.count_correct_subitem[Metric.MOST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
-            else:
-                self.count_incorrect_subitem[Metric.MOST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
+            correct = special_colors.issubset(output_colors)
+            self.track_label(Metric.MOST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT, correct)
 
         if analyzer.most_popular_colors_of_input_are_not_present_in_output:
             special_colors = set(input_histogram.most_popular_color_list())
             output_colors = output_histogram.unique_colors_set()
-            if special_colors.issubset(output_colors) == False:
-                self.count_correct_subitem[Metric.MOST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT] += 1
-            else:
-                self.count_incorrect_subitem[Metric.MOST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT] += 1
+            correct = special_colors.issubset(output_colors) == False
+            self.track_label(Metric.MOST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT, correct)
 
         if analyzer.least_popular_colors_of_input_are_present_in_output:
             special_colors = set(input_histogram.least_popular_color_list())
             output_colors = output_histogram.unique_colors_set()
-            if special_colors.issubset(output_colors):
-                self.count_correct_subitem[Metric.LEAST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
-            else:
-                self.count_incorrect_subitem[Metric.LEAST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
+            correct = special_colors.issubset(output_colors)
+            self.track_label(Metric.LEAST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT, correct)
 
         if analyzer.least_popular_colors_of_input_are_not_present_in_output:
             special_colors = set(input_histogram.least_popular_color_list())
             output_colors = output_histogram.unique_colors_set()
-            if special_colors.issubset(output_colors) == False:
-                self.count_correct_subitem[Metric.LEAST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT] += 1
-            else:
-                self.count_incorrect_subitem[Metric.LEAST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT] += 1
+            correct = special_colors.issubset(output_colors) == False
+            self.track_label(Metric.LEAST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT, correct)
 
         if analyzer.inbetween_colors_of_input_are_present_in_output:
             special_colors = input_histogram.histogram_without_mostleast_popular_colors().unique_colors_set()
             output_colors = output_histogram.unique_colors_set()
-            if special_colors.issubset(output_colors):
-                self.count_correct_subitem[Metric.INBETWEEN_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
-            else:
-                self.count_incorrect_subitem[Metric.INBETWEEN_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
+            correct = special_colors.issubset(output_colors)
+            self.track_label(Metric.INBETWEEN_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT, correct)
 
         if analyzer.inbetween_colors_of_input_are_not_present_in_output:
             special_colors = input_histogram.histogram_without_mostleast_popular_colors().unique_colors_set()
             output_colors = output_histogram.unique_colors_set()
-            if special_colors.issubset(output_colors) == False:
-                self.count_correct_subitem[Metric.INBETWEEN_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT] += 1
-            else:
-                self.count_incorrect_subitem[Metric.INBETWEEN_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT] += 1
+            correct = special_colors.issubset(output_colors) == False
+            self.track_label(Metric.INBETWEEN_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT, correct)
 
         if analyzer.has_color_insert or analyzer.has_color_remove or analyzer.has_optional_color_insert:
             predicted_colors = input_histogram.unique_colors_set()
@@ -466,14 +460,14 @@ class BenchmarkColorConstraintAnalyzer:
             if analyzer.has_color_remove:
                 predicted_colors = predicted_colors - analyzer.color_remove_intersection
             if output_histogram.unique_colors_set() == predicted_colors:
-                self.count_correct[Metric.SAME_INSERT_REMOVE] += 1
+                self.count_full_correct[Metric.SAME_INSERT_REMOVE] += 1
                 return
             if analyzer.has_optional_color_insert:
                 predicted_colors2 = predicted_colors | analyzer.optional_color_insert_set
                 if output_histogram.unique_colors_set() == predicted_colors2:
-                    self.count_correct[Metric.SAME_INSERT_REMOVE] += 1
+                    self.count_full_correct[Metric.SAME_INSERT_REMOVE] += 1
                     return
-            self.count_incorrect[Metric.SAME_INSERT_REMOVE] += 1
+            self.count_full_incorrect[Metric.SAME_INSERT_REMOVE] += 1
 
         if analyzer.output_colors_is_subset_input_colors:
             correct = output_histogram.unique_colors_set().issubset(input_histogram.unique_colors_set())
