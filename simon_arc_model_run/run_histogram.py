@@ -146,9 +146,9 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
         for i in range(task.count_examples):
             input_histogram = input_histogram_list[i]
             output_histogram = output_histogram_list[i]
-            input_colors = input_histogram.unique_colors_set()
+            predicted_colors = input_histogram.unique_colors_set()
             output_colors = output_histogram.unique_colors_set()
-            if output_colors.issubset(input_colors) == False:
+            if output_colors.issubset(predicted_colors) == False:
                 output_colors_is_subset_input_colors = False
                 break
 
@@ -158,13 +158,13 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
         for i in range(task.count_examples):
             input_histogram = input_histogram_list[i]
             output_histogram = output_histogram_list[i]
-            input_colors_raw = input_histogram.unique_colors_set()
-            input_colors = (input_colors_raw | color_insert_intersection) - color_remove_intersection
-            if len(input_colors) == 0:
+            input_colors = input_histogram.unique_colors_set()
+            predicted_colors = (input_colors | color_insert_intersection) - color_remove_intersection
+            if len(predicted_colors) == 0:
                 output_colors_is_subset_input_colors_with_insert_remove = False
                 break
             output_colors = output_histogram.unique_colors_set()
-            if output_colors.issubset(input_colors) == False:
+            if output_colors.issubset(predicted_colors) == False:
                 output_colors_is_subset_input_colors_with_insert_remove = False
                 break
 
@@ -384,9 +384,9 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                 # print(f"output_colors_is_subset_input_colors: {task.metadata_task_id} test={test_index}")
 
             if output_colors_is_subset_input_colors_with_insert_remove:
-                input_colors_raw = input_histogram.unique_colors_set()
-                input_colors = (input_colors_raw | color_insert_intersection) - color_remove_intersection
-                if output_histogram.unique_colors_set().issubset(input_colors):
+                input_colors = input_histogram.unique_colors_set()
+                predicted_colors = (input_colors | color_insert_intersection) - color_remove_intersection
+                if output_histogram.unique_colors_set().issubset(predicted_colors):
                     count_correct[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS_WITH_INSERT_REMOVE] += 1
                     continue
                 count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS_WITH_INSERT_REMOVE] += 1
