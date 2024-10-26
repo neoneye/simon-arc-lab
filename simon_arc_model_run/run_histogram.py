@@ -46,15 +46,32 @@ if not os.path.isdir(path_to_arc_dataset_collection_dataset):
 groupname_pathtotaskdir_list = [
     ('arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
     ('arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
-    # ('tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
-    # ('miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
-    # ('conceptarc', os.path.join(path_to_arc_dataset_collection_dataset, 'ConceptARC/data')),
-    # ('rearc_easy', os.path.join(path_to_arc_dataset_collection_dataset, 'RE-ARC/data/easy')),
-    # ('rearc_hard', os.path.join(path_to_arc_dataset_collection_dataset, 'RE-ARC/data/hard')),
+    ('tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
+    ('diva', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-diva/data')),
+    ('miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
+    ('conceptarc', os.path.join(path_to_arc_dataset_collection_dataset, 'ConceptARC/data')),
+    ('rearc_easy', os.path.join(path_to_arc_dataset_collection_dataset, 'RE-ARC/data/easy')),
+    ('rearc_hard', os.path.join(path_to_arc_dataset_collection_dataset, 'RE-ARC/data/hard')),
+    ('sortofarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Sort-of-ARC/data')),
+    ('synth_riddles', os.path.join(path_to_arc_dataset_collection_dataset, 'synth_riddles/data')),
+    ('Sequence_ARC', os.path.join(path_to_arc_dataset_collection_dataset, 'Sequence_ARC/data')),
+    ('PQA', os.path.join(path_to_arc_dataset_collection_dataset, 'PQA/data')),
+    ('nosound', os.path.join(path_to_arc_dataset_collection_dataset, 'nosound/data')),
+    ('dbigham', os.path.join(path_to_arc_dataset_collection_dataset, 'dbigham/data')),
+    ('arc-community', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-community/data')),
+    ('IPARC', os.path.join(path_to_arc_dataset_collection_dataset, 'IPARC/data')),
     # ('testdata', os.path.join(PROJECT_ROOT, 'testdata', 'simple_arc_tasks')),
 ]
 
-invalid_task_id_list = ['a8610ef7']
+invalid_task_id_list = [
+    # ARC-AGI
+    'a8610ef7',
+    # IPARC
+    'CatB_Hard_Task005',
+    'CatB_Hard_Task017',
+    'CatB_Hard_Task019',
+    'CatB_Hard_Task089',
+]
 
 for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
     if not os.path.isdir(path_to_task_dir):
