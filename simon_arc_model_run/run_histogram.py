@@ -67,30 +67,6 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
     elapsed_time = end_time - start_time
     total_elapsed_time += elapsed_time
 
-print(f"\nIssues: {benchmark.count_issue}, puzzles where the transformation couldn't be identified.")
-
-print(f"\nCorrect full:")
-sorted_counters = sorted(benchmark.count_full_correct.items(), key=lambda x: (-x[1], x[0].name))
-for key, count in sorted_counters:
-    s = key.format_with_value(count)
-    print(f"  {s}")
-
-print(f"\nIncorrect full, where the check was triggered, but not satisfied, a false positive:")
-sorted_counters = sorted(benchmark.count_full_incorrect.items(), key=lambda x: (-x[1], x[0].name))
-for key, count in sorted_counters:
-    s = key.format_with_value(count)
-    print(f"  {s}")
-
-print(f"\nCorrect label:")
-sorted_counters = sorted(benchmark.count_label_correct.items(), key=lambda x: (-x[1], x[0].name))
-for key, count in sorted_counters:
-    s = key.format_with_value(count)
-    print(f"  {s}")
-
-print(f"\nIncorrect label, where the check was triggered, but not satisfied, a false positive:")
-sorted_counters = sorted(benchmark.count_label_incorrect.items(), key=lambda x: (-x[1], x[0].name))
-for key, count in sorted_counters:
-    s = key.format_with_value(count)
-    print(f"  {s}")
+benchmark.print_summary()
 
 print(f"\nTotal elapsed time: {total_elapsed_time:,.1f} seconds")

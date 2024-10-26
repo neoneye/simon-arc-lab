@@ -510,3 +510,30 @@ class BenchmarkTaskColorProfile:
         self.count_issue += 1
         if self.verbose:
             print(f"issue: {task.metadata_task_id} test={test_index}")
+
+    def print_summary(self):
+        print(f"Issues: {self.count_issue}, puzzles where the transformation couldn't be identified.")
+
+        print(f"\nCorrect full:")
+        sorted_counters = sorted(self.count_full_correct.items(), key=lambda x: (-x[1], x[0].name))
+        for key, count in sorted_counters:
+            s = key.format_with_value(count)
+            print(f"  {s}")
+
+        print(f"\nIncorrect full, where the check was triggered, but not satisfied, a false positive:")
+        sorted_counters = sorted(self.count_full_incorrect.items(), key=lambda x: (-x[1], x[0].name))
+        for key, count in sorted_counters:
+            s = key.format_with_value(count)
+            print(f"  {s}")
+
+        print(f"\nCorrect label:")
+        sorted_counters = sorted(self.count_label_correct.items(), key=lambda x: (-x[1], x[0].name))
+        for key, count in sorted_counters:
+            s = key.format_with_value(count)
+            print(f"  {s}")
+
+        print(f"\nIncorrect label, where the check was triggered, but not satisfied, a false positive:")
+        sorted_counters = sorted(self.count_label_incorrect.items(), key=lambda x: (-x[1], x[0].name))
+        for key, count in sorted_counters:
+            s = key.format_with_value(count)
+            print(f"  {s}")
