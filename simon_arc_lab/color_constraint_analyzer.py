@@ -1,0 +1,528 @@
+import numpy as np
+from enum import Enum
+from collections import defaultdict
+from functools import cached_property
+from .histogram import Histogram
+from .task import Task
+
+class Metric(Enum):
+    SAME_HISTOGRAM_FOR_INPUT_OUTPUT = 'same_histogram_for_input_output'
+    SAME_HISTOGRAM_FOR_ALL_OUTPUTS = 'same_histogram_for_all_outputs'
+    SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT = 'same_unique_colors_for_input_output'
+    SAME_INSERT_REMOVE = 'same_insert_remove'
+    OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS = 'output_colors_is_subset_input_colors'
+    OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS_WITH_INSERT_REMOVE = 'output_colors_is_subset_input_colors_with_insert_remove'
+    COLOR_MAPPING = 'color_mapping'
+    OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION = 'output_colors_is_subset_example_output_union'
+    OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OUTPUTINTERSECTIONCOLORS = 'output_colors_is_subset_inputcolors_union_outputintersectioncolors'
+    OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OPTIONALOUTPUTINTERSECTIONCOLORS = 'output_colors_is_subset_inputcolors_union_optionaloutputintersectioncolors'
+    MOST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'most_popular_colors_of_input_are_present_in_output'
+    MOST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT = 'most_popular_colors_of_input_are_not_present_in_output'
+    LEAST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'least_popular_colors_of_input_are_present_in_output'
+    LEAST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT = 'least_popular_colors_of_input_are_not_present_in_output'
+    INBETWEEN_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'inbetween_colors_of_input_are_present_in_output'
+    INBETWEEN_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT = 'inbetween_colors_of_input_are_not_present_in_output'
+
+    def format_with_value(self, value: int) -> str:
+        suffix = ''
+        if self == Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS:
+            suffix = ' weak'
+        elif self == Metric.OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION:
+            suffix = ' weak'
+        return f"{self.name.lower()}: {value}{suffix}"
+
+class ColorConstraintAnalyzer:
+    def __init__(self, task):
+        self.task = task
+        self.input_histograms = []
+        self.output_histograms = []
+        self.input_union = None
+        self.input_intersection = None
+        self.output_union = None
+        self.output_intersection = None
+        self.color_insert_union = set()
+        self.color_insert_intersection = set()
+        self.color_remove_union = set()
+        self.color_remove_intersection = set()
+        self.has_optional_color_insert = False
+        self.optional_color_insert_set = set()
+        self.color_mapping = {}
+
+        self.prepare_histograms()
+        self.compute_color_insert_remove()
+        self.compute_color_mapping()
+
+    def prepare_histograms(self):
+        """Compute histograms for input and output images."""
+        # Compute histograms for input images
+        for i in range(self.task.count_examples + self.task.count_tests):
+            histogram = Histogram.create_with_image(self.task.input_images[i])
+            self.input_histograms.append(histogram)
+        self.input_union, self.input_intersection = Histogram.union_intersection(self.input_histograms)
+
+        # Compute histograms for output images (examples only)
+        for i in range(self.task.count_examples):
+            histogram = Histogram.create_with_image(self.task.output_images[i])
+            self.output_histograms.append(histogram)
+        self.output_union, self.output_intersection = Histogram.union_intersection(self.output_histograms)
+
+    def compute_color_insert_remove(self):
+        """Compute color insertions and removals between inputs and outputs."""
+        color_insert_union = set()
+        color_insert_intersection = set()
+        color_remove_union = set()
+        color_remove_intersection = set()
+
+        for i in range(self.task.count_examples):
+            input_colors = self.input_histograms[i].unique_colors_set()
+            output_colors = self.output_histograms[i].unique_colors_set()
+            color_insert = output_colors - input_colors
+            color_remove = input_colors - output_colors
+
+            color_insert_union |= color_insert
+            color_remove_union |= color_remove
+
+            if i == 0:
+                color_insert_intersection = color_insert.copy()
+            else:
+                color_insert_intersection &= color_insert
+
+            if i == 0:
+                color_remove_intersection = color_remove.copy()
+            else:
+                color_remove_intersection &= color_remove
+
+        self.color_insert_union = color_insert_union
+        self.color_insert_intersection = color_insert_intersection
+        self.color_remove_union = color_remove_union
+        self.color_remove_intersection = color_remove_intersection
+
+        color_insert_difference = color_insert_union - color_insert_intersection
+        optional_color_insert_set = set()
+        has_optional_color_insert = False
+        if len(color_insert_difference) in [1, 2]:
+            optional_color_insert_set = color_insert_difference
+            has_optional_color_insert = True
+        self.optional_color_insert_set = optional_color_insert_set
+        self.has_optional_color_insert = has_optional_color_insert
+
+
+    def compute_color_mapping(self):
+        """
+        Determines if there a color mapping between input and output histograms
+
+        Examples:
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6ea4a07e
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=913fb3ed
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=54d9e175
+        """
+        color_mapping = {}
+        consistent = True
+        for i in range(self.task.count_examples):
+            input_colors = self.input_histograms[i].unique_colors_set()
+            output_colors = self.output_histograms[i].unique_colors_set()
+            key = frozenset(input_colors)
+            if key in color_mapping:
+                if color_mapping[key] != output_colors:
+                    consistent = False  # Inconsistent mapping. This puzzle is probably not using color mapping.
+                    break
+            else:
+                color_mapping[key] = output_colors
+        if consistent:
+            self.color_mapping = color_mapping
+        else:
+            self.color_mapping = {}  # Reset to empty if inconsistent
+
+    # Constraint methods (do not have side effects)
+
+    @cached_property
+    def same_histogram_for_input_output(self):
+        """Check if input and output have the same exact same histogram for each example."""
+        for i in range(self.task.count_examples):
+            input_histogram = self.input_histograms[i]
+            output_histogram = self.output_histograms[i]
+            if input_histogram != output_histogram:
+                return False
+        return True
+
+    @cached_property
+    def same_histogram_for_all_outputs(self):
+        """Check if all example outputs agree on the same unique colors."""
+        return self.output_union == self.output_intersection
+
+    @cached_property
+    def same_unique_colors_for_input_output(self):
+        """Check if input and output have the same unique colors for each example."""
+        for i in range(self.task.count_examples):
+            input_colors = self.input_histograms[i].unique_colors_set()
+            output_colors = self.output_histograms[i].unique_colors_set()
+            if input_colors != output_colors:
+                return False
+        return True
+
+    @property
+    def has_color_insert(self):
+        """Check if all the examples agree that there are are 1 or more colors inserted."""
+        return len(self.color_insert_intersection) > 0
+
+    @property
+    def has_color_remove(self):
+        """Check if all the examples agree that there are are 1 or more colors removed."""
+        return len(self.color_remove_intersection) > 0
+
+    @cached_property
+    def most_popular_colors_of_input_are_present_in_output(self):
+        """
+        Check if the most popular colors of the input are present in the output for each example.
+
+        Examples:
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9565186b
+        """
+        for i in range(self.task.count_examples):
+            input_histogram = self.input_histograms[i]
+            output_colors = self.output_histograms[i].unique_colors_set()
+            special_colors = set(input_histogram.most_popular_color_list())
+            if not special_colors.issubset(output_colors):
+                return False
+        return True
+
+    @cached_property
+    def most_popular_colors_of_input_are_not_present_in_output(self):
+        """
+        Check if the most popular colors of the input are not present in the output for each example.
+
+        Examples:
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e9b4f6fc
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ca8de6ea
+        """
+        for i in range(self.task.count_examples):
+            input_histogram = self.input_histograms[i]
+            output_colors = self.output_histograms[i].unique_colors_set()
+            special_colors = set(input_histogram.most_popular_color_list())
+            if special_colors.issubset(output_colors):
+                return False
+        return True
+
+    @cached_property
+    def least_popular_colors_of_input_are_present_in_output(self):
+        """
+        Check if the least popular colors of the input are present in the output for each example.
+
+        Examples:
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=50aad11f
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=5289ad53
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=5a5a2103
+        """
+        for i in range(self.task.count_examples):
+            input_histogram = self.input_histograms[i]
+            output_colors = self.output_histograms[i].unique_colors_set()
+            special_colors = set(input_histogram.least_popular_color_list())
+            if not special_colors.issubset(output_colors):
+                return False
+        return True
+
+    @cached_property
+    def least_popular_colors_of_input_are_not_present_in_output(self):
+        """
+        Check if the least popular colors of the input are not present in the output for each example.
+
+        Examples:
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=0a2355a6
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=37d3e8b2
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=604001fa
+        """
+        for i in range(self.task.count_examples):
+            input_histogram = self.input_histograms[i]
+            output_colors = self.output_histograms[i].unique_colors_set()
+            special_colors = set(input_histogram.least_popular_color_list())
+            if special_colors.issubset(output_colors):
+                return False
+        return True
+
+    @cached_property
+    def inbetween_colors_of_input_are_present_in_output(self):
+        """
+        Determines if the in-between colors of the input are present in the output.
+
+        Examples:
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=3ee1011a
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=93b4f4b3
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=94133066
+        """
+        for i in range(self.task.count_examples):
+            inbetween_histogram = self.input_histograms[i].histogram_without_mostleast_popular_colors()
+            special_colors = inbetween_histogram.unique_colors_set()
+            if not special_colors:
+                return False
+            output_colors = self.output_histograms[i].unique_colors_set()
+            if not special_colors.issubset(output_colors):
+                return False
+        return True
+
+    @cached_property
+    def inbetween_colors_of_input_are_not_present_in_output(self):
+        """
+        Determines if the in-between colors of the input are not present in the output.
+
+        Examples:
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=aabf363d
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=ddf7fa4f
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=cf98881b
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=7c008303
+        """
+        for i in range(self.task.count_examples):
+            inbetween_histogram = self.input_histograms[i].histogram_without_mostleast_popular_colors()
+            special_colors = inbetween_histogram.unique_colors_set()
+            if not special_colors:
+                return False
+            output_colors = self.output_histograms[i].unique_colors_set()
+            if special_colors.issubset(output_colors):
+                return False
+        return True
+
+    @cached_property
+    def output_colors_is_subset_input_colors(self):
+        """
+        Check if output colors are a subset of input colors for each example.
+        
+        Examples:
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e7b06bea
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=de493100
+        """
+        for i in range(self.task.count_examples):
+            input_colors = self.input_histograms[i].unique_colors_set()
+            output_colors = self.output_histograms[i].unique_colors_set()
+            if not output_colors.issubset(input_colors):
+                return False
+        return True
+
+    @cached_property
+    def output_colors_is_subset_input_colors_with_insert_remove(self):
+        """
+        Determines if the output colors are a subset of the input colors with insert/remove.
+
+        Examples:
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9565186b
+        """
+        if not self.color_insert_intersection and not self.color_remove_intersection:
+            return False
+        for i in range(self.task.count_examples):
+            input_colors = self.input_histograms[i].unique_colors_set()
+            output_colors = self.output_histograms[i].unique_colors_set()
+            predicted_colors = (input_colors | self.color_insert_intersection) - self.color_remove_intersection
+            if not output_colors.issubset(predicted_colors):
+                return False
+        return True
+
+    @cached_property
+    def output_colors_is_subset_example_output_union(self):
+        """
+        Check if output colors are a subset of the union of example output colors.
+        
+        Examples:
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=0d3d703e
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=44f52bb0
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=27a28665
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=995c5fa3
+        """
+        for i in range(self.task.count_examples):
+            output_colors = self.output_histograms[i].unique_colors_set()
+            if not output_colors.issubset(self.output_union):
+                return False
+        return True
+
+    @cached_property
+    def output_colors_is_subset_inputcolors_union_outputintersectioncolors(self):
+        """
+        Determines if the output colors are a subset of (input_colors UNION example_output_intersection).
+
+        Examples:
+        - https://neoneye.github.io/arc/edit.html?dataset=ConceptARC&task=Center4
+        - https://neoneye.github.io/arc/edit.html?dataset=ConceptARC&task=ExtractObjects6
+        - https://neoneye.github.io/arc/edit.html?dataset=ConceptARC&task=FilledNotFilled7
+        - https://neoneye.github.io/arc/edit.html?dataset=Mini-ARC&task=find_the_most_frequent_color_for_every_2x2_l6ad7ge3gc5rtysj7p
+        """
+        for i in range(self.task.count_examples):
+            input_colors = self.input_histograms[i].unique_colors_set()
+            output_colors = self.output_histograms[i].unique_colors_set()
+            predicted_colors = input_colors | self.output_intersection
+            if not output_colors.issubset(predicted_colors):
+                return False
+        return True
+
+    @cached_property
+    def output_colors_is_subset_inputcolors_union_optionaloutputintersectioncolors(self):
+        """
+        Determines if the output colors are a subset of (input_colors UNION optional_output_intersection).
+
+        Examples:
+        - https://neoneye.github.io/arc/edit.html?dataset=RE-ARC-easy&task=f2829549
+        """
+        if not self.optional_color_insert_set:
+            return False
+        for i in range(self.task.count_examples):
+            input_colors = self.input_histograms[i].unique_colors_set()
+            output_colors = self.output_histograms[i].unique_colors_set()
+            predicted_colors = input_colors | self.optional_color_insert_set
+            if not output_colors.issubset(predicted_colors):
+                return False
+        return True
+
+class ColorConstraintAnalyzerRunner:
+    def __init__(self):
+        self.count_correct = defaultdict(int)
+        self.count_incorrect = defaultdict(int)
+        self.count_correct_subitem = defaultdict(int)
+        self.count_incorrect_subitem = defaultdict(int)
+        self.count_issue = 0
+
+    def measure_task(self, task):
+        analyzer = ColorConstraintAnalyzer(task)
+        for test_index in range(task.count_tests):
+            self.measure_test(task, test_index, analyzer)
+
+    def measure_test(self, task: Task, test_index: int, analyzer: ColorConstraintAnalyzer):
+        input_image = task.test_input(test_index)
+        output_image = task.test_output(test_index)
+        input_histogram = Histogram.create_with_image(input_image)
+        output_histogram = Histogram.create_with_image(output_image)
+
+        if analyzer.same_histogram_for_input_output:
+            if output_histogram == input_histogram:
+                self.count_correct[Metric.SAME_HISTOGRAM_FOR_INPUT_OUTPUT] += 1
+                return
+            self.count_incorrect[Metric.SAME_HISTOGRAM_FOR_INPUT_OUTPUT] += 1
+            # print(f"same_histogram_for_input_output: {task.metadata_task_id} test={test_index}")
+
+        if analyzer.same_histogram_for_all_outputs:
+            if output_histogram.unique_colors_set() == analyzer.output_intersection:
+                self.count_correct[Metric.SAME_HISTOGRAM_FOR_ALL_OUTPUTS] += 1
+                return
+            self.count_incorrect[Metric.SAME_HISTOGRAM_FOR_ALL_OUTPUTS] += 1
+            # print(f"same_histogram_for_all_outputs: {task.metadata_task_id} test={test_index}")
+        
+        if analyzer.same_unique_colors_for_input_output:
+            if output_histogram.unique_colors_set() == input_histogram.unique_colors_set():
+                self.count_correct[Metric.SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT] += 1
+                return
+            self.count_incorrect[Metric.SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT] += 1
+            # print(f"same_unique_colors_for_input_output: {task.metadata_task_id} test={test_index}")
+        
+        if analyzer.most_popular_colors_of_input_are_present_in_output:
+            special_colors = set(input_histogram.most_popular_color_list())
+            output_colors = output_histogram.unique_colors_set()
+            if special_colors.issubset(output_colors):
+                self.count_correct_subitem[Metric.MOST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
+            else:
+                self.count_incorrect_subitem[Metric.MOST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
+
+        if analyzer.most_popular_colors_of_input_are_not_present_in_output:
+            special_colors = set(input_histogram.most_popular_color_list())
+            output_colors = output_histogram.unique_colors_set()
+            if special_colors.issubset(output_colors) == False:
+                self.count_correct_subitem[Metric.MOST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT] += 1
+            else:
+                self.count_incorrect_subitem[Metric.MOST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT] += 1
+
+        if analyzer.least_popular_colors_of_input_are_present_in_output:
+            special_colors = set(input_histogram.least_popular_color_list())
+            output_colors = output_histogram.unique_colors_set()
+            if special_colors.issubset(output_colors):
+                self.count_correct_subitem[Metric.LEAST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
+            else:
+                self.count_incorrect_subitem[Metric.LEAST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
+
+        if analyzer.least_popular_colors_of_input_are_not_present_in_output:
+            special_colors = set(input_histogram.least_popular_color_list())
+            output_colors = output_histogram.unique_colors_set()
+            if special_colors.issubset(output_colors) == False:
+                self.count_correct_subitem[Metric.LEAST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT] += 1
+            else:
+                self.count_incorrect_subitem[Metric.LEAST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT] += 1
+
+        if analyzer.inbetween_colors_of_input_are_present_in_output:
+            special_colors = input_histogram.histogram_without_mostleast_popular_colors().unique_colors_set()
+            output_colors = output_histogram.unique_colors_set()
+            if special_colors.issubset(output_colors):
+                self.count_correct_subitem[Metric.INBETWEEN_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
+            else:
+                self.count_incorrect_subitem[Metric.INBETWEEN_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT] += 1
+
+        if analyzer.inbetween_colors_of_input_are_not_present_in_output:
+            special_colors = input_histogram.histogram_without_mostleast_popular_colors().unique_colors_set()
+            output_colors = output_histogram.unique_colors_set()
+            if special_colors.issubset(output_colors) == False:
+                self.count_correct_subitem[Metric.INBETWEEN_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT] += 1
+            else:
+                self.count_incorrect_subitem[Metric.INBETWEEN_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT] += 1
+
+        if analyzer.has_color_insert or analyzer.has_color_remove or analyzer.has_optional_color_insert:
+            predicted_colors = input_histogram.unique_colors_set()
+            if analyzer.has_color_insert:
+                predicted_colors = predicted_colors | analyzer.color_insert_intersection
+            if analyzer.has_color_remove:
+                predicted_colors = predicted_colors - analyzer.color_remove_intersection
+            if output_histogram.unique_colors_set() == predicted_colors:
+                self.count_correct[Metric.SAME_INSERT_REMOVE] += 1
+                return
+            if analyzer.has_optional_color_insert:
+                predicted_colors2 = predicted_colors | analyzer.optional_color_insert_set
+                if output_histogram.unique_colors_set() == predicted_colors2:
+                    self.count_correct[Metric.SAME_INSERT_REMOVE] += 1
+                    return
+            self.count_incorrect[Metric.SAME_INSERT_REMOVE] += 1
+            # print(f"has_color_insert/has_color_remove/has_optional_color_insert: {task.metadata_task_id} test={test_index}")
+
+        if analyzer.output_colors_is_subset_input_colors:
+            if output_histogram.unique_colors_set().issubset(input_histogram.unique_colors_set()):
+                self.count_correct[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS] += 1
+                return
+            self.count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS] += 1
+            # print(f"output_colors_is_subset_input_colors: {task.metadata_task_id} test={test_index}")
+
+        if analyzer.output_colors_is_subset_input_colors_with_insert_remove:
+            input_colors = input_histogram.unique_colors_set()
+            predicted_colors = (input_colors | analyzer.color_insert_intersection) - analyzer.color_remove_intersection
+            if output_histogram.unique_colors_set().issubset(predicted_colors):
+                self.count_correct[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS_WITH_INSERT_REMOVE] += 1
+                return
+            self.count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS_WITH_INSERT_REMOVE] += 1
+            # print(f"output_colors_is_subset_input_colors_with_insert_remove: {task.metadata_task_id} test={test_index}")
+
+        if analyzer.output_colors_is_subset_inputcolors_union_outputintersectioncolors:
+            predicted_colors = input_histogram.unique_colors_set() | analyzer.output_intersection
+            if output_histogram.unique_colors_set().issubset(predicted_colors):
+                self.count_correct[Metric.OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OUTPUTINTERSECTIONCOLORS] += 1
+                return
+            self.count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OUTPUTINTERSECTIONCOLORS] += 1
+            # print(f"output_colors_is_subset_input_union_example_output_intersection: {task.metadata_task_id} test={test_index}")
+
+        if len(analyzer.color_mapping) > 0:
+            key = frozenset(input_histogram.unique_colors_set())
+            if key in analyzer.color_mapping and output_histogram.unique_colors_set() == analyzer.color_mapping[key]:
+                self.count_correct[Metric.COLOR_MAPPING] += 1
+                return
+            self.count_incorrect[Metric.COLOR_MAPPING] += 1
+            # print(f"has_color_mapping: {task.metadata_task_id} test={test_index}")
+        
+        if analyzer.output_colors_is_subset_example_output_union:
+            if output_histogram.unique_colors_set().issubset(analyzer.output_union):
+                self.count_correct[Metric.OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION] += 1
+                return
+            self.count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION] += 1
+            # print(f"output_colors_is_subset_example_output_union: {task.metadata_task_id} test={test_index}")
+
+        if analyzer.output_colors_is_subset_inputcolors_union_optionaloutputintersectioncolors:
+            predicted_colors = input_histogram.unique_colors_set() | analyzer.optional_color_insert_set
+            if output_histogram.unique_colors_set().issubset(predicted_colors):
+                self.count_correct[Metric.OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OPTIONALOUTPUTINTERSECTIONCOLORS] += 1
+                return
+            self.count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OPTIONALOUTPUTINTERSECTIONCOLORS] += 1
+            #print(f"output_colors_is_subset_input_union_optional_output_intersection: {task.metadata_task_id} test={test_index}")
+
+        self.count_issue += 1
+        print(f"issue: {task.metadata_task_id} test={test_index}")
+        # most popular color manipulation
+        # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9565186b
+
+        
