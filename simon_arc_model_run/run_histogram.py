@@ -22,6 +22,7 @@ class Metric(Enum):
     COLOR_MAPPING = 'color_mapping'
     OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION = 'output_colors_is_subset_example_output_union'
     OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OUTPUTINTERSECTIONCOLORS = 'output_colors_is_subset_inputcolors_union_outputintersectioncolors'
+    OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OPTIONALOUTPUTINTERSECTIONCOLORS = 'output_colors_is_subset_inputcolors_union_optionaloutputintersectioncolors'
     MOST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'most_popular_colors_of_input_are_present_in_output'
     MOST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT = 'most_popular_colors_of_input_are_not_present_in_output'
     LEAST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'least_popular_colors_of_input_are_present_in_output'
@@ -192,6 +193,20 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
             if output_colors.issubset(predicted_colors) == False:
                 output_colors_is_subset_inputcolors_union_outputintersectioncolors = False
                 break
+
+        # Determines if the output colors are a subset of (input_colors UNION optional_output_intersection)
+        # https://neoneye.github.io/arc/edit.html?dataset=RE-ARC-easy&task=f2829549
+        output_colors_is_subset_inputcolors_union_optionaloutputintersectioncolors = False
+        if has_optional_color_insert:
+            output_colors_is_subset_inputcolors_union_optionaloutputintersectioncolors = True
+            for i in range(task.count_examples):
+                input_histogram = input_histogram_list[i]
+                output_histogram = output_histogram_list[i]
+                predicted_colors = input_histogram.unique_colors_set() | optional_color_insert_set
+                output_colors = output_histogram.unique_colors_set()
+                if output_colors.issubset(predicted_colors) == False:
+                    output_colors_is_subset_inputcolors_union_optionaloutputintersectioncolors = False
+                    break
 
         # Determines if there a color mapping between input and output histograms
         # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=6ea4a07e
@@ -430,6 +445,14 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                     continue
                 count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION] += 1
                 # print(f"output_colors_is_subset_example_output_union: {task.metadata_task_id} test={test_index}")
+
+            if output_colors_is_subset_inputcolors_union_optionaloutputintersectioncolors:
+                predicted_colors = input_histogram.unique_colors_set() | optional_color_insert_set
+                if output_histogram.unique_colors_set().issubset(predicted_colors):
+                    count_correct[Metric.OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OPTIONALOUTPUTINTERSECTIONCOLORS] += 1
+                    continue
+                count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OPTIONALOUTPUTINTERSECTIONCOLORS] += 1
+                #print(f"output_colors_is_subset_input_union_optional_output_intersection: {task.metadata_task_id} test={test_index}")
 
             count_issue += 1
             print(f"issue: {task.metadata_task_id} test={test_index}")
