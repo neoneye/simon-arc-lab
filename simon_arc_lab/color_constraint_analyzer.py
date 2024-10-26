@@ -402,21 +402,6 @@ class BenchmarkColorConstraintAnalyzer:
         input_histogram = Histogram.create_with_image(input_image)
         output_histogram = Histogram.create_with_image(output_image)
 
-        if analyzer.same_histogram_for_input_output:
-            correct = output_histogram == input_histogram
-            if self.check_and_track_full(Metric.SAME_HISTOGRAM_FOR_INPUT_OUTPUT, correct):
-                return
-
-        if analyzer.same_histogram_for_all_outputs:
-            correct = output_histogram.unique_colors_set() == analyzer.output_intersection
-            if self.check_and_track_full(Metric.SAME_HISTOGRAM_FOR_ALL_OUTPUTS, correct):
-                return
-        
-        if analyzer.same_unique_colors_for_input_output:
-            correct = output_histogram.unique_colors_set() == input_histogram.unique_colors_set()
-            if self.check_and_track_full(Metric.SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT, correct):
-                return
-        
         if analyzer.most_popular_colors_of_input_are_present_in_output:
             special_colors = set(input_histogram.most_popular_color_list())
             output_colors = output_histogram.unique_colors_set()
@@ -453,6 +438,21 @@ class BenchmarkColorConstraintAnalyzer:
             correct = special_colors.issubset(output_colors) == False
             self.track_label(Metric.INBETWEEN_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT, correct)
 
+        if analyzer.same_histogram_for_input_output:
+            correct = output_histogram == input_histogram
+            if self.check_and_track_full(Metric.SAME_HISTOGRAM_FOR_INPUT_OUTPUT, correct):
+                return
+
+        if analyzer.same_histogram_for_all_outputs:
+            correct = output_histogram.unique_colors_set() == analyzer.output_intersection
+            if self.check_and_track_full(Metric.SAME_HISTOGRAM_FOR_ALL_OUTPUTS, correct):
+                return
+        
+        if analyzer.same_unique_colors_for_input_output:
+            correct = output_histogram.unique_colors_set() == input_histogram.unique_colors_set()
+            if self.check_and_track_full(Metric.SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT, correct):
+                return
+        
         if analyzer.has_color_insert or analyzer.has_color_remove or analyzer.has_optional_color_insert:
             predicted_colors = input_histogram.unique_colors_set()
             if analyzer.has_color_insert:
