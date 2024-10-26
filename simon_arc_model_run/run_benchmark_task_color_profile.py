@@ -30,7 +30,7 @@ groupname_pathtotaskdir_list = [
     # ('dbigham', os.path.join(path_to_arc_dataset_collection_dataset, 'dbigham/data')),
     # ('arc-community', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-community/data')),
     # ('IPARC', os.path.join(path_to_arc_dataset_collection_dataset, 'IPARC/data')),
-    # ('testdata', os.path.join(PROJECT_ROOT, 'testdata', 'simple_arc_tasks')),
+    # ('testdata', os.path.join(PROJECT_ROOT, 'testdata', 'ARC-AGI/data')),
 ]
 
 invalid_task_id_list = [

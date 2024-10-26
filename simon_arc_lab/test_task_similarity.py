@@ -6,7 +6,7 @@ from .image_similarity import *
 class TestTaskSimilarity(unittest.TestCase):
     def test_10000_same_histogram(self):
         # Arrange
-        filename = 'testdata/simple_arc_tasks/25ff71a9.json'
+        filename = 'testdata/ARC-AGI/data/training/25ff71a9.json'
         task = Task.load_arcagi1(filename)
         # Act
         ts = TaskSimilarity.create_with_task(task)
@@ -17,7 +17,7 @@ class TestTaskSimilarity(unittest.TestCase):
 
     def test_20000_same_most_popular_color_list(self):
         # Arrange
-        filename = 'testdata/simple_arc_tasks/5582e5ca.json'
+        filename = 'testdata/ARC-AGI/data/training/5582e5ca.json'
         task = Task.load_arcagi1(filename)
         # Act
         ts = TaskSimilarity.create_with_task(task)

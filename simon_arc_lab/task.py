@@ -227,9 +227,9 @@ class Task:
 if __name__ == '__main__':
     # How to run this snippet
     # PROMPT> python -m simon_arc_lab.task
-    filename = 'testdata/simple_arc_tasks/25ff71a9.json'
+    filename = 'testdata/ARC-AGI/data/training/25ff71a9.json'
     task = Task.load_arcagi1(filename)
     print(task)
     print(repr(task))
-    task.show_in_terminal()
+    task.show()
 
