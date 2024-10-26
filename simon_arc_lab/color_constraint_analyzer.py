@@ -5,32 +5,6 @@ from functools import cached_property
 from .histogram import Histogram
 from .task import Task
 
-class Metric(Enum):
-    SAME_HISTOGRAM_FOR_INPUT_OUTPUT = 'same_histogram_for_input_output'
-    SAME_HISTOGRAM_FOR_ALL_OUTPUTS = 'same_histogram_for_all_outputs'
-    SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT = 'same_unique_colors_for_input_output'
-    SAME_INSERT_REMOVE = 'same_insert_remove'
-    OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS = 'output_colors_is_subset_input_colors'
-    OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS_WITH_INSERT_REMOVE = 'output_colors_is_subset_input_colors_with_insert_remove'
-    COLOR_MAPPING = 'color_mapping'
-    OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION = 'output_colors_is_subset_example_output_union'
-    OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OUTPUTINTERSECTIONCOLORS = 'output_colors_is_subset_inputcolors_union_outputintersectioncolors'
-    OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OPTIONALOUTPUTINTERSECTIONCOLORS = 'output_colors_is_subset_inputcolors_union_optionaloutputintersectioncolors'
-    MOST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'most_popular_colors_of_input_are_present_in_output'
-    MOST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT = 'most_popular_colors_of_input_are_not_present_in_output'
-    LEAST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'least_popular_colors_of_input_are_present_in_output'
-    LEAST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT = 'least_popular_colors_of_input_are_not_present_in_output'
-    INBETWEEN_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'inbetween_colors_of_input_are_present_in_output'
-    INBETWEEN_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT = 'inbetween_colors_of_input_are_not_present_in_output'
-
-    def format_with_value(self, value: int) -> str:
-        suffix = ''
-        if self == Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS:
-            suffix = ' weak'
-        elif self == Metric.OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION:
-            suffix = ' weak'
-        return f"{self.name.lower()}: {value}{suffix}"
-
 class ColorConstraintAnalyzer:
     def __init__(self, task):
         self.task = task
@@ -105,7 +79,6 @@ class ColorConstraintAnalyzer:
             has_optional_color_insert = True
         self.optional_color_insert_set = optional_color_insert_set
         self.has_optional_color_insert = has_optional_color_insert
-
 
     def compute_color_mapping(self):
         """
@@ -368,7 +341,33 @@ class ColorConstraintAnalyzer:
                 return False
         return True
 
-class ColorConstraintAnalyzerRunner:
+class Metric(Enum):
+    SAME_HISTOGRAM_FOR_INPUT_OUTPUT = 'same_histogram_for_input_output'
+    SAME_HISTOGRAM_FOR_ALL_OUTPUTS = 'same_histogram_for_all_outputs'
+    SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT = 'same_unique_colors_for_input_output'
+    SAME_INSERT_REMOVE = 'same_insert_remove'
+    OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS = 'output_colors_is_subset_input_colors'
+    OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS_WITH_INSERT_REMOVE = 'output_colors_is_subset_input_colors_with_insert_remove'
+    COLOR_MAPPING = 'color_mapping'
+    OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION = 'output_colors_is_subset_example_output_union'
+    OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OUTPUTINTERSECTIONCOLORS = 'output_colors_is_subset_inputcolors_union_outputintersectioncolors'
+    OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OPTIONALOUTPUTINTERSECTIONCOLORS = 'output_colors_is_subset_inputcolors_union_optionaloutputintersectioncolors'
+    MOST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'most_popular_colors_of_input_are_present_in_output'
+    MOST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT = 'most_popular_colors_of_input_are_not_present_in_output'
+    LEAST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'least_popular_colors_of_input_are_present_in_output'
+    LEAST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT = 'least_popular_colors_of_input_are_not_present_in_output'
+    INBETWEEN_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'inbetween_colors_of_input_are_present_in_output'
+    INBETWEEN_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT = 'inbetween_colors_of_input_are_not_present_in_output'
+
+    def format_with_value(self, value: int) -> str:
+        suffix = ''
+        if self == Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS:
+            suffix = ' weak'
+        elif self == Metric.OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION:
+            suffix = ' weak'
+        return f"{self.name.lower()}: {value}{suffix}"
+
+class BenchmarkColorConstraintAnalyzer:
     def __init__(self):
         self.count_correct = defaultdict(int)
         self.count_incorrect = defaultdict(int)
