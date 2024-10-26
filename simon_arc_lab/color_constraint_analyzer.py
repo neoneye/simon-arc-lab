@@ -375,6 +375,16 @@ class ColorConstraintAnalyzerRunner:
         self.count_correct_subitem = defaultdict(int)
         self.count_incorrect_subitem = defaultdict(int)
         self.count_issue = 0
+    
+    def track_full(self, metric: Metric, value: bool):
+        if value:
+            self.count_correct[metric] += 1
+        else:
+            self.count_incorrect[metric] += 1
+    
+    def check_and_track_full(self, metric: Metric, condition: bool) -> bool:
+        self.track_full(metric, condition)
+        return condition
 
     def measure_task(self, task):
         analyzer = ColorConstraintAnalyzer(task)
@@ -388,25 +398,19 @@ class ColorConstraintAnalyzerRunner:
         output_histogram = Histogram.create_with_image(output_image)
 
         if analyzer.same_histogram_for_input_output:
-            if output_histogram == input_histogram:
-                self.count_correct[Metric.SAME_HISTOGRAM_FOR_INPUT_OUTPUT] += 1
+            correct = output_histogram == input_histogram
+            if self.check_and_track_full(Metric.SAME_HISTOGRAM_FOR_INPUT_OUTPUT, correct):
                 return
-            self.count_incorrect[Metric.SAME_HISTOGRAM_FOR_INPUT_OUTPUT] += 1
-            # print(f"same_histogram_for_input_output: {task.metadata_task_id} test={test_index}")
 
         if analyzer.same_histogram_for_all_outputs:
-            if output_histogram.unique_colors_set() == analyzer.output_intersection:
-                self.count_correct[Metric.SAME_HISTOGRAM_FOR_ALL_OUTPUTS] += 1
+            correct = output_histogram.unique_colors_set() == analyzer.output_intersection
+            if self.check_and_track_full(Metric.SAME_HISTOGRAM_FOR_ALL_OUTPUTS, correct):
                 return
-            self.count_incorrect[Metric.SAME_HISTOGRAM_FOR_ALL_OUTPUTS] += 1
-            # print(f"same_histogram_for_all_outputs: {task.metadata_task_id} test={test_index}")
         
         if analyzer.same_unique_colors_for_input_output:
-            if output_histogram.unique_colors_set() == input_histogram.unique_colors_set():
-                self.count_correct[Metric.SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT] += 1
+            correct = output_histogram.unique_colors_set() == input_histogram.unique_colors_set()
+            if self.check_and_track_full(Metric.SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT, correct):
                 return
-            self.count_incorrect[Metric.SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT] += 1
-            # print(f"same_unique_colors_for_input_output: {task.metadata_task_id} test={test_index}")
         
         if analyzer.most_popular_colors_of_input_are_present_in_output:
             special_colors = set(input_histogram.most_popular_color_list())
@@ -471,58 +475,43 @@ class ColorConstraintAnalyzerRunner:
                     self.count_correct[Metric.SAME_INSERT_REMOVE] += 1
                     return
             self.count_incorrect[Metric.SAME_INSERT_REMOVE] += 1
-            # print(f"has_color_insert/has_color_remove/has_optional_color_insert: {task.metadata_task_id} test={test_index}")
 
         if analyzer.output_colors_is_subset_input_colors:
-            if output_histogram.unique_colors_set().issubset(input_histogram.unique_colors_set()):
-                self.count_correct[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS] += 1
+            correct = output_histogram.unique_colors_set().issubset(input_histogram.unique_colors_set())
+            if self.check_and_track_full(Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS, correct):
                 return
-            self.count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS] += 1
-            # print(f"output_colors_is_subset_input_colors: {task.metadata_task_id} test={test_index}")
 
         if analyzer.output_colors_is_subset_input_colors_with_insert_remove:
             input_colors = input_histogram.unique_colors_set()
             predicted_colors = (input_colors | analyzer.color_insert_intersection) - analyzer.color_remove_intersection
-            if output_histogram.unique_colors_set().issubset(predicted_colors):
-                self.count_correct[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS_WITH_INSERT_REMOVE] += 1
+            correct = output_histogram.unique_colors_set().issubset(predicted_colors)
+            if self.check_and_track_full(Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS_WITH_INSERT_REMOVE, correct):
                 return
-            self.count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS_WITH_INSERT_REMOVE] += 1
-            # print(f"output_colors_is_subset_input_colors_with_insert_remove: {task.metadata_task_id} test={test_index}")
 
         if analyzer.output_colors_is_subset_inputcolors_union_outputintersectioncolors:
             predicted_colors = input_histogram.unique_colors_set() | analyzer.output_intersection
-            if output_histogram.unique_colors_set().issubset(predicted_colors):
-                self.count_correct[Metric.OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OUTPUTINTERSECTIONCOLORS] += 1
+            correct = output_histogram.unique_colors_set().issubset(predicted_colors)
+            if self.check_and_track_full(Metric.OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OUTPUTINTERSECTIONCOLORS, correct):
                 return
-            self.count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OUTPUTINTERSECTIONCOLORS] += 1
-            # print(f"output_colors_is_subset_input_union_example_output_intersection: {task.metadata_task_id} test={test_index}")
 
         if len(analyzer.color_mapping) > 0:
             key = frozenset(input_histogram.unique_colors_set())
-            if key in analyzer.color_mapping and output_histogram.unique_colors_set() == analyzer.color_mapping[key]:
-                self.count_correct[Metric.COLOR_MAPPING] += 1
+            correct = key in analyzer.color_mapping and output_histogram.unique_colors_set() == analyzer.color_mapping[key]
+            if self.check_and_track_full(Metric.COLOR_MAPPING, correct):
                 return
-            self.count_incorrect[Metric.COLOR_MAPPING] += 1
-            # print(f"has_color_mapping: {task.metadata_task_id} test={test_index}")
         
         if analyzer.output_colors_is_subset_example_output_union:
-            if output_histogram.unique_colors_set().issubset(analyzer.output_union):
-                self.count_correct[Metric.OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION] += 1
+            correct = output_histogram.unique_colors_set().issubset(analyzer.output_union)
+            if self.check_and_track_full(Metric.OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION, correct):
                 return
-            self.count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION] += 1
-            # print(f"output_colors_is_subset_example_output_union: {task.metadata_task_id} test={test_index}")
 
         if analyzer.output_colors_is_subset_inputcolors_union_optionaloutputintersectioncolors:
             predicted_colors = input_histogram.unique_colors_set() | analyzer.optional_color_insert_set
-            if output_histogram.unique_colors_set().issubset(predicted_colors):
-                self.count_correct[Metric.OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OPTIONALOUTPUTINTERSECTIONCOLORS] += 1
+            correct = output_histogram.unique_colors_set().issubset(predicted_colors)
+            if self.check_and_track_full(Metric.OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OPTIONALOUTPUTINTERSECTIONCOLORS, correct):
                 return
-            self.count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OPTIONALOUTPUTINTERSECTIONCOLORS] += 1
-            #print(f"output_colors_is_subset_input_union_optional_output_intersection: {task.metadata_task_id} test={test_index}")
 
         self.count_issue += 1
         print(f"issue: {task.metadata_task_id} test={test_index}")
-        # most popular color manipulation
-        # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9565186b
 
         
