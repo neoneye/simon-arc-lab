@@ -18,6 +18,7 @@ class Metric(Enum):
     SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT = 'same_unique_colors_for_input_output'
     SAME_INSERT_REMOVE = 'same_insert_remove'
     OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS = 'output_colors_is_subset_input_colors'
+    OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS_WITH_INSERT_REMOVE = 'output_colors_is_subset_input_colors_with_insert_remove'
     COLOR_MAPPING = 'color_mapping'
     OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION = 'output_colors_is_subset_example_output_union'
     MOST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'most_popular_colors_of_input_are_present_in_output'
@@ -149,6 +150,22 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
             output_colors = output_histogram.unique_colors_set()
             if output_colors.issubset(input_colors) == False:
                 output_colors_is_subset_input_colors = False
+                break
+
+        # Determines if the output colors are a subset of the input colors with insert/remove
+        # https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9565186b
+        output_colors_is_subset_input_colors_with_insert_remove = has_color_insert or has_color_remove
+        for i in range(task.count_examples):
+            input_histogram = input_histogram_list[i]
+            output_histogram = output_histogram_list[i]
+            input_colors_raw = input_histogram.unique_colors_set()
+            input_colors = (input_colors_raw | color_insert_intersection) - color_remove_intersection
+            if len(input_colors) == 0:
+                output_colors_is_subset_input_colors_with_insert_remove = False
+                break
+            output_colors = output_histogram.unique_colors_set()
+            if output_colors.issubset(input_colors) == False:
+                output_colors_is_subset_input_colors_with_insert_remove = False
                 break
 
         output_colors_is_subset_example_output_union = True
@@ -365,6 +382,15 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
                     continue
                 count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS] += 1
                 # print(f"output_colors_is_subset_input_colors: {task.metadata_task_id} test={test_index}")
+
+            if output_colors_is_subset_input_colors_with_insert_remove:
+                input_colors_raw = input_histogram.unique_colors_set()
+                input_colors = (input_colors_raw | color_insert_intersection) - color_remove_intersection
+                if output_histogram.unique_colors_set().issubset(input_colors):
+                    count_correct[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS_WITH_INSERT_REMOVE] += 1
+                    continue
+                count_incorrect[Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS_WITH_INSERT_REMOVE] += 1
+                # print(f"output_colors_is_subset_input_colors_with_insert_remove: {task.metadata_task_id} test={test_index}")
 
             if has_color_mapping:
                 key = input_histogram.unique_colors_pretty()
