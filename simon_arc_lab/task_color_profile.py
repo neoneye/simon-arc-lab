@@ -389,6 +389,10 @@ class TaskColorProfile:
                 return False
         return True
     
+    def predict_output_colors_for_test_index(self, test_index: int) -> list[Tuple[bool, set]]:
+        input_histogram = Histogram.create_with_image(self.task.test_input(test_index))
+        return self.predict_output_colors_given_input_histogram(input_histogram)
+
     def predict_output_colors_given_input_histogram(self, input_histogram: Histogram) -> list[Tuple[bool, set]]:
         """
         Predict the output colors given the input histogram.
@@ -431,10 +435,12 @@ class TaskColorProfile:
                 predicted_colors = predicted_colors | self.color_insert_intersection
             if self.has_color_remove:
                 predicted_colors = predicted_colors - self.color_remove_intersection
-            predicted_colors_list.append((True, predicted_colors))
+            if len(predicted_colors) > 0:
+                predicted_colors_list.append((True, predicted_colors))
             if self.has_optional_color_insert:
                 predicted_colors2 = predicted_colors | self.optional_color_insert_set
-                predicted_colors_list.append((True, predicted_colors2))
+                if len(predicted_colors2) > 0:
+                    predicted_colors_list.append((True, predicted_colors2))
 
         if self.output_colors_is_subset_input_colors:
             predicted_colors = input_histogram.unique_colors_set()

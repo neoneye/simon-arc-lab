@@ -63,3 +63,16 @@ class TestTaskColorProfile(unittest.TestCase):
         # Assert
         self.assertEqual(profile.same_unique_colors_for_all_outputs, True)
 
+    def test_predict_output_colors_for_test_index_17cae0c1(self):
+        # Arrange
+        filename = 'testdata/ARC-AGI/data/evaluation/17cae0c1.json'
+        task = Task.load_arcagi1(filename)
+        profile = TaskColorProfile(task)
+        # Act
+        actual = profile.predict_output_colors_for_test_index(0)
+        # Assert
+        expected = [
+            (False, {1, 3, 4, 6, 9})
+        ]
+        self.assertEqual(actual, expected)
+
