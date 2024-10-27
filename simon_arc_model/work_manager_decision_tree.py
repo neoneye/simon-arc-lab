@@ -9,6 +9,7 @@ from simon_arc_lab.image_vote import *
 from simon_arc_lab.task import Task
 from simon_arc_lab.task_mutator import *
 from simon_arc_lab.taskset import TaskSet
+from simon_arc_lab.task_color_profile import TaskColorProfile
 from simon_arc_lab.task_similarity import TaskSimilarity
 from simon_arc_lab.show_prediction_result import show_prediction_result, show_multiple_images
 from .predict_output_donothing import PredictOutputDoNothing
@@ -95,6 +96,17 @@ class WorkManagerDecisionTree(WorkManagerBase):
             work_item = original_work_item
 
             ts = TaskSimilarity.create_with_task(work_item.task)
+
+            profile = TaskColorProfile(work_item.task)
+            input_image = work_item.task.test_input(work_item.test_index)
+            predicted_output_colors = profile.predict_output_colors_given_input_histogram(Histogram.create_with_image(input_image))
+            color_image = image_create(10, len(predicted_output_colors), 255)
+            for i, (certain, color_set) in enumerate(predicted_output_colors):
+                j = 0
+                for color in range(10):
+                    if color in color_set:
+                        color_image[i, j] = color
+                        j += 1
 
             image_and_score = []
 
@@ -234,6 +246,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                 title_image_list = []
                 title_image_list.append(('arc', 'Input', temp_work_item.task.test_input(temp_work_item.test_index)))
                 title_image_list.append(('arc', 'Output', temp_work_item.task.test_output(temp_work_item.test_index)))
+                title_image_list.append(('arc', 'Colors', color_image))
                 if best_image is not None:
                     title_image_list.append(('arc', 'Best', best_image))
                 if second_best_image is not None:
