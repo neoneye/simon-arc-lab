@@ -504,12 +504,13 @@ class TaskColorProfile:
     def remove_duplicates(cls, predicted_colors_list: list[Tuple[bool, set]]) -> list[Tuple[bool, set]]:
         """
         Remove duplicates from the predicted colors list.
-        Keep the first occurrence of each unique set of colors.
+        Keep the first occurrence of each unique set of colors, and use its certainty boolean value.
         """
         final_list = []
         encountered = set()
         for row in predicted_colors_list:
-            key = (row[0], frozenset(row[1]))
+            predicted_color_set = row[1]
+            key = frozenset(predicted_color_set)
             if key in encountered:
                 continue
             encountered.add(key)

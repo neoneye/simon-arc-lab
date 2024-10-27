@@ -72,7 +72,7 @@ class TestTaskColorProfile(unittest.TestCase):
         # Assert
         self.assertEqual(profile.same_unique_colors_for_all_outputs, True)
 
-    def test_remove_duplicates_do_nothing0(self):
+    def test_remove_duplicates_keep_first0(self):
         input = [
             (True, {5, 6}),
             (False, {5, 6}),
@@ -80,11 +80,10 @@ class TestTaskColorProfile(unittest.TestCase):
         actual = TaskColorProfile.remove_duplicates(input)
         expected = [
             (True, {5, 6}),
-            (False, {5, 6}),
         ]
         self.assertEqual(actual, expected)
 
-    def test_remove_duplicates_do_nothing1(self):
+    def test_remove_duplicates_keep_first1(self):
         input = [
             (False, {5, 6}),
             (True, {5, 6}),
@@ -92,11 +91,10 @@ class TestTaskColorProfile(unittest.TestCase):
         actual = TaskColorProfile.remove_duplicates(input)
         expected = [
             (False, {5, 6}),
-            (True, {5, 6}),
         ]
         self.assertEqual(actual, expected)
 
-    def test_remove_duplicates_multiple(self):
+    def test_remove_duplicates_multiple_identical(self):
         input = [
             (False, {5, 6}),
             (False, {5, 6}),
