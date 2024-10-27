@@ -72,6 +72,61 @@ class TestTaskColorProfile(unittest.TestCase):
         # Assert
         self.assertEqual(profile.same_unique_colors_for_all_outputs, True)
 
+    def test_remove_duplicates_do_nothing0(self):
+        input = [
+            (True, {5, 6}),
+            (False, {5, 6}),
+        ]
+        actual = TaskColorProfile.remove_duplicates(input)
+        expected = [
+            (True, {5, 6}),
+            (False, {5, 6}),
+        ]
+        self.assertEqual(actual, expected)
+
+    def test_remove_duplicates_do_nothing1(self):
+        input = [
+            (False, {5, 6}),
+            (True, {5, 6}),
+        ]
+        actual = TaskColorProfile.remove_duplicates(input)
+        expected = [
+            (False, {5, 6}),
+            (True, {5, 6}),
+        ]
+        self.assertEqual(actual, expected)
+
+    def test_remove_duplicates_multiple(self):
+        input = [
+            (False, {5, 6}),
+            (False, {5, 6}),
+            (False, {5, 6}),
+            (True, {7, 8, 9}),
+            (True, {7, 8, 9}),
+        ]
+        actual = TaskColorProfile.remove_duplicates(input)
+        expected = [
+            (False, {5, 6}),
+            (True, {7, 8, 9}),
+        ]
+        self.assertEqual(actual, expected)
+
+    def test_remove_duplicates_keep_first(self):
+        input = [
+            (True, {5, 6}),
+            (True, {3, 9}),
+            (False, {1}),
+            (True, {3, 9}),
+            (True, {5, 6}),
+        ]
+        actual = TaskColorProfile.remove_duplicates(input)
+        expected = [
+            (True, {5, 6}),
+            (True, {3, 9}),
+            (False, {1}),
+        ]
+        self.assertEqual(actual, expected)
+
     def test_predict_output_colors_for_test_index_17cae0c1(self):
         # Arrange
         filename = 'testdata/ARC-AGI/data/evaluation/17cae0c1.json'
