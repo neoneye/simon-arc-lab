@@ -480,6 +480,8 @@ class Metric(Enum):
     ACCURACY_PREDICTED_COLORS_DIFF1 = 'accuracy_predicted_colors_diff1'
     ACCURACY_PREDICTED_COLORS_DIFF2 = 'accuracy_predicted_colors_diff2'
     ACCURACY_PREDICTED_COLORS_DIFF3_OR_WORSE = 'accuracy_predicted_colors_diff3_or_worse'
+    ACCURACY_PREDICTED_COLORS_CERTAIN_CORRECT = 'accuracy_predicted_colors_certain_correct'
+    ACCURACY_PREDICTED_COLORS_CERTAIN_INCORRECT = 'accuracy_predicted_colors_certain_incorrect'
 
     def format_with_value(self, value: int) -> str:
         suffix = ''
@@ -532,12 +534,18 @@ class BenchmarkTaskColorProfile:
         first_match = None
         diff_count = None
         for index, (certain, predicted_color_set) in enumerate(predicted_color_list):
-            correct = expected_color_set.issubset(predicted_color_set)
-            if correct:
-                first_match = index
-                diff_color_set = predicted_color_set - expected_color_set
-                diff_count = len(diff_color_set)
-                break
+            if expected_color_set.issubset(predicted_color_set) == False:
+                continue
+            first_match = index
+            diff_color_set = predicted_color_set - expected_color_set
+            diff_count = len(diff_color_set)
+
+            if certain:
+                if diff_count == 0:
+                    self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_CERTAIN_CORRECT] += 1
+                else:
+                    self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_CERTAIN_INCORRECT] += 1
+            break
 
         problem = False
         if first_match is None:
@@ -563,7 +571,7 @@ class BenchmarkTaskColorProfile:
             self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_DIFF3_OR_WORSE] += 1
             problem = True
         
-        if problem:
+        if problem and self.verbose:
             print(f"task={task.metadata_task_id} test={test_index} first_match={first_match} diff={diff_count}")
 
     def measure_histograms(self, profile: TaskColorProfile, task: Task, test_index: int, input_histogram: Histogram, output_histogram: Histogram):
