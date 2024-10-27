@@ -12,6 +12,17 @@ class TaskColorProfilePrediction:
         self.certain_colorset_list = certain_colorset_list
     
     def to_image(self) -> np.array:
+        """
+        Visualization of the predicted color sets.
+
+        The top most row is the best guess.
+        The rows in between are the guesses in between.
+        The bottom most row is the worst guess.
+
+        The width of the image is always 10, since there are 10 colors in the ARC dataset.
+
+        The height of the image is the number of predicted color sets.
+        """
         color_image = image_create(10, len(self.certain_colorset_list), 255)
         for y, (certain, color_set) in enumerate(self.certain_colorset_list):
             x = 0
