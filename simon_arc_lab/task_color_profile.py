@@ -5,9 +5,24 @@ from collections import defaultdict
 from functools import cached_property
 from .histogram import Histogram
 from .task import Task
+from .image_util import image_create
+
+class TaskColorProfilePrediction:
+    def __init__(self, certain_colorset_list: list[Tuple[bool, set]]):
+        self.certain_colorset_list = certain_colorset_list
+    
+    def to_image(self) -> np.array:
+        color_image = image_create(10, len(self.certain_colorset_list), 255)
+        for y, (certain, color_set) in enumerate(self.certain_colorset_list):
+            x = 0
+            for color in range(10):
+                if color in color_set:
+                    color_image[y, x] = color
+                    x += 1
+        return color_image
 
 class TaskColorProfile:
-    def __init__(self, task):
+    def __init__(self, task: Task):
         self.task = task
         self.input_histograms = []
         self.output_histograms = []
@@ -415,11 +430,11 @@ class TaskColorProfile:
                 return False
         return True
     
-    def predict_output_colors_for_test_index(self, test_index: int) -> list[Tuple[bool, set]]:
+    def predict_output_colors_for_test_index(self, test_index: int) -> TaskColorProfilePrediction:
         input_histogram = Histogram.create_with_image(self.task.test_input(test_index))
         return self.predict_output_colors_given_input_histogram(input_histogram)
 
-    def predict_output_colors_given_input_histogram(self, input_histogram: Histogram) -> list[Tuple[bool, set]]:
+    def predict_output_colors_given_input_histogram(self, input_histogram: Histogram) -> TaskColorProfilePrediction:
         """
         Predict the output colors given the input histogram.
 
@@ -498,7 +513,8 @@ class TaskColorProfile:
             predicted_colors = input_histogram.unique_colors_set() | self.optional_color_insert_set
             predicted_colors_list.append((False, predicted_colors))
         
-        return TaskColorProfile.remove_duplicates(predicted_colors_list)
+        predicted_colors_list_without_duplicates = TaskColorProfile.remove_duplicates(predicted_colors_list)
+        return TaskColorProfilePrediction(predicted_colors_list_without_duplicates)
 
     @classmethod
     def remove_duplicates(cls, predicted_colors_list: list[Tuple[bool, set]]) -> list[Tuple[bool, set]]:
@@ -718,11 +734,11 @@ class BenchmarkTaskColorProfile:
         """
         Measure the accuracy of the predicted output colors.
         """
-        predicted_color_list = profile.predict_output_colors_given_input_histogram(input_histogram)
+        prediction = profile.predict_output_colors_given_input_histogram(input_histogram)
         expected_color_set = output_histogram.unique_colors_set()
         first_match = None
         diff_count = None
-        for index, (certain, predicted_color_set) in enumerate(predicted_color_list):
+        for index, (certain, predicted_color_set) in enumerate(prediction.certain_colorset_list):
             if expected_color_set.issubset(predicted_color_set) == False:
                 continue
             first_match = index
