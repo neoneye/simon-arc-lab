@@ -45,6 +45,15 @@ class TestTaskColorProfile(unittest.TestCase):
         # Assert
         self.assertEqual(profile.same_histogram_for_input_output, True)
 
+    def test_same_unique_colors_across_all_images(self):
+        # Arrange
+        filename = 'testdata/ARC-AGI/data/training/3618c87e.json'
+        task = Task.load_arcagi1(filename)
+        # Act
+        profile = TaskColorProfile(task)
+        # Assert
+        self.assertEqual(profile.same_unique_colors_across_all_images, True)
+
     def test_same_unique_colors_for_all_outputs(self):
         # Arrange
         filename = 'testdata/ARC-AGI/data/training/db3e9e38.json'

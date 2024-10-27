@@ -142,6 +142,20 @@ class TaskColorProfile:
         return True
 
     @cached_property
+    def same_unique_colors_across_all_images(self):
+        """
+        Check if all images agree on the same unique colors.
+        
+        Examples:
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=178fcbfb
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2dd70a9a
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=3618c87e
+        """
+        inout_union = self.input_union | self.output_union
+        inout_intersection = self.input_intersection & self.output_intersection
+        return inout_union == inout_intersection
+
+    @cached_property
     def same_unique_colors_for_all_outputs(self):
         """
         Check if all example outputs agree on the same unique colors.
@@ -376,6 +390,7 @@ class TaskColorProfile:
 
 class Metric(Enum):
     SAME_HISTOGRAM_FOR_INPUT_OUTPUT = 'same_histogram_for_input_output'
+    SAME_UNIQUE_COLORS_ACROSS_ALL_IMAGES = 'same_unique_colors_across_all_images'
     SAME_UNIQUE_COLORS_FOR_ALL_OUTPUTS = 'same_unique_colors_for_all_outputs'
     SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT = 'same_unique_colors_for_input_output'
     SAME_INSERT_REMOVE = 'same_insert_remove'
@@ -477,6 +492,11 @@ class BenchmarkTaskColorProfile:
         if profile.same_histogram_for_input_output:
             correct = output_histogram == input_histogram
             if self.check_and_track_full(Metric.SAME_HISTOGRAM_FOR_INPUT_OUTPUT, correct):
+                return
+            
+        if profile.same_unique_colors_across_all_images:
+            correct = output_histogram.unique_colors_set() == profile.output_intersection
+            if self.check_and_track_full(Metric.SAME_UNIQUE_COLORS_ACROSS_ALL_IMAGES, correct):
                 return
 
         if profile.same_unique_colors_for_all_outputs:
