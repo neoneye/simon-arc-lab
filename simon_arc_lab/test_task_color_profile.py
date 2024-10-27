@@ -36,6 +36,15 @@ class TestTaskColorProfile(unittest.TestCase):
         }
         self.assertEqual(profile.color_mapping, expected)
 
+    def test_compute_number_of_unique_colors_in_outputs(self):
+        # Arrange
+        filename = 'testdata/ARC-AGI/data/evaluation/009d5c81.json'
+        task = Task.load_arcagi1(filename)
+        # Act
+        profile = TaskColorProfile(task)
+        # Assert
+        self.assertEqual(profile.number_of_unique_colors_in_outputs, 2)
+
     def test_same_histogram_for_input_output(self):
         # Arrange
         filename = 'testdata/ARC-AGI/data/training/e9afcf9a.json'
@@ -73,6 +82,19 @@ class TestTaskColorProfile(unittest.TestCase):
         # Assert
         expected = [
             (False, {1, 3, 4, 6, 9})
+        ]
+        self.assertEqual(actual, expected)
+
+    def test_predict_output_colors_for_test_index_009d5c81(self):
+        # Arrange
+        filename = 'testdata/ARC-AGI/data/evaluation/009d5c81.json'
+        task = Task.load_arcagi1(filename)
+        profile = TaskColorProfile(task)
+        # Act
+        actual = profile.predict_output_colors_for_test_index(0)
+        # Assert
+        expected = [
+            (False, {0, 2, 3, 7})
         ]
         self.assertEqual(actual, expected)
 
