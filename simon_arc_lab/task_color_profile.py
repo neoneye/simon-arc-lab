@@ -527,54 +527,13 @@ class BenchmarkTaskColorProfile:
         output_image = task.test_output(test_index)
         input_histogram = Histogram.create_with_image(input_image)
         output_histogram = Histogram.create_with_image(output_image)
-        self.measure_histograms(profile, task, test_index, input_histogram, output_histogram)
+        self.measure_rules(profile, task, test_index, input_histogram, output_histogram)
+        self.measure_accuracy(profile, task, test_index, input_histogram, output_histogram)
 
-        predicted_color_list = profile.predict_output_colors_given_input_histogram(input_histogram)
-        expected_color_set = output_histogram.unique_colors_set()
-        first_match = None
-        diff_count = None
-        for index, (certain, predicted_color_set) in enumerate(predicted_color_list):
-            if expected_color_set.issubset(predicted_color_set) == False:
-                continue
-            first_match = index
-            diff_color_set = predicted_color_set - expected_color_set
-            diff_count = len(diff_color_set)
-
-            if certain:
-                if diff_count == 0:
-                    self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_CERTAIN_CORRECT] += 1
-                else:
-                    self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_CERTAIN_INCORRECT] += 1
-            break
-
-        problem = False
-        if first_match is None:
-            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_NO_PREDICTION] += 1
-            problem = True
-        elif first_match == 0:
-            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_A] += 1 
-        elif first_match == 1:
-            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_B] += 1
-        else:
-            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_C_OR_WORSE] += 1
-            problem = True
-        
-        if diff_count is None:
-            pass
-        elif diff_count == 0:
-            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_DIFF0] += 1
-        elif diff_count == 1:
-            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_DIFF1] += 1
-        elif diff_count == 2:
-            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_DIFF2] += 1
-        else:
-            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_DIFF3_OR_WORSE] += 1
-            problem = True
-        
-        if problem and self.verbose:
-            print(f"task={task.metadata_task_id} test={test_index} first_match={first_match} diff={diff_count}")
-
-    def measure_histograms(self, profile: TaskColorProfile, task: Task, test_index: int, input_histogram: Histogram, output_histogram: Histogram):
+    def measure_rules(self, profile: TaskColorProfile, task: Task, test_index: int, input_histogram: Histogram, output_histogram: Histogram):
+        """
+        Measure the rules are explaining the color of the output.
+        """
         if profile.most_popular_colors_of_input_are_present_in_output:
             special_colors = set(input_histogram.most_popular_color_list())
             output_colors = output_histogram.unique_colors_set()
@@ -685,6 +644,55 @@ class BenchmarkTaskColorProfile:
         self.count_issue += 1
         if self.verbose:
             print(f"issue: {task.metadata_task_id} test={test_index}")
+
+    def measure_accuracy(self, profile: TaskColorProfile, task: Task, test_index: int, input_histogram: Histogram, output_histogram: Histogram):
+        """
+        Measure the accuracy of the predicted output colors.
+        """
+        predicted_color_list = profile.predict_output_colors_given_input_histogram(input_histogram)
+        expected_color_set = output_histogram.unique_colors_set()
+        first_match = None
+        diff_count = None
+        for index, (certain, predicted_color_set) in enumerate(predicted_color_list):
+            if expected_color_set.issubset(predicted_color_set) == False:
+                continue
+            first_match = index
+            diff_color_set = predicted_color_set - expected_color_set
+            diff_count = len(diff_color_set)
+
+            if certain:
+                if diff_count == 0:
+                    self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_CERTAIN_CORRECT] += 1
+                else:
+                    self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_CERTAIN_INCORRECT] += 1
+            break
+
+        problem = False
+        if first_match is None:
+            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_NO_PREDICTION] += 1
+            problem = True
+        elif first_match == 0:
+            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_A] += 1 
+        elif first_match == 1:
+            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_B] += 1
+        else:
+            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_C_OR_WORSE] += 1
+            problem = True
+        
+        if diff_count is None:
+            pass
+        elif diff_count == 0:
+            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_DIFF0] += 1
+        elif diff_count == 1:
+            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_DIFF1] += 1
+        elif diff_count == 2:
+            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_DIFF2] += 1
+        else:
+            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_DIFF3_OR_WORSE] += 1
+            problem = True
+        
+        if problem and self.verbose:
+            print(f"task={task.metadata_task_id} test={test_index} first_match={first_match} diff={diff_count}")
 
     def print_summary(self):
         print(f"Issues: {self.count_issue}, puzzles where the transformation couldn't be identified.")
