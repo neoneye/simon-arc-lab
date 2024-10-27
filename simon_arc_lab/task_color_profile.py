@@ -22,11 +22,13 @@ class TaskColorProfile:
         self.has_optional_color_insert = False
         self.optional_color_insert_set = set()
         self.color_mapping = {}
+        self.number_of_unique_colors_in_outputs = None
 
         self.prepare_histograms()
         self.compute_color_insert_remove()
         self.compute_optional_color_insert()
         self.compute_color_mapping()
+        self.compute_number_of_unique_colors_in_outputs()
 
     def prepare_histograms(self):
         """Compute histograms for input and output images."""
@@ -124,6 +126,30 @@ class TaskColorProfile:
             self.color_mapping = color_mapping
         else:
             self.color_mapping = {}  # Reset to empty if inconsistent
+
+    def compute_number_of_unique_colors_in_outputs(self):
+        """
+        Determines if there outputs agree on the same number of colors.
+
+        Examples:
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=009d5c81
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=e2092e0c
+        - https://neoneye.github.io/arc/edit.html?dataset=ARC&task=9caba7c3
+        """
+        count = 0
+        consistent = True
+        for i in range(self.task.count_examples):
+            output_colors = self.output_histograms[i].unique_colors_set()
+            if i == 0:
+                count = len(output_colors)
+                continue
+            if count != len(output_colors):
+                consistent = False
+                break
+        if consistent:
+            self.number_of_unique_colors_in_outputs = count
+        else:
+            self.number_of_unique_colors_in_outputs = None
 
     @cached_property
     def same_histogram_for_input_output(self):
@@ -483,6 +509,7 @@ class Metric(Enum):
     OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION = 'output_colors_is_subset_example_output_union'
     OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OUTPUTINTERSECTIONCOLORS = 'output_colors_is_subset_inputcolors_union_outputintersectioncolors'
     OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OPTIONALOUTPUTINTERSECTIONCOLORS = 'output_colors_is_subset_inputcolors_union_optionaloutputintersectioncolors'
+    NUMBER_OF_UNIQUE_COLORS_IN_OUTPUTS = 'number_of_unique_colors_in_outputs'
     MOST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'most_popular_colors_of_input_are_present_in_output'
     MOST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT = 'most_popular_colors_of_input_are_not_present_in_output'
     LEAST_POPULAR_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'least_popular_colors_of_input_are_present_in_output'
@@ -547,6 +574,11 @@ class BenchmarkTaskColorProfile:
         """
         Measure the labels that may explain the color of the output.
         """
+        if profile.number_of_unique_colors_in_outputs is not None:
+            count = output_histogram.number_of_unique_colors()
+            correct = count == profile.number_of_unique_colors_in_outputs
+            self.track_label(Metric.NUMBER_OF_UNIQUE_COLORS_IN_OUTPUTS, correct)
+
         if profile.most_popular_colors_of_input_are_present_in_output:
             special_colors = set(input_histogram.most_popular_color_list())
             output_colors = output_histogram.unique_colors_set()
