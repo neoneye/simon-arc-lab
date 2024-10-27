@@ -461,11 +461,14 @@ class TaskColorProfile:
                 predicted_colors = predicted_colors | self.color_insert_intersection
             if self.has_color_remove:
                 predicted_colors = predicted_colors - self.color_remove_intersection
-            if len(predicted_colors) > 0:
+            minimum_count = 1
+            if self.number_of_unique_colors_in_outputs is not None:
+                minimum_count = self.number_of_unique_colors_in_outputs
+            if len(predicted_colors) >= minimum_count:
                 predicted_colors_list.append((True, predicted_colors))
             if self.has_optional_color_insert:
                 predicted_colors2 = predicted_colors | self.optional_color_insert_set
-                if len(predicted_colors2) > 0:
+                if len(predicted_colors2) >= minimum_count:
                     predicted_colors_list.append((True, predicted_colors2))
 
         if self.output_colors_is_subset_input_colors:
