@@ -81,6 +81,35 @@ class WorkManagerDecisionTree(WorkManagerBase):
             print(f'Saving images to directory: {save_dir}')
             os.makedirs(save_dir, exist_ok=True)
 
+        correct_count = 0
+        correct_task_id_set = set()
+        pbar = tqdm(self.work_items, desc="Processing work items")
+        for original_work_item in pbar:
+            work_item = original_work_item
+
+            task_similarity = TaskSimilarity.create_with_task(work_item.task)
+
+            profile = TaskColorProfile(work_item.task)
+            task_color_profile_prediction = profile.predict_output_colors_for_test_index(work_item.test_index)
+            predicted_output_color_image = task_color_profile_prediction.to_image()
+
+            for colorprofile_index, (certain, colorset) in enumerate(task_color_profile_prediction.certain_colorset_list):
+                self.process_with_predicted_colorset(
+                    work_item,
+                    colorprofile_index,
+                    colorset, 
+                    predicted_output_color_image, 
+                    task_similarity, 
+                    show, 
+                    save_dir
+                )
+
+            if work_item.status == WorkItemStatus.CORRECT:
+                correct_task_id_set.add(work_item.task.metadata_task_id)
+                correct_count = len(correct_task_id_set)
+            pbar.set_postfix({'correct': correct_count})
+
+    def process_with_predicted_colorset(self, work_item: WorkItem, profile_index: int, predicted_output_colorset: set[int], predicted_output_color_image: np.array, task_similarity: TaskSimilarity, show: bool, save_dir: Optional[str]):
         # noise_levels = [95, 90, 85, 80, 75, 70, 65]
         # noise_levels = [95, 90]
         # noise_levels = [100, 95, 90]
@@ -89,195 +118,179 @@ class WorkManagerDecisionTree(WorkManagerBase):
         # noise_levels = [100, 0, 0]
         number_of_refinements = len(noise_levels)
 
-        correct_count = 0
-        correct_task_id_set = set()
-        pbar = tqdm(self.work_items, desc="Processing work items")
-        for original_work_item in pbar:
-            work_item = original_work_item
+        image_and_score = []
 
-            ts = TaskSimilarity.create_with_task(work_item.task)
+        last_predicted_output = None
+        last_predicted_correctness = None
+        for refinement_index in range(number_of_refinements):
+            noise_level = noise_levels[refinement_index]
+            # print(f"Refinement {refinement_index+1}/{number_of_refinements} noise_level={noise_level}")
+            predicted_output = None
+            cache_file = None
+            best_image = None
+            second_best_image = None
+            third_best_image = None
+            fourth_best_image = None
+            # if self.cache_dir is not None:
+            #     if refinement_index == 0:
+            #         cache_file = os.path.join(self.cache_dir, f'{work_item.task.metadata_task_id}_{work_item.test_index}.npy')
+            #         if os.path.isfile(cache_file):
+            #             predicted_output = np.load(cache_file)
+            #             # print(f"Loaded from cache: {cache_file}")
+            if predicted_output is None:
+                # print(f"Predicting task: {work_item.task.metadata_task_id} test: {work_item.test_index} refinement: {refinement_index} last_predicted_output: {last_predicted_output is not None} last_predicted_correctness: {last_predicted_correctness is not None}")
+                if last_predicted_output is not None:
+                    if last_predicted_correctness is not None:
+                        assert last_predicted_output.shape == last_predicted_correctness.shape
 
-            profile = TaskColorProfile(work_item.task)
-            task_color_profile_prediction = profile.predict_output_colors_for_test_index(work_item.test_index)
-            color_image = task_color_profile_prediction.to_image()
-
-            image_and_score = []
-
-            last_predicted_output = None
-            last_predicted_correctness = None
-            for refinement_index in range(number_of_refinements):
-                noise_level = noise_levels[refinement_index]
-                # print(f"Refinement {refinement_index+1}/{number_of_refinements} noise_level={noise_level}")
-                predicted_output = None
-                cache_file = None
-                best_image = None
-                second_best_image = None
-                third_best_image = None
-                fourth_best_image = None
-                # if self.cache_dir is not None:
-                #     if refinement_index == 0:
-                #         cache_file = os.path.join(self.cache_dir, f'{work_item.task.metadata_task_id}_{work_item.test_index}.npy')
-                #         if os.path.isfile(cache_file):
-                #             predicted_output = np.load(cache_file)
-                #             # print(f"Loaded from cache: {cache_file}")
-                if predicted_output is None:
-                    # print(f"Predicting task: {work_item.task.metadata_task_id} test: {work_item.test_index} refinement: {refinement_index} last_predicted_output: {last_predicted_output is not None} last_predicted_correctness: {last_predicted_correctness is not None}")
-                    if last_predicted_output is not None:
-                        if last_predicted_correctness is not None:
-                            assert last_predicted_output.shape == last_predicted_correctness.shape
-
-                    best_image, second_best_image, third_best_image, fourth_best_image = DecisionTreeUtil.predict_output(
-                        work_item.task, 
-                        work_item.test_index, 
-                        last_predicted_output,
-                        last_predicted_correctness,
-                        refinement_index, 
-                        noise_level,
-                        set(FEATURES_2)
-                    )
-                    predicted_output = best_image.copy()
-                    # if cache_file is not None:
-                    #     np.save(cache_file, predicted_output)
-
-                predicted_correctness = DecisionTreeUtil.validate_output(
+                best_image, second_best_image, third_best_image, fourth_best_image = DecisionTreeUtil.predict_output(
                     work_item.task, 
                     work_item.test_index, 
-                    predicted_output,
+                    last_predicted_output,
+                    last_predicted_correctness,
                     refinement_index, 
                     noise_level,
-                    set(FEATURES_3)
+                    set(FEATURES_2)
                 )
+                predicted_output = best_image.copy()
+                # if cache_file is not None:
+                #     np.save(cache_file, predicted_output)
 
-                expected_output = work_item.task.test_output(work_item.test_index)
-                assert expected_output.shape == predicted_output.shape
-                assert expected_output.shape == predicted_correctness.shape
-                height, width = predicted_output.shape
+            predicted_correctness = DecisionTreeUtil.validate_output(
+                work_item.task, 
+                work_item.test_index, 
+                predicted_output,
+                refinement_index, 
+                noise_level,
+                set(FEATURES_3)
+            )
 
-                if second_best_image is not None:
-                    count_repair = 0
-                    for y in range(height):
-                        for x in range(width):
-                            if predicted_correctness[y, x] == 0:
-                                predicted_output[y, x] = second_best_image[y, x]
-                                count_repair += 1
-                    # print(f'repaired {count_repair} pixels')
+            expected_output = work_item.task.test_output(work_item.test_index)
+            assert expected_output.shape == predicted_output.shape
+            assert expected_output.shape == predicted_correctness.shape
+            height, width = predicted_output.shape
 
-                if best_image is not None:
-                    if second_best_image is not None:
-                        if third_best_image is not None:
-                            if fourth_best_image is not None:
-                                count_correct1 = 0
-                                count_correct2 = 0
-                                count_correct3 = 0
-                                count_correct4 = 0
-                                count_incorrect = 0
-                                for y in range(height):
-                                    for x in range(width):
-                                        color = expected_output[y, x]
-                                        if best_image[y, x] == color:
-                                            count_correct1 += 1
-                                        elif second_best_image[y, x] == color:
-                                            count_correct2 += 1
-                                        elif third_best_image[y, x] == color:
-                                            count_correct3 += 1
-                                        elif fourth_best_image[y, x] == color:
-                                            count_correct4 += 1
-                                        else:
-                                            count_incorrect += 1
-                                # print(f'correct {count_correct} incorrect {count_incorrect}')
-                                correct_list = [count_correct1, count_correct2, count_correct3, count_correct4]
-                                if count_incorrect == 0:
-                                    if count_correct4 > 0:
-                                        rank = 4
-                                    if count_correct3 > 0:
-                                        rank = 3
-                                    elif count_correct2 > 0:
-                                        rank = 2
-                                    elif count_correct1 > 0:
-                                        rank = 1
-                                    else:
-                                        rank = None
-                                    print(f'good task: {work_item.task.metadata_task_id} test: {work_item.test_index} correct_list: {correct_list} rank: {rank}')
-                                else:
-                                    count_correct = count_correct1 + count_correct2 + count_correct3 + count_correct4
-                                    percent = count_correct * 100 // (count_correct + count_incorrect)
-                                    print(f'bad task: {work_item.task.metadata_task_id} test: {work_item.test_index} count_incorrect: {count_incorrect} correct_list: {correct_list} correctness_percentage: {percent}')
-
-
-                last_predicted_output = predicted_output
-                last_predicted_correctness = predicted_correctness
-                score = ts.measure_test_prediction(predicted_output, work_item.test_index)
-                # print(f"task: {work_item.task.metadata_task_id} score: {score} refinement_index: {refinement_index} noise_level: {noise_level}")
-                image_and_score.append((predicted_output, score))
-
-                problem_image = np.zeros((height, width), dtype=np.float32)
+            if second_best_image is not None:
+                count_repair = 0
                 for y in range(height):
                     for x in range(width):
-                        is_same = predicted_output[y, x] == expected_output[y, x]
-                        is_correct = predicted_correctness[y, x] == 1
-                        if is_same == False and is_correct == True:
-                            # Worst case scenario, the validator was unable to identify this bad pixel.
-                            # Thus there is no way for the predictor to ever repair this pixel.
-                            value = 0.0
-                        else:
-                            value = 1.0
-                        problem_image[y, x] = value
+                        if predicted_correctness[y, x] == 0:
+                            predicted_output[y, x] = second_best_image[y, x]
+                            count_repair += 1
+                # print(f'repaired {count_repair} pixels')
 
-                temp_work_item = WorkItem(
-                    work_item.task.clone(), 
-                    work_item.test_index, 
-                    refinement_index, 
-                    PredictOutputDoNothing()
-                )
-                temp_work_item.predicted_output_image = predicted_output
-                temp_work_item.assign_status()
-                # if show:
-                #     temp_work_item.show()
-                # if save_dir is not None:
-                #     temp_work_item.show(save_dir)
-                
-                title_image_list = []
-                title_image_list.append(('arc', 'Input', temp_work_item.task.test_input(temp_work_item.test_index)))
-                title_image_list.append(('arc', 'Output', temp_work_item.task.test_output(temp_work_item.test_index)))
-                title_image_list.append(('arc', 'Colors', color_image))
-                if best_image is not None:
-                    title_image_list.append(('arc', 'Best', best_image))
+            if best_image is not None:
                 if second_best_image is not None:
-                    title_image_list.append(('arc', 'Second', second_best_image))
-                title_image_list.append(('arc', 'Predict', predicted_output))
-                title_image_list.append(('heatmap', 'Valid', predicted_correctness))
-                title_image_list.append(('heatmap', 'Problem', problem_image))
+                    if third_best_image is not None:
+                        if fourth_best_image is not None:
+                            count_correct1 = 0
+                            count_correct2 = 0
+                            count_correct3 = 0
+                            count_correct4 = 0
+                            count_incorrect = 0
+                            for y in range(height):
+                                for x in range(width):
+                                    color = expected_output[y, x]
+                                    if best_image[y, x] == color:
+                                        count_correct1 += 1
+                                    elif second_best_image[y, x] == color:
+                                        count_correct2 += 1
+                                    elif third_best_image[y, x] == color:
+                                        count_correct3 += 1
+                                    elif fourth_best_image[y, x] == color:
+                                        count_correct4 += 1
+                                    else:
+                                        count_incorrect += 1
+                            # print(f'correct {count_correct} incorrect {count_incorrect}')
+                            correct_list = [count_correct1, count_correct2, count_correct3, count_correct4]
+                            if count_incorrect == 0:
+                                if count_correct4 > 0:
+                                    rank = 4
+                                if count_correct3 > 0:
+                                    rank = 3
+                                elif count_correct2 > 0:
+                                    rank = 2
+                                elif count_correct1 > 0:
+                                    rank = 1
+                                else:
+                                    rank = None
+                                print(f'good task: {work_item.task.metadata_task_id} test: {work_item.test_index} correct_list: {correct_list} rank: {rank}')
+                            else:
+                                count_correct = count_correct1 + count_correct2 + count_correct3 + count_correct4
+                                percent = count_correct * 100 // (count_correct + count_incorrect)
+                                print(f'bad task: {work_item.task.metadata_task_id} test: {work_item.test_index} count_incorrect: {count_incorrect} correct_list: {correct_list} correctness_percentage: {percent}')
 
-                # Format the filename for the image, so it contains the task id, test index, and refinement index.
-                filename_items_optional = [
-                    work_item.task.metadata_task_id,
-                    f'test{work_item.test_index}',
-                    f'step{refinement_index}',
-                    temp_work_item.status.to_string(),
-                ]
-                filename_items = [item for item in filename_items_optional if item is not None]
-                filename = '_'.join(filename_items) + '.png'
 
-                # Format the title
-                title = f'{work_item.task.metadata_task_id} test{work_item.test_index} step{refinement_index}'
+            last_predicted_output = predicted_output
+            last_predicted_correctness = predicted_correctness
+            score = task_similarity.measure_test_prediction(predicted_output, work_item.test_index)
+            # print(f"task: {work_item.task.metadata_task_id} score: {score} refinement_index: {refinement_index} noise_level: {noise_level}")
+            image_and_score.append((predicted_output, score))
 
-                # Save the image to disk or show it.
-                if show:
-                    image_file_path = None
-                else:
-                    image_file_path = os.path.join(save_dir, filename)
-                show_multiple_images(title_image_list, title=title, save_path=image_file_path)
+            problem_image = np.zeros((height, width), dtype=np.float32)
+            for y in range(height):
+                for x in range(width):
+                    is_same = predicted_output[y, x] == expected_output[y, x]
+                    is_correct = predicted_correctness[y, x] == 1
+                    if is_same == False and is_correct == True:
+                        # Worst case scenario, the validator was unable to identify this bad pixel.
+                        # Thus there is no way for the predictor to ever repair this pixel.
+                        value = 0.0
+                    else:
+                        value = 1.0
+                    problem_image[y, x] = value
 
-            best_image, best_score = max(image_and_score, key=lambda x: x[1])
-            # print(f"task: {work_item.task.metadata_task_id} best_score: {best_score}")
+            temp_work_item = WorkItem(
+                work_item.task.clone(), 
+                work_item.test_index, 
+                refinement_index, 
+                PredictOutputDoNothing()
+            )
+            temp_work_item.predicted_output_image = predicted_output
+            temp_work_item.assign_status()
+            # if show:
+            #     temp_work_item.show()
+            # if save_dir is not None:
+            #     temp_work_item.show(save_dir)
+            
+            title_image_list = []
+            title_image_list.append(('arc', 'Input', temp_work_item.task.test_input(temp_work_item.test_index)))
+            title_image_list.append(('arc', 'Output', temp_work_item.task.test_output(temp_work_item.test_index)))
+            title_image_list.append(('arc', 'Colors', predicted_output_color_image))
+            if best_image is not None:
+                title_image_list.append(('arc', 'Best', best_image))
+            if second_best_image is not None:
+                title_image_list.append(('arc', 'Second', second_best_image))
+            title_image_list.append(('arc', 'Predict', predicted_output))
+            title_image_list.append(('heatmap', 'Valid', predicted_correctness))
+            title_image_list.append(('heatmap', 'Problem', problem_image))
 
-            work_item.predicted_output_image = best_image
-            work_item.assign_status()
+            # Format the filename for the image, so it contains the task id, test index, and refinement index.
+            filename_items_optional = [
+                work_item.task.metadata_task_id,
+                f'test{work_item.test_index}',
+                f'profile{profile_index}',
+                f'step{refinement_index}',
+                temp_work_item.status.to_string(),
+            ]
+            filename_items = [item for item in filename_items_optional if item is not None]
+            filename = '_'.join(filename_items) + '.png'
 
-            if work_item.status == WorkItemStatus.CORRECT:
-                correct_task_id_set.add(work_item.task.metadata_task_id)
-                correct_count = len(correct_task_id_set)
-            pbar.set_postfix({'correct': correct_count})
+            # Format the title
+            title = f'{work_item.task.metadata_task_id} test{work_item.test_index} profile{profile_index} step{refinement_index}'
+
+            # Save the image to disk or show it.
+            if show:
+                image_file_path = None
+            else:
+                image_file_path = os.path.join(save_dir, filename)
+            show_multiple_images(title_image_list, title=title, save_path=image_file_path)
+
+        best_image, best_score = max(image_and_score, key=lambda x: x[1])
+        # print(f"task: {work_item.task.metadata_task_id} best_score: {best_score}")
+
+        work_item.predicted_output_image = best_image
+        work_item.assign_status()
 
     def summary(self):
         correct_task_id_set = set()
