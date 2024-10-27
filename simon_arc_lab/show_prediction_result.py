@@ -14,11 +14,15 @@ GRID_COLOR = '#555555'
 LABEL_COLOR_WIDTHXHEIGHT = '#444'
 PLOT_BACKGROUND_COLOR = '#dddddd'
 
-def plot_single_image(ax, title: str, image: Optional[np.array], cmap, norm, show_grid: bool):
+def plot_single_image(ax, title: str, image: Optional[np.array], cmap, norm, show_grid: bool, mask_outside09: bool):
     if image is None:
         plot_missing_image(ax, title)
         return
-    
+
+    if mask_outside09:
+        # Mask values outside 0-9, so they can be shown with the cmap bad color
+        image = np.ma.masked_where((image < 0) | (image > 9), image)
+
     height, width = image.shape
 
     ax.imshow(image, cmap=cmap, norm=norm)
@@ -69,11 +73,12 @@ def show_prediction_result(input_image: np.array, predicted_image: Optional[np.a
     plt.suptitle(title, fontsize=20, fontweight='bold', y=0.96)
     
     cmap = colors.ListedColormap(ARCAGI_COLORS)
+    cmap.set_bad(color='white')
     norm = colors.Normalize(vmin=0, vmax=9)
     
-    plot_single_image(axs[0], 'Input', input_image, cmap, norm, show_grid)
-    plot_single_image(axs[1], 'Predicted', predicted_image, cmap, norm, show_grid)
-    plot_single_image(axs[2], 'Expected', expected_image, cmap, norm, show_grid)
+    plot_single_image(axs[0], 'Input', input_image, cmap, norm, show_grid, mask_outside09=True)
+    plot_single_image(axs[1], 'Predicted', predicted_image, cmap, norm, show_grid, mask_outside09=True)
+    plot_single_image(axs[2], 'Expected', expected_image, cmap, norm, show_grid, mask_outside09=True)
     
     fig.patch.set_facecolor(PLOT_BACKGROUND_COLOR)
 
@@ -102,14 +107,15 @@ def show_multiple_images(cmap_title_image_list: list[Tuple[str, np.array, str]],
     plt.suptitle(title, fontsize=20, fontweight='bold', y=0.96)
     
     cmap = colors.ListedColormap(ARCAGI_COLORS)
+    cmap.set_bad(color='white')
     norm09 = colors.Normalize(vmin=0, vmax=9)
     norm01 = colors.Normalize(vmin=0, vmax=1, clip=True)
     
     for index, (image_cmap, image_title, image_data) in enumerate(cmap_title_image_list):
         if image_cmap == 'arc':
-            plot_single_image(axs[index], image_title, image_data, cmap, norm09, show_grid)
+            plot_single_image(axs[index], image_title, image_data, cmap, norm09, show_grid, mask_outside09=True)
         elif image_cmap == 'heatmap':
-            plot_single_image(axs[index], image_title, image_data, 'bone', norm01, show_grid)
+            plot_single_image(axs[index], image_title, image_data, 'bone', norm01, show_grid, mask_outside09=False)
         else:
             raise ValueError('image_cmap must be either "arc" or "heatmap"')
     
