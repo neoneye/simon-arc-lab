@@ -498,7 +498,24 @@ class TaskColorProfile:
             predicted_colors = input_histogram.unique_colors_set() | self.optional_color_insert_set
             predicted_colors_list.append((False, predicted_colors))
         
-        return predicted_colors_list
+        return TaskColorProfile.remove_duplicates(predicted_colors_list)
+
+    @classmethod
+    def remove_duplicates(cls, predicted_colors_list: list[Tuple[bool, set]]) -> list[Tuple[bool, set]]:
+        """
+        Remove duplicates from the predicted colors list.
+        Keep the first occurrence of each unique set of colors, and use its certainty boolean value.
+        """
+        final_list = []
+        encountered = set()
+        for row in predicted_colors_list:
+            predicted_color_set = row[1]
+            key = frozenset(predicted_color_set)
+            if key in encountered:
+                continue
+            encountered.add(key)
+            final_list.append(row)
+        return final_list
 
 class Metric(Enum):
     SAME_HISTOGRAM_FOR_INPUT_OUTPUT = 'same_histogram_for_input_output'
