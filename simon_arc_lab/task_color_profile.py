@@ -1,3 +1,4 @@
+from typing import Tuple
 import numpy as np
 from enum import Enum
 from collections import defaultdict
@@ -387,6 +388,71 @@ class TaskColorProfile:
             if not output_colors.issubset(predicted_colors):
                 return False
         return True
+    
+    def predict_output_colors_given_input_histogram(self, input_histogram: Histogram) -> list[Tuple[bool, set]]:
+        """
+        Predict the output colors given the input histogram.
+
+        The boolean value indicates if the prediction is certain or not.
+        If True, then the output must contain all the colors in the set.
+        If False, then the output may contain some of the colors in the set.
+        """
+        predicted_colors_list = []
+        if self.same_histogram_for_input_output:
+            predicted_color_set = input_histogram.unique_colors_set()
+            predicted_colors_list.append((True, predicted_color_set))
+
+        if self.same_unique_colors_across_all_images:
+            predicted_color_set = self.output_intersection
+            predicted_colors_list.append((True, predicted_color_set))
+
+        if self.same_unique_colors_for_all_outputs:
+            predicted_color_set = self.output_intersection
+            predicted_colors_list.append((True, predicted_color_set))
+
+        if self.same_unique_colors_for_input_output:
+            predicted_color_set = input_histogram.unique_colors_set()
+            predicted_colors_list.append((True, predicted_color_set))
+
+        if self.has_color_insert or self.has_color_remove or self.has_optional_color_insert:
+            predicted_colors = input_histogram.unique_colors_set()
+            if self.has_color_insert:
+                predicted_colors = predicted_colors | self.color_insert_intersection
+            if self.has_color_remove:
+                predicted_colors = predicted_colors - self.color_remove_intersection
+            predicted_colors_list.append((True, predicted_colors))
+            if self.has_optional_color_insert:
+                predicted_colors2 = predicted_colors | self.optional_color_insert_set
+                predicted_colors_list.append((True, predicted_colors2))
+
+        if self.output_colors_is_subset_input_colors:
+            predicted_colors = input_histogram.unique_colors_set()
+            predicted_colors_list.append((False, predicted_colors))
+
+        if self.output_colors_is_subset_input_colors_with_insert_remove:
+            input_colors = input_histogram.unique_colors_set()
+            predicted_colors = (input_colors | self.color_insert_intersection) - self.color_remove_intersection
+            predicted_colors_list.append((False, predicted_colors))
+
+        if self.output_colors_is_subset_inputcolors_union_outputintersectioncolors:
+            predicted_colors = input_histogram.unique_colors_set() | self.output_intersection
+            predicted_colors_list.append((False, predicted_colors))
+
+        if len(self.color_mapping) > 0:
+            key = frozenset(input_histogram.unique_colors_set())
+            if key in self.color_mapping:
+                predicted_colors = self.color_mapping[key]
+                predicted_colors_list.append((True, predicted_colors))
+
+        if self.output_colors_is_subset_example_output_union:
+            predicted_colors = self.output_union
+            predicted_colors_list.append((False, predicted_colors))
+
+        if self.output_colors_is_subset_inputcolors_union_optionaloutputintersectioncolors:
+            predicted_colors = input_histogram.unique_colors_set() | self.optional_color_insert_set
+            predicted_colors_list.append((False, predicted_colors))
+        
+        return predicted_colors_list
 
 class Metric(Enum):
     SAME_HISTOGRAM_FOR_INPUT_OUTPUT = 'same_histogram_for_input_output'
@@ -406,6 +472,14 @@ class Metric(Enum):
     LEAST_POPULAR_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT = 'least_popular_colors_of_input_are_not_present_in_output'
     INBETWEEN_COLORS_OF_INPUT_ARE_PRESENT_IN_OUTPUT = 'inbetween_colors_of_input_are_present_in_output'
     INBETWEEN_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT = 'inbetween_colors_of_input_are_not_present_in_output'
+    ACCURACY_PREDICTED_COLORS_A = 'accuracy_predicted_colors_a'
+    ACCURACY_PREDICTED_COLORS_B = 'accuracy_predicted_colors_b'
+    ACCURACY_PREDICTED_COLORS_C_OR_WORSE = 'accuracy_predicted_colors_c_or_worse'
+    ACCURACY_PREDICTED_COLORS_NO_PREDICTION = 'accuracy_predicted_colors_no_prediction'
+    ACCURACY_PREDICTED_COLORS_DIFF0 = 'accuracy_predicted_colors_diff0'
+    ACCURACY_PREDICTED_COLORS_DIFF1 = 'accuracy_predicted_colors_diff1'
+    ACCURACY_PREDICTED_COLORS_DIFF2 = 'accuracy_predicted_colors_diff2'
+    ACCURACY_PREDICTED_COLORS_DIFF3_OR_WORSE = 'accuracy_predicted_colors_diff3_or_worse'
 
     def format_with_value(self, value: int) -> str:
         suffix = ''
@@ -421,6 +495,7 @@ class BenchmarkTaskColorProfile:
         self.count_full_incorrect = defaultdict(int)
         self.count_label_correct = defaultdict(int)
         self.count_label_incorrect = defaultdict(int)
+        self.count_accuracy = defaultdict(int)
         self.count_issue = 0
         self.verbose = verbose
     
@@ -451,6 +526,45 @@ class BenchmarkTaskColorProfile:
         input_histogram = Histogram.create_with_image(input_image)
         output_histogram = Histogram.create_with_image(output_image)
         self.measure_histograms(profile, task, test_index, input_histogram, output_histogram)
+
+        predicted_color_list = profile.predict_output_colors_given_input_histogram(input_histogram)
+        expected_color_set = output_histogram.unique_colors_set()
+        first_match = None
+        diff_count = None
+        for index, (certain, predicted_color_set) in enumerate(predicted_color_list):
+            correct = expected_color_set.issubset(predicted_color_set)
+            if correct:
+                first_match = index
+                diff_color_set = predicted_color_set - expected_color_set
+                diff_count = len(diff_color_set)
+                break
+
+        problem = False
+        if first_match is None:
+            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_NO_PREDICTION] += 1
+            problem = True
+        elif first_match == 0:
+            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_A] += 1 
+        elif first_match == 1:
+            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_B] += 1
+        else:
+            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_C_OR_WORSE] += 1
+            problem = True
+        
+        if diff_count is None:
+            pass
+        elif diff_count == 0:
+            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_DIFF0] += 1
+        elif diff_count == 1:
+            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_DIFF1] += 1
+        elif diff_count == 2:
+            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_DIFF2] += 1
+        else:
+            self.count_accuracy[Metric.ACCURACY_PREDICTED_COLORS_DIFF3_OR_WORSE] += 1
+            problem = True
+        
+        if problem:
+            print(f"task={task.metadata_task_id} test={test_index} first_match={first_match} diff={diff_count}")
 
     def measure_histograms(self, profile: TaskColorProfile, task: Task, test_index: int, input_histogram: Histogram, output_histogram: Histogram):
         if profile.most_popular_colors_of_input_are_present_in_output:
@@ -587,6 +701,12 @@ class BenchmarkTaskColorProfile:
 
         print(f"\nIncorrect label, where the check was triggered, but not satisfied, a false positive:")
         sorted_counters = sorted(self.count_label_incorrect.items(), key=lambda x: (-x[1], x[0].name))
+        for key, count in sorted_counters:
+            s = key.format_with_value(count)
+            print(f"  {s}")
+
+        print(f"\nAccuracy:")
+        sorted_counters = sorted(self.count_accuracy.items(), key=lambda x: (-x[1], x[0].name))
         for key, count in sorted_counters:
             s = key.format_with_value(count)
             print(f"  {s}")
