@@ -23,7 +23,7 @@ if not os.path.isdir(path_to_arc_dataset_collection_dataset):
 
 groupname_pathtotaskdir_list = [
     ('arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
-    ('arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
+    # ('arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
     # ('tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
     # ('tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data/symmetry_rect_input_image_and_extract_a_particular_tile')),
     # ('miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
@@ -63,7 +63,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
     wm = work_manager_class(model, taskset, cache_dir)
     # wm.discard_items_with_too_short_prompts(500)
     # wm.discard_items_with_too_long_prompts(max_prompt_length)
-    wm.truncate_work_items(30)
+    wm.truncate_work_items(20)
     # wm.process_all_work_items()
     wm.process_all_work_items(save_dir=save_dir)
     # wm.process_all_work_items(show=True)
