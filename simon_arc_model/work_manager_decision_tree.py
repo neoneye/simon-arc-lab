@@ -98,8 +98,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
             ts = TaskSimilarity.create_with_task(work_item.task)
 
             profile = TaskColorProfile(work_item.task)
-            prediction = profile.predict_output_colors_for_test_index(work_item.test_index)
-            color_image = prediction.to_image()
+            task_color_profile_prediction = profile.predict_output_colors_for_test_index(work_item.test_index)
+            color_image = task_color_profile_prediction.to_image()
 
             image_and_score = []
 
