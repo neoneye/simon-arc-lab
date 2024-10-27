@@ -34,8 +34,6 @@ groupname_pathtotaskdir_list = [
 ]
 
 invalid_task_id_list = [
-    # ARC-AGI
-    # 'a8610ef7',
     # IPARC
     'CatB_Hard_Task005',
     'CatB_Hard_Task017',
