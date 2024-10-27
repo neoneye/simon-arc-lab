@@ -30,6 +30,24 @@ class TestHistogram(unittest.TestCase):
         expected = '2:8,5:1'
         self.assertEqual(actual, expected)
 
+    def test_create_with_color_set_empty(self):
+        color_set = set()
+        actual = Histogram.create_with_color_set(color_set).pretty()
+        expected = 'empty'
+        self.assertEqual(actual, expected)
+
+    def test_create_with_color_set5(self):
+        color_set = set([5])
+        actual = Histogram.create_with_color_set(color_set).pretty()
+        expected = '5:1'
+        self.assertEqual(actual, expected)
+
+    def test_create_with_color_set57(self):
+        color_set = set([5, 7])
+        actual = Histogram.create_with_color_set(color_set).pretty()
+        expected = '5:1,7:1'
+        self.assertEqual(actual, expected)
+
     def test_create_random0(self):
         actual = Histogram.create_random(0, 1, 1, 55, 55).pretty()
         expected = '7:55'
@@ -68,6 +86,29 @@ class TestHistogram(unittest.TestCase):
         actual = histogram.pretty()
         expected = '7:6,5:5,8:5,9:2'
         self.assertEqual(actual, expected)
+
+    def test_eq_empty(self):
+        histogram0 = Histogram.empty()
+        histogram1 = Histogram.empty()
+        self.assertEqual(histogram0, histogram0)
+        self.assertEqual(histogram1, histogram1)
+        self.assertEqual(histogram0, histogram1)
+
+    def test_eq_empty_with_nonempty(self):
+        histogram0 = Histogram.empty()
+        histogram1 = Histogram({0: 7, 1: 2, 9: 1})
+        self.assertEqual(histogram0, histogram0)
+        self.assertEqual(histogram1, histogram1)
+        self.assertNotEqual(histogram0, histogram1)
+
+    def test_eq_nonempty(self):
+        histogram0 = Histogram({0: 8, 1: 2, 9: 1})
+        histogram1 = Histogram({0: 7, 1: 2, 9: 1})
+        self.assertEqual(histogram0, histogram0)
+        self.assertEqual(histogram1, histogram1)
+        self.assertNotEqual(histogram0, histogram1)
+        histogram1.increment(0)
+        self.assertEqual(histogram0, histogram1)
 
     def test_sorted_color_count_list_unambiguous(self):
         image = np.zeros((3, 2), dtype=np.uint8)
@@ -239,6 +280,16 @@ class TestHistogram(unittest.TestCase):
     def test_unique_colors1(self):
         actual = Histogram({5:1,2:8}).unique_colors()
         expected = [2, 5]
+        self.assertEqual(actual, expected)
+
+    def test_unique_colors_set0(self):
+        actual = Histogram.empty().unique_colors_set()
+        expected = set()
+        self.assertEqual(actual, expected)
+
+    def test_unique_colors_set1(self):
+        actual = Histogram({5:1,2:8,9:0}).unique_colors_set()
+        expected = set([5, 2])
         self.assertEqual(actual, expected)
 
     def test_unique_colors_pretty0(self):
@@ -443,6 +494,36 @@ class TestHistogram(unittest.TestCase):
         actual = histogram.least_popular_color_list()
         self.assertEqual(actual, [])
 
+    def test_histogram_without_mostleast_popular_colors_empty(self):
+        histogram = Histogram.empty()
+        actual = histogram.histogram_without_mostleast_popular_colors()
+        self.assertEqual(actual.pretty(), 'empty')
+
+    def test_histogram_without_mostleast_popular_colors_one_color(self):
+        histogram = Histogram({3: 5})
+        actual = histogram.histogram_without_mostleast_popular_colors()
+        self.assertEqual(actual.pretty(), 'empty')
+
+    def test_histogram_without_mostleast_popular_colors_two_colors(self):
+        histogram = Histogram({3: 5, 4: 9})
+        actual = histogram.histogram_without_mostleast_popular_colors()
+        self.assertEqual(actual.pretty(), 'empty')
+
+    def test_histogram_without_mostleast_popular_colors_no_overlap1(self):
+        histogram = Histogram({3: 5, 4: 9, 7: 6})
+        actual = histogram.histogram_without_mostleast_popular_colors()
+        self.assertEqual(actual.pretty(), '7:6')
+
+    def test_histogram_without_mostleast_popular_colors_no_overlap2(self):
+        histogram = Histogram({3: 5, 6: 1, 4: 5, 7: 8})
+        actual = histogram.histogram_without_mostleast_popular_colors()
+        self.assertEqual(actual.pretty(), '3:5,4:5')
+
+    def test_histogram_without_mostleast_popular_colors_no_overlap_tie(self):
+        histogram = Histogram({3: 1, 6: 1, 4: 5, 7: 8, 8: 8})
+        actual = histogram.histogram_without_mostleast_popular_colors()
+        self.assertEqual(actual.pretty(), '4:5')
+
     def test_get_count_for_color(self):
         histogram = Histogram({0: 5, 6: 1, 7: 8})
         self.assertEqual(histogram.get_count_for_color(0), 5)
@@ -486,5 +567,31 @@ class TestHistogram(unittest.TestCase):
         expected = '255:999,2:8,5:5,9:1'
         self.assertEqual(actual, expected)
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_union_intersection_with_empty_list(self):
+        histogram_list = []
+        union, intersection = Histogram.union_intersection(histogram_list)
+        self.assertEqual(union, set())
+        self.assertEqual(intersection, set())
+
+    def test_union_intersection_with_one_histogram(self):
+        histogram = Histogram({9:1,2:8,5:5,255:999})
+        histogram_list = [histogram]
+        union, intersection = Histogram.union_intersection(histogram_list)
+        self.assertEqual(union, set([2, 5, 9, 255]))
+        self.assertEqual(intersection, set([2, 5, 9, 255]))
+
+    def test_union_intersection_with_two_histograms_no_overlap(self):
+        histogram0 = Histogram({9:1,2:8,5:5,255:999})
+        histogram1 = Histogram({7:7})
+        histogram_list = [histogram0, histogram1]
+        union, intersection = Histogram.union_intersection(histogram_list)
+        self.assertEqual(union, set([2, 5, 7, 9, 255]))
+        self.assertEqual(intersection, set())
+
+    def test_union_intersection_with_two_histograms_some_overlap(self):
+        histogram0 = Histogram({9:1,2:8,5:5,255:999})
+        histogram1 = Histogram({7:7,255:1})
+        histogram_list = [histogram0, histogram1]
+        union, intersection = Histogram.union_intersection(histogram_list)
+        self.assertEqual(union, set([2, 5, 7, 9, 255]))
+        self.assertEqual(intersection, set([255]))

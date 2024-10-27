@@ -43,6 +43,17 @@ class Histogram:
         return histogram
 
     @classmethod
+    def create_with_color_set(cls, color_set: set[int]) -> 'Histogram':
+        """
+        Populate a histogram with the colors from a set.
+        If the color is in the set, then the count is 1.
+        """
+        hist = {}
+        for color in color_set:
+            hist[color] = 1
+        return cls(hist)
+
+    @classmethod
     def create_random(cls, seed: int, min_colors: int, max_colors: int, min_count: int, max_count: int) -> 'Histogram':
         if min_colors > max_colors:
             raise Exception("min_colors must be less than or equal to max_colors")
@@ -65,6 +76,13 @@ class Histogram:
             count = random.Random(seed + color_index + 2).randint(min_count, max_count)
             hist[colors[color_index]] = count
         return cls(hist)
+
+    def __eq__(self, other):
+        if isinstance(other, Histogram):
+            self.purge_mutable()
+            other.purge_mutable()
+            return self.color_count == other.color_count
+        return False
 
     def sorted_color_count_list(self) -> list[Tuple[int, int]]:
         """
@@ -196,6 +214,14 @@ class Histogram:
         colors.sort()
         return colors
 
+    def unique_colors_set(self) -> set[int]:
+        """
+        Set of unique colors in the histogram.
+        """
+        histogram = self.clone()
+        histogram.purge_mutable()
+        return set(histogram.color_count.keys())
+
     def unique_colors_pretty(self) -> str:
         """
         Comma separated list of unique colors in the histogram.
@@ -316,6 +342,18 @@ class Histogram:
         sorted_colors = sorted(found_colors)
         return sorted_colors
 
+    def histogram_without_mostleast_popular_colors(self) -> 'Histogram':
+        """
+        Ignore the most popular and the least popular colors.
+        Return a new histogram with the remaining colors.
+        """
+        histogram = self.clone()
+        for color in self.most_popular_color_list():
+            histogram.remove_color(color)
+        for color in self.least_popular_color_list():
+            histogram.remove_color(color)
+        return histogram
+
     def get_count_for_color(self, color: int) -> int:
         """
         Get the count for a specific color.
@@ -368,3 +406,18 @@ class Histogram:
         self.color_count[color] = 0
         self.purge_mutable()
 
+    @classmethod
+    def union_intersection(cls, histogram_list: list['Histogram']) -> Tuple[set, set]:
+        """
+        Find the union and intersection of multiple histograms.
+        """
+        union = set()
+        intersection = set()
+        for index, histogram in enumerate(histogram_list):
+            color_set = histogram.unique_colors_set()
+            union = union | color_set
+            if index == 0:
+                intersection = color_set
+            else:
+                intersection = intersection & color_set
+        return (union, intersection)
