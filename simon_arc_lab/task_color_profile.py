@@ -396,6 +396,17 @@ class TaskColorProfile:
         The boolean value indicates if the prediction is certain or not.
         If True, then the output must contain all the colors in the set.
         If False, then the output may contain some of the colors in the set.
+
+        Returns a list of tuples. Each tuple contains a boolean value and a set of colors.
+        The start of the list contains the best guesses.
+        The end of the list contains the worst guesses.
+
+        ---
+        IDEA: Currently I'm not using the labels for predicting the output colors.
+        Making use of the following labels may improving the accuracy of the predicted colors.
+        most_popular_colors_of_input_are_present_in_output, most_popular_colors_of_input_are_not_present_in_output
+        least_popular_colors_of_input_are_present_in_output, least_popular_colors_of_input_are_not_present_in_output
+        inbetween_colors_of_input_are_present_in_output, inbetween_colors_of_input_are_not_present_in_output
         """
         predicted_colors_list = []
         if self.same_histogram_for_input_output:
@@ -484,31 +495,26 @@ class Metric(Enum):
     ACCURACY_PREDICTED_COLORS_CERTAIN_INCORRECT = 'accuracy_predicted_colors_certain_incorrect'
 
     def format_with_value(self, value: int) -> str:
-        suffix = ''
-        if self == Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS:
-            suffix = ' weak'
-        elif self == Metric.OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION:
-            suffix = ' weak'
-        return f"{self.name.lower()}: {value}{suffix}"
+        return f"{self.name.lower()}: {value}"
 
 class BenchmarkTaskColorProfile:
     def __init__(self, verbose: bool = True):
-        self.count_full_correct = defaultdict(int)
-        self.count_full_incorrect = defaultdict(int)
+        self.count_rule_correct = defaultdict(int)
+        self.count_rule_incorrect = defaultdict(int)
+        self.count_rule_issue = 0
         self.count_label_correct = defaultdict(int)
         self.count_label_incorrect = defaultdict(int)
         self.count_accuracy = defaultdict(int)
-        self.count_issue = 0
         self.verbose = verbose
     
-    def track_full(self, metric: Metric, value: bool):
+    def track_rule(self, metric: Metric, value: bool):
         if value:
-            self.count_full_correct[metric] += 1
+            self.count_rule_correct[metric] += 1
         else:
-            self.count_full_incorrect[metric] += 1
+            self.count_rule_incorrect[metric] += 1
     
-    def check_and_track_full(self, metric: Metric, condition: bool) -> bool:
-        self.track_full(metric, condition)
+    def check_and_track_rule(self, metric: Metric, condition: bool) -> bool:
+        self.track_rule(metric, condition)
         return condition
 
     def track_label(self, metric: Metric, value: bool):
@@ -527,12 +533,13 @@ class BenchmarkTaskColorProfile:
         output_image = task.test_output(test_index)
         input_histogram = Histogram.create_with_image(input_image)
         output_histogram = Histogram.create_with_image(output_image)
+        self.measure_labels(profile, task, test_index, input_histogram, output_histogram)
         self.measure_rules(profile, task, test_index, input_histogram, output_histogram)
         self.measure_accuracy(profile, task, test_index, input_histogram, output_histogram)
 
-    def measure_rules(self, profile: TaskColorProfile, task: Task, test_index: int, input_histogram: Histogram, output_histogram: Histogram):
+    def measure_labels(self, profile: TaskColorProfile, task: Task, test_index: int, input_histogram: Histogram, output_histogram: Histogram):
         """
-        Measure the rules are explaining the color of the output.
+        Measure the labels that may explain the color of the output.
         """
         if profile.most_popular_colors_of_input_are_present_in_output:
             special_colors = set(input_histogram.most_popular_color_list())
@@ -570,24 +577,28 @@ class BenchmarkTaskColorProfile:
             correct = special_colors.issubset(output_colors) == False
             self.track_label(Metric.INBETWEEN_COLORS_OF_INPUT_ARE_NOT_PRESENT_IN_OUTPUT, correct)
 
+    def measure_rules(self, profile: TaskColorProfile, task: Task, test_index: int, input_histogram: Histogram, output_histogram: Histogram):
+        """
+        Measure the rules that may explain the color of the output.
+        """
         if profile.same_histogram_for_input_output:
             correct = output_histogram == input_histogram
-            if self.check_and_track_full(Metric.SAME_HISTOGRAM_FOR_INPUT_OUTPUT, correct):
+            if self.check_and_track_rule(Metric.SAME_HISTOGRAM_FOR_INPUT_OUTPUT, correct):
                 return
             
         if profile.same_unique_colors_across_all_images:
             correct = output_histogram.unique_colors_set() == profile.output_intersection
-            if self.check_and_track_full(Metric.SAME_UNIQUE_COLORS_ACROSS_ALL_IMAGES, correct):
+            if self.check_and_track_rule(Metric.SAME_UNIQUE_COLORS_ACROSS_ALL_IMAGES, correct):
                 return
 
         if profile.same_unique_colors_for_all_outputs:
             correct = output_histogram.unique_colors_set() == profile.output_intersection
-            if self.check_and_track_full(Metric.SAME_UNIQUE_COLORS_FOR_ALL_OUTPUTS, correct):
+            if self.check_and_track_rule(Metric.SAME_UNIQUE_COLORS_FOR_ALL_OUTPUTS, correct):
                 return
         
         if profile.same_unique_colors_for_input_output:
             correct = output_histogram.unique_colors_set() == input_histogram.unique_colors_set()
-            if self.check_and_track_full(Metric.SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT, correct):
+            if self.check_and_track_rule(Metric.SAME_UNIQUE_COLORS_FOR_INPUT_OUTPUT, correct):
                 return
         
         if profile.has_color_insert or profile.has_color_remove or profile.has_optional_color_insert:
@@ -597,51 +608,51 @@ class BenchmarkTaskColorProfile:
             if profile.has_color_remove:
                 predicted_colors = predicted_colors - profile.color_remove_intersection
             if output_histogram.unique_colors_set() == predicted_colors:
-                self.count_full_correct[Metric.SAME_INSERT_REMOVE] += 1
+                self.count_rule_correct[Metric.SAME_INSERT_REMOVE] += 1
                 return
             if profile.has_optional_color_insert:
                 predicted_colors2 = predicted_colors | profile.optional_color_insert_set
                 if output_histogram.unique_colors_set() == predicted_colors2:
-                    self.count_full_correct[Metric.SAME_INSERT_REMOVE] += 1
+                    self.count_rule_correct[Metric.SAME_INSERT_REMOVE] += 1
                     return
-            self.count_full_incorrect[Metric.SAME_INSERT_REMOVE] += 1
+            self.count_rule_incorrect[Metric.SAME_INSERT_REMOVE] += 1
 
         if profile.output_colors_is_subset_input_colors:
             correct = output_histogram.unique_colors_set().issubset(input_histogram.unique_colors_set())
-            if self.check_and_track_full(Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS, correct):
+            if self.check_and_track_rule(Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS, correct):
                 return
 
         if profile.output_colors_is_subset_input_colors_with_insert_remove:
             input_colors = input_histogram.unique_colors_set()
             predicted_colors = (input_colors | profile.color_insert_intersection) - profile.color_remove_intersection
             correct = output_histogram.unique_colors_set().issubset(predicted_colors)
-            if self.check_and_track_full(Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS_WITH_INSERT_REMOVE, correct):
+            if self.check_and_track_rule(Metric.OUTPUT_COLORS_IS_SUBSET_INPUT_COLORS_WITH_INSERT_REMOVE, correct):
                 return
 
         if profile.output_colors_is_subset_inputcolors_union_outputintersectioncolors:
             predicted_colors = input_histogram.unique_colors_set() | profile.output_intersection
             correct = output_histogram.unique_colors_set().issubset(predicted_colors)
-            if self.check_and_track_full(Metric.OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OUTPUTINTERSECTIONCOLORS, correct):
+            if self.check_and_track_rule(Metric.OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OUTPUTINTERSECTIONCOLORS, correct):
                 return
 
         if len(profile.color_mapping) > 0:
             key = frozenset(input_histogram.unique_colors_set())
             correct = key in profile.color_mapping and output_histogram.unique_colors_set() == profile.color_mapping[key]
-            if self.check_and_track_full(Metric.COLOR_MAPPING, correct):
+            if self.check_and_track_rule(Metric.COLOR_MAPPING, correct):
                 return
         
         if profile.output_colors_is_subset_example_output_union:
             correct = output_histogram.unique_colors_set().issubset(profile.output_union)
-            if self.check_and_track_full(Metric.OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION, correct):
+            if self.check_and_track_rule(Metric.OUTPUT_COLORS_IS_SUBSET_EXAMPLE_OUTPUT_UNION, correct):
                 return
 
         if profile.output_colors_is_subset_inputcolors_union_optionaloutputintersectioncolors:
             predicted_colors = input_histogram.unique_colors_set() | profile.optional_color_insert_set
             correct = output_histogram.unique_colors_set().issubset(predicted_colors)
-            if self.check_and_track_full(Metric.OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OPTIONALOUTPUTINTERSECTIONCOLORS, correct):
+            if self.check_and_track_rule(Metric.OUTPUT_COLORS_IS_SUBSET_INPUTCOLORS_UNION_OPTIONALOUTPUTINTERSECTIONCOLORS, correct):
                 return
 
-        self.count_issue += 1
+        self.count_rule_issue += 1
         if self.verbose:
             print(f"issue: {task.metadata_task_id} test={test_index}")
 
@@ -695,33 +706,33 @@ class BenchmarkTaskColorProfile:
             print(f"task={task.metadata_task_id} test={test_index} first_match={first_match} diff={diff_count}")
 
     def print_summary(self):
-        print(f"Issues: {self.count_issue}, puzzles where the transformation couldn't be identified.")
+        print(f"Issues: {self.count_rule_issue}, puzzles where the transformation couldn't be identified.")
 
-        print(f"\nCorrect full:")
-        sorted_counters = sorted(self.count_full_correct.items(), key=lambda x: (-x[1], x[0].name))
+        print(f"\nRules correct:")
+        sorted_counters = sorted(self.count_rule_correct.items(), key=lambda x: (-x[1], x[0].name))
         for key, count in sorted_counters:
             s = key.format_with_value(count)
             print(f"  {s}")
 
-        print(f"\nIncorrect full, where the check was triggered, but not satisfied, a false positive:")
-        sorted_counters = sorted(self.count_full_incorrect.items(), key=lambda x: (-x[1], x[0].name))
+        print(f"\nRules incorrect, where the check was triggered, but not satisfied, a false positive:")
+        sorted_counters = sorted(self.count_rule_incorrect.items(), key=lambda x: (-x[1], x[0].name))
         for key, count in sorted_counters:
             s = key.format_with_value(count)
             print(f"  {s}")
 
-        print(f"\nCorrect label:")
+        print(f"\nLabels correct:")
         sorted_counters = sorted(self.count_label_correct.items(), key=lambda x: (-x[1], x[0].name))
         for key, count in sorted_counters:
             s = key.format_with_value(count)
             print(f"  {s}")
 
-        print(f"\nIncorrect label, where the check was triggered, but not satisfied, a false positive:")
+        print(f"\nLabels incorrect, where the check was triggered, but not satisfied, a false positive:")
         sorted_counters = sorted(self.count_label_incorrect.items(), key=lambda x: (-x[1], x[0].name))
         for key, count in sorted_counters:
             s = key.format_with_value(count)
             print(f"  {s}")
 
-        print(f"\nAccuracy:")
+        print(f"\nAccuracy of predicted colors:")
         sorted_counters = sorted(self.count_accuracy.items(), key=lambda x: (-x[1], x[0].name))
         for key, count in sorted_counters:
             s = key.format_with_value(count)
