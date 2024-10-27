@@ -136,7 +136,7 @@ class TestTaskColorProfile(unittest.TestCase):
         expected = [
             (False, {1, 3, 4, 6, 9})
         ]
-        self.assertEqual(actual, expected)
+        self.assertEqual(actual.certain_colorset_list, expected)
 
     def test_predict_output_colors_for_test_index_009d5c81(self):
         # Arrange
@@ -149,5 +149,5 @@ class TestTaskColorProfile(unittest.TestCase):
         expected = [
             (False, {0, 2, 3, 7})
         ]
-        self.assertEqual(actual, expected)
+        self.assertEqual(actual.certain_colorset_list, expected)
 
