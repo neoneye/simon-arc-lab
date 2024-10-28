@@ -137,7 +137,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                 last_predicted_correctness,
                 refinement_index, 
                 noise_level,
-                set(FEATURES_2)
+                set(FEATURES_1)
             )
             n_predicted_images = prediction.images(4)
             best_image = n_predicted_images[0]
@@ -163,7 +163,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
             assert expected_output.shape == predicted_correctness.shape
             height, width = predicted_output.shape
 
-            if second_best_image is not None:
+            if False:
                 count_repair = 0
                 for y in range(height):
                     for x in range(width):
@@ -172,42 +172,42 @@ class WorkManagerDecisionTree(WorkManagerBase):
                             count_repair += 1
                 # print(f'repaired {count_repair} pixels')
 
-                count_correct1 = 0
-                count_correct2 = 0
-                count_correct3 = 0
-                count_correct4 = 0
-                count_incorrect = 0
-                for y in range(height):
-                    for x in range(width):
-                        color = expected_output[y, x]
-                        if best_image[y, x] == color:
-                            count_correct1 += 1
-                        elif second_best_image[y, x] == color:
-                            count_correct2 += 1
-                        elif third_best_image[y, x] == color:
-                            count_correct3 += 1
-                        elif fourth_best_image[y, x] == color:
-                            count_correct4 += 1
-                        else:
-                            count_incorrect += 1
-                # print(f'correct {count_correct} incorrect {count_incorrect}')
-                correct_list = [count_correct1, count_correct2, count_correct3, count_correct4]
-                if count_incorrect == 0:
-                    if count_correct4 > 0:
-                        rank = 4
-                    if count_correct3 > 0:
-                        rank = 3
-                    elif count_correct2 > 0:
-                        rank = 2
-                    elif count_correct1 > 0:
-                        rank = 1
+            count_correct1 = 0
+            count_correct2 = 0
+            count_correct3 = 0
+            count_correct4 = 0
+            count_incorrect = 0
+            for y in range(height):
+                for x in range(width):
+                    color = expected_output[y, x]
+                    if best_image[y, x] == color:
+                        count_correct1 += 1
+                    elif second_best_image[y, x] == color:
+                        count_correct2 += 1
+                    elif third_best_image[y, x] == color:
+                        count_correct3 += 1
+                    elif fourth_best_image[y, x] == color:
+                        count_correct4 += 1
                     else:
-                        rank = None
-                    print(f'good task: {work_item.task.metadata_task_id} test: {work_item.test_index} correct_list: {correct_list} rank: {rank}')
+                        count_incorrect += 1
+            # print(f'correct {count_correct} incorrect {count_incorrect}')
+            correct_list = [count_correct1, count_correct2, count_correct3, count_correct4]
+            if count_incorrect == 0:
+                if count_correct4 > 0:
+                    rank = 4
+                if count_correct3 > 0:
+                    rank = 3
+                elif count_correct2 > 0:
+                    rank = 2
+                elif count_correct1 > 0:
+                    rank = 1
                 else:
-                    count_correct = count_correct1 + count_correct2 + count_correct3 + count_correct4
-                    percent = count_correct * 100 // (count_correct + count_incorrect)
-                    print(f'bad task: {work_item.task.metadata_task_id} test: {work_item.test_index} count_incorrect: {count_incorrect} correct_list: {correct_list} correctness_percentage: {percent}')
+                    rank = None
+                print(f'good task: {work_item.task.metadata_task_id} test: {work_item.test_index} correct_list: {correct_list} rank: {rank}')
+            else:
+                count_correct = count_correct1 + count_correct2 + count_correct3 + count_correct4
+                percent = count_correct * 100 // (count_correct + count_incorrect)
+                print(f'bad task: {work_item.task.metadata_task_id} test: {work_item.test_index} count_incorrect: {count_incorrect} correct_list: {correct_list} correctness_percentage: {percent}')
 
 
             last_predicted_output = predicted_output
