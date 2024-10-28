@@ -148,6 +148,17 @@ class WorkManagerDecisionTree(WorkManagerBase):
             entropy_map = prediction.entropy_map()
 
             predicted_output = best_image.copy()
+            height, width = predicted_output.shape
+            if True:
+                count_repair = 0
+                for y in range(height):
+                    for x in range(width):
+                        color = predicted_output[y, x]
+                        if color not in predicted_output_colorset:
+                            color = random.Random(y * width + x).choice(list(predicted_output_colorset))
+                            predicted_output[y, x] = color
+                            count_repair += 1
+                print(f'task {work_item.task.metadata_task_id} test: {work_item.test_index} repaired {count_repair} pixels')
 
             predicted_correctness = DecisionTreeUtil.validate_output(
                 work_item.task, 
@@ -161,7 +172,6 @@ class WorkManagerDecisionTree(WorkManagerBase):
             expected_output = work_item.task.test_output(work_item.test_index)
             assert expected_output.shape == predicted_output.shape
             assert expected_output.shape == predicted_correctness.shape
-            height, width = predicted_output.shape
 
             if False:
                 count_repair = 0
