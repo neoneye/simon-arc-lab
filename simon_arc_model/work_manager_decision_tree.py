@@ -171,7 +171,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                             color = random.Random(y * width + x).choice(list(predicted_output_colorset))
                             predicted_output[y, x] = color
                             count_repair += 1
-                print(f'task {work_item.task.metadata_task_id} test: {work_item.test_index} repaired {count_repair} pixels')
+                print(f'task {work_item.task.metadata_task_id} test: {work_item.test_index} repaired {count_repair} pixels based on predicted output colorset')
 
             predicted_correctness = DecisionTreeUtil.validate_output(
                 work_item.task, 
@@ -194,6 +194,23 @@ class WorkManagerDecisionTree(WorkManagerBase):
                             predicted_output[y, x] = second_best_image[y, x]
                             count_repair += 1
                 # print(f'repaired {count_repair} pixels')
+
+            if True:
+                count_repair = 0
+                for y in range(height):
+                    for x in range(width):
+                        if predicted_correctness[y, x] > 0:
+                            continue
+                        color = predicted_output[y, x]
+                        # copy the predicted_output_colorset, and remove the current color from the set
+                        candidate_color_set = set(predicted_output_colorset)
+                        candidate_color_set.discard(color)
+                        if len(candidate_color_set) == 0:
+                            continue
+                        color = random.Random(y * width + x).choice(list(candidate_color_set))
+                        predicted_output[y, x] = color
+                        count_repair += 1
+                print(f'task {work_item.task.metadata_task_id} test: {work_item.test_index} repaired {count_repair} pixels based on validation')
 
             count_correct1 = 0
             count_correct2 = 0
