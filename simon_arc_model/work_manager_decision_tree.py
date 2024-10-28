@@ -113,10 +113,23 @@ class WorkManagerDecisionTree(WorkManagerBase):
         # noise_levels = [95, 90, 85, 80, 75, 70, 65]
         # noise_levels = [95, 90]
         # noise_levels = [100, 95, 90]
-        noise_levels = [100]
+        # noise_levels = [100]
         # noise_levels = [100, 0]
-        # noise_levels = [100, 0, 0]
+        noise_levels = [100, 0, 0]
         number_of_refinements = len(noise_levels)
+
+        predict_output_features = [
+            set(FEATURES_1),
+            set(FEATURES_2),
+            set(FEATURES_3),
+        ]
+
+        validator_features = [
+            set(FEATURES_2),
+            set(FEATURES_3),
+            set(FEATURES_1),
+        ]
+
 
         image_and_score = []
 
@@ -137,7 +150,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                 last_predicted_correctness,
                 refinement_index, 
                 noise_level,
-                set(FEATURES_1)
+                predict_output_features[refinement_index % len(predict_output_features)]
             )
             n_predicted_images = prediction.images(4)
             best_image = n_predicted_images[0]
@@ -166,7 +179,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                 predicted_output,
                 refinement_index, 
                 noise_level,
-                set(FEATURES_3)
+                validator_features[refinement_index % len(validator_features)]
             )
 
             expected_output = work_item.task.test_output(work_item.test_index)
@@ -258,8 +271,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
             title_image_list.append(('arc', 'Colors', predicted_output_color_image))
             if best_image is not None:
                 title_image_list.append(('arc', 'Best', best_image))
-            if second_best_image is not None:
-                title_image_list.append(('arc', 'Second', second_best_image))
+            # if second_best_image is not None:
+            #     title_image_list.append(('arc', 'Second', second_best_image))
             title_image_list.append(('arc', 'Predict', predicted_output))
             title_image_list.append(('heatmap', 'Valid', predicted_correctness))
             title_image_list.append(('heatmap', 'Problem', problem_image))
