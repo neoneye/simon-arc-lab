@@ -125,28 +125,29 @@ class WorkManagerDecisionTree(WorkManagerBase):
         for refinement_index in range(number_of_refinements):
             noise_level = noise_levels[refinement_index]
             # print(f"Refinement {refinement_index+1}/{number_of_refinements} noise_level={noise_level}")
-            predicted_output = None
-            best_image = None
-            second_best_image = None
-            third_best_image = None
-            fourth_best_image = None
-            if predicted_output is None:
-                # print(f"Predicting task: {work_item.task.metadata_task_id} test: {work_item.test_index} refinement: {refinement_index} last_predicted_output: {last_predicted_output is not None} last_predicted_correctness: {last_predicted_correctness is not None}")
-                if last_predicted_output is not None:
-                    if last_predicted_correctness is not None:
-                        assert last_predicted_output.shape == last_predicted_correctness.shape
+            # print(f"Predicting task: {work_item.task.metadata_task_id} test: {work_item.test_index} refinement: {refinement_index} last_predicted_output: {last_predicted_output is not None} last_predicted_correctness: {last_predicted_correctness is not None}")
+            if last_predicted_output is not None:
+                if last_predicted_correctness is not None:
+                    assert last_predicted_output.shape == last_predicted_correctness.shape
 
-                prediction = DecisionTreeUtil.predict_output(
-                    work_item.task, 
-                    work_item.test_index, 
-                    last_predicted_output,
-                    last_predicted_correctness,
-                    refinement_index, 
-                    noise_level,
-                    set(FEATURES_2)
-                )
-                best_image, second_best_image, third_best_image, fourth_best_image = prediction.images(4)
-                predicted_output = best_image.copy()
+            prediction = DecisionTreeUtil.predict_output(
+                work_item.task, 
+                work_item.test_index, 
+                last_predicted_output,
+                last_predicted_correctness,
+                refinement_index, 
+                noise_level,
+                set(FEATURES_2)
+            )
+            n_predicted_images = prediction.images(4)
+            best_image = n_predicted_images[0]
+            second_best_image = n_predicted_images[1]
+            third_best_image = n_predicted_images[2]
+            fourth_best_image = n_predicted_images[3]
+            confidence_map = prediction.confidence_map()
+            entropy_map = prediction.entropy_map()
+
+            predicted_output = best_image.copy()
 
             predicted_correctness = DecisionTreeUtil.validate_output(
                 work_item.task, 
@@ -171,46 +172,42 @@ class WorkManagerDecisionTree(WorkManagerBase):
                             count_repair += 1
                 # print(f'repaired {count_repair} pixels')
 
-            if best_image is not None:
-                if second_best_image is not None:
-                    if third_best_image is not None:
-                        if fourth_best_image is not None:
-                            count_correct1 = 0
-                            count_correct2 = 0
-                            count_correct3 = 0
-                            count_correct4 = 0
-                            count_incorrect = 0
-                            for y in range(height):
-                                for x in range(width):
-                                    color = expected_output[y, x]
-                                    if best_image[y, x] == color:
-                                        count_correct1 += 1
-                                    elif second_best_image[y, x] == color:
-                                        count_correct2 += 1
-                                    elif third_best_image[y, x] == color:
-                                        count_correct3 += 1
-                                    elif fourth_best_image[y, x] == color:
-                                        count_correct4 += 1
-                                    else:
-                                        count_incorrect += 1
-                            # print(f'correct {count_correct} incorrect {count_incorrect}')
-                            correct_list = [count_correct1, count_correct2, count_correct3, count_correct4]
-                            if count_incorrect == 0:
-                                if count_correct4 > 0:
-                                    rank = 4
-                                if count_correct3 > 0:
-                                    rank = 3
-                                elif count_correct2 > 0:
-                                    rank = 2
-                                elif count_correct1 > 0:
-                                    rank = 1
-                                else:
-                                    rank = None
-                                print(f'good task: {work_item.task.metadata_task_id} test: {work_item.test_index} correct_list: {correct_list} rank: {rank}')
-                            else:
-                                count_correct = count_correct1 + count_correct2 + count_correct3 + count_correct4
-                                percent = count_correct * 100 // (count_correct + count_incorrect)
-                                print(f'bad task: {work_item.task.metadata_task_id} test: {work_item.test_index} count_incorrect: {count_incorrect} correct_list: {correct_list} correctness_percentage: {percent}')
+                count_correct1 = 0
+                count_correct2 = 0
+                count_correct3 = 0
+                count_correct4 = 0
+                count_incorrect = 0
+                for y in range(height):
+                    for x in range(width):
+                        color = expected_output[y, x]
+                        if best_image[y, x] == color:
+                            count_correct1 += 1
+                        elif second_best_image[y, x] == color:
+                            count_correct2 += 1
+                        elif third_best_image[y, x] == color:
+                            count_correct3 += 1
+                        elif fourth_best_image[y, x] == color:
+                            count_correct4 += 1
+                        else:
+                            count_incorrect += 1
+                # print(f'correct {count_correct} incorrect {count_incorrect}')
+                correct_list = [count_correct1, count_correct2, count_correct3, count_correct4]
+                if count_incorrect == 0:
+                    if count_correct4 > 0:
+                        rank = 4
+                    if count_correct3 > 0:
+                        rank = 3
+                    elif count_correct2 > 0:
+                        rank = 2
+                    elif count_correct1 > 0:
+                        rank = 1
+                    else:
+                        rank = None
+                    print(f'good task: {work_item.task.metadata_task_id} test: {work_item.test_index} correct_list: {correct_list} rank: {rank}')
+                else:
+                    count_correct = count_correct1 + count_correct2 + count_correct3 + count_correct4
+                    percent = count_correct * 100 // (count_correct + count_incorrect)
+                    print(f'bad task: {work_item.task.metadata_task_id} test: {work_item.test_index} count_incorrect: {count_incorrect} correct_list: {correct_list} correctness_percentage: {percent}')
 
 
             last_predicted_output = predicted_output
@@ -256,6 +253,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
             title_image_list.append(('arc', 'Predict', predicted_output))
             title_image_list.append(('heatmap', 'Valid', predicted_correctness))
             title_image_list.append(('heatmap', 'Problem', problem_image))
+            title_image_list.append(('heatmap', 'Confidence', confidence_map))
+            title_image_list.append(('heatmap', 'Entropy', entropy_map))
 
             # Format the filename for the image, so it contains the task id, test index, and refinement index.
             filename_items_optional = [

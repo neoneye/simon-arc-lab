@@ -140,6 +140,9 @@ class DecisionTreePredictOutputResult:
     def confidence_scores(self):
         return np.max(self.probabilities, axis=1)
 
+    def confidence_map(self) -> np.array:
+        return self.confidence_scores().reshape(self.height, self.width)
+
     def low_confidence_pixels(self) -> list[Tuple[int, int]]:
         width = self.width
         confidence_scores = self.confidence_scores()
@@ -152,6 +155,9 @@ class DecisionTreePredictOutputResult:
     def entropy_scores(self):
         return entropy(self.probabilities.T)
     
+    def entropy_map(self) -> np.array:
+        return self.entropy_scores().reshape(self.height, self.width)
+    
     def high_entropy_pixels(self) -> list[Tuple[int, int]]:
         width = self.width
         entropy_scores = self.entropy_scores()
@@ -162,10 +168,9 @@ class DecisionTreePredictOutputResult:
         return xy_positions
 
     def show_confidence_map(self):
-        scores = self.confidence_scores()
-        # scores = self.entropy_scores()
-        confidence_map = scores.reshape(self.height, self.width)
-        plt.imshow(confidence_map, cmap='hot')
+        image = self.confidence_map()
+        # image = self.entropy_map()
+        plt.imshow(image, cmap='hot')
         plt.colorbar()
         plt.title('Prediction Confidence Map')
         plt.show()
