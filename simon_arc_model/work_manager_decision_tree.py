@@ -143,7 +143,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                     if last_predicted_correctness is not None:
                         assert last_predicted_output.shape == last_predicted_correctness.shape
 
-                best_image, second_best_image, third_best_image, fourth_best_image = DecisionTreeUtil.predict_output(
+                prediction = DecisionTreeUtil.predict_output(
                     work_item.task, 
                     work_item.test_index, 
                     last_predicted_output,
@@ -152,6 +152,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                     noise_level,
                     set(FEATURES_2)
                 )
+                best_image, second_best_image, third_best_image, fourth_best_image = prediction.images(4)
                 predicted_output = best_image.copy()
                 # if cache_file is not None:
                 #     np.save(cache_file, predicted_output)

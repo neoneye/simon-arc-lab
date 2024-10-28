@@ -131,6 +131,60 @@ class DecisionTreeFeature(Enum):
     BIGRAM_ROWCOL = 'bigram_rowcol'
     COLOR_POPULARITY = 'color_popularity'
 
+class DecisionTreePredictOutputResult:
+    def __init__(self, width: int, height: int, probabilities: np.array):
+        self.width = width
+        self.height = height
+        self.probabilities = probabilities
+    
+    def confidence_scores(self):
+        return np.max(self.probabilities, axis=1)
+
+    def low_confidence_pixels(self) -> list[Tuple[int, int]]:
+        width = self.width
+        confidence_scores = self.confidence_scores()
+        confidence_threshold = 0.7  # Adjust this value based on your needs
+        low_confidence_indices = np.where(confidence_scores < confidence_threshold)[0]
+        xy_positions = [(idx % width, idx // width) for idx in low_confidence_indices]
+        # print(f'low_confidence_pixels={xy_positions}')
+        return xy_positions
+    
+    def entropy_scores(self):
+        return entropy(self.probabilities.T)
+    
+    def high_entropy_pixels(self) -> list[Tuple[int, int]]:
+        width = self.width
+        entropy_scores = self.entropy_scores()
+        entropy_threshold = 0.5  # Adjust based on analysis
+        high_entropy_indices = np.where(entropy_scores > entropy_threshold)[0]
+        xy_positions = [(idx % width, idx // width) for idx in high_entropy_indices]
+        # print(f'high_entropy_pixels={xy_positions}')
+        return xy_positions
+
+    def show_confidence_map(self):
+        scores = self.confidence_scores()
+        # scores = self.entropy_scores()
+        confidence_map = scores.reshape(self.height, self.width)
+        plt.imshow(confidence_map, cmap='hot')
+        plt.colorbar()
+        plt.title('Prediction Confidence Map')
+        plt.show()
+    
+    def images(self, count: int) -> list[np.array]:
+        # Sort probabilities to get class rankings
+        sorted_indices_desc = np.argsort(self.probabilities, axis=1)[:, ::-1]
+
+        result_images = []
+        for i in range(count):
+            # Extract the N'th best prediction
+            classes = sorted_indices_desc[:, i]
+            # Reshape to image dimensions
+            image = classes.reshape(self.height, self.width)
+            result_images.append(image)
+
+        return result_images
+
+
 class DecisionTreeUtil:
     @classmethod
     def has_same_input_output_size_for_all_examples(cls, task: Task) -> bool:
@@ -792,7 +846,7 @@ class DecisionTreeUtil:
         return values
 
     @classmethod
-    def predict_output(cls, task: Task, test_index: int, previous_prediction_image: Optional[np.array], previous_prediction_mask: Optional[np.array], refinement_index: int, noise_level: int, features: set[DecisionTreeFeature]) -> Tuple[np.array, np.array, np.array, np.array]:
+    def predict_output(cls, task: Task, test_index: int, previous_prediction_image: Optional[np.array], previous_prediction_mask: Optional[np.array], refinement_index: int, noise_level: int, features: set[DecisionTreeFeature]) -> DecisionTreePredictOutputResult:
         has_previous_prediction_image = previous_prediction_image is not None
         has_previous_prediction_mask = previous_prediction_mask is not None
         if has_previous_prediction_image != has_previous_prediction_mask:
@@ -950,72 +1004,12 @@ class DecisionTreeUtil:
             for i in range(len(xs_image)):
                 xs_image[i][0] = random.Random(refinement_index + 42 + i).randint(0, current_pair_id - 1)
         
-        probabilities = clf.predict_proba(xs_image)
-        confidence_scores = np.max(probabilities, axis=1)
-        confidence_threshold = 0.7  # Adjust this value based on your needs
-        low_confidence_indices = np.where(confidence_scores < confidence_threshold)[0]
-        low_confidence_pixels = [(idx // width, idx % width) for idx in low_confidence_indices]
-        # print(f'low_confidence_pixels={low_confidence_pixels}')
-
-        entropy_scores = entropy(probabilities.T)
-        entropy_threshold = 0.5  # Adjust based on analysis
-        high_entropy_indices = np.where(entropy_scores > entropy_threshold)[0]
-        entropy_threshold = 0.5  # Adjust based on analysis
-        high_entropy_indices = np.where(entropy_scores > entropy_threshold)[0]
-        high_entropy_pixels = [(idx // width, idx % width) for idx in high_entropy_indices]
-        # print(f'high_entropy_pixels={high_entropy_pixels}')
-
-        # confidence_map = confidence_scores.reshape(height, width)
-        # confidence_map = entropy_scores.reshape(height, width)
-        # plt.imshow(confidence_map, cmap='hot')
-        # plt.colorbar()
-        # plt.title('Prediction Confidence Map')
-        # plt.show()
-
-        # Sort probabilities to get class rankings
-        sorted_indices_desc = np.argsort(probabilities, axis=1)[:, ::-1]
-
-        # Extract best and second-best predictions
-        best_classes = sorted_indices_desc[:, 0]
-        second_best_classes = sorted_indices_desc[:, 1]
-        third_best_classes = sorted_indices_desc[:, 2]
-        fourth_best_classes = sorted_indices_desc[:, 3]
-
-        # Reshape to image dimensions
-        best_image = best_classes.reshape(height, width)
-        second_best_image = second_best_classes.reshape(height, width)
-        third_best_image = third_best_classes.reshape(height, width)
-        fourth_best_image = fourth_best_classes.reshape(height, width)
-        return (best_image, second_best_image, third_best_image, fourth_best_image)
-
-        result = clf.predict(xs_image)
-
-        predicted_image = input_image.copy()
-        if previous_prediction_image is not None:
-            predicted_image = previous_prediction_image.copy()
-        for y in range(height):
-            for x in range(width):
-                if mask_image[y, x] > 0:
-                    continue
-                value_raw = result[y * width + x]
-                value = int(value_raw)
-                if value < 0:
-                    value = 0
-                if value > 9:
-                    value = 9
-                predicted_image[y, x] = value
-
-        # if result_index != len(result):
-        #     print(f'result_index={result_index} len(result)={len(result)}')
-        #     raise ValueError('Inconsistent result length and the number of pixels in the mask')
-
-        # assert len(result) == result_index
-
         # plt.figure()
         # tree.plot_tree(clf, filled=True)
         # plt.show()
 
-        return predicted_image
+        probabilities = clf.predict_proba(xs_image)
+        return DecisionTreePredictOutputResult(width, height, probabilities)
 
     @classmethod
     def validate_output(cls, task: Task, test_index: int, prediction_to_verify: np.array, refinement_index: int, noise_level: int, features: set[DecisionTreeFeature]) -> np.array:
