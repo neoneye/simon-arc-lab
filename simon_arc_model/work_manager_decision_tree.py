@@ -160,6 +160,23 @@ class WorkManagerDecisionTree(WorkManagerBase):
             confidence_map = prediction.confidence_map()
             entropy_map = prediction.entropy_map()
 
+            best_images = [best_image]
+            for j in range(2):
+                predictionj = DecisionTreeUtil.predict_output(
+                    work_item.task, 
+                    work_item.test_index, 
+                    last_predicted_output,
+                    last_predicted_correctness,
+                    refinement_index, 
+                    noise_level,
+                    predict_output_features[(refinement_index + j + 1) % len(predict_output_features)]
+                )
+                n_predicted_imagesj = predictionj.images(1)
+                best_imagej = n_predicted_imagesj[0]
+                best_images.append(best_imagej)
+
+            vote_image = image_vote(best_images)
+
             predicted_output = best_image.copy()
             height, width = predicted_output.shape
             if True:
@@ -288,6 +305,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
             title_image_list.append(('arc', 'Colors', predicted_output_color_image))
             if best_image is not None:
                 title_image_list.append(('arc', 'Best', best_image))
+            if vote_image is not None:
+                title_image_list.append(('arc', 'Vote', vote_image))
             # if second_best_image is not None:
             #     title_image_list.append(('arc', 'Second', second_best_image))
             title_image_list.append(('arc', 'Predict', predicted_output))
