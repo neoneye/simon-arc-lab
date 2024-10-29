@@ -171,6 +171,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
             fourth_best_image = None
             confidence_map = None
             entropy_map = None
+            problem_image = None
 
             if True:
                 expected_output = work_item.task.test_output(work_item.test_index)
@@ -239,7 +240,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                             count_repair += 1
                 print(f'task {work_item.task.metadata_task_id} test: {work_item.test_index} repaired {count_repair} pixels based on predicted output colorset')
 
-            predicted_correctness = DecisionTreeUtil.validate_output(
+            validate_result = DecisionTreeUtil.validate_output(
                 work_item.task, 
                 work_item.test_index, 
                 predicted_output,
@@ -247,6 +248,9 @@ class WorkManagerDecisionTree(WorkManagerBase):
                 noise_level,
                 validator_features[refinement_index % len(validator_features)]
             )
+            predicted_correctness = validate_result.images(1)[0]
+            confidence_map = validate_result.confidence_map()
+            entropy_map = validate_result.entropy_map()
 
             expected_output = work_item.task.test_output(work_item.test_index)
             assert expected_output.shape == predicted_output.shape
@@ -324,18 +328,19 @@ class WorkManagerDecisionTree(WorkManagerBase):
             # print(f"task: {work_item.task.metadata_task_id} score: {score} refinement_index: {refinement_index} noise_level: {noise_level}")
             image_and_score.append((predicted_output, score))
 
-            problem_image = np.zeros((height, width), dtype=np.float32)
-            for y in range(height):
-                for x in range(width):
-                    is_same = predicted_output[y, x] == expected_output[y, x]
-                    is_correct = predicted_correctness[y, x] == 1
-                    if is_same == False and is_correct == True:
-                        # Worst case scenario, the validator was unable to identify this bad pixel.
-                        # Thus there is no way for the predictor to ever repair this pixel.
-                        value = 0.0
-                    else:
-                        value = 1.0
-                    problem_image[y, x] = value
+            if False:
+                problem_image = np.zeros((height, width), dtype=np.float32)
+                for y in range(height):
+                    for x in range(width):
+                        is_same = predicted_output[y, x] == expected_output[y, x]
+                        is_correct = predicted_correctness[y, x] == 1
+                        if is_same == False and is_correct == True:
+                            # Worst case scenario, the validator was unable to identify this bad pixel.
+                            # Thus there is no way for the predictor to ever repair this pixel.
+                            value = 0.0
+                        else:
+                            value = 1.0
+                        problem_image[y, x] = value
 
             temp_work_item = WorkItem(
                 work_item.task.clone(), 
@@ -362,7 +367,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
             #     title_image_list.append(('arc', 'Second', second_best_image))
             title_image_list.append(('arc', 'Predict', predicted_output))
             title_image_list.append(('heatmap', 'Valid', predicted_correctness))
-            title_image_list.append(('heatmap', 'Problem', problem_image))
+            if problem_image is not None:
+                title_image_list.append(('heatmap', 'Problem', problem_image))
             if confidence_map is not None:
                 title_image_list.append(('heatmap', 'Confidence', confidence_map))
             if entropy_map is not None:

@@ -1017,7 +1017,7 @@ class DecisionTreeUtil:
         return DecisionTreePredictOutputResult(width, height, probabilities)
 
     @classmethod
-    def validate_output(cls, task: Task, test_index: int, prediction_to_verify: np.array, refinement_index: int, noise_level: int, features: set[DecisionTreeFeature]) -> np.array:
+    def validate_output(cls, task: Task, test_index: int, prediction_to_verify: np.array, refinement_index: int, noise_level: int, features: set[DecisionTreeFeature]) -> DecisionTreePredictOutputResult:
         xs = []
         ys = []
 
@@ -1025,13 +1025,13 @@ class DecisionTreeUtil:
 
         transformation_ids = [
             Transformation.DO_NOTHING,
-            Transformation.ROTATE_CW,
-            Transformation.ROTATE_CCW,
-            Transformation.ROTATE_180,
-            Transformation.FLIP_X,
-            Transformation.FLIP_Y,
-            Transformation.FLIP_A,
-            Transformation.FLIP_B,
+            # Transformation.ROTATE_CW,
+            # Transformation.ROTATE_CCW,
+            # Transformation.ROTATE_180,
+            # Transformation.FLIP_X,
+            # Transformation.FLIP_Y,
+            # Transformation.FLIP_A,
+            # Transformation.FLIP_B,
             # Transformation.SKEW_UP,
             # Transformation.SKEW_DOWN,
             # Transformation.SKEW_LEFT,
@@ -1092,7 +1092,7 @@ class DecisionTreeUtil:
                 input_image2 = image_replace_colors(input_image, color_mapping)
                 output_image2 = image_replace_colors(output_image, color_mapping)
                 noise_image2 = image_replace_colors(noise_image, color_mapping)
-                input_noise_output.append((input_image2, noise_image2, output_image2))
+                # input_noise_output.append((input_image2, noise_image2, output_image2))
 
             count_mutations = len(input_noise_output)
             for i in range(count_mutations):
@@ -1143,6 +1143,9 @@ class DecisionTreeUtil:
                 value_list_index = y * width + x
                 predicted_color = prediction_to_verify[y, x]
                 xs_image[value_list_index].append(predicted_color)
+
+        probabilities = clf.predict_proba(xs_image)
+        return DecisionTreePredictOutputResult(width, height, probabilities)
 
         result = clf.predict(xs_image)
 
