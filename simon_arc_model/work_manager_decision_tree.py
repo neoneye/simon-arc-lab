@@ -177,7 +177,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
 
             vote_image = image_vote(best_images)
 
-            predicted_output = best_image.copy()
+            # predicted_output = best_image.copy()
+            predicted_output = vote_image.copy()
             height, width = predicted_output.shape
             if True:
                 count_repair = 0
@@ -212,7 +213,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                             count_repair += 1
                 # print(f'repaired {count_repair} pixels')
 
-            if True:
+            if False:
                 count_repair = 0
                 for y in range(height):
                     for x in range(width):
