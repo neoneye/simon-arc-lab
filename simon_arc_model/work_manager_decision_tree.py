@@ -234,7 +234,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                             count_repair += 1
                 # print(f'repaired {count_repair} pixels')
 
-            if False:
+            if True:
                 count_repair = 0
                 for y in range(height):
                     for x in range(width):
