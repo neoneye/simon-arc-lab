@@ -46,6 +46,23 @@ FEATURES_3 = [
     DecisionTreeFeature.OBJECT_ID_RAY_LIST,
 ]
 
+# Correct 47
+FEATURES_4 = [
+    DecisionTreeFeature.COMPONENT_NEAREST4, 
+    DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR, 
+    DecisionTreeFeature.EROSION_CORNER4, 
+    DecisionTreeFeature.EROSION_ROWCOL,
+]
+
+# Correct 48
+FEATURES_5 = [
+    DecisionTreeFeature.CENTER, 
+    DecisionTreeFeature.COMPONENT_NEAREST4, 
+    DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR, 
+    DecisionTreeFeature.EROSION_NEAREST4, 
+    DecisionTreeFeature.HISTOGRAM_ROWCOL,
+]
+
 class WorkManagerDecisionTree(WorkManagerBase):
     def __init__(self, model: any, taskset: TaskSet, cache_dir: Optional[str] = None):
         self.taskset = taskset
@@ -119,15 +136,19 @@ class WorkManagerDecisionTree(WorkManagerBase):
         number_of_refinements = len(noise_levels)
 
         predict_output_features = [
+            set(FEATURES_3),
+            set(FEATURES_4),
+            set(FEATURES_5),
             set(FEATURES_1),
             set(FEATURES_2),
-            set(FEATURES_3),
         ]
 
         validator_features = [
+            set(FEATURES_4),
+            set(FEATURES_5),
             set(FEATURES_2),
-            set(FEATURES_3),
             set(FEATURES_1),
+            set(FEATURES_3),
         ]
 
 
@@ -161,7 +182,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
             entropy_map = prediction.entropy_map()
 
             best_images = [best_image]
-            for j in range(2):
+            for j in range(4):
                 predictionj = DecisionTreeUtil.predict_output(
                     work_item.task, 
                     work_item.test_index, 
