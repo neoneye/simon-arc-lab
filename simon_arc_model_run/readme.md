@@ -2,29 +2,39 @@
 
 Command line interface.
 
-## Run ARC-AGI
+## Run the solver that uses decisiontrees
 
-Identify what ARC-AGI puzzles that are predicted correct/incorrect.
+Identify what ARC-AGI puzzles that are predicted correct/incorrect. Creates a dir, where each prediction can be inspected.
 
 ```bash
-(venv) PROMPT> python simon_arc_model_run/run_arcagi.py
-Loading 8 tasks from /Users/neoneye/git/simon_arc_lab/testdata
-Generated 9 dataset items
-Processing entries: 100%|██████████████████████████████████████████████████| 9/9 [00:04<00:00,  1.88it/s]
+(venv) PROMPT> python simon_arc_model_run/run_tasks_with_decisiontree.py 
+Run id: 20241112_144837
+Using WorkManager of type: WorkManagerDecisionTree
+Number of task ids to ignore: 93
+Processing 1 of 1. Group name 'arcagi_training'. Results will be saved to 'run_tasks_result/20241112_144837/arcagi_training'
+Loading 405 tasks from /Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training
+Saving images to directory: run_tasks_result/20241112_144837/arcagi_training
+Processing work items: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 20/20 [00:31<00:00,  1.57s/it, correct=0]
+Removed 0 work items where the input and output is identical. Remaining are 20 work items.
+Number of correct solutions: 0
+None_INCORRECT: 20
+```
 
-Final Summary
-Correct sum: 7
-dataset=25ff71a9 predict=image test_index=0: 1
-dataset=3c9b0459 predict=image test_index=0: 1
-dataset=5582e5ca predict=image test_index=0: 1
-dataset=6150a2bd predict=image test_index=0: 1
-dataset=68b16354 predict=image test_index=0: 1
-dataset=74dd1130 predict=image test_index=0: 1
-dataset=Most_Common_color_l6ab0lf3xztbyxsu3p predict=image test_index=0: 1
 
-Incorrect sum: 2
-dataset=25ff71a9 predict=image test_index=1: 1
-dataset=ed36ccf7 predict=image test_index=0: 1
+## Run the solver that uses LLM
+
+Identify what ARC-AGI puzzles that are predicted correct/incorrect. Creates a dir, where each prediction can be inspected.
+
+```bash
+(venv) PROMPT> python simon_arc_model_run/run_tasks_with_llm.py 
+Using WorkManager of type: WorkManagerSimple
+context length: 512, max prompt length: 500
+Number of task ids to ignore: 93
+Processing 1 of 2. Group name 'arcagi_training'. Results will be saved to 'run_tasks_result/682/arcagi_training'
+Loading 405 tasks from /Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training
+Removed 268 work items with too long prompt. Remaining are 576 work items.
+Saving images to directory: run_tasks_result/682/arcagi_training
+Processing work items:   1%|█▏                          | 7/576 [00:10<10:38,  1.12s/it, correct=0]
 ```
 
 
