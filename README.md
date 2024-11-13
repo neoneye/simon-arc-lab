@@ -1,50 +1,63 @@
-# Simon ARC Lab
+# Simon ARC Lab - My experiments with ARC-AGI
 
-My experiments with [ARC-AGI](https://github.com/fchollet/ARC-AGI).
+In the ARC Prize 2024 contest, my solver got `score=1` out of 100. 
+My approach uses `RLE` compression to fit in an entire puzzle into a tiny 1024 context length.
+I'm new to LLMs and I'm surprised that I managed to solve 1 of the hidden tasks with this approach.
 
----
+## RLE compression of an image
 
-# Inside the datasets that I'm using for LLM training
+Given this image
 
-My datasets are public on huggingface.
-https://huggingface.co/neoneye
-
-My dataset generators are public on github (this repo).
-https://github.com/neoneye/simon-arc-lab
-
-I use RLE compression, so it may be a bit hard to decipher what is going on.
-
-Below, is the job to identify the colors that are present in a histogram, by eliminating the color counters.
-
-```json
-{
-    "instruction": "SIMONS-HISTOGRAM, unique colors", 
-    "input": "0:3626,2:3280,3:2819,8:677", 
-    "output": "0,2,3,8", 
-    "benchmark": "dataset=histogram_one group=unique_colors histogram_size=e"
-}
+```text
+4 4 4 4
+4 4 4 4
+4 4 4 4
+4 7 4 7
+4 7 4 7
+4 7 4 7
+8 8 2 4
+8 8 2 4
+8 8 2 4
+7 4 2 4
+7 4 2 4
+7 4 2 4
 ```
 
-Below, is the job to subtract 2 histograms, and return what colors and color counters that are remaining.
+Here is the RLE representation
 
-```json
-{
-    "instruction": "simons-Arc-Histogram, remove histogram b colors from histogram a", 
-    "input": "6:1549,7:1428,2:1325,5:1166,8:1120,0:926,1:734,3:733,9:633\n4:1524,6:97", 
-    "output": "7:1428,2:1325,5:1166,8:1120,0:926,1:734,3:733,9:633", 
-    "benchmark": "dataset=histogram_two group=a_remove_b_colors histogram_size=e"
-}
+```text
+4 12 4,,,4747,,,a824,,,7424,,
 ```
 
-Below, is the job to recognize what cellular automata transformations is happening between input/output images.
+The `4 12` means `width=4` and `height=12`.
 
-```json
-{
-    "instruction": "SimonCellularAutomata, Recognize the transformation. gameoflife_nowrap,gameoflife_wrap,serviettes_wrap,maze_wrap", 
-    "input": "12 21 b262d6a2,a2h62,2626b2d6,b6f2a6,a6h26,b6g26,c6g2,2c6b2b62,a2b6b2b62,a2b6a2a6262,62b6a26b26,c6f26,6j2,i262,d26b2a62,b2g62,b2c62a6a2,b2b6b26a2,a2b6c2a62,i262,h26a2\n12 21 d6d2a6,a6d2b626,6262b6d2,6a2f6a2,j62,a62g62,2a62g6,62a62c62a6,a6262b62626,a6262b62b6,26262e62,c2f62,6,,h6a26,c6f26,b62a626a2a6,b6262b62a6,b6a2f6,6,", 
-    "output": "gameoflife_nowrap=0,gameoflife_wrap=0,serviettes_wrap=1,maze_wrap=0", 
-    "benchmark": "dataset=cellular_automaton group=recognize_transformation ca_step=1 image_width=medium image_height=large"
-}
+## RLE compression of an ARC puzzle
+
+```text
+I0
+6 2 9a3b9,071b3
+O0
+6 7 9,d93,c939,a9a3a9,931b9,97c9,0d9
+I1
+3 1 4a7
+O1
+3 3 a97,979,4a9
+I2
+3 3 370,7a0,a50
+O2
+3 5 a90,970,3a0,759,5a9
+I3
+3 5 181,1a8,238,138,
+O3
+3 7 a91,9a8,1a8,138,238,139,1a9
+I54
+3 5 0a4,494,934,a49,4
+O54
+3 7 a94,9a4,694,439,9a4,a49,4a9
 ```
 
-The `"benchmark"` field is not used when training the LLM. I use it afterwards to identify areas where the model fails to predict the correct output.
+The `I0`, here `I` means input, and `0` means that it's pair 0. The input image for pair 0.
+
+The `O0`, here `O` means output, and `0` means that it's pair 0. The output image for pair 0.
+
+The `I4T`, here `T` means that it's the `test` pair, that is to be solved.
