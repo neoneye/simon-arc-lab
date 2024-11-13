@@ -1,4 +1,4 @@
-# Simon ARC Lab - My experiments with ARC-AGI
+# Simon ARC Lab - My solution for ARC Prize 2024 contest
 
 In the ARC Prize 2024 contest, my solver got `score=1` out of 100. 
 My approach uses `RLE` compression to fit in an entire puzzle into a tiny 1024 context length.
