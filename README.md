@@ -68,3 +68,10 @@ The `I0`, here `I` means input, and `0` means that it's pair 0. The input image 
 The `O0`, here `O` means output, and `0` means that it's pair 0. The output image for pair 0.
 
 The `I4T`, here `T` means that it's the `test` pair, that is to be solved.
+
+## Reflections on what went wrong
+
+**Catastrophic forgetting**, Whenever I taught the model a new kind of task, then it was able to solve that kind of task, but got worse at solving other kinds of tasks.
+Future plan: Explore approaches that are more robust against catastrophic forgetting.
+
+**Previous prediction being ignored**, When solving a puzzle the model got invoked a few times. Feeding the previous prediction into the next iteration. However the model seemed to get confused about the previous prediction despite being very close to the target output. Leaving out the previous best prediction was resulting in better predictions. I had hoped that the model was better at taking a hint and refine on it, however taking hints was unsuccessful.
