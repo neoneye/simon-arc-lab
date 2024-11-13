@@ -4,6 +4,13 @@ In the ARC Prize 2024 contest, my solver got `score=1` out of 100.
 My approach uses `RLE` compression to fit in an entire puzzle into a tiny 1024 context length.
 I'm new to LLMs and I'm surprised that I managed to solve 1 of the hidden tasks with this approach.
 
+## Examples of incorrect predictions
+
+![image](metadata/2b01abd0_incorrect.png)
+![image](metadata/3f23242b_incorrect.png)
+![image](metadata/a2fd1cf0_incorrect.png)
+![image](metadata/cb227835_incorrect.png)
+
 ## RLE compression of an image
 
 Given this image
