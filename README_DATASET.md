@@ -46,6 +46,13 @@ Below, is the job to recognize what cellular automata transformations is happeni
 The `"benchmark"` field is not used when training the LLM. I use it afterwards to identify areas where the model fails to predict the correct output.
 
 
+#### Generating `dataset_combine.jsonl`
+
+```bash
+(venv) PROMPT> python simon_arc_dataset_run/dataset_combine.py
+Generated 3991 samples, saved to /Users/neoneye/git/simon_arc_lab/simon_arc_dataset_run/dataset_combine.jsonl, file size: 13385405 bytes.
+```
+
 #### Generating `dataset_rle.jsonl`
 
 ```bash
