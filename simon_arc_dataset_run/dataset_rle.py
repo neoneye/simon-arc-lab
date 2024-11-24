@@ -341,21 +341,21 @@ def generate_deserialize_dataset_item(seed):
     }
     return result_dict
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    if seed % 6 == 0:
-        item = generate_serialize_dataset_item(seed)
-    else:
-        item = generate_deserialize_dataset_item(seed)
-    return [item]
+class DatasetRLE(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        if seed % 6 == 0:
+            item = generate_serialize_dataset_item(seed)
+        else:
+            item = generate_deserialize_dataset_item(seed)
+        return [item]
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=1200001,
-    max_num_samples=100000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
-
+if __name__ == "__main__":
+    generator = DatasetRLE()
+    generator.generate(
+        seed=1200001,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

@@ -54,7 +54,7 @@ def generate_task(seed):
 
     return task
 
-def generate_dataset_item(seed):
+def generate_dataset_item(seed: int, show: bool) -> dict:
     dataformat_names = [
         'SIMONARCTASK',
         'SIMONSARCTASK',
@@ -91,7 +91,7 @@ def generate_dataset_item(seed):
 
 
     task = generate_task(seed + 1002)
-    # task.show()
+    task.metadata_task_id = transformation_id
 
     # task_formatter = TaskFormatterRLEVerbose(task)
     task_formatter = TaskFormatterRLECompact(task)
@@ -384,8 +384,7 @@ def generate_dataset_item(seed):
         ]
         instruction = random.Random(seed + 1006).choice(instructions)
 
-    debug = False
-    if debug:
+    if show:
         print("---")
         print("instruction:")
         print(instruction)
@@ -393,6 +392,7 @@ def generate_dataset_item(seed):
         print(input)
         print("output:")
         print(output)
+        task.show()
 
     max_width, max_height = task.max_image_size()
     benchmark_width = image_size1d_to_string(max_width)
@@ -408,17 +408,18 @@ def generate_dataset_item(seed):
     }
     return result_dict
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    item = generate_dataset_item(seed)
-    return [item]
+class DatasetTask(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        item = generate_dataset_item(seed, show)
+        return [item]
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=1500009,
-    max_num_samples=100000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetTask()
+    generator.generate(
+        seed=1500009,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

@@ -282,21 +282,22 @@ def generate_two_histogram_dataset_item(seed):
     }
     return result_dict
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    item = None
-    if seed % 20 == 0:
-        item = generate_one_histogram_dataset_item(seed)
-    else:
-        item = generate_two_histogram_dataset_item(seed)
-    return [item]
+class DatasetHistogram(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        item = None
+        if seed % 20 == 0:
+            item = generate_one_histogram_dataset_item(seed)
+        else:
+            item = generate_two_histogram_dataset_item(seed)
+        return [item]
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=3232003,
-    max_num_samples=100000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetHistogram()
+    generator.generate(
+        seed=3232003,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

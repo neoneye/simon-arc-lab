@@ -21,7 +21,7 @@ from simon_arc_dataset.dataset_generator import *
 
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_image_pair.jsonl')
 
-def generate_dataset_item(seed):
+def generate_dataset_item(seed: int) -> dict:
     """
     Two images as input.
     Do some transformation with the two images.
@@ -195,18 +195,19 @@ def generate_dataset_item(seed):
     }
     return result_dict
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    item = generate_dataset_item(seed)
-    return [item]
+class DatasetImagePair(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        item = generate_dataset_item(seed)
+        return [item]
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=2100005,
-    max_num_samples=100000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetImagePair()
+    generator.generate(
+        seed=2100005,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()
 

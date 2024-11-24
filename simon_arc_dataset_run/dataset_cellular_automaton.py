@@ -17,6 +17,7 @@ from simon_arc_lab.image_util import *
 from simon_arc_lab.cellular_automaton import *
 from simon_arc_lab.benchmark import *
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
+from simon_arc_lab.show_prediction_result import show_multiple_images
 import matplotlib.pyplot as plt
 from simon_arc_dataset.dataset_generator import *
 
@@ -44,7 +45,7 @@ DATASET_NAMES = [
     'simons-cellular-automaton',
 ]
 
-def generate_dataset_item_transform_simple(seed):
+def generate_dataset_item_transform_simple(seed: int, show: bool):
     """
     Do a transformation from one image into another image.
 
@@ -258,13 +259,13 @@ def generate_dataset_item_transform_simple(seed):
     input = serialize(input_image2)
     output = serialize(output_image2)
 
-    # print(instruction)
-    # print(input_image2)
-    # print(output_image2)
-    # plt.imshow(input_image, cmap='gray')
-    # plt.show()
-    # plt.imshow(output_image, cmap='gray')
-    # plt.show()
+    if show:
+        title_image_list = [
+            ('arc', 'input', input_image2),
+            ('arc', 'output', output_image2),
+        ]
+        title = f'{instruction}'
+        show_multiple_images(title_image_list, title=title)
 
     benchmark_width = image_size1d_to_string(width)
     benchmark_height = image_size1d_to_string(height)
@@ -279,7 +280,7 @@ def generate_dataset_item_transform_simple(seed):
     }
     return result_dict
 
-def generate_dataset_item_transform_recognize(seed):
+def generate_dataset_item_transform_recognize(seed: int, show: bool):
     """
     Recognize what transformation is being done from one image into another image.
 
@@ -397,13 +398,13 @@ def generate_dataset_item_transform_recognize(seed):
 
     input = f'{rle_string0}\n{rle_string1}'
 
-    # print(instruction)
-    # print(input_image2)
-    # print(output_image2)
-    # plt.imshow(input_image, cmap='gray')
-    # plt.show()
-    # plt.imshow(output_image, cmap='gray')
-    # plt.show()
+    if show:
+        title_image_list = [
+            ('arc', 'input', input_image2),
+            ('arc', 'output', output_image2),
+        ]
+        title = f'{instruction}'
+        show_multiple_images(title_image_list, title=title)
 
     # loop through the image_name_list
     # and check if there are other images that are identical to the output_image
@@ -431,21 +432,22 @@ def generate_dataset_item_transform_recognize(seed):
     }
     return result_dict
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    item = None
-    if seed % 5 == 0:
-        item = generate_dataset_item_transform_simple(seed)
-    else:
-        item = generate_dataset_item_transform_recognize(seed)
-    return [item]
+class DatasetCellularAutomaton(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        item = None
+        if seed % 5 == 0:
+            item = generate_dataset_item_transform_simple(seed, show)
+        else:
+            item = generate_dataset_item_transform_recognize(seed, show)
+        return [item]
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=10800003,
-    max_num_samples=100000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetCellularAutomaton()
+    generator.generate(
+        seed=10800003,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

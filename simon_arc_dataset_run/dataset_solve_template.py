@@ -49,7 +49,7 @@ def generate_task_with_template_areas(seed: int, transformation_id: str) -> Task
     min_template_size = 2
     max_template_size = 4
     min_image_size = 6
-    max_image_size = 16
+    max_image_size = 15
     min_rect_count = 2
     max_rect_count = 3
 
@@ -168,33 +168,34 @@ def generate_task_with_template_areas(seed: int, transformation_id: str) -> Task
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    builder.append_image_randomized()
+    # builder.append_image_randomized()
+    builder.append_image_rawpixel_output()
     return builder.dataset_items()
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 4
-    # j = (seed % 2) + 2
-    # j = 2
-    if j == 0:
-        task = generate_task_with_template_areas(seed, "with_insertion_image")
-    elif j == 1:
-        task = generate_task_with_template_areas(seed, "without_insertion_image")
-    elif j == 2:
-        task = generate_task_with_template_areas(seed, "swap_one_to_many")
-    else:
-        task = generate_task_with_template_areas(seed, "swap_many_to_one")
-    # task.show()
-    transformation_id = task.metadata_task_id
-    dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
-    return dataset_items
+class DatasetSolveTemplate(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        j = seed % 4
+        if j == 0:
+            task = generate_task_with_template_areas(seed, "with_insertion_image")
+        elif j == 1:
+            task = generate_task_with_template_areas(seed, "without_insertion_image")
+        elif j == 2:
+            task = generate_task_with_template_areas(seed, "swap_one_to_many")
+        else:
+            task = generate_task_with_template_areas(seed, "swap_many_to_one")
+        if show:
+            task.show()
+        transformation_id = task.metadata_task_id
+        dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
+        return dataset_items
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=7400600041,
-    max_num_samples=1000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetSolveTemplate()
+    generator.generate(
+        seed=7400630041,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

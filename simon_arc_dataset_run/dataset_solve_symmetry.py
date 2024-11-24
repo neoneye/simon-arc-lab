@@ -50,15 +50,17 @@ def generate_task_with_input_image_create_output_symmetry_rect(seed: int) -> Tas
     """
     Create a symmetric image from a rectangular input image.
     """
+    max_output_mass = 240
+
     count_example = random.Random(seed + 9).randint(2, 4)
     count_test = random.Random(seed + 10).randint(1, 2)
     # count_test = 1
     task = Task()
     min_image_size = 2
-    max_image_size = 4
+    max_image_size = 8
 
     is_padded = random.Random(seed + 16).choice([False, True])
-    max_pad_count = 8
+    max_pad_count = 3
     color_padding = random.Random(seed + 17).randint(0, 9)
 
     image_symmetry = ImageSymmetryRect.create_random(seed * 1333 + 100)
@@ -96,6 +98,13 @@ def generate_task_with_input_image_create_output_symmetry_rect(seed: int) -> Tas
                     continue
 
             output_image = image_symmetry.execute(candidate_image)
+
+            # Ensure the output image is not too big.
+            output_height, output_width = output_image.shape
+            output_mass = output_width * output_height
+            if output_mass > max_output_mass:
+                continue
+
             break
         if input_image is None:
             raise Exception("Failed to create image")
@@ -113,15 +122,17 @@ def generate_task_with_input_image_create_output_symmetry_square(seed: int) -> T
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=46442a0e
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=7fe24cdd
     """
+    max_output_mass = 240
+
     count_example = random.Random(seed + 9).randint(3, 5)
     count_test = random.Random(seed + 10).randint(1, 2)
     # count_test = 1
     task = Task()
     min_image_size = 2
-    max_image_size = 4
+    max_image_size = 8
 
     is_padded = random.Random(seed + 16).choice([False, True])
-    max_pad_count = 8
+    max_pad_count = 3
     color_padding = random.Random(seed + 17).randint(0, 9)
 
     # pattern_ids = [ImageSymmetryPatternId.HSTACK2, ImageSymmetryPatternId.VSTACK2]
@@ -168,6 +179,13 @@ def generate_task_with_input_image_create_output_symmetry_square(seed: int) -> T
                     continue
 
             output_image = image_symmetry.execute(candidate_image)
+
+            # Ensure the output image is not too big.
+            output_height, output_width = output_image.shape
+            output_mass = output_width * output_height
+            if output_mass > max_output_mass:
+                continue
+
             break
         if input_image is None:
             raise Exception("Failed to create image")
@@ -186,10 +204,10 @@ def generate_task_with_symmetry_rect_input_image_and_extract_a_particular_tile(s
     # count_test = 1
     task = Task()
     min_image_size = 2
-    max_image_size = 4
+    max_image_size = 8
 
     is_padded = random.Random(seed + 16).choice([False, True])
-    max_pad_count = 8
+    max_pad_count = 3
     color_padding = random.Random(seed + 17).randint(0, 9)
 
     image_symmetry = ImageSymmetryRect.create_random(seed * 1333 + 100)
@@ -258,10 +276,10 @@ def generate_task_with_symmetry_square_input_image_and_extract_a_particular_tile
     # count_test = 1
     task = Task()
     min_image_size = 2
-    max_image_size = 3
+    max_image_size = 8
 
     is_padded = random.Random(seed + 16).choice([False, True])
-    max_pad_count = 8
+    max_pad_count = 3
     color_padding = random.Random(seed + 17).randint(0, 9)
 
     # pattern_ids = [ImageSymmetryPatternId.HSTACK2, ImageSymmetryPatternId.VSTACK2]
@@ -333,14 +351,16 @@ def generate_task_with_symmetry_line(seed: int) -> Task:
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=2b01abd0
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=47c1f68c
     """
+    max_output_mass = 240
+
     count_example = random.Random(seed + 1).randint(3, 4)
     count_test = random.Random(seed + 2).randint(1, 2)
     # count_test = 1
     task = Task()
     min_image_size = 2
-    max_image_size = 3
+    max_image_size = 8
     min_pad_count = 0
-    max_pad_count = 8
+    max_pad_count = 3
     max_wall_size = 3
 
     invert_variant = random.Random(seed + 3).randint(0, 7)
@@ -402,7 +422,7 @@ def generate_task_with_symmetry_line(seed: int) -> Task:
             ratio = random.Random(iteration_seed + 3).choice(ratios)
             random_image = image_create_random_with_two_colors(random_image_width, random_image_height, 0, 1, ratio, iteration_seed + 4)
 
-            # Instert a tricky decoy pixel with the same color as the background or wall.
+            # Insert a tricky decoy pixel with the same color as the background or wall.
             set_x = random.Random(iteration_seed + 5).randint(0, random_image_width - 1)
             set_y = random.Random(iteration_seed + 6).randint(0, random_image_height - 1)
             set_variant = random.Random(iteration_seed + 7).randint(0, 2)
@@ -474,6 +494,12 @@ def generate_task_with_symmetry_line(seed: int) -> Task:
             input_image = np.rot90(input_image_raw, rotate_n)
             output_image = np.rot90(output_image_raw, rotate_n)
 
+            # Ensure the output image is not too big.
+            output_height, output_width = output_image.shape
+            output_mass = output_width * output_height
+            if output_mass > max_output_mass:
+                continue
+
             break
         if input_image is None:
             raise Exception("Failed to create image")
@@ -485,34 +511,36 @@ def generate_task_with_symmetry_line(seed: int) -> Task:
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    builder.append_image_randomized()
+    # builder.append_image_randomized()
+    builder.append_image_rawpixel_output()
     return builder.dataset_items()
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 5
-    # j = 4
-    if j == 0:
-        task = generate_task_with_input_image_create_output_symmetry_rect(seed)
-    elif j == 1:
-        task = generate_task_with_symmetry_rect_input_image_and_extract_a_particular_tile(seed)
-    elif j == 2:
-        task = generate_task_with_input_image_create_output_symmetry_square(seed)
-    elif j == 3:
-        task = generate_task_with_symmetry_square_input_image_and_extract_a_particular_tile(seed)
-    elif j == 4:
-        task = generate_task_with_symmetry_line(seed)
-    # task.show()
-    transformation_id = task.metadata_task_id
-    dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
-    return dataset_items
+class DatasetSolveSymmetry(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        j = seed % 5
+        if j == 0:
+            task = generate_task_with_input_image_create_output_symmetry_rect(seed)
+        elif j == 1:
+            task = generate_task_with_symmetry_rect_input_image_and_extract_a_particular_tile(seed)
+        elif j == 2:
+            task = generate_task_with_input_image_create_output_symmetry_square(seed)
+        elif j == 3:
+            task = generate_task_with_symmetry_square_input_image_and_extract_a_particular_tile(seed)
+        elif j == 4:
+            task = generate_task_with_symmetry_line(seed)
+        if show:
+            task.show()
+        transformation_id = task.metadata_task_id
+        dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
+        return dataset_items
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=2850000410,
-    max_num_samples=1000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetSolveSymmetry()
+    generator.generate(
+        seed=2852000410,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

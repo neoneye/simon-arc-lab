@@ -49,7 +49,7 @@ DATASET_NAMES = [
     'SimonsImageSymmetry',
 ]
 
-def generate_dataset_item_with_symmetry_output(seed: int) -> dict:
+def generate_dataset_item_with_symmetry_output(seed: int, show: bool) -> dict:
     """
     Make a symmetric image.
 
@@ -57,7 +57,7 @@ def generate_dataset_item_with_symmetry_output(seed: int) -> dict:
     :return: A dictionary with the instruction, input, and output
     """
     min_image_size = 1
-    max_image_size = 30
+    max_image_size = 14
 
     transformation_id = 'symmetry'
 
@@ -82,7 +82,7 @@ def generate_dataset_item_with_symmetry_output(seed: int) -> dict:
     ]
     instruction = random.choice(instructions)
 
-    if False:
+    if show:
         print(f"---\ninput: {input_image}\ninstruction: {instruction}\noutput: {output_image}")
         title = instruction_sequence
         show_prediction_result(input_image, output_image, None, title, show_grid=True, save_path=None)
@@ -104,17 +104,18 @@ def generate_dataset_item_with_symmetry_output(seed: int) -> dict:
     }
     return result_dict
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    item = generate_dataset_item_with_symmetry_output(seed)
-    return [item]
+class DatasetSymmetry(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        item = generate_dataset_item_with_symmetry_output(seed, show)
+        return [item]
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=6003013,
-    max_num_samples=100000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetSymmetry()
+    generator.generate(
+        seed=6003013,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

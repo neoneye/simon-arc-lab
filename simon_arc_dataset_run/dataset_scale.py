@@ -55,7 +55,7 @@ def compute_max_image_size(max_image_size: int, scale_factor: int) -> int:
     return computed_max_image_size
 
 
-def generate_dataset_item_with_scale(seed: int) -> dict:
+def generate_dataset_item_with_scale(seed: int, show: bool) -> dict:
     """
     Resize the image by a scale factor.
 
@@ -120,7 +120,7 @@ def generate_dataset_item_with_scale(seed: int) -> dict:
     unscaled_image = image_create_random_advanced(seed + 5, min_image_size, computed_x_max_image_size, min_image_size, computed_y_max_image_size)
     input_image, output_image = image_scale(unscaled_image, scalex_up_down, scalex_factor, scaley_up_down, scaley_factor)
 
-    if False:
+    if show:
         print(f"---\ninput: {input_image}\nscale-x {scalex_up_down} by {scalex_factor}\nscale-y {scaley_up_down} by {scaley_factor}\noutput: {output_image}")
         # title = f'scale-x {scalex_up_down} by {scalex_factor}, scale-y {scaley_up_down} by {scaley_factor}'
         title = instruction
@@ -170,7 +170,7 @@ def format_scalexy_identifiers(max_scale_factor: int) -> list[str]:
                     name_list.append(name)
     return name_list
 
-def generate_dataset_item_transform_recognize(seed: int) -> dict:
+def generate_dataset_item_transform_recognize(seed: int, show: bool) -> dict:
     """
     Recognize what transformation is being done from one image into another image.
 
@@ -248,7 +248,7 @@ def generate_dataset_item_transform_recognize(seed: int) -> dict:
         items.append(f'{name}={value}')
     output = ','.join(items)
 
-    if False:
+    if show:
         print(f"instruction: {instruction}\noutput: {output}")
         print(f"---\ninput: {input_image}\nscale-x {scalex_up_down} by {scalex_factor}\nscale-y {scaley_up_down} by {scaley_factor}\noutput: {output_image}")
         # title = f'scale-x {scalex_up_down} by {scalex_factor}, scale-y {scaley_up_down} by {scaley_factor}'
@@ -270,20 +270,21 @@ def generate_dataset_item_transform_recognize(seed: int) -> dict:
     }
     return result_dict
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    if seed % 2 == 0:
-        item = generate_dataset_item_with_scale(seed)
-    else:
-        item = generate_dataset_item_transform_recognize(seed)
-    return [item]
+class DatasetScale(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        if seed % 2 == 0:
+            item = generate_dataset_item_with_scale(seed, show)
+        else:
+            item = generate_dataset_item_transform_recognize(seed, show)
+        return [item]
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=10003005,
-    max_num_samples=100000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetScale()
+    generator.generate(
+        seed=10003005,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

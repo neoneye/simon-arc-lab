@@ -754,45 +754,58 @@ def mutated_tasks_from_task(task: Task, seed: int) -> list[Task]:
     # print(f"Number of mutations: {len(mutated_tasks)} from task {task.metadata_task_id}")
     return mutated_tasks
 
-original_tasks = []
-for group_index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
-    taskset = TaskSet.load_directory(path_to_task_dir)
-    for task in taskset.tasks:
-        original_tasks.append(task)
+class DatasetSolveAugment(DatasetGenerator):
+    def __init__(self):
+        super().__init__()
+        self.lazy_original_tasks = None
 
-count_original_tasks = len(original_tasks)
-print(f"Number of original tasks: {count_original_tasks}")
+    def original_tasks(self):
+        if self.lazy_original_tasks is not None:
+            return self.lazy_original_tasks
+        original_tasks = []
+        for group_index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
+            taskset = TaskSet.load_directory(path_to_task_dir)
+            for task in taskset.tasks:
+                original_tasks.append(task)
 
-# for task in original_tasks:
-#     task.show()
+        count_original_tasks = len(original_tasks)
+        print(f"Number of original tasks: {count_original_tasks}")
+        self.lazy_original_tasks = original_tasks
+        return self.lazy_original_tasks
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    accumulated_tasks = []
-    for task_index, task in enumerate(original_tasks):
-        new_tasks = mutated_tasks_from_task(task, seed + task_index * 10010101)
-        # for nt in new_tasks:
-        #     nt.show()
-        accumulated_tasks.extend(new_tasks)
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        original_tasks = self.original_tasks()
 
-    # print(f"Number of tasks: {len(accumulated_tasks)}")
+        # for task in original_tasks:
+        #     task.show()
 
-    accumulated_dataset_items = []
-    for task_index, task in enumerate(accumulated_tasks):
-        if task.total_pixel_count() > 2000:
-            continue
-        transformation_id = task.metadata_task_id
-        # task.show()
-        dataset_items = generate_dataset_item_list_inner(seed + task_index * 100053523, task, transformation_id)
-        accumulated_dataset_items.extend(dataset_items)
-    return accumulated_dataset_items
+        accumulated_tasks = []
+        for task_index, task in enumerate(original_tasks):
+            new_tasks = mutated_tasks_from_task(task, seed + task_index * 10010101)
+            # for nt in new_tasks:
+            #     nt.show()
+            accumulated_tasks.extend(new_tasks)
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=1200023425,
-    max_num_samples=100000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+        # print(f"Number of tasks: {len(accumulated_tasks)}")
+
+        accumulated_dataset_items = []
+        for task_index, task in enumerate(accumulated_tasks):
+            if task.total_pixel_count() > 2000:
+                continue
+            transformation_id = task.metadata_task_id
+            if show:
+                task.show()
+            dataset_items = generate_dataset_item_list_inner(seed + task_index * 100053523, task, transformation_id)
+            accumulated_dataset_items.extend(dataset_items)
+        return accumulated_dataset_items
+
+if __name__ == "__main__":
+    generator = DatasetSolveAugment()
+    generator.generate(
+        seed=1200023425,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

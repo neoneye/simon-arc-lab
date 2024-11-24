@@ -46,7 +46,7 @@ DATASET_NAMES = [
     'SimonsImageMass',
 ]
 
-def generate_dataset_item_with_max_mass(seed: int, connectivity: PixelConnectivity) -> dict:
+def generate_dataset_item_with_max_mass(seed: int, connectivity: PixelConnectivity, show: bool) -> dict:
     """
     Find objects less than or equal to a particular mass.
 
@@ -150,7 +150,7 @@ def generate_dataset_item_with_max_mass(seed: int, connectivity: PixelConnectivi
 
     output_image = mask
 
-    if False:
+    if show:
         # print(f"---\ninput: {input_image}\nmax mass: {max_mass}\nmass image: {mass_image}\noutput: {output_image}")
         print(f"---\ninstruction: {instruction}\nmax mass: {max_mass}\nconnectivity={connectivity}")
         title = f"{connectivity} max_mass={max_mass}"
@@ -174,36 +174,37 @@ def generate_dataset_item_with_max_mass(seed: int, connectivity: PixelConnectivi
     }
     return result_dict
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    connectivity_list = [
-        PixelConnectivity.NEAREST4,
-        PixelConnectivity.ALL8,
-        PixelConnectivity.CORNER4,
-        PixelConnectivity.LR2,
-        PixelConnectivity.TB2,
-        PixelConnectivity.TLBR2,
-        PixelConnectivity.TRBL2,
-    ]
-    items = []
-    for index, connectivity in enumerate(connectivity_list):
-        for retry_index in range(20):
-            try:
-                item = generate_dataset_item_with_max_mass(seed + index * 10000 + 1333 * retry_index, connectivity)
-                items.append(item)
-                break
-            except Exception as e:
-                print(f"trying again {retry_index}")
-    if len(items) == 0:
-        print(f"Failed to generate any dataset items")
-    return items
+class DatasetMass(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        connectivity_list = [
+            PixelConnectivity.NEAREST4,
+            PixelConnectivity.ALL8,
+            PixelConnectivity.CORNER4,
+            PixelConnectivity.LR2,
+            PixelConnectivity.TB2,
+            PixelConnectivity.TLBR2,
+            PixelConnectivity.TRBL2,
+        ]
+        items = []
+        for index, connectivity in enumerate(connectivity_list):
+            for retry_index in range(20):
+                try:
+                    item = generate_dataset_item_with_max_mass(seed + index * 10000 + 1333 * retry_index, connectivity, show)
+                    items.append(item)
+                    break
+                except Exception as e:
+                    print(f"trying again {retry_index}")
+        if len(items) == 0:
+            print(f"Failed to generate any dataset items")
+        return items
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=1401905000,
-    max_num_samples=100000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetMass()
+    generator.generate(
+        seed=1401905000,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

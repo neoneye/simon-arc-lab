@@ -46,7 +46,7 @@ DATASET_NAMES = [
     'SimonsImageErosion',
 ]
 
-def generate_dataset_item(seed: int, connectivity: PixelConnectivity) -> dict:
+def generate_dataset_item(seed: int, connectivity: PixelConnectivity, show: bool) -> dict:
     """
     Erode the image with a particular connectivity.
 
@@ -91,7 +91,7 @@ def generate_dataset_item(seed: int, connectivity: PixelConnectivity) -> dict:
 
     output_image = accumulated_mask
 
-    if False:
+    if show:
         print(f"---\ninstruction: {instruction}\nconnectivity={connectivity}")
         title = f"erosion {connectivity_name_lower}"
         show_prediction_result(input_image, output_image, None, title, show_grid=True, save_path=None)
@@ -116,37 +116,38 @@ def generate_dataset_item(seed: int, connectivity: PixelConnectivity) -> dict:
     }
     return result_dict
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    connectivity_list = [
-        PixelConnectivity.NEAREST4,
-        PixelConnectivity.ALL8,
-        PixelConnectivity.CORNER4,
-        PixelConnectivity.LR2,
-        PixelConnectivity.TB2,
-        PixelConnectivity.TLBR2,
-        PixelConnectivity.TRBL2,
-    ]
-    items = []
-    for index, connectivity in enumerate(connectivity_list):
-        for retry_index in range(20):
-            current_seed = seed + index * 10000 + 1333 * retry_index
-            try:
-                item = generate_dataset_item(current_seed, connectivity)
-                items.append(item)
-                break
-            except Exception as e:
-                print(f"trying again {retry_index} with connectivity {connectivity}. error: {e}")
-    if len(items) == 0:
-        print(f"Failed to generate any dataset items")
-    return items
+class DatasetErosion(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        connectivity_list = [
+            PixelConnectivity.NEAREST4,
+            PixelConnectivity.ALL8,
+            PixelConnectivity.CORNER4,
+            PixelConnectivity.LR2,
+            PixelConnectivity.TB2,
+            PixelConnectivity.TLBR2,
+            PixelConnectivity.TRBL2,
+        ]
+        items = []
+        for index, connectivity in enumerate(connectivity_list):
+            for retry_index in range(20):
+                current_seed = seed + index * 10000 + 1333 * retry_index
+                try:
+                    item = generate_dataset_item(current_seed, connectivity, show)
+                    items.append(item)
+                    break
+                except Exception as e:
+                    print(f"trying again {retry_index} with connectivity {connectivity}. error: {e}")
+        if len(items) == 0:
+            print(f"Failed to generate any dataset items")
+        return items
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=10101101000,
-    max_num_samples=100000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetErosion()
+    generator.generate(
+        seed=10101101000,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

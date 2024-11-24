@@ -81,7 +81,7 @@ def generate_task_pattern_to_fractal(seed: int) -> Task:
     count_test = random.Random(seed + 10).randint(1, 2)
 
     scale_input = random.Random(seed + 11).randint(1, 5)
-    scale_output = random.Random(seed + 12).randint(1, 5)
+    scale_output = random.Random(seed + 12).randint(1, 3)
     is_inverse_mask = random.Random(seed + 14).choice([False, True])
     is_padded = random.Random(seed + 16).choice([False, True])
     empty_color = random.Random(seed + 15).choice([0, 1])
@@ -90,7 +90,7 @@ def generate_task_pattern_to_fractal(seed: int) -> Task:
     task = Task()
     task.metadata_task_id = f"pattern_to_fractal in={scale_input} out={scale_output} inv={is_inverse_mask} empty={empty_color} pad={is_padded}"
     min_image_size = 2
-    max_image_size = 5
+    max_image_size = 3
     max_pad_count = 8
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -161,7 +161,7 @@ def generate_task_fractal_to_pattern(seed: int) -> Task:
     count_test = random.Random(seed + 10).randint(1, 2)
 
     scale_input = random.Random(seed + 11).randint(1, 5)
-    scale_output = random.Random(seed + 12).randint(1, 5)
+    scale_output = random.Random(seed + 12).randint(1, 3)
     is_inverse_mask = random.Random(seed + 14).choice([False, True])
     is_padded = random.Random(seed + 16).choice([False, True])
     empty_color = random.Random(seed + 15).choice([0, 1])
@@ -170,7 +170,7 @@ def generate_task_fractal_to_pattern(seed: int) -> Task:
     task = Task()
     task.metadata_task_id = f"fractal_to_pattern in={scale_input} out={scale_output} inv={is_inverse_mask} empty={empty_color} pad={is_padded}"
     min_image_size = 2
-    max_image_size = 5
+    max_image_size = 3
     max_pad_count = 8
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -235,7 +235,8 @@ def generate_task_fractal_to_pattern(seed: int) -> Task:
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    builder.append_image_randomized()
+    # builder.append_image_randomized()
+    builder.append_image_rawpixel_output()
     return builder.dataset_items()
 
 def can_fit_inside_context_length(task: Task) -> bool:
@@ -246,35 +247,37 @@ def can_fit_inside_context_length(task: Task) -> bool:
     except Exception as e:
         return False
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 2
-    task = None
-    for retry_index in range(100):
-        iteration_seed = seed + retry_index * 100324
-        if j == 0:
-            transformation_id = 'pattern_to_fractal'
-            task = generate_task_pattern_to_fractal(iteration_seed)
-        else:
-            transformation_id = 'fractal_to_pattern'
-            task = generate_task_fractal_to_pattern(iteration_seed)
-        
-        if can_fit_inside_context_length(task):
-            # Bingo, we found a task that fits inside the context length of the LLM.
-            break
+class DatasetSolveFractal(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        j = seed % 2
+        task = None
+        for retry_index in range(100):
+            iteration_seed = seed + retry_index * 100324
+            if j == 0:
+                transformation_id = 'pattern_to_fractal'
+                task = generate_task_pattern_to_fractal(iteration_seed)
+            else:
+                transformation_id = 'fractal_to_pattern'
+                task = generate_task_fractal_to_pattern(iteration_seed)
+            
+            if can_fit_inside_context_length(task):
+                # Bingo, we found a task that fits inside the context length of the LLM.
+                break
 
-        # Task is too long to fit inside the context length of LLM. Try again.
+            # Task is too long to fit inside the context length of LLM. Try again.
 
-    # task.show()
-    dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
-    return dataset_items
+        if show:
+            task.show()
+        dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
+        return dataset_items
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=15032103031,
-    max_num_samples=1000,
-    max_byte_size=1024*1024*150
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetSolveFractal()
+    generator.generate(
+        seed=15032203031,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

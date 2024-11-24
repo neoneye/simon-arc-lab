@@ -46,7 +46,7 @@ def generate_task_with_intersecting_spans(seed: int, transformation_id: str) -> 
     task = Task()
     min_span_count = 3
     max_span_count = 6
-    max_image_size = 8
+    max_image_size = 20
 
     color_background = 9
     color_template = 8
@@ -190,7 +190,7 @@ def generate_task_with_template_lines(seed: int, transformation_id: str) -> Task
     task = Task()
     min_span_count = 3
     max_span_count = 6
-    max_image_size = 8
+    max_image_size = 20
 
     color_background = 9
     color_template = 8
@@ -299,7 +299,7 @@ def generate_task_with_alternate(seed: int, transformation_id: str) -> Task:
     task = Task()
     min_span_count = 4
     max_span_count = 5
-    max_image_size = 8
+    max_image_size = 20
 
     color_background = 9
     color_indicator = 8
@@ -457,47 +457,49 @@ def generate_task_with_alternate(seed: int, transformation_id: str) -> Task:
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    builder.append_image_randomized()
+    # builder.append_image_randomized()
+    builder.append_image_rawpixel_output()
     return builder.dataset_items()
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 11
-    # j = (seed % 4) + 7
-    if j == 0:
-        task = generate_task_with_intersecting_spans(seed, 'empty_primary_area')
-    elif j == 1:
-        task = generate_task_with_intersecting_spans(seed, 'template_primary_area')
-    elif j == 2:
-        task = generate_task_with_intersecting_spans(seed, 'template_primary_area_without_border')
-    elif j == 3:
-        task = generate_task_with_intersecting_spans(seed, 'colored_primary_area_fill_template_border')
-    elif j == 4:
-        # This is identical to 'colored_primary_area_extract_horizontal', due to rotation of the tasks.
-        task = generate_task_with_intersecting_spans(seed, 'colored_primary_area_extract_horizontal')
-    elif j == 5:
-        task = generate_task_with_template_lines(seed, 'output_with_border')
-    elif j == 6:
-        task = generate_task_with_template_lines(seed, 'output_without_border')
-    elif j == 7:
-        task = generate_task_with_alternate(seed, 'and')
-    elif j == 8:
-        task = generate_task_with_alternate(seed, 'or')
-    elif j == 9:
-        task = generate_task_with_alternate(seed, 'xor')
-    elif j == 10:
-        task = generate_task_with_alternate(seed, 'sum')
-    transformation_id = task.metadata_task_id
-    # task.show()
-    dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
-    return dataset_items
+class DatasetSolveSpan(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        j = seed % 11
+        if j == 0:
+            task = generate_task_with_intersecting_spans(seed, 'empty_primary_area')
+        elif j == 1:
+            task = generate_task_with_intersecting_spans(seed, 'template_primary_area')
+        elif j == 2:
+            task = generate_task_with_intersecting_spans(seed, 'template_primary_area_without_border')
+        elif j == 3:
+            task = generate_task_with_intersecting_spans(seed, 'colored_primary_area_fill_template_border')
+        elif j == 4:
+            # This is identical to 'colored_primary_area_extract_horizontal', due to rotation of the tasks.
+            task = generate_task_with_intersecting_spans(seed, 'colored_primary_area_extract_horizontal')
+        elif j == 5:
+            task = generate_task_with_template_lines(seed, 'output_with_border')
+        elif j == 6:
+            task = generate_task_with_template_lines(seed, 'output_without_border')
+        elif j == 7:
+            task = generate_task_with_alternate(seed, 'and')
+        elif j == 8:
+            task = generate_task_with_alternate(seed, 'or')
+        elif j == 9:
+            task = generate_task_with_alternate(seed, 'xor')
+        elif j == 10:
+            task = generate_task_with_alternate(seed, 'sum')
+        transformation_id = task.metadata_task_id
+        if show:
+            task.show()
+        dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
+        return dataset_items
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=2231000410,
-    max_num_samples=1000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetSolveSpan()
+    generator.generate(
+        seed=2231000410,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

@@ -78,7 +78,7 @@ def generate_task_extract_content_from_grid(seed: int, transformation_id: str) -
     # count_test = 1
     task = Task()
     min_image_size = 2
-    max_image_size = 5
+    max_image_size = 6
 
     min_cell_size = 1
     max_cell_size = 6
@@ -186,10 +186,10 @@ def generate_task_mutate_content_inside_grid(seed: int, transformation_id: str) 
     # count_test = 1
     task = Task()
     min_image_size = 2
-    max_image_size = 4
+    max_image_size = 6
 
     min_cell_size = 1
-    max_cell_size = 3
+    max_cell_size = 2
 
     # grid colors
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -276,57 +276,59 @@ def generate_task_mutate_content_inside_grid(seed: int, transformation_id: str) 
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    builder.append_image_randomized()
+    # builder.append_image_randomized()
+    builder.append_image_rawpixel_output()
     return builder.dataset_items()
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 11
-    if j == 0:
-        task = generate_task_extract_content_from_grid(seed, 'original')
-        transformation_id = 'extract_content_from_grid_original'
-    elif j == 1:
-        task = generate_task_extract_content_from_grid(seed, 'flipx')
-        transformation_id = 'extract_content_from_grid_flipx'
-    elif j == 2:
-        task = generate_task_extract_content_from_grid(seed, 'flipy')
-        transformation_id = 'extract_content_from_grid_flipy'
-    elif j == 3:
-        task = generate_task_extract_content_from_grid(seed, '180')
-        transformation_id = 'extract_content_from_grid_180'
-    elif j == 4:
-        task = generate_task_extract_content_from_grid(seed, 'cw')
-        transformation_id = 'extract_content_from_grid_cw'
-    elif j == 5:
-        task = generate_task_extract_content_from_grid(seed, 'ccw')
-        transformation_id = 'extract_content_from_grid_ccw'
-    elif j == 6:
-        task = generate_task_extract_content_from_grid(seed, 'flipa')
-        transformation_id = 'extract_content_from_grid_flipa'
-    elif j == 7:
-        task = generate_task_extract_content_from_grid(seed, 'flipb')
-        transformation_id = 'extract_content_from_grid_flipb'
-    elif j == 8:
-        task = generate_task_mutate_content_inside_grid(seed, 'flipx')
-        transformation_id = 'mutate_content_inside_grid_flipx'
-    elif j == 9:
-        task = generate_task_mutate_content_inside_grid(seed, 'flipy')
-        transformation_id = 'mutate_content_inside_grid_flipy'
-    elif j == 10:
-        task = generate_task_mutate_content_inside_grid(seed, '180')
-        transformation_id = 'mutate_content_inside_grid_180'
+class DatasetSolveGrid(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        j = seed % 11
+        if j == 0:
+            task = generate_task_extract_content_from_grid(seed, 'original')
+            transformation_id = 'extract_content_from_grid_original'
+        elif j == 1:
+            task = generate_task_extract_content_from_grid(seed, 'flipx')
+            transformation_id = 'extract_content_from_grid_flipx'
+        elif j == 2:
+            task = generate_task_extract_content_from_grid(seed, 'flipy')
+            transformation_id = 'extract_content_from_grid_flipy'
+        elif j == 3:
+            task = generate_task_extract_content_from_grid(seed, '180')
+            transformation_id = 'extract_content_from_grid_180'
+        elif j == 4:
+            task = generate_task_extract_content_from_grid(seed, 'cw')
+            transformation_id = 'extract_content_from_grid_cw'
+        elif j == 5:
+            task = generate_task_extract_content_from_grid(seed, 'ccw')
+            transformation_id = 'extract_content_from_grid_ccw'
+        elif j == 6:
+            task = generate_task_extract_content_from_grid(seed, 'flipa')
+            transformation_id = 'extract_content_from_grid_flipa'
+        elif j == 7:
+            task = generate_task_extract_content_from_grid(seed, 'flipb')
+            transformation_id = 'extract_content_from_grid_flipb'
+        elif j == 8:
+            task = generate_task_mutate_content_inside_grid(seed, 'flipx')
+            transformation_id = 'mutate_content_inside_grid_flipx'
+        elif j == 9:
+            task = generate_task_mutate_content_inside_grid(seed, 'flipy')
+            transformation_id = 'mutate_content_inside_grid_flipy'
+        elif j == 10:
+            task = generate_task_mutate_content_inside_grid(seed, '180')
+            transformation_id = 'mutate_content_inside_grid_180'
 
-    # task.show()
-    items = generate_dataset_item_list_inner((seed + 1) * 11, task, transformation_id)
-    return items
+        if show:
+            task.show()
+        items = generate_dataset_item_list_inner((seed + 1) * 11, task, transformation_id)
+        return items
 
-
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=81600013,
-    max_num_samples=1000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetSolveGrid()
+    generator.generate(
+        seed=81700013,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

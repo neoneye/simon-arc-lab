@@ -34,7 +34,7 @@ def generate_task_skew(seed: int, direction: SkewDirection) -> Task:
     task = Task()
     task.metadata_task_id = f'skew_{direction.name.lower()}'
     min_image_size = 1
-    max_image_size = 7
+    max_image_size = 16
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(colors)
@@ -88,7 +88,7 @@ def generate_task_unskew(seed: int, direction: SkewDirection) -> Task:
     task = Task()
     task.metadata_task_id = f'unskew_{direction.name.lower()}'
     min_image_size = 1
-    max_image_size = 7
+    max_image_size = 16
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(colors)
@@ -134,39 +134,42 @@ def generate_task_unskew(seed: int, direction: SkewDirection) -> Task:
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    builder.append_image_randomized()
+    # builder.append_image_randomized()
+    builder.append_image_rawpixel_output()
     return builder.dataset_items()
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 8
-    if j == 0:
-        task = generate_task_skew(seed, SkewDirection.LEFT)
-    elif j == 1:
-        task = generate_task_skew(seed, SkewDirection.RIGHT)
-    elif j == 2:
-        task = generate_task_skew(seed, SkewDirection.UP)
-    elif j == 3:
-        task = generate_task_skew(seed, SkewDirection.DOWN)
-    elif j == 4:
-        task = generate_task_unskew(seed, SkewDirection.UP)
-    elif j == 5:
-        task = generate_task_unskew(seed, SkewDirection.DOWN)
-    elif j == 6:
-        task = generate_task_unskew(seed, SkewDirection.LEFT)
-    elif j == 7:
-        task = generate_task_unskew(seed, SkewDirection.RIGHT)
-    transformation_id = task.metadata_task_id
-    # task.show()
-    dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
-    return dataset_items
+class DatasetSolveSkew(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        j = seed % 8
+        if j == 0:
+            task = generate_task_skew(seed, SkewDirection.LEFT)
+        elif j == 1:
+            task = generate_task_skew(seed, SkewDirection.RIGHT)
+        elif j == 2:
+            task = generate_task_skew(seed, SkewDirection.UP)
+        elif j == 3:
+            task = generate_task_skew(seed, SkewDirection.DOWN)
+        elif j == 4:
+            task = generate_task_unskew(seed, SkewDirection.UP)
+        elif j == 5:
+            task = generate_task_unskew(seed, SkewDirection.DOWN)
+        elif j == 6:
+            task = generate_task_unskew(seed, SkewDirection.LEFT)
+        elif j == 7:
+            task = generate_task_unskew(seed, SkewDirection.RIGHT)
+        transformation_id = task.metadata_task_id
+        if show:
+            task.show()
+        dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
+        return dataset_items
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=1221023425,
-    max_num_samples=1000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetSolveSkew()
+    generator.generate(
+        seed=1223123425,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

@@ -62,7 +62,7 @@ def generate_task_gravity_move(seed: int, direction: GravityMoveDirection) -> Ta
     # count_test = 1
     task = Task()
     min_image_size = 3
-    max_image_size = 30
+    max_image_size = 9
     max_number_of_positions = 5
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -143,7 +143,7 @@ def generate_task_gravity_draw(seed: int, direction: GravityDrawDirection) -> Ta
     # count_test = 1
     task = Task()
     min_image_size = 3
-    max_image_size = 30
+    max_image_size = 9
     max_number_of_positions = 5
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -210,72 +210,75 @@ def generate_task_gravity_draw(seed: int, direction: GravityDrawDirection) -> Ta
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    builder.append_image_randomized()
+    # builder.append_image_randomized()
+    builder.append_image_rawpixel_output()
     return builder.dataset_items()
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 16
-    # j = seed % 4
-    # j = (seed % 4) + 12
-    if j == 0:
-        transformation_id = 'gravity_move_top_to_bottom'
-        task = generate_task_gravity_move(seed, GravityMoveDirection.TOP_TO_BOTTOM)
-    elif j == 1:
-        transformation_id = 'gravity_move_bottom_to_top'
-        task = generate_task_gravity_move(seed, GravityMoveDirection.BOTTOM_TO_TOP)
-    elif j == 2:
-        transformation_id = 'gravity_move_left_to_right'
-        task = generate_task_gravity_move(seed, GravityMoveDirection.LEFT_TO_RIGHT)
-    elif j == 3:
-        transformation_id = 'gravity_move_right_to_left'
-        task = generate_task_gravity_move(seed, GravityMoveDirection.RIGHT_TO_LEFT)
-    elif j == 4:
-        transformation_id = 'gravity_move_topleft_to_bottomright'
-        task = generate_task_gravity_move(seed, GravityMoveDirection.TOPLEFT_TO_BOTTOMRIGHT)
-    elif j == 5:
-        transformation_id = 'gravity_move_bottomright_to_topleft'
-        task = generate_task_gravity_move(seed, GravityMoveDirection.BOTTOMRIGHT_TO_TOPLEFT)
-    elif j == 6:
-        transformation_id = 'gravity_move_topright_to_bottomleft'
-        task = generate_task_gravity_move(seed, GravityMoveDirection.TOPRIGHT_TO_BOTTOMLEFT)
-    elif j == 7:
-        transformation_id = 'gravity_move_bottomleft_to_topright'
-        task = generate_task_gravity_move(seed, GravityMoveDirection.BOTTOMLEFT_TO_TOPRIGHT)
-    elif j == 8:
-        transformation_id = 'gravity_draw_bottom_to_top'
-        task = generate_task_gravity_draw(seed, GravityDrawDirection.BOTTOM_TO_TOP)
-    elif j == 9:
-        transformation_id = 'gravity_draw_top_to_bottom'
-        task = generate_task_gravity_draw(seed, GravityDrawDirection.TOP_TO_BOTTOM)
-    elif j == 10:
-        transformation_id = 'gravity_draw_right_to_left'
-        task = generate_task_gravity_draw(seed, GravityDrawDirection.RIGHT_TO_LEFT)
-    elif j == 11:
-        transformation_id = 'gravity_draw_left_to_right'
-        task = generate_task_gravity_draw(seed, GravityDrawDirection.LEFT_TO_RIGHT)
-    elif j == 12:
-        transformation_id = 'gravity_draw_topleft_to_bottomright'
-        task = generate_task_gravity_draw(seed, GravityDrawDirection.TOPLEFT_TO_BOTTOMRIGHT)
-    elif j == 13:
-        transformation_id = 'gravity_draw_bottomright_to_topleft'
-        task = generate_task_gravity_draw(seed, GravityDrawDirection.BOTTOMRIGHT_TO_TOPLEFT)
-    elif j == 14:
-        transformation_id = 'gravity_draw_topright_to_bottomleft'
-        task = generate_task_gravity_draw(seed, GravityDrawDirection.TOPRIGHT_TO_BOTTOMLEFT)
-    elif j == 15:
-        transformation_id = 'gravity_draw_bottomleft_to_topright'
-        task = generate_task_gravity_draw(seed, GravityDrawDirection.BOTTOMLEFT_TO_TOPRIGHT)
-    # task.show()
-    dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
-    return dataset_items
+class DatasetSolveGravity(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        j = seed % 16
+        # j = seed % 4
+        # j = (seed % 4) + 12
+        if j == 0:
+            transformation_id = 'gravity_move_top_to_bottom'
+            task = generate_task_gravity_move(seed, GravityMoveDirection.TOP_TO_BOTTOM)
+        elif j == 1:
+            transformation_id = 'gravity_move_bottom_to_top'
+            task = generate_task_gravity_move(seed, GravityMoveDirection.BOTTOM_TO_TOP)
+        elif j == 2:
+            transformation_id = 'gravity_move_left_to_right'
+            task = generate_task_gravity_move(seed, GravityMoveDirection.LEFT_TO_RIGHT)
+        elif j == 3:
+            transformation_id = 'gravity_move_right_to_left'
+            task = generate_task_gravity_move(seed, GravityMoveDirection.RIGHT_TO_LEFT)
+        elif j == 4:
+            transformation_id = 'gravity_move_topleft_to_bottomright'
+            task = generate_task_gravity_move(seed, GravityMoveDirection.TOPLEFT_TO_BOTTOMRIGHT)
+        elif j == 5:
+            transformation_id = 'gravity_move_bottomright_to_topleft'
+            task = generate_task_gravity_move(seed, GravityMoveDirection.BOTTOMRIGHT_TO_TOPLEFT)
+        elif j == 6:
+            transformation_id = 'gravity_move_topright_to_bottomleft'
+            task = generate_task_gravity_move(seed, GravityMoveDirection.TOPRIGHT_TO_BOTTOMLEFT)
+        elif j == 7:
+            transformation_id = 'gravity_move_bottomleft_to_topright'
+            task = generate_task_gravity_move(seed, GravityMoveDirection.BOTTOMLEFT_TO_TOPRIGHT)
+        elif j == 8:
+            transformation_id = 'gravity_draw_bottom_to_top'
+            task = generate_task_gravity_draw(seed, GravityDrawDirection.BOTTOM_TO_TOP)
+        elif j == 9:
+            transformation_id = 'gravity_draw_top_to_bottom'
+            task = generate_task_gravity_draw(seed, GravityDrawDirection.TOP_TO_BOTTOM)
+        elif j == 10:
+            transformation_id = 'gravity_draw_right_to_left'
+            task = generate_task_gravity_draw(seed, GravityDrawDirection.RIGHT_TO_LEFT)
+        elif j == 11:
+            transformation_id = 'gravity_draw_left_to_right'
+            task = generate_task_gravity_draw(seed, GravityDrawDirection.LEFT_TO_RIGHT)
+        elif j == 12:
+            transformation_id = 'gravity_draw_topleft_to_bottomright'
+            task = generate_task_gravity_draw(seed, GravityDrawDirection.TOPLEFT_TO_BOTTOMRIGHT)
+        elif j == 13:
+            transformation_id = 'gravity_draw_bottomright_to_topleft'
+            task = generate_task_gravity_draw(seed, GravityDrawDirection.BOTTOMRIGHT_TO_TOPLEFT)
+        elif j == 14:
+            transformation_id = 'gravity_draw_topright_to_bottomleft'
+            task = generate_task_gravity_draw(seed, GravityDrawDirection.TOPRIGHT_TO_BOTTOMLEFT)
+        elif j == 15:
+            transformation_id = 'gravity_draw_bottomleft_to_topright'
+            task = generate_task_gravity_draw(seed, GravityDrawDirection.BOTTOMLEFT_TO_TOPRIGHT)
+        if show:
+            task.show()
+        dataset_items = generate_dataset_item_list_inner(seed, task, transformation_id)
+        return dataset_items
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=35200194,
-    max_num_samples=1000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetSolveGravity()
+    generator.generate(
+        seed=35300194,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

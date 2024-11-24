@@ -41,9 +41,9 @@ def generate_task_erosion(seed: int, connectivity: PixelConnectivity) -> Task:
     task = Task()
     task.metadata_task_id = f'erosion {connectivity_name_lower}'
     min_width = 3
-    max_width = 8
+    max_width = 11
     min_height = 3
-    max_height = 8
+    max_height = 11
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 11).shuffle(colors)
@@ -91,44 +91,46 @@ def generate_task_erosion(seed: int, connectivity: PixelConnectivity) -> Task:
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    builder.append_image_randomized()
+    # builder.append_image_randomized()
+    builder.append_image_rawpixel_output()
     return builder.dataset_items()
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    connectivity_list = [
-        PixelConnectivity.NEAREST4,
-        PixelConnectivity.ALL8,
-        PixelConnectivity.CORNER4,
-        PixelConnectivity.LR2,
-        PixelConnectivity.TB2,
-        PixelConnectivity.TLBR2,
-        PixelConnectivity.TRBL2,
-    ]
-    accumulated_items = []
-    for index, connectivity in enumerate(connectivity_list):
-        for retry_index in range(20):
-            current_seed = seed + index * 10000 + 1333 * retry_index
-            try:
-                task = generate_task_erosion(current_seed, connectivity)
-                transformation_id = task.metadata_task_id
-                # task.show()
-                items = generate_dataset_item_list_inner(seed, task, transformation_id)
-                accumulated_items.extend(items)
-                break
-            except Exception as e:
-                print(f"trying again {retry_index} with connectivity {connectivity}. error: {e}")
-    if len(accumulated_items) == 0:
-        print(f"Failed to generate any dataset items")
-    return accumulated_items
+class DatasetSolveErosion(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        connectivity_list = [
+            PixelConnectivity.NEAREST4,
+            PixelConnectivity.ALL8,
+            PixelConnectivity.CORNER4,
+            PixelConnectivity.LR2,
+            PixelConnectivity.TB2,
+            PixelConnectivity.TLBR2,
+            PixelConnectivity.TRBL2,
+        ]
+        accumulated_items = []
+        for index, connectivity in enumerate(connectivity_list):
+            for retry_index in range(20):
+                current_seed = seed + index * 10000 + 1333 * retry_index
+                try:
+                    task = generate_task_erosion(current_seed, connectivity)
+                    transformation_id = task.metadata_task_id
+                    if show:
+                        task.show()
+                    items = generate_dataset_item_list_inner(seed, task, transformation_id)
+                    accumulated_items.extend(items)
+                    break
+                except Exception as e:
+                    print(f"trying again {retry_index} with connectivity {connectivity}. error: {e}")
+        if len(accumulated_items) == 0:
+            print(f"Failed to generate any dataset items")
+        return accumulated_items
 
-
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=615600313,
-    max_num_samples=1000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetSolveErosion()
+    generator.generate(
+        seed=615800313,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

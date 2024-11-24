@@ -47,7 +47,7 @@ def generate_task_mask_of_primary_rectangle(seed: int) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 6
-    max_image_size = 20
+    max_image_size = 15
 
     # input colors
     colors_input = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -118,7 +118,7 @@ def generate_task_mask_of_obscured_rectangle(seed: int) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 6
-    max_image_size = 18
+    max_image_size = 15
 
     # input colors
     colors_input = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -233,7 +233,7 @@ def generate_task_mask_of_intersection_rectangle(seed: int) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 6
-    max_image_size = 16
+    max_image_size = 15
 
     # input colors
     colors_input = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -449,34 +449,35 @@ def generate_task_move_obscured_rectangle_to_top(seed: int) -> Task:
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    builder.append_image_randomized()
+    # builder.append_image_randomized()
+    builder.append_image_rawpixel_output()
     return builder.dataset_items()
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    j = seed % 4
-    # j = (seed % 2) + 2
-    if j == 0:
-        task = generate_task_mask_of_primary_rectangle(seed)
-    elif j == 1:
-        task = generate_task_mask_of_obscured_rectangle(seed)
-    elif j == 2:
-        task = generate_task_mask_of_intersection_rectangle(seed)
-    elif j == 3:
-        task = generate_task_move_obscured_rectangle_to_top(seed)
-        
-    # task.show()
-    transformation_id = task.metadata_task_id
-    items = generate_dataset_item_list_inner((seed + 1) * 11, task, transformation_id)
-    return items
+class DatasetSolveZIndex(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        j = seed % 4
+        if j == 0:
+            task = generate_task_mask_of_primary_rectangle(seed)
+        elif j == 1:
+            task = generate_task_mask_of_obscured_rectangle(seed)
+        elif j == 2:
+            task = generate_task_mask_of_intersection_rectangle(seed)
+        elif j == 3:
+            task = generate_task_move_obscured_rectangle_to_top(seed)
 
+        if show:            
+            task.show()
+        transformation_id = task.metadata_task_id
+        items = generate_dataset_item_list_inner((seed + 1) * 11, task, transformation_id)
+        return items
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=218200911,
-    max_num_samples=1000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetSolveZIndex()
+    generator.generate(
+        seed=218300911,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

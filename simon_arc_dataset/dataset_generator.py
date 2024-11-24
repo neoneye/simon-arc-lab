@@ -8,12 +8,17 @@ from tqdm import tqdm
 from .plot import *
 
 class DatasetGenerator:
-    def __init__(self, generate_dataset_item_list_fn):
-        self.generate_dataset_item_list_fn = generate_dataset_item_list_fn
+    def __init__(self):
         self.row_strings = None
         self.dataset_items = None
 
-    def generate(self, seed: int, max_num_samples=1000, max_byte_size=1024*1024):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        raise NotImplementedError("This method should be overridden by subclasses.")
+
+    def generate(self, seed: int, max_num_samples=1000, max_byte_size=10*1024*1024, show: bool = False):
+        # The output context length limit is 512 tokens
+        max_output_length = 512
+
         row_strings = []
         dataset_items = []
         file_size = 0
@@ -22,8 +27,16 @@ class DatasetGenerator:
             for i in range(max_num_samples):
                 if stop:
                     break
-                items = self.generate_dataset_item_list_fn(seed + i + 1000)
+                iteration_seed = seed + i
+                items = self.generate_dataset_item_list(iteration_seed, show)
                 for item in items:
+                    field_benchmark = item.get('benchmark', None)
+                    field_output = item['output']
+                    length_field_output = len(field_output)
+                    if length_field_output > max_output_length:
+                        print(f"Skipping dataset item because the output is too long: {length_field_output}, max_output_length: {max_output_length}, seed: {iteration_seed}, benchmark: {field_benchmark}")
+                        continue
+
                     row_string = json.dumps(item, separators=(',', ':')) + '\n'
                     bytes = len(row_string)
                     if file_size + bytes > max_byte_size:
@@ -36,7 +49,15 @@ class DatasetGenerator:
                     row_strings.append(row_string)
                     dataset_items.append(item)
                     pbar.update(1)
-        random.Random(seed).shuffle(row_strings)
+
+        if len(row_strings) != len(dataset_items):
+            raise Exception("len(row_strings) != len(dataset_items)")
+        
+        # shuffle the row_strings and dataset_items in the same order
+        indexes = list(range(len(row_strings)))
+        random.Random(seed).shuffle(indexes)
+        row_strings = [row_strings[i] for i in indexes]
+        dataset_items = [dataset_items[i] for i in indexes]
 
         self.row_strings = row_strings
         self.dataset_items = dataset_items

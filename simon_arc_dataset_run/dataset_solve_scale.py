@@ -107,7 +107,7 @@ def generate_task(seed: int, x_up_down, x_scale, y_up_down, y_scale) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 1
-    max_image_size = 12
+    max_image_size = 7
 
     can_add_noise = False
     if x_up_down == 'down' and y_up_down == 'down':
@@ -156,47 +156,50 @@ def generate_task(seed: int, x_up_down, x_scale, y_up_down, y_scale) -> Task:
 
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
-    builder.append_image_randomized()
+    # builder.append_image_randomized()
+    builder.append_image_rawpixel_output()
     return builder.dataset_items()
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    max_scale_factor = 7
-    up_down = ['up', 'down']
-    config_list = []
-    for x_up_down in up_down:
-        for y_up_down in up_down:
-            for y_scale in range(1, max_scale_factor + 1):
-                for x_scale in range(1, max_scale_factor + 1):
-                    if x_scale == 1 and y_scale == 1:
-                        continue
-                    config_list.append((x_up_down, x_scale, y_up_down, y_scale))
+class DatasetSolveScale(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        max_scale_factor = 3
+        up_down = ['up', 'down']
+        config_list = []
+        for x_up_down in up_down:
+            for y_up_down in up_down:
+                for y_scale in range(1, max_scale_factor + 1):
+                    for x_scale in range(1, max_scale_factor + 1):
+                        if x_scale == 1 and y_scale == 1:
+                            continue
+                        config_list.append((x_up_down, x_scale, y_up_down, y_scale))
 
-    # shuffle the parameters
-    random.Random(seed + 1).shuffle(config_list)
+        # shuffle the parameters
+        random.Random(seed + 1).shuffle(config_list)
 
-    # truncate the parameters to a few
-    truncate_length = random.Random(seed + 2).randint(2, 5)
-    config_list_truncated = config_list[:truncate_length]
+        # truncate the parameters to a few
+        truncate_length = random.Random(seed + 2).randint(2, 5)
+        config_list_truncated = config_list[:truncate_length]
 
-    all_dataset_items = []
-    for index, config_list in enumerate(config_list_truncated):
-        iteration_seed = seed + index * 1000000
-        x_up_down, x_scale, y_up_down, y_scale = config_list
-        task = generate_task(iteration_seed, x_up_down, x_scale, y_up_down, y_scale)
-        transformation_id = task.metadata_task_id
-        # task.show()
-        dataset_items = generate_dataset_item_list_inner(iteration_seed + 1, task, transformation_id)
-        all_dataset_items.extend(dataset_items)
+        all_dataset_items = []
+        for index, config_list in enumerate(config_list_truncated):
+            iteration_seed = seed + index * 1000000
+            x_up_down, x_scale, y_up_down, y_scale = config_list
+            task = generate_task(iteration_seed, x_up_down, x_scale, y_up_down, y_scale)
+            transformation_id = task.metadata_task_id
+            if show:
+                task.show()
+            dataset_items = generate_dataset_item_list_inner(iteration_seed + 1, task, transformation_id)
+            all_dataset_items.extend(dataset_items)
 
-    return all_dataset_items
+        return all_dataset_items
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=82200019,
-    max_num_samples=1000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetSolveScale()
+    generator.generate(
+        seed=82400019,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()

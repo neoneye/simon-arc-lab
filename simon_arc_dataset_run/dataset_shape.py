@@ -14,6 +14,7 @@ from simon_arc_lab.image_shape2x2 import *
 from simon_arc_lab.image_shape3x3_center import *
 from simon_arc_lab.image_shape3x3_opposite import *
 from simon_arc_lab.image_shape3x3_histogram import *
+from simon_arc_lab.show_prediction_result import show_multiple_images
 import matplotlib.pyplot as plt
 from simon_arc_dataset.dataset_generator import *
 
@@ -39,7 +40,7 @@ DATASET_NAMES = [
     'SimonsImageShape',
 ]
 
-def generate_dataset_item_shape2x2(seed):
+def generate_dataset_item_shape2x2(seed: int, show: bool) -> dict:
     """
     Find shapes in a 2x2 neighborhood.
 
@@ -71,14 +72,15 @@ def generate_dataset_item_shape2x2(seed):
     shape_mask = 1 << shape_bit
     output_image = np.where(shape_image & shape_mask > 0, 1, 0)
 
-    if False:
+    if show:
         print(f"---\ninput: {input_image}\nshape: {shape_image}\nshape_mask: {shape_mask} (bit {shape_bit})\noutput: {output_image}")
-        plt.imshow(input_image, cmap='gray')
-        plt.show()
-        plt.imshow(shape_image, cmap='gray')
-        plt.show()
-        plt.imshow(output_image, cmap='gray')
-        plt.show()
+        title_image_list = [
+            ('arc', 'input', input_image),
+            ('arc', 'shape_image', shape_image),
+            ('arc', 'output', output_image),
+        ]
+        title = f"{transformation_id} shape_mask: {shape_mask} (bit {shape_bit})"
+        show_multiple_images(title_image_list, title=title)
 
     input = serialize(input_image)
     output = serialize(output_image)
@@ -97,7 +99,7 @@ def generate_dataset_item_shape2x2(seed):
     }
     return result_dict
 
-def generate_dataset_item_shape3x3_center(seed):
+def generate_dataset_item_shape3x3_center(seed: int, show: bool) -> dict:
     """
     Find shapes in a 3x3 neighborhood.
 
@@ -129,14 +131,15 @@ def generate_dataset_item_shape3x3_center(seed):
     shape_mask = 1 << shape_bit
     output_image = np.where(shape_image & shape_mask > 0, 1, 0)
 
-    if False:
+    if show:
         print(f"---\ninput: {input_image}\nshape: {shape_image}\nshape_mask: {shape_mask} (bit {shape_bit})\noutput: {output_image}")
-        plt.imshow(input_image, cmap='gray')
-        plt.show()
-        plt.imshow(shape_image, cmap='gray')
-        plt.show()
-        plt.imshow(output_image, cmap='gray')
-        plt.show()
+        title_image_list = [
+            ('arc', 'input', input_image),
+            ('arc', 'shape_image', shape_image),
+            ('arc', 'output', output_image),
+        ]
+        title = f"{transformation_id} shape_mask: {shape_mask} (bit {shape_bit})"
+        show_multiple_images(title_image_list, title=title)
 
     input = serialize(input_image)
     output = serialize(output_image)
@@ -155,7 +158,7 @@ def generate_dataset_item_shape3x3_center(seed):
     }
     return result_dict
 
-def generate_dataset_item_shape3x3_opposite(seed):
+def generate_dataset_item_shape3x3_opposite(seed: int, show: bool) -> dict:
     """
     Find shapes in a 3x3 neighborhood, where the opposite side have the same color.
 
@@ -187,14 +190,15 @@ def generate_dataset_item_shape3x3_opposite(seed):
     shape_mask = 1 << shape_bit
     output_image = np.where(shape_image & shape_mask > 0, 1, 0)
 
-    if False:
+    if show:
         print(f"---\ninput: {input_image}\nshape: {shape_image}\nshape_mask: {shape_mask} (bit {shape_bit})\noutput: {output_image}")
-        plt.imshow(input_image, cmap='gray')
-        plt.show()
-        plt.imshow(shape_image, cmap='gray')
-        plt.show()
-        plt.imshow(output_image, cmap='gray')
-        plt.show()
+        title_image_list = [
+            ('arc', 'input', input_image),
+            ('arc', 'shape_image', shape_image),
+            ('arc', 'output', output_image),
+        ]
+        title = f"{transformation_id} shape_mask: {shape_mask} (bit {shape_bit})"
+        show_multiple_images(title_image_list, title=title)
 
     input = serialize(input_image)
     output = serialize(output_image)
@@ -213,7 +217,7 @@ def generate_dataset_item_shape3x3_opposite(seed):
     }
     return result_dict
 
-def generate_dataset_item_shape3x3_histogram(seed):
+def generate_dataset_item_shape3x3_histogram(seed: int, show: bool) -> dict:
     """
     Find shapes in a 3x3 neighborhood, count the number of unique colors.
 
@@ -303,12 +307,14 @@ def generate_dataset_item_shape3x3_histogram(seed):
     else:
         raise Exception("Unreachable code reached")
 
-    if False:
+    if show:
         print(f"---\ninstruction: {instruction}\ninput: {input_image}\noutput: {output_image}")
-        plt.imshow(input_image, cmap='gray')
-        plt.show()
-        plt.imshow(output_image, cmap='gray')
-        plt.show()
+        title_image_list = [
+            ('arc', 'input', input_image),
+            ('arc', 'output', output_image),
+        ]
+        title = f"{transformation_id}"
+        show_multiple_images(title_image_list, title=title)
 
     input = serialize(input_image)
     output = serialize(output_image)
@@ -327,26 +333,27 @@ def generate_dataset_item_shape3x3_histogram(seed):
     }
     return result_dict
 
-def generate_dataset_item_list(seed: int) -> list[dict]:
-    item = None
-    j = seed % 4
-    if j == 0:
-        item = generate_dataset_item_shape3x3_opposite(seed)
-    elif j == 1:
-        item = generate_dataset_item_shape2x2(seed)
-    elif j == 2:
-        item = generate_dataset_item_shape3x3_center(seed)
-    else:
-        item = generate_dataset_item_shape3x3_histogram(seed)
-    return [item]
+class DatasetShape(DatasetGenerator):
+    def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
+        item = None
+        j = seed % 4
+        if j == 0:
+            item = generate_dataset_item_shape3x3_opposite(seed, show)
+        elif j == 1:
+            item = generate_dataset_item_shape2x2(seed, show)
+        elif j == 2:
+            item = generate_dataset_item_shape3x3_center(seed, show)
+        else:
+            item = generate_dataset_item_shape3x3_histogram(seed, show)
+        return [item]
 
-generator = DatasetGenerator(
-    generate_dataset_item_list_fn=generate_dataset_item_list
-)
-generator.generate(
-    seed=11800057,
-    max_num_samples=100000,
-    max_byte_size=1024*1024*100
-)
-# generator.inspect()
-generator.save(SAVE_FILE_PATH)
+if __name__ == "__main__":
+    generator = DatasetShape()
+    generator.generate(
+        seed=11800057,
+        max_num_samples=1000,
+        max_byte_size=1024*1024*100,
+        # show=True
+    )
+    generator.save(SAVE_FILE_PATH)
+    # generator.inspect()
