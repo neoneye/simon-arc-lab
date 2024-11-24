@@ -116,7 +116,7 @@ class Model:
         else:
             raise ValueError(f"Unknown mode: {mode}")
 
-        generate_options['max_length'] = 128
+        generate_options['max_length'] = 512
         generate_options['num_return_sequences'] = num_return_sequences
 
         outputs = self.model.generate(input_ids, **generate_options)

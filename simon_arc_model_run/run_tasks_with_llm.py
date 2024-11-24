@@ -15,7 +15,7 @@ from simon_arc_model.work_manager_decision_tree import WorkManagerDecisionTree
 CONTEXT_SIZE_LIMIT = (512, 500)
 # CONTEXT_SIZE_LIMIT = (1024, 1000)
 
-model_iteration = 682
+model_iteration = 729
 model_name = f'simon-arc-lab-model{model_iteration}'
 model_directory = f'/Users/neoneye/nobackup/git/{model_name}'
 
@@ -36,7 +36,7 @@ if not os.path.isdir(path_to_arc_dataset_collection_dataset):
 
 groupname_pathtotaskdir_list = [
     ('arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
-    ('arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
+    # ('arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
     # ('tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
     # ('tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data/symmetry_rect_input_image_and_extract_a_particular_tile')),
     # ('miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),

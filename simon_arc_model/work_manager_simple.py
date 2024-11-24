@@ -6,6 +6,7 @@ from simon_arc_lab.task_mutator import *
 from simon_arc_lab.taskset import TaskSet
 from .model import Model
 from .predict_output_v1 import *
+from .predict_output_v3 import *
 from .work_item import WorkItem
 from .work_item_list import WorkItemList
 from .work_item_status import WorkItemStatus
@@ -26,7 +27,8 @@ class WorkManagerSimple(WorkManagerBase):
         for task in taskset.tasks:
             for test_index in range(task.count_tests):
                 for task_mutator_class in task_mutator_class_list:
-                    predictor = PredictOutputV1(task, test_index, task_mutator_class)
+                    # predictor = PredictOutputV1(task, test_index, task_mutator_class)
+                    predictor = PredictOutputV3(task, test_index, task_mutator_class)
                     work_item = WorkItem(task, test_index, refinement_step, predictor)
                     try:
                         prompt = work_item.predictor.prompt()
