@@ -5,8 +5,9 @@ from simon_arc_lab.task import *
 from simon_arc_lab.task_formatter_rle_compact import *
 from simon_arc_lab.benchmark import *
 from simon_arc_lab.image_distort import *
+from simon_arc_lab.image_string_representation import image_to_string
 
-def generate_dataset_item_for_output_image(
+def generate_dataset_item_for_output_image_rle_input_rle_output(
     seed: int, 
     dataset_names: list[str], 
     dataset_id: str, 
@@ -60,7 +61,7 @@ def generate_dataset_item_for_output_image(
     }
     return result_dict
 
-def generate_dataset_item_for_output_image_with_earlier_prediction(
+def generate_dataset_item_for_output_image_with_earlier_prediction_rle_input_rle_output(
     seed: int, 
     dataset_names: list[str], 
     dataset_id: str, 
@@ -123,6 +124,65 @@ def generate_dataset_item_for_output_image_with_earlier_prediction(
     }
     return result_dict
 
+def generate_dataset_item_for_output_image_rle_input_rawpixel_output(
+    seed: int, 
+    dataset_names: list[str], 
+    dataset_id: str, 
+    task: Task, 
+    test_index: int, 
+    transformation_id: str
+) -> dict:
+    random.seed(seed)
+    dataset_name = random.choice(dataset_names)
+
+    output_image = task.test_output(test_index)
+
+    task_without_test_output = task.clone()
+    task_without_test_output.set_all_test_outputs_to_none()
+    task_formatter = TaskFormatterRLECompact(task_without_test_output)
+
+    output_ids = task_formatter.output_ids()
+    test_output_id = output_ids[task.count_examples + test_index]
+
+    instructions = [
+        f"{dataset_name}, {test_output_id}, predict raw pixels",
+        f"{dataset_name} '{test_output_id}' predict the raw pixels",
+        f"{dataset_name}, '{test_output_id}', predict the raw pixels",
+        f"{dataset_name} predict raw pixels for {test_output_id}",
+        f"{dataset_name} predict raw pixels for '{test_output_id}'",
+        f"{dataset_name}, {test_output_id}, predict pixels",
+        f"{dataset_name} '{test_output_id}' predict the pixels",
+        f"{dataset_name}, '{test_output_id}', predict the pixels",
+        f"{dataset_name} predict pixels for {test_output_id}",
+        f"{dataset_name} predict pixels for '{test_output_id}'",
+    ]
+    instruction = random.choice(instructions)
+
+    input = task_formatter.to_string()
+    # print(input)
+
+    output = image_to_string(output_image)
+
+    arc_task_string = task.to_arcagi1_json(True)
+
+    max_width, max_height = task.max_image_size()
+    benchmark_width = image_size1d_to_string(max_width)
+    benchmark_height = image_size1d_to_string(max_height)
+    benchmark_pixels = task_pixels_to_string(task.total_pixel_count())
+    benchmark_id = f'dataset={dataset_id} group={transformation_id} predict=rawpixels earlier_prediction=none image_width={benchmark_width} image_height={benchmark_height} task_pixels={benchmark_pixels}'
+
+    earlier_output_none = ''
+    result_dict = {
+        'instruction': instruction,
+        'input': input,
+        'output': output,
+        'arc_task': arc_task_string,
+        'test_index': test_index,
+        'earlier_output': earlier_output_none,
+        'benchmark': benchmark_id
+    }
+    return result_dict
+
 class DatasetItemListBuilder:
     def __init__(self, seed: int, task: Task, dataset_names: list[str], dataset_id: str, transformation_id: str):
         self.seed = seed
@@ -152,12 +212,27 @@ class DatasetItemListBuilder:
             task_dict['metadata'] = metadata
         self.accumulated_dataset_items.append(task_dict)
 
-    def append_image(self):
+    def append_image_rle_output(self):
         """
-        Predict the entire output image
+        Predict the entire output image with RLE compression.
         """
         for test_index in range(self.task.count_tests):
-            dataset_item = generate_dataset_item_for_output_image(
+            dataset_item = generate_dataset_item_for_output_image_rle_input_rle_output(
+                self.seed + test_index * 100 + 2000, 
+                self.dataset_names, 
+                self.dataset_id,
+                self.task, 
+                test_index, 
+                self.transformation_id
+            )
+            self.accumulated_dataset_items.append(dataset_item)
+
+    def append_image_rawpixel_output(self):
+        """
+        Predict the entire output image without RLE compression.
+        """
+        for test_index in range(self.task.count_tests):
+            dataset_item = generate_dataset_item_for_output_image_rle_input_rawpixel_output(
                 self.seed + test_index * 100 + 2000, 
                 self.dataset_names, 
                 self.dataset_id,
@@ -175,7 +250,7 @@ class DatasetItemListBuilder:
             output_image = self.task.test_output(test_index)
             earlier_predicted_image = image_distort(output_image, 1, 10, self.seed + test_index * 100 + 1000)
 
-            dataset_item = generate_dataset_item_for_output_image_with_earlier_prediction(
+            dataset_item = generate_dataset_item_for_output_image_with_earlier_prediction_rle_input_rle_output(
                 self.seed + test_index * 100 + 2000, 
                 self.dataset_names, 
                 self.dataset_id,
@@ -196,7 +271,7 @@ class DatasetItemListBuilder:
             input_image = self.task.test_input(test_index)
             earlier_predicted_image = image_distort(input_image, 1, 10, self.seed + test_index * 100 + 1000)
 
-            dataset_item = generate_dataset_item_for_output_image_with_earlier_prediction(
+            dataset_item = generate_dataset_item_for_output_image_with_earlier_prediction_rle_input_rle_output(
                 self.seed + test_index * 100 + 2000, 
                 self.dataset_names, 
                 self.dataset_id,
@@ -218,7 +293,7 @@ class DatasetItemListBuilder:
             output_image = self.task.test_output(test_index)
             earlier_predicted_image = image_noise_one_pixel(output_image, iteration_seed + 1)
 
-            dataset_item = generate_dataset_item_for_output_image_with_earlier_prediction(
+            dataset_item = generate_dataset_item_for_output_image_with_earlier_prediction_rle_input_rle_output(
                 iteration_seed + 4, 
                 self.dataset_names, 
                 self.dataset_id,
@@ -233,7 +308,7 @@ class DatasetItemListBuilder:
     def append_image_randomized(self):
         j = self.seed % 4
         if j == 0:
-            self.append_image()
+            self.append_image_rle_output()
         elif j == 1:
             self.append_image_with_earlier_prediction_very_close_to_expected_output()
         elif j == 2:
