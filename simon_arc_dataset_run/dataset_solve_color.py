@@ -4,8 +4,9 @@
 # - Swap 2 colors.
 # - Identify the most popular color.
 # - Identify the least popular color.
+# - Identify both the most popular color and least popular color.
 #
-# IDEA: Swap the most/lest popular colors with each other.
+# IDEA: Swap the most/least popular colors with each other.
 #
 # IDEA: Image size 1xN, where N is the number of unique colors.
 # IDEA: Image size 1xN, where N is the count of the most popular color.
@@ -356,6 +357,8 @@ def generate_task_most_or_least_popular_color(seed: int, find_id: str, output_si
     task.metadata_task_id = f'most_or_least_popular_color {find_id} {output_size_id}'
     min_image_size = 1
     max_image_size = 22
+    output_image_width = random.Random(the_seed + 3).randint(1, 5)
+    output_image_height = random.Random(the_seed + 4).randint(1, 5)
 
     available_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
@@ -404,9 +407,9 @@ def generate_task_most_or_least_popular_color(seed: int, find_id: str, output_si
 
         output_width = None
         output_height = None
-        if output_size_id == '1x1':
-            output_width = 1
-            output_height = 1
+        if output_size_id == 'NxM':
+            output_width = output_image_width
+            output_height = output_image_height
         elif output_size_id == 'same':
             output_width = input_image.shape[1]
             output_height = input_image.shape[0]
@@ -505,9 +508,9 @@ class DatasetSolveColor(DatasetGenerator):
         elif j == 6:
             task = generate_task_swap_colors(seed)
         elif j == 7:
-            task = generate_task_most_or_least_popular_color(seed, 'most_popular', '1x1')
+            task = generate_task_most_or_least_popular_color(seed, 'most_popular', 'NxM')
         elif j == 8:
-            task = generate_task_most_or_least_popular_color(seed, 'least_popular', '1x1')
+            task = generate_task_most_or_least_popular_color(seed, 'least_popular', 'NxM')
         elif j == 9:
             task = generate_task_most_or_least_popular_color(seed, 'most_popular', 'same')
         elif j == 10:
