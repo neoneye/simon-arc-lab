@@ -27,6 +27,7 @@ from dataset_solve_count import DatasetSolveCount
 from dataset_solve_cross import DatasetSolveCross
 from dataset_solve_edge import DatasetSolveEdge
 from dataset_solve_erosion import DatasetSolveErosion
+from dataset_solve_deform import DatasetSolveDeform
 from dataset_solve_flip import DatasetSolveFlip
 from dataset_solve_fractal import DatasetSolveFractal
 from dataset_solve_gravity import DatasetSolveGravity
@@ -112,7 +113,7 @@ if __name__ == "__main__":
         # DatasetCellularAutomaton(),
         # DatasetDilation(),
         # DatasetErosion(),
-        DatasetHistogram(),
+        # DatasetHistogram(),
         # DatasetImage(),
         # DatasetImagePair(),
         # DatasetMass(),
@@ -128,10 +129,11 @@ if __name__ == "__main__":
         # DatasetSolveBoundingBox(),
         DatasetSolveColor(),
         # DatasetSolveCompress(),
-        DatasetSolveCount(),
+        # DatasetSolveCount(),
         # DatasetSolveCross(),
         # DatasetSolveEdge(),
         # DatasetSolveErosion(),
+        DatasetSolveDeform(),
         # DatasetSolveFlip(),
         # DatasetSolveFractal(),
         # DatasetSolveGravity(),
@@ -141,13 +143,13 @@ if __name__ == "__main__":
         # DatasetSolveMask(),
         # DatasetSolveMass(),
         # DatasetSolveOutline(),
-        DatasetSolveProbeColor(),
-        DatasetSolveRay(),
+        # DatasetSolveProbeColor(),
+        # DatasetSolveRay(),
         # DatasetSolveRectangle(),
         # DatasetSolveReverse(),
         # DatasetSolveRotate(),
         # DatasetSolveScale(),
-        # DatasetSolveSpan(),
+        DatasetSolveSpan(),
         # DatasetSolveSkew(),
         # DatasetSolveSymmetry(),
         # DatasetSolveTemplate(),
@@ -157,7 +159,7 @@ if __name__ == "__main__":
     generator_list = generator_list_not_puzzles + generator_list_puzzles
     generator = CombinedDatasetGenerator(generator_list)
     generator.generate(
-        seed=21,
+        seed=24,
         max_num_samples=4000,
         max_byte_size=1024*1024*100,
         # show=True

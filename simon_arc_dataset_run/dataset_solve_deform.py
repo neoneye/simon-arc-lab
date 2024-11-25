@@ -34,11 +34,25 @@ def generate_task_displace_rows_based_on_mask(seed: int) -> Task:
     the_seed = seed * 11113
     count_example = random.Random(the_seed + 1).randint(3, 4)
     count_test = random.Random(the_seed + 2).randint(1, 2)
+    rotate_k = random.Random(the_seed + 3).randint(0, 3)
+    displacement = random.Random(the_seed + 4).choice([-1, 1])
 
     task = Task()
-    task.metadata_task_id = 'deform_line'
+    task.metadata_task_id = f'deform_line rotate_{rotate_k} displacement_{displacement}'
     min_image_size = 4
     max_image_size = 22
+
+
+    colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    random.Random(the_seed + 5).shuffle(colors)
+    input_output_color_map = {
+        0: colors[0],
+        1: colors[1],
+        2: colors[2],
+        3: colors[3],
+    }
+
+    padding_color = random.Random(the_seed + 6).choice([0, 1])
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -62,7 +76,7 @@ def generate_task_displace_rows_based_on_mask(seed: int) -> Task:
 
             random_image23 = image_replace_colors(random_image01, color_map)
 
-            padding_right = image_create(1, random_image_height, 0)
+            padding_right = image_create(1, random_image_height, padding_color)
             random_image_with_padding = np.hstack([random_image23, padding_right])
             random_image_with_padding_width = random_image_with_padding.shape[1]
 
@@ -83,15 +97,21 @@ def generate_task_displace_rows_based_on_mask(seed: int) -> Task:
                 # At least 2 lines of deformation.
                 continue
 
-            input_image = np.hstack([mask_image, random_image_with_padding])
+            input_image_raw = np.hstack([mask_image, random_image_with_padding])
 
-            output_image = input_image.copy()
+            output_image_raw = input_image_raw.copy()
             for y in range(mask_height):
                 if mask_image[y, 0] == 0:
                     continue
                 # Displace the row.
                 for x in range(random_image_with_padding_width):
-                    output_image[y, x + 1] = random_image_with_padding[y, (x - 1) % random_image_with_padding_width]
+                    output_image_raw[y, x + 1] = random_image_with_padding[y, (x + displacement) % random_image_with_padding_width]
+
+            input_image_rotated = np.rot90(input_image_raw, k=rotate_k)
+            output_image_rotated = np.rot90(output_image_raw, k=rotate_k)
+
+            input_image = image_replace_colors(input_image_rotated, input_output_color_map)
+            output_image = image_replace_colors(output_image_rotated, input_output_color_map)
 
             if np.array_equal(input_image, output_image):
                 # No change to the image. Try again.
