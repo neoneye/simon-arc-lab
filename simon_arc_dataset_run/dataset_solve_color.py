@@ -352,13 +352,15 @@ def generate_task_mostleast_popular_color(seed: int, find_id: str, output_size_i
     min_image_size = 1
     max_image_size = 22
 
+    available_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
     for i in range(count_example+count_test):
         is_example = i < count_example
 
         random_image = None
         found_color = None
         number_of_retries = 0
-        for retry_index in range(100):
+        for retry_index in range(10):
             iteration_seed = the_seed + i * 9392 + retry_index * 100033
             use_min_image_size = min_image_size
             if retry_index == 1:
@@ -375,9 +377,16 @@ def generate_task_mostleast_popular_color(seed: int, find_id: str, output_size_i
             else:
                 raise ValueError(f"Unknown find_id: {find_id}")
             
-            if found_color is not None:
-                number_of_retries = retry_index
-                break
+            if found_color in available_colors:
+                available_colors.remove(found_color)
+            else:
+                found_color = None
+
+            if found_color is None:
+                continue
+
+            number_of_retries = retry_index
+            break
 
         if random_image is None:
             raise ValueError(f"Failed to create random image")
