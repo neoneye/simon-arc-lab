@@ -141,9 +141,15 @@ def generate_task_replace_color_pairs_with_different_palettes(seed: int, transfo
     # count_test = 1
     task = Task()
     min_image_size = 3
-    max_image_size = 20
-    min_padding = 1
-    max_padding = 5
+    max_image_size = 22
+    min_padding = 0
+    max_padding = 7
+
+    uses_padding = (transformation_id == 'crop') or (transformation_id == 'padding')
+    if uses_padding:
+        resolved_max_image_size = max_image_size - (max_padding * 2)
+    else:
+        resolved_max_image_size = max_image_size
 
     color_padding = 0
     color_background = 1
@@ -181,22 +187,32 @@ def generate_task_replace_color_pairs_with_different_palettes(seed: int, transfo
         pair_color = pair_colors[i]
 
         mask_image = None
-        for retry_index in range(10):
+        mask_image_with_padding = None
+        for retry_index in range(20):
             iteration_seed = seed + 1000 + retry_index * 100033 + i
-            width = random.Random(iteration_seed + 1).randint(min_image_size, max_image_size)
-            height = random.Random(iteration_seed + 2).randint(min_image_size, max_image_size)
+            width = random.Random(iteration_seed + 1).randint(min_image_size, resolved_max_image_size)
+            height = random.Random(iteration_seed + 2).randint(min_image_size, resolved_max_image_size)
             ratios = [0.2, 0.3, 0.4, 0.5]
             ratio = random.Random(iteration_seed + 3).choice(ratios)
             mask_image = image_create_random_with_two_colors(width, height, color_background, pair_color, ratio, iteration_seed + 4)
             histogram = Histogram.create_with_image(mask_image)
-            if histogram.number_of_unique_colors() == 2:
-                # print(f"retry_index: {retry_index}")
-                break
+            if histogram.number_of_unique_colors() != 2:
+                # print(f"retry_index: {retry_index} - wrong number of colors")
+                continue
+            if uses_padding:
+                # print(f"mask_image: {mask_image}")
+                mask_image_with_padding = image_pad_random(mask_image, iteration_seed + 5, color_padding, min_padding, max_padding)
+                # print(f"mask_image_with_padding: {mask_image_with_padding}")
+                height2, width2 = mask_image_with_padding.shape
+                if width2 > max_image_size or height2 > max_image_size:
+                    # print(f"retry_index: {retry_index} - the image is too big")
+                    continue
 
         if mask_image is None:
             raise ValueError(f"Failed to create mask_image with 2 colors")
         
-        mask_image_with_padding = image_pad_random(mask_image, seed + 1000 + i * 133, color_padding, min_padding, max_padding)
+        if uses_padding and (mask_image_with_padding is None):
+            raise ValueError(f"Failed to create mask_image_with_padding")
 
         if transformation_id == 'no_padding':
             input_image_raw = mask_image.copy()
