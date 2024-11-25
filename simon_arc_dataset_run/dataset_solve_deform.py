@@ -18,6 +18,7 @@ from simon_arc_lab.image_create_random_simple import *
 from simon_arc_lab.image_compress import *
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.benchmark import *
+from simon_arc_lab.cellular_automaton import *
 from simon_arc_dataset.simon_solve_version1_names import SIMON_SOLVE_VERSION1_NAMES
 from simon_arc_dataset.generate_solve import *
 from simon_arc_dataset.dataset_generator import *
@@ -37,7 +38,7 @@ def generate_task_displace_rows_based_on_mask(seed: int) -> Task:
     task = Task()
     task.metadata_task_id = 'deform_line'
     min_image_size = 4
-    max_image_size = 12
+    max_image_size = 22
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -45,8 +46,26 @@ def generate_task_displace_rows_based_on_mask(seed: int) -> Task:
         output_image = None
         for retry_index in range(100):
             iteration_seed = (the_seed * 37) + (retry_index * 10000) + i
-            random_image = image_create_random_advanced(iteration_seed + 1, min_image_size, max_image_size, min_image_size, max_image_size)
-            random_image_height, random_image_width = random_image.shape
+
+            random_image_width = random.Random(iteration_seed + 1).randint(min_image_size, max_image_size - 1)
+            random_image_height = random.Random(iteration_seed + 2).randint(min_image_size, max_image_size)
+
+            ratios = [0.4, 0.5, 0.6]
+            ratio = random.Random(iteration_seed + 3).choice(ratios)
+            random_image_raw = image_create_random_with_two_colors(random_image_width, random_image_height, 0, 1, ratio, iteration_seed + 4)
+            random_image01 = CARuleMaze().apply_wrap(random_image_raw, wrapx=False, wrapy=False, outside_value=0, step_count=3)
+
+            color_map = {
+                0: 2,
+                1: 3,
+            }
+
+            random_image23 = image_replace_colors(random_image01, color_map)
+
+            padding_right = image_create(1, random_image_height, 0)
+            random_image_with_padding = np.hstack([random_image23, padding_right])
+            random_image_with_padding_width = random_image_with_padding.shape[1]
+
 
             ratios = [0.2, 0.3, 0.4, 0.5]
             ratio = random.Random(iteration_seed + 2).choice(ratios)
@@ -64,15 +83,15 @@ def generate_task_displace_rows_based_on_mask(seed: int) -> Task:
                 # At least 2 lines of deformation.
                 continue
 
-            input_image = np.hstack([mask_image, random_image])
+            input_image = np.hstack([mask_image, random_image_with_padding])
 
             output_image = input_image.copy()
             for y in range(mask_height):
                 if mask_image[y, 0] == 0:
                     continue
                 # Displace the row.
-                for x in range(random_image_width):
-                    output_image[y, x + 1] = random_image[y, (x + 1) % random_image_width]
+                for x in range(random_image_with_padding_width):
+                    output_image[y, x + 1] = random_image_with_padding[y, (x - 1) % random_image_with_padding_width]
 
             if np.array_equal(input_image, output_image):
                 # No change to the image. Try again.
