@@ -45,8 +45,10 @@ def generate_task_replace_color_same_palette_for_all_pairs(seed: int, transforma
 
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=b1948b0a
     """
-    count_example = random.Random(seed + 1).randint(2, 4)
-    count_test = random.Random(seed + 2).randint(1, 2)
+    the_seed = seed * 77797
+
+    count_example = random.Random(the_seed + 1).randint(2, 4)
+    count_test = random.Random(the_seed + 2).randint(1, 2)
     # count_test = 1
     task = Task()
     min_image_size = 3
@@ -70,7 +72,7 @@ def generate_task_replace_color_same_palette_for_all_pairs(seed: int, transforma
     }
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    random.Random(seed + 3).shuffle(colors)
+    random.Random(the_seed + 3).shuffle(colors)
     color_map = {}
     for i in range(10):
         color_map[i] = colors[i]
@@ -83,7 +85,7 @@ def generate_task_replace_color_same_palette_for_all_pairs(seed: int, transforma
         mask_image = None
         mask_image_with_padding = None
         for retry_index in range(20):
-            iteration_seed = seed + 1000 + retry_index * 100033 + i
+            iteration_seed = the_seed + retry_index * 100033 + i * 1000
 
             width = random.Random(iteration_seed + 1).randint(min_image_size, resolved_max_image_size)
             height = random.Random(iteration_seed + 2).randint(min_image_size, resolved_max_image_size)
@@ -136,8 +138,10 @@ def generate_task_replace_color_pairs_with_different_palettes(seed: int, transfo
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=f76d97a5
     https://neoneye.github.io/arc/edit.html?dataset=ARC&task=b94a9452
     """
-    count_example = random.Random(seed + 1).randint(2, 4)
-    count_test = random.Random(seed + 2).randint(1, 2)
+    the_seed = seed * 85559
+
+    count_example = random.Random(the_seed + 1).randint(2, 4)
+    count_test = random.Random(the_seed + 2).randint(1, 2)
     # count_test = 1
     task = Task()
     min_image_size = 3
@@ -156,13 +160,13 @@ def generate_task_replace_color_pairs_with_different_palettes(seed: int, transfo
     color_replace_to = 2
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    random.Random(seed + 3).shuffle(colors)
+    random.Random(the_seed + 3).shuffle(colors)
     color_map = {}
     for i in range(10):
         color_map[i] = colors[i]
 
     available_colors = [3, 4, 5, 6, 7, 8, 9]
-    random.Random(seed + 4).shuffle(available_colors)
+    random.Random(the_seed + 4).shuffle(available_colors)
     pair_colors = []
     for i in range(count_example+count_test):
         pair_color = available_colors[i % len(available_colors)]
@@ -177,7 +181,7 @@ def generate_task_replace_color_pairs_with_different_palettes(seed: int, transfo
         available_palette_transformations = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
     else:
         raise ValueError(f"Unknown transformation_id: {transformation_id}")
-    palette_transformation = random.Random(seed + 5).choice(available_palette_transformations)
+    palette_transformation = random.Random(the_seed + 5).choice(available_palette_transformations)
 
     task.metadata_task_id = f'replace_color_different_palettes {transformation_id} palette_{palette_transformation}'
 
@@ -189,7 +193,7 @@ def generate_task_replace_color_pairs_with_different_palettes(seed: int, transfo
         mask_image = None
         mask_image_with_padding = None
         for retry_index in range(20):
-            iteration_seed = seed + 1000 + retry_index * 100033 + i
+            iteration_seed = the_seed + retry_index * 100033 + i * 1000
             width = random.Random(iteration_seed + 1).randint(min_image_size, resolved_max_image_size)
             height = random.Random(iteration_seed + 2).randint(min_image_size, resolved_max_image_size)
             ratios = [0.2, 0.3, 0.4, 0.5]
@@ -289,8 +293,9 @@ def generate_task_replace_color_pairs_with_different_palettes(seed: int, transfo
     return task
 
 def generate_task_swap_colors(seed: int) -> Task:
-    count_example = random.Random(seed + 1).randint(2, 4)
-    count_test = random.Random(seed + 1).randint(1, 2)
+    the_seed = seed * 55391
+    count_example = random.Random(the_seed + 1).randint(2, 4)
+    count_test = random.Random(the_seed + 1).randint(1, 2)
     # count_test = 1
     task = Task()
     task.metadata_task_id = 'swap_colors'
@@ -302,7 +307,7 @@ def generate_task_swap_colors(seed: int) -> Task:
 
         mask_image = None
         for retry_index in range(10):
-            iteration_seed = seed + 1000 + i + retry_index * 100033
+            iteration_seed = the_seed + i * 3821 + retry_index * 100033
             use_min_image_size = min_image_size
             if retry_index == 1:
                 use_min_image_size = 2
@@ -322,7 +327,7 @@ def generate_task_swap_colors(seed: int) -> Task:
             raise ValueError(f"Failed to create mask_image with 2 colors")
 
         colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-        random.Random(seed + 1000 + i).shuffle(colors)
+        random.Random(the_seed + 1000 + i).shuffle(colors)
         color0 = colors[0]
         color1 = colors[1]
 
@@ -360,7 +365,7 @@ def generate_task_mostleast_popular_color(seed: int, find_id: str, output_size_i
         random_image = None
         found_color = None
         number_of_retries = 0
-        for retry_index in range(10):
+        for retry_index in range(30):
             iteration_seed = the_seed + i * 9392 + retry_index * 100033
             use_min_image_size = min_image_size
             if retry_index == 1:
