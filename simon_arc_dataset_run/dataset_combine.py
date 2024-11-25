@@ -112,7 +112,7 @@ if __name__ == "__main__":
         # DatasetCellularAutomaton(),
         # DatasetDilation(),
         # DatasetErosion(),
-        # DatasetHistogram(),
+        DatasetHistogram(),
         # DatasetImage(),
         # DatasetImagePair(),
         # DatasetMass(),
@@ -124,11 +124,11 @@ if __name__ == "__main__":
     ]
     generator_list_puzzles = [
         # DatasetSolveAugment(),
-        DatasetSolveBool(),
-        DatasetSolveBoundingBox(),
+        # DatasetSolveBool(),
+        # DatasetSolveBoundingBox(),
         DatasetSolveColor(),
         # DatasetSolveCompress(),
-        # DatasetSolveCount(),
+        DatasetSolveCount(),
         # DatasetSolveCross(),
         # DatasetSolveEdge(),
         # DatasetSolveErosion(),
@@ -141,8 +141,8 @@ if __name__ == "__main__":
         # DatasetSolveMask(),
         # DatasetSolveMass(),
         # DatasetSolveOutline(),
-        # DatasetSolveProbeColor(),
-        # DatasetSolveRay(),
+        DatasetSolveProbeColor(),
+        DatasetSolveRay(),
         # DatasetSolveRectangle(),
         # DatasetSolveReverse(),
         # DatasetSolveRotate(),
@@ -157,7 +157,7 @@ if __name__ == "__main__":
     generator_list = generator_list_not_puzzles + generator_list_puzzles
     generator = CombinedDatasetGenerator(generator_list)
     generator.generate(
-        seed=20,
+        seed=21,
         max_num_samples=4000,
         max_byte_size=1024*1024*100,
         # show=True
