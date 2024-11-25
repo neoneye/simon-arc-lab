@@ -347,13 +347,13 @@ def generate_task_swap_colors(seed: int) -> Task:
 
     return task
 
-def generate_task_mostleast_popular_color(seed: int, find_id: str, output_size_id: str) -> Task:
+def generate_task_most_or_least_popular_color(seed: int, find_id: str, output_size_id: str) -> Task:
     the_seed = seed * 38382351
     count_example = random.Random(the_seed + 1).randint(2, 4)
     count_test = random.Random(the_seed + 2).randint(1, 2)
     # count_test = 1
     task = Task()
-    task.metadata_task_id = f'mostleast_popular_color {find_id} {output_size_id}'
+    task.metadata_task_id = f'most_or_least_popular_color {find_id} {output_size_id}'
     min_image_size = 1
     max_image_size = 22
 
@@ -419,6 +419,68 @@ def generate_task_mostleast_popular_color(seed: int, find_id: str, output_size_i
 
     return task
 
+def generate_task_most_and_least_popular_colors(seed: int) -> Task:
+    the_seed = seed * 933391
+    count_example = random.Random(the_seed + 1).randint(2, 4)
+    count_test = random.Random(the_seed + 2).randint(1, 2)
+    # count_test = 1
+
+    rotate_k = random.Random(the_seed + 3).randint(0, 3)
+
+    task = Task()
+    task.metadata_task_id = f'most_and_least_popular_colors rotate_{rotate_k}'
+    min_image_size = 1
+    max_image_size = 22
+
+    available_colors_most_popular = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    available_colors_least_popular = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+    for i in range(count_example+count_test):
+        is_example = i < count_example
+
+        random_image = None
+        found_color_most_popular = None
+        found_color_least_popular = None
+        number_of_retries = 0
+        for retry_index in range(30):
+            iteration_seed = the_seed + i * 9392 + retry_index * 100033
+            use_min_image_size = min_image_size
+            if retry_index == 1:
+                use_min_image_size = 2
+            if retry_index >= 2:
+                use_min_image_size = 3
+            random_image = image_create_random_advanced(iteration_seed, use_min_image_size, max_image_size, use_min_image_size, max_image_size)
+            histogram = Histogram.create_with_image(random_image)
+            if is_example and histogram.number_of_unique_colors() < 2:
+                continue
+            found_color_most_popular = histogram.most_popular_color()
+            found_color_least_popular = histogram.least_popular_color()
+
+            if found_color_most_popular in available_colors_most_popular and found_color_least_popular in available_colors_least_popular:
+                available_colors_most_popular.remove(found_color_most_popular)
+                available_colors_least_popular.remove(found_color_least_popular)
+            else:
+                continue
+
+            number_of_retries = retry_index
+            break
+
+        if random_image is None:
+            raise ValueError(f"Failed to create random image")
+        if found_color_most_popular is None or found_color_least_popular is None:
+            raise ValueError(f"Failed to find colors")
+        if number_of_retries >= 50:
+            print(f"number_of_retries: {number_of_retries}")
+
+        input_image = random_image
+
+        output_image_raw = np.array([[found_color_most_popular, found_color_least_popular]], dtype=np.uint8)
+        output_image = np.rot90(output_image_raw, k=rotate_k)
+
+        task.append_pair(input_image, output_image, is_example)
+
+    return task
+
 def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: str) -> list[dict]:
     builder = DatasetItemListBuilder(seed, task, DATASET_NAMES, BENCHMARK_DATASET_NAME, transformation_id)
     # builder.append_image_randomized()
@@ -427,7 +489,7 @@ def generate_dataset_item_list_inner(seed: int, task: Task, transformation_id: s
 
 class DatasetSolveColor(DatasetGenerator):
     def generate_dataset_item_list(self, seed: int, show: bool) -> list[dict]:
-        j = seed % 11
+        j = seed % 12
         if j == 0:
             task = generate_task_replace_color_same_palette_for_all_pairs(seed, 'no_padding')
         elif j == 1:
@@ -443,13 +505,15 @@ class DatasetSolveColor(DatasetGenerator):
         elif j == 6:
             task = generate_task_swap_colors(seed)
         elif j == 7:
-            task = generate_task_mostleast_popular_color(seed, 'most_popular', '1x1')
+            task = generate_task_most_or_least_popular_color(seed, 'most_popular', '1x1')
         elif j == 8:
-            task = generate_task_mostleast_popular_color(seed, 'least_popular', '1x1')
+            task = generate_task_most_or_least_popular_color(seed, 'least_popular', '1x1')
         elif j == 9:
-            task = generate_task_mostleast_popular_color(seed, 'most_popular', 'same')
+            task = generate_task_most_or_least_popular_color(seed, 'most_popular', 'same')
         elif j == 10:
-            task = generate_task_mostleast_popular_color(seed, 'least_popular', 'same')
+            task = generate_task_most_or_least_popular_color(seed, 'least_popular', 'same')
+        elif j == 11:
+            task = generate_task_most_and_least_popular_colors(seed)
         else:
             raise ValueError(f"Unknown j: {j}")
 
