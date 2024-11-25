@@ -294,27 +294,22 @@ def generate_task_swap_colors(seed: int) -> Task:
     # count_test = 1
     task = Task()
     task.metadata_task_id = 'swap_colors'
-    min_width = 1
-    max_width = 30
-    min_height = 1
-    max_height = 30
+    min_image_size = 3
+    max_image_size = 22
 
     for i in range(count_example+count_test):
         is_example = i < count_example
 
         mask_image = None
         for retry_index in range(10):
-            iteration_seed = seed + 1000 + i
-            use_min_width = min_width
-            use_min_height = min_height
+            iteration_seed = seed + 1000 + i + retry_index * 100033
+            use_min_image_size = min_image_size
             if retry_index == 1:
-                use_min_width = 2
-                use_min_height = 2
+                use_min_image_size = 2
             if retry_index >= 2:
-                use_min_width = 3
-                use_min_height = 3
-            width = random.Random(iteration_seed + 1).randint(use_min_width, max_width)
-            height = random.Random(iteration_seed + 2).randint(use_min_height, max_height)
+                use_min_image_size = 3
+            width = random.Random(iteration_seed + 1).randint(use_min_image_size, max_image_size)
+            height = random.Random(iteration_seed + 2).randint(use_min_image_size, max_image_size)
             ratios = [0.2, 0.3, 0.4, 0.5]
             ratio = random.Random(iteration_seed + 3).choice(ratios)
             mask_image = image_create_random_with_two_colors(width, height, 0, 1, ratio, iteration_seed + 4)
