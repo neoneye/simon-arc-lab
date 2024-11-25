@@ -343,15 +343,14 @@ def generate_task_swap_colors(seed: int) -> Task:
     return task
 
 def generate_task_mostleast_popular_color(seed: int, find_id: str, output_size_id: str) -> Task:
-    count_example = random.Random(seed + 1).randint(2, 4)
-    count_test = random.Random(seed + 2).randint(1, 2)
+    the_seed = seed * 38382351
+    count_example = random.Random(the_seed + 1).randint(2, 4)
+    count_test = random.Random(the_seed + 2).randint(1, 2)
     # count_test = 1
     task = Task()
     task.metadata_task_id = f'mostleast_popular_color {find_id} {output_size_id}'
-    min_width = 1
-    max_width = 30
-    min_height = 1
-    max_height = 30
+    min_image_size = 1
+    max_image_size = 22
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -360,16 +359,13 @@ def generate_task_mostleast_popular_color(seed: int, find_id: str, output_size_i
         found_color = None
         number_of_retries = 0
         for retry_index in range(100):
-            iteration_seed = seed + 1000 + i + retry_index * 100033
-            use_min_width = min_width
-            use_min_height = min_height
+            iteration_seed = the_seed + i * 9392 + retry_index * 100033
+            use_min_image_size = min_image_size
             if retry_index == 1:
-                use_min_width = 2
-                use_min_height = 2
+                use_min_image_size = 2
             if retry_index >= 2:
-                use_min_width = 3
-                use_min_height = 3
-            random_image = image_create_random_advanced(iteration_seed, use_min_width, max_width, use_min_height, max_height)
+                use_min_image_size = 3
+            random_image = image_create_random_advanced(iteration_seed, use_min_image_size, max_image_size, use_min_image_size, max_image_size)
             histogram = Histogram.create_with_image(random_image)
             found_color = None
             if find_id == 'most_popular':
