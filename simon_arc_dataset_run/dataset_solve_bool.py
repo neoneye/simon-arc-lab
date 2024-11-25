@@ -53,7 +53,7 @@ def generate_task_bool_transformation(seed: int, transformation_id: str) -> Task
     task = Task()
     task.metadata_task_id = transformation_id
     min_image_size = 2
-    max_image_size = 13
+    max_image_size = 22
 
     input_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(input_colors)

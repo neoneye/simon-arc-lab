@@ -71,7 +71,7 @@ def generate_task_boundingbox_of_lonely_pixels(seed: int, transformation_id: str
     # count_test = 1
     task = Task()
     min_image_size = 3
-    max_image_size = 14
+    max_image_size = 22
 
     input_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(input_colors)
@@ -182,7 +182,7 @@ def generate_task_inner_boundingbox(seed: int, transformation_id: str) -> Task:
     count_test = random.Random(seed + 2).randint(1, 2)
     # count_test = 1
     task = Task()
-    max_image_size = 14
+    max_image_size = 22
 
     available_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(available_colors)
