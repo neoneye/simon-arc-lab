@@ -148,18 +148,18 @@ if __name__ == "__main__":
         # DatasetSolveRectangle(),
         # DatasetSolveReverse(),
         # DatasetSolveRotate(),
-        # DatasetSolveScale(),
-        DatasetSolveSpan(),
+        DatasetSolveScale(),
+        # DatasetSolveSpan(),
         # DatasetSolveSkew(),
-        # DatasetSolveSymmetry(),
+        DatasetSolveSymmetry(),
         # DatasetSolveTemplate(),
         # DatasetSolveTranslate(),
-        # DatasetSolveZIndex(),
+        DatasetSolveZIndex(),
     ]
     generator_list = generator_list_not_puzzles + generator_list_puzzles
     generator = CombinedDatasetGenerator(generator_list)
     generator.generate(
-        seed=24,
+        seed=26,
         max_num_samples=4000,
         max_byte_size=1024*1024*100,
         # show=True
