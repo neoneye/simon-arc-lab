@@ -32,6 +32,7 @@ dataset_solve_half.jsonl
 dataset_solve_halfplane.jsonl
 dataset_solve_mask.jsonl
 dataset_solve_mass.jsonl
+dataset_solve_mirror.jsonl
 dataset_solve_outline.jsonl
 dataset_solve_probecolor.jsonl
 dataset_solve_ray.jsonl
