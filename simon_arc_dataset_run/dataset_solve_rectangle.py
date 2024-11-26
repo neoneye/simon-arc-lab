@@ -45,7 +45,7 @@ def generate_task_with_rectangles(seed: int, transformation_id: str) -> Task:
     min_rect_size = 3
     max_rect_size = 7
     min_image_size = 8
-    max_image_size = 16
+    max_image_size = 22
     min_rect_count = 2
     max_rect_count = 4
 

@@ -32,7 +32,7 @@ def generate_task(seed: int) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 5
-    max_image_size = 25
+    max_image_size = 22
 
     probecolor_direction_list = [
         ImageRaytraceProbeColorDirection.TOP,

@@ -34,7 +34,7 @@ def generate_task_outline_all8(seed: int) -> Task:
     task = Task()
     task.metadata_task_id = 'outline_all8'
     min_image_size = 3
-    max_image_size = 10
+    max_image_size = 22
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(colors)

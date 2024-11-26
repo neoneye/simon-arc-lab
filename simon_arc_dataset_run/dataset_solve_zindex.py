@@ -47,7 +47,7 @@ def generate_task_mask_of_primary_rectangle(seed: int) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 6
-    max_image_size = 15
+    max_image_size = 22
 
     # input colors
     colors_input = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -118,7 +118,7 @@ def generate_task_mask_of_obscured_rectangle(seed: int) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 6
-    max_image_size = 15
+    max_image_size = 22
 
     # input colors
     colors_input = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -233,7 +233,7 @@ def generate_task_mask_of_intersection_rectangle(seed: int) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 6
-    max_image_size = 15
+    max_image_size = 22
 
     # input colors
     colors_input = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -348,7 +348,7 @@ def generate_task_move_obscured_rectangle_to_top(seed: int) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 6
-    max_image_size = 15
+    max_image_size = 22
 
     # input/output colors
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]

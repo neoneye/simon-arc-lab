@@ -39,7 +39,7 @@ def generate_task_emit_rays_from_lonely_pixels(seed: int) -> Task:
     # count_test = 1
     task = Task()
     min_image_size = 5
-    max_image_size = 20
+    max_image_size = 22
     max_number_of_positions = 4
 
     input_colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
