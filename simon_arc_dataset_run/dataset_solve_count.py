@@ -25,7 +25,7 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_count'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_count.jsonl')
 
-MAX_IMAGE_SIZE = 22
+MAX_IMAGE_SIZE = 12
 
 def generate_task_count_pixels_and_repeat_output_pattern(seed: int, transformation_id: str) -> Task:
     """

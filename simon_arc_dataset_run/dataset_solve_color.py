@@ -38,7 +38,7 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_color'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_color.jsonl')
 
-MAX_IMAGE_SIZE = 22
+MAX_IMAGE_SIZE = 12
 
 def generate_task_replace_color_same_palette_for_all_pairs(seed: int, transformation_id: str) -> Task:
     """
@@ -56,7 +56,7 @@ def generate_task_replace_color_same_palette_for_all_pairs(seed: int, transforma
     min_image_size = 3
     max_image_size = MAX_IMAGE_SIZE
     min_padding = 0
-    max_padding = 7
+    max_padding = 3
 
     uses_padding = (transformation_id == 'crop') or (transformation_id == 'padding')
     if uses_padding:
@@ -149,7 +149,7 @@ def generate_task_replace_color_pairs_with_different_palettes(seed: int, transfo
     min_image_size = 3
     max_image_size = MAX_IMAGE_SIZE
     min_padding = 0
-    max_padding = 7
+    max_padding = 3
 
     uses_padding = (transformation_id == 'crop') or (transformation_id == 'padding')
     if uses_padding:

@@ -33,7 +33,7 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_mirror'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_mirror.jsonl')
 
-MAX_IMAGE_SIZE = 22
+MAX_IMAGE_SIZE = 12
 
 def random_asymmetric_object_maze(seed: int, min_size: int, max_size: int, color0: int, color1: int) -> np.array:
     if min_size > max_size:

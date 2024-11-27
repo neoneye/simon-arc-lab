@@ -36,6 +36,8 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_template'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_template.jsonl')
 
+MAX_IMAGE_SIZE = 12
+
 def generate_task_with_template_areas(seed: int, transformation_id: str) -> Task:
     """
     Create some template areas, and insert objects into them.
@@ -49,7 +51,7 @@ def generate_task_with_template_areas(seed: int, transformation_id: str) -> Task
     min_template_size = 2
     max_template_size = 4
     min_image_size = 6
-    max_image_size = 15
+    max_image_size = MAX_IMAGE_SIZE
     min_rect_count = 2
     max_rect_count = 3
 
