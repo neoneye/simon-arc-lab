@@ -27,7 +27,7 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_deform'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_deform.jsonl')
 
-MAX_IMAGE_SIZE = 20
+MAX_IMAGE_SIZE = 22
 
 def generate_task_displace_rows_based_on_mask(seed: int) -> Task:
     """

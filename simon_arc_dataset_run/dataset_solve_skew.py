@@ -24,7 +24,7 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_skew'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_skew.jsonl')
 
-MAX_IMAGE_SIZE = 20
+MAX_IMAGE_SIZE = 22
 
 def generate_task_skew(seed: int, direction: SkewDirection) -> Task:
     """

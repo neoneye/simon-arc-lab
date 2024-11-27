@@ -36,7 +36,7 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_template'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_template.jsonl')
 
-MAX_IMAGE_SIZE = 20
+MAX_IMAGE_SIZE = 22
 
 def generate_task_with_template_areas(seed: int, transformation_id: str) -> Task:
     """
