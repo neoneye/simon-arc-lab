@@ -38,6 +38,8 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_color'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_color.jsonl')
 
+MAX_IMAGE_SIZE = 22
+
 def generate_task_replace_color_same_palette_for_all_pairs(seed: int, transformation_id: str) -> Task:
     """
     Replace one color with another color.
@@ -52,7 +54,7 @@ def generate_task_replace_color_same_palette_for_all_pairs(seed: int, transforma
     # count_test = 1
     task = Task()
     min_image_size = 3
-    max_image_size = 22
+    max_image_size = MAX_IMAGE_SIZE
     min_padding = 0
     max_padding = 7
 
@@ -145,7 +147,7 @@ def generate_task_replace_color_pairs_with_different_palettes(seed: int, transfo
     # count_test = 1
     task = Task()
     min_image_size = 3
-    max_image_size = 22
+    max_image_size = MAX_IMAGE_SIZE
     min_padding = 0
     max_padding = 7
 
@@ -300,7 +302,7 @@ def generate_task_swap_colors(seed: int) -> Task:
     task = Task()
     task.metadata_task_id = 'swap_colors'
     min_image_size = 3
-    max_image_size = 22
+    max_image_size = MAX_IMAGE_SIZE
 
     for i in range(count_example+count_test):
         is_example = i < count_example
@@ -355,7 +357,7 @@ def generate_task_identify_most_or_least_popular_color(seed: int, find_id: str, 
     task = Task()
     task.metadata_task_id = f'identify_most_or_least_popular_color {find_id} {output_size_id}'
     min_image_size = 1
-    max_image_size = 22
+    max_image_size = MAX_IMAGE_SIZE
     output_image_width = random.Random(the_seed + 3).randint(1, 5)
     output_image_height = random.Random(the_seed + 4).randint(1, 5)
 
@@ -432,7 +434,7 @@ def generate_task_identify_most_and_least_popular_colors(seed: int) -> Task:
     task = Task()
     task.metadata_task_id = f'identify_most_and_least_popular_colors rotate_{rotate_k}'
     min_image_size = 1
-    max_image_size = 22
+    max_image_size = MAX_IMAGE_SIZE
 
     available_colors_most_popular = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     available_colors_least_popular = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -492,7 +494,7 @@ def generate_task_swap_most_and_least_popular_colors(seed: int) -> Task:
     task = Task()
     task.metadata_task_id = f'swap_most_and_least_popular_colors'
     min_image_size = 3
-    max_image_size = 22
+    max_image_size = MAX_IMAGE_SIZE
 
     available_colors_most_popular = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     available_colors_least_popular = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
