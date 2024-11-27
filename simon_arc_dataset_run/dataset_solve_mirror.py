@@ -33,7 +33,12 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_mirror'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_mirror.jsonl')
 
+MAX_IMAGE_SIZE = 22
+
 def random_asymmetric_object_maze(seed: int, min_size: int, max_size: int, color0: int, color1: int) -> np.array:
+    if min_size > max_size:
+        raise Exception(f"min_size={min_size} > max_size={max_size}")
+    
     for retry_index in range(100):
         iteration_seed = seed * 37 + retry_index * 100
         width = random.Random(iteration_seed + 1).randint(min_size, max_size)
@@ -98,7 +103,7 @@ def generate_task_mirror_swap_objects(seed: int) -> Task:
     task = Task()
     task.metadata_task_id = f'mirror a_{align_a} b_{align_b} rotate_{rotate_k}'
     min_image_size = 8
-    max_image_size = 22
+    max_image_size = MAX_IMAGE_SIZE
     half_max_width = (max_image_size - 1) // 2
 
 
@@ -145,6 +150,9 @@ def generate_task_mirror_swap_objects(seed: int) -> Task:
             left_output_image = left_image.copy()
             right_output_image = right_image.copy()
 
+            if random_image_height < object0_height:
+                # print(f"The object is too big for the image. random_image_height={random_image_height} < object0_height={object0_height}")
+                continue
             position_y = random.Random(iteration_seed + 7).randint(0, random_image_height - object0_height)
 
             if align_a == 'left':
