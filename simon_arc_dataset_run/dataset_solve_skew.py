@@ -24,6 +24,8 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_skew'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_skew.jsonl')
 
+MAX_IMAGE_SIZE = 22
+
 def generate_task_skew(seed: int, direction: SkewDirection) -> Task:
     """
     Skew an image.
@@ -34,7 +36,7 @@ def generate_task_skew(seed: int, direction: SkewDirection) -> Task:
     task = Task()
     task.metadata_task_id = f'skew_{direction.name.lower()}'
     min_image_size = 1
-    max_image_size = 16
+    max_image_size = MAX_IMAGE_SIZE
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(colors)
@@ -49,7 +51,16 @@ def generate_task_skew(seed: int, direction: SkewDirection) -> Task:
         output_image = None
         for retry_index in range(100):
             iteration_seed = (retry_index * 10000) + (seed * 37) + (i * 9932342) + 101
-            random_image = image_create_random_advanced(iteration_seed, min_image_size, max_image_size, min_image_size, max_image_size)
+
+            random_width = random.Random(iteration_seed + 1).randint(min_image_size, max_image_size)
+            random_height = random.Random(iteration_seed + 2).randint(min_image_size, max_image_size)
+
+            skewed_output_size = random_width + random_height - 1
+            if skewed_output_size > max_image_size:
+                # print("Skip too large size for output")
+                continue
+
+            random_image = image_create_random_advanced(iteration_seed + 3, random_width, random_width, random_height, random_height)
 
             # We are not interested in an empty image
             histogram = Histogram.create_with_image(random_image)
@@ -61,11 +72,17 @@ def generate_task_skew(seed: int, direction: SkewDirection) -> Task:
                 continue
 
             # If the the height is 1 or the width is 1, then it's ambiguous what kind of skew it is.
-            height, width = random_image.shape
-            if height > 1 and width > 1:
+            input_height, input_width = random_image.shape
+            if input_height > 1 and input_width > 1:
                 is_ambiguous = False
             if is_ambiguous:
                 # print("Skip ambiguous pair")
+                continue
+
+            output_height, output_width = skewed_image.shape
+
+            if output_width > max_image_size or output_height > max_image_size:
+                # print("Skip too large output image")
                 continue
 
             input_image = image_replace_colors(random_image, color_map)
@@ -88,7 +105,7 @@ def generate_task_unskew(seed: int, direction: SkewDirection) -> Task:
     task = Task()
     task.metadata_task_id = f'unskew_{direction.name.lower()}'
     min_image_size = 1
-    max_image_size = 16
+    max_image_size = MAX_IMAGE_SIZE
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 3).shuffle(colors)
@@ -103,7 +120,16 @@ def generate_task_unskew(seed: int, direction: SkewDirection) -> Task:
         output_image = None
         for retry_index in range(100):
             iteration_seed = (retry_index * 10000) + (seed * 37) + (i * 9932342) + 101
-            random_image = image_create_random_advanced(iteration_seed, min_image_size, max_image_size, min_image_size, max_image_size)
+
+            random_width = random.Random(iteration_seed + 1).randint(min_image_size, max_image_size)
+            random_height = random.Random(iteration_seed + 2).randint(min_image_size, max_image_size)
+
+            skewed_output_size = random_width + random_height - 1
+            if skewed_output_size > max_image_size:
+                # print("Skip too large size for output")
+                continue
+
+            random_image = image_create_random_advanced(iteration_seed + 3, random_width, random_width, random_height, random_height)
 
             # We are not interested in an empty image
             histogram = Histogram.create_with_image(random_image)
@@ -114,9 +140,14 @@ def generate_task_unskew(seed: int, direction: SkewDirection) -> Task:
             if np.array_equal(random_image, skewed_image):
                 continue
 
+            input_height, input_width = skewed_image.shape
+            if input_height > max_image_size or input_width > max_image_size:
+                # print("Skip too large input image")
+                continue
+
             # If the the height is 1 or the width is 1, then it's ambiguous what kind of skew it is.
-            height, width = random_image.shape
-            if height > 1 and width > 1:
+            output_height, output_width = random_image.shape
+            if output_height > 1 and output_width > 1:
                 is_ambiguous = False
             if is_ambiguous:
                 # print("Skip ambiguous pair")
