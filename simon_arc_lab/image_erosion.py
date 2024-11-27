@@ -1,5 +1,6 @@
 import numpy as np
 from .pixel_connectivity import PixelConnectivity
+from scipy.ndimage import binary_erosion
 
 def image_erosion(image: np.array, pixel_connectivity: PixelConnectivity) -> np.array:
     """
@@ -47,28 +48,5 @@ def image_erosion(image: np.array, pixel_connectivity: PixelConnectivity) -> np.
     else:
         raise ValueError(f'Unknown pixel connectivity: {pixel_connectivity}')
     
-    # count number of 1s in the kernel
-    number_of_ones_in_kernel = np.sum(kernel)
-
-    # Pad the image with a 1px border that is 0
-    image_with_padding = np.zeros((image.shape[0] + 2, image.shape[1] + 2), dtype=np.uint8)
-    image_with_padding[1:-1, 1:-1] = image  # Insert original image into the padded array
-
-    height, width = image_with_padding.shape
-
-    # Convolve the image with the kernel
-    output_with_padding = np.zeros(image_with_padding.shape, dtype=np.uint8)
-    for y in range(height - 2):
-        for x in range(width - 2):
-            count = 0
-            for dy in range(3):
-                for dx in range(3):
-                    if kernel[dy, dx] > 0 and image_with_padding[y + dy, x + dx] > 0:
-                        count += 1
-            if count == number_of_ones_in_kernel:
-                output_with_padding[y + 1, x + 1] = 1
-
-    # remove the padding
-    output = output_with_padding[1:-1, 1:-1]
-
+    output = binary_erosion(image, structure=kernel).astype(np.uint8)
     return output
