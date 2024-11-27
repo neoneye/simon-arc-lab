@@ -128,12 +128,12 @@ if __name__ == "__main__":
         # DatasetSolveAugment(),
         # DatasetSolveBool(),
         # DatasetSolveBoundingBox(),
-        # DatasetSolveColor(),
+        DatasetSolveColor(),
         # DatasetSolveCompress(),
-        # DatasetSolveCount(),
+        DatasetSolveCount(),
         # DatasetSolveCross(),
         # DatasetSolveEdge(),
-        # DatasetSolveErosion(),
+        DatasetSolveErosion(),
         DatasetSolveDeform(),
         # DatasetSolveFlip(),
         # DatasetSolveFractal(),
@@ -152,16 +152,16 @@ if __name__ == "__main__":
         # DatasetSolveRotate(),
         # DatasetSolveScale(),
         # DatasetSolveSpan(),
-        # DatasetSolveSkew(),
-        DatasetSolveSymmetry(),
-        # DatasetSolveTemplate(),
+        DatasetSolveSkew(),
+        # DatasetSolveSymmetry(),
+        DatasetSolveTemplate(),
         # DatasetSolveTranslate(),
         # DatasetSolveZIndex(),
     ]
     generator_list = generator_list_not_puzzles + generator_list_puzzles
     generator = CombinedDatasetGenerator(generator_list)
     generator.generate(
-        seed=38,
+        seed=39,
         max_num_samples=8000,
         max_byte_size=1024*1024*100,
         # show=True
