@@ -38,7 +38,7 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_color'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_color.jsonl')
 
-MAX_IMAGE_SIZE = 12
+MAX_IMAGE_SIZE = 16
 
 def generate_task_replace_color_same_palette_for_all_pairs(seed: int, transformation_id: str) -> Task:
     """
