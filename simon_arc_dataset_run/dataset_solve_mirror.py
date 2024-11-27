@@ -102,9 +102,9 @@ def generate_task_mirror_swap_objects(seed: int) -> Task:
 
     task = Task()
     task.metadata_task_id = f'mirror a_{align_a} b_{align_b} rotate_{rotate_k}'
-    min_image_size = 8
     max_image_size = MAX_IMAGE_SIZE
     half_max_width = (max_image_size - 1) // 2
+    min_image_size = half_max_width - 1
 
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
