@@ -27,6 +27,8 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_deform'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_deform.jsonl')
 
+MAX_IMAGE_SIZE = 22
+
 def generate_task_displace_rows_based_on_mask(seed: int) -> Task:
     """
     Displace rows depending on the content of the first column.
@@ -40,7 +42,7 @@ def generate_task_displace_rows_based_on_mask(seed: int) -> Task:
     task = Task()
     task.metadata_task_id = f'deform_line rotate_{rotate_k} displacement_{displacement}'
     min_image_size = 4
-    max_image_size = 22
+    max_image_size = MAX_IMAGE_SIZE
 
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -61,7 +63,7 @@ def generate_task_displace_rows_based_on_mask(seed: int) -> Task:
         for retry_index in range(100):
             iteration_seed = (the_seed * 37) + (retry_index * 10000) + i
 
-            random_image_width = random.Random(iteration_seed + 1).randint(min_image_size, max_image_size - 1)
+            random_image_width = random.Random(iteration_seed + 1).randint(min_image_size, max_image_size - 2)
             random_image_height = random.Random(iteration_seed + 2).randint(min_image_size, max_image_size)
 
             ratios = [0.4, 0.5, 0.6]
