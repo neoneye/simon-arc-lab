@@ -25,6 +25,8 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_count'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_count.jsonl')
 
+MAX_IMAGE_SIZE = 22
+
 def generate_task_count_pixels_and_repeat_output_pattern(seed: int, transformation_id: str) -> Task:
     """
     The input images shows N lonely pixels.
@@ -39,7 +41,7 @@ def generate_task_count_pixels_and_repeat_output_pattern(seed: int, transformati
     # count_test = 1
     task = Task()
     min_image_size = 3
-    max_image_size = 14
+    max_image_size = MAX_IMAGE_SIZE
     min_pattern_size = 1
     max_pattern_size = 5
     min_count = 1
@@ -151,7 +153,7 @@ def generate_task_count_pixels_and_repeat_input_pattern(seed: int, transformatio
     # count_test = 1
     task = Task()
     min_image_size = 4
-    max_image_size = 30
+    max_image_size = MAX_IMAGE_SIZE
     min_pattern_size = 2
     max_pattern_size = 6
     min_count = 1

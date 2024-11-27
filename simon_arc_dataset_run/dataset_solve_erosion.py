@@ -29,6 +29,8 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_erosion'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_erosion.jsonl')
 
+MAX_IMAGE_SIZE = 11
+
 def generate_task_erosion(seed: int, connectivity: PixelConnectivity) -> Task:
     """
     Create an eroded image from an input image, by removing the outermost pixels.
@@ -40,10 +42,8 @@ def generate_task_erosion(seed: int, connectivity: PixelConnectivity) -> Task:
     # count_test = 1
     task = Task()
     task.metadata_task_id = f'erosion {connectivity_name_lower}'
-    min_width = 3
-    max_width = 11
-    min_height = 3
-    max_height = 11
+    min_image_size = 3
+    max_image_size = MAX_IMAGE_SIZE
 
     colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     random.Random(seed + 11).shuffle(colors)
@@ -59,7 +59,7 @@ def generate_task_erosion(seed: int, connectivity: PixelConnectivity) -> Task:
         input_image = None
         output_image = None
         for retry_index in range(100):
-            input_image = image_create_random_advanced((retry_index * 10000) + (seed * 37) + 101 + i, min_width, max_width, min_height, max_height)
+            input_image = image_create_random_advanced((retry_index * 10000) + (seed * 37) + 101 + i, min_image_size, max_image_size, min_image_size, max_image_size)
             image_mask = image_erosion_multicolor(input_image, connectivity)
 
             # most of the eroded images, have the same color for all pixels, except the border. Ignore those.
