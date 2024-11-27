@@ -161,7 +161,7 @@ if __name__ == "__main__":
     generator_list = generator_list_not_puzzles + generator_list_puzzles
     generator = CombinedDatasetGenerator(generator_list)
     generator.generate(
-        seed=40,
+        seed=41,
         max_num_samples=8000,
         max_byte_size=1024*1024*100,
         # show=True

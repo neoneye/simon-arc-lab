@@ -29,7 +29,7 @@ DATASET_NAMES = SIMON_SOLVE_VERSION1_NAMES
 BENCHMARK_DATASET_NAME = 'solve_erosion'
 SAVE_FILE_PATH = os.path.join(os.path.dirname(__file__), 'dataset_solve_erosion.jsonl')
 
-MAX_IMAGE_SIZE = 18
+MAX_IMAGE_SIZE = 20
 
 def generate_task_erosion(seed: int, connectivity: PixelConnectivity) -> Task:
     """
