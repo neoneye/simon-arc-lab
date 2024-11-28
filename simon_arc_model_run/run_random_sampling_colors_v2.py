@@ -311,6 +311,9 @@ def xs_ys_from_input_target_pairs(input_target_pairs: list) -> tuple[list, list]
         # print(f"n: {n}")
         for y in range(n):
             for x in range(n):
+                # if x == y:
+                #     continue
+
                 input_values = input_data_samples[y]
                 target_values = target_data_samples[x]
 
