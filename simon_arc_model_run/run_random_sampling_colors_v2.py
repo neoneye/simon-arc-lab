@@ -74,6 +74,37 @@ def datapoints_from_input_image(pair_id: int, image: np.array) -> list:
     # else:
     #     mass_image = object_mass(component_list)
 
+    positions5x5 = [
+        (0, 0),
+        (0, 1),
+        (0, 2),
+        (0, 3),
+        (0, 4),
+        (1, 4),
+        (2, 4),
+        (3, 4),
+        (4, 4),
+        (4, 3),
+        (4, 2),
+        (4, 1),
+        (4, 0),
+        (3, 0),
+        (2, 0),
+        (1, 0),
+    ]
+
+    positions3x3 = [
+        (0, 0),
+        (0, 1),
+        (0, 2),
+        (1, 2),
+        (2, 2),
+        (2, 1),
+        (2, 0),
+        (1, 0),
+        (0, 0),
+    ]
+
     for y in range(height):
         for x in range(width):
             pixel_value = image[y, x]
@@ -86,20 +117,21 @@ def datapoints_from_input_image(pair_id: int, image: np.array) -> list:
             #     shape3x3center_id |= 2
             count_same = 0
             count_different = 0
-            for dx in range(5):
-                for dy in range(5):
-                    if dx >= 1 and dx <= 3 and dy >= 1 and dy <= 3:
-                        continue
-                    x2 = x + dx - 2
-                    y2 = y + dy - 2
-                    pixel_value2 = 10
-                    if x2 >= 0 and x2 < width and y2 >= 0 and y2 < height:
-                        pixel_value2 = image[y2, x2]
-                    if pixel_value2 == pixel_value:
-                        count_same += 1
-                    else:
-                        count_different += 1
-            shape3x3center_id = count_different
+            count_change = 0
+            last_color = 10
+            for pos_index, (dx, dy) in enumerate(positions3x3):
+                x2 = x + dx - 1
+                y2 = y + dy - 1
+                pixel_value2 = 10
+                if x2 >= 0 and x2 < width and y2 >= 0 and y2 < height:
+                    pixel_value2 = image[y2, x2]
+                if pos_index == 0:
+                    last_color = pixel_value2
+                    continue
+                if pixel_value2 != last_color:
+                    count_change += 1
+                last_color = pixel_value2
+            shape3x3center_id = count_change
             values = [
                 pair_id,
                 pixel_value,
