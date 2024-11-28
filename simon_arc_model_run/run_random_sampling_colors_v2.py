@@ -19,6 +19,12 @@ from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.gallery_generator import gallery_generator_run
 from simon_arc_lab.show_prediction_result import show_prediction_result, show_multiple_images
 from simon_arc_lab.image_noise import *
+from simon_arc_lab.image_shape3x3_center import *
+from simon_arc_lab.image_shape3x3_opposite import *
+from simon_arc_lab.pixel_connectivity import *
+from simon_arc_lab.connected_component import *
+from simon_arc_lab.image_object_mass import *
+from simon_arc_lab.histogram import *
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -50,6 +56,71 @@ class DataPoint(Enum):
     WIDTH = 4
     HEIGHT = 5
     PIXEL_VALUES = 6
+    SHAPE3X3CENTER_ID = 7
+
+def datapoints_from_input_image(pair_id: int, image: np.array) -> list:
+    height, width = image.shape
+    data = []
+    shape3x3center_image = ImageShape3x3Center.apply(image)
+    # shape3x3center_image = ImageShape3x3Opposite.apply(image)
+    histogram = Histogram.create_with_image(image)
+    most_popular_color = histogram.most_popular_color()
+    least_popular_color = histogram.least_popular_color()
+
+    # component_list = ConnectedComponent.find_objects(PixelConnectivity.NEAREST4, image)
+    # print(f"component_list: {component_list}")
+    # if len(component_list) == 0:
+    #     mass_image = np.zeros_like(image)
+    # else:
+    #     mass_image = object_mass(component_list)
+
+    for y in range(height):
+        for x in range(width):
+            pixel_value = image[y, x]
+            # shape3x3center_id = shape3x3center_image[y, x]
+            # shape3x3center_id = 0
+            # shape3x3center_id = mass_image[y, x]
+            # if pixel_value == most_popular_color:
+            #     shape3x3center_id |= 1
+            # if pixel_value == least_popular_color:
+            #     shape3x3center_id |= 2
+            count_same = 0
+            count_different = 0
+            for dx in range(5):
+                for dy in range(5):
+                    if dx >= 1 and dx <= 3 and dy >= 1 and dy <= 3:
+                        continue
+                    x2 = x + dx - 2
+                    y2 = y + dy - 2
+                    pixel_value2 = 10
+                    if x2 >= 0 and x2 < width and y2 >= 0 and y2 < height:
+                        pixel_value2 = image[y2, x2]
+                    if pixel_value2 == pixel_value:
+                        count_same += 1
+                    else:
+                        count_different += 1
+            shape3x3center_id = count_different
+            values = [
+                pair_id,
+                pixel_value,
+                x,
+                y,
+                width,
+                height,
+                shape3x3center_id,
+            ]
+            for dx in range(3):
+                for dy in range(3):
+                    if dx == 1 and dy == 1:
+                        continue
+                    x2 = x + dx
+                    y2 = y + dy
+                    pixel_value2 = 10
+                    if x2 >= 0 and x2 < width and y2 >= 0 and y2 < height:
+                        pixel_value2 = image[y2, x2]
+                    values.append(pixel_value2)
+            data.append(values)
+    return data
 
 def datapoints_from_image(pair_id: int, image: np.array) -> list:
     height, width = image.shape
@@ -187,6 +258,7 @@ def xs_ys_from_input_target_pairs(input_target_pairs: list) -> tuple[list, list]
                 input_pixel_values2 = input_values[DataPoint.PIXEL_VALUES.value:-1]
                 input_x_rev = input_width - input_x - 1
                 input_y_rev = input_height - input_y - 1
+                input_shape3x3center_id = input_values[DataPoint.SHAPE3X3CENTER_ID.value]
 
                 target_pair_index = target_values[DataPoint.PAIR_ID.value]
                 target_value = target_values[DataPoint.PIXEL_VALUE.value]
@@ -211,6 +283,11 @@ def xs_ys_from_input_target_pairs(input_target_pairs: list) -> tuple[list, list]
                 one_hot_input_value[input_value] = 1
                 one_hot_input_value = one_hot_input_value.tolist()
 
+                many_bools_input_shape3x3center = np.zeros(6, dtype=int)
+                for i in range(6):
+                    many_bools_input_shape3x3center[i] = 1 if (input_shape3x3center_id & (1 << i)) > 0 else 0
+                many_bools_input_shape3x3center = many_bools_input_shape3x3center.tolist()
+
                 # one hot encoding of target_value
                 one_hot_target_value = np.zeros(10, dtype=int)
                 one_hot_target_value[target_value] = 1
@@ -227,6 +304,7 @@ def xs_ys_from_input_target_pairs(input_target_pairs: list) -> tuple[list, list]
                     input_y,
                     input_width,
                     input_height,
+                    input_shape3x3center_id,
                     # target_value,
                     target_width,
                     target_height,
@@ -242,6 +320,7 @@ def xs_ys_from_input_target_pairs(input_target_pairs: list) -> tuple[list, list]
                 xs_item += one_hot_input_value
                 # xs_item += one_hot_target_value
                 xs_item += input_pixel_values2
+                # xs_item += many_bools_input_shape3x3center
 
                 ys_item = target_value
 
@@ -262,7 +341,7 @@ def process_task(task: Task, weights: np.array, save_dir: str):
     input_data = []
     for i in range(task.count_examples + task.count_tests):
         image = task.input_images[i]
-        input_data += datapoints_from_image(i, image)
+        input_data += datapoints_from_input_image(i, image)
 
     target_data_only_examples = []
     for i in range(task.count_examples):
