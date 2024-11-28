@@ -437,6 +437,8 @@ def xs_ys_from_input_target_pairs(input_target_pairs: list) -> tuple[list, list]
                 extra_item = [
                     input_pair_index,
                     target_pair_index,
+                    target_x,
+                    target_y,
                 ]
 
                 xs.append(xs_item)
@@ -523,12 +525,11 @@ def process_task(task: Task, weights: np.array, save_dir: str):
             image = np.zeros_like(expected_output_image, dtype=np.uint32)
             color_count_image.append(image)
         for i in range(len(predicted_values)):
-            xs2_item = xs2[i]
             target_pair_id = extra2[i][1]
             if target_pair_id != task.count_examples:
                 continue
-            target_x = xs2_item[0]
-            target_y = xs2_item[1]
+            target_x = extra2[i][2]
+            target_y = extra2[i][3]
             # v = image[target_y, target_x]
             # if predicted_values[i] == expected_output_image[target_y, target_x]:
             #     v += 1.0
