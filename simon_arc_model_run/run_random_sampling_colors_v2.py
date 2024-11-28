@@ -69,11 +69,11 @@ class DataPoint(Enum):
 def datapoints_from_input_image(pair_id: int, image: np.array) -> list:
     height, width = image.shape
     data = []
-    shape3x3center_image = ImageShape3x3Center.apply(image)
+    # shape3x3center_image = ImageShape3x3Center.apply(image)
     # shape3x3center_image = ImageShape3x3Opposite.apply(image)
-    histogram = Histogram.create_with_image(image)
-    most_popular_color = histogram.most_popular_color()
-    least_popular_color = histogram.least_popular_color()
+    # histogram = Histogram.create_with_image(image)
+    # most_popular_color = histogram.most_popular_color()
+    # least_popular_color = histogram.least_popular_color()
 
     # ray_right = image_raytrace_probecolor_direction(image, 10, ImageRaytraceProbeColorDirection.RIGHT)
     # ray_left = image_raytrace_probecolor_direction(image, 10, ImageRaytraceProbeColorDirection.LEFT)
@@ -132,10 +132,10 @@ def datapoints_from_input_image(pair_id: int, image: np.array) -> list:
             #     shape3x3center_id |= 1
             # if pixel_value == least_popular_color:
             #     shape3x3center_id |= 2
-            count_same = 0
-            count_different = 0
-            count_change = 0
-            last_color = 10
+            # count_same = 0
+            # count_different = 0
+            # count_change = 0
+            # last_color = 10
             # for pos_index, (dx, dy) in enumerate(positions3x3):
             #     x2 = x + dx - 1
             #     y2 = y + dy - 1
