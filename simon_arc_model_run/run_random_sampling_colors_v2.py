@@ -19,13 +19,6 @@ from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.gallery_generator import gallery_generator_run
 from simon_arc_lab.show_prediction_result import show_prediction_result, show_multiple_images
 from simon_arc_lab.image_noise import *
-from simon_arc_lab.image_shape3x3_center import *
-from simon_arc_lab.image_shape3x3_opposite import *
-from simon_arc_lab.pixel_connectivity import *
-from simon_arc_lab.connected_component import *
-from simon_arc_lab.image_object_mass import *
-from simon_arc_lab.image_raytrace_probecolor import *
-from simon_arc_lab.histogram import *
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -56,136 +49,7 @@ class DataPoint(Enum):
     Y = 3
     WIDTH = 4
     HEIGHT = 5
-    # RAY_TOP = 6
-    # RAY_BOTTOM = 7
-    # RAY_LEFT = 8
-    # RAY_RIGHT = 9
-    # RAY_TOPLEFT = 10
-    # RAY_TOPRIGHT = 11
-    # RAY_BOTTOMLEFT = 12
-    # RAY_BOTTOMRIGHT = 13
     PIXEL_VALUES = 6
-
-def datapoints_from_input_image(pair_id: int, image: np.array) -> list:
-    height, width = image.shape
-    data = []
-    # shape3x3center_image = ImageShape3x3Center.apply(image)
-    # shape3x3center_image = ImageShape3x3Opposite.apply(image)
-    # histogram = Histogram.create_with_image(image)
-    # most_popular_color = histogram.most_popular_color()
-    # least_popular_color = histogram.least_popular_color()
-
-    # ray_right = image_raytrace_probecolor_direction(image, 10, ImageRaytraceProbeColorDirection.RIGHT)
-    # ray_left = image_raytrace_probecolor_direction(image, 10, ImageRaytraceProbeColorDirection.LEFT)
-    # ray_top = image_raytrace_probecolor_direction(image, 10, ImageRaytraceProbeColorDirection.TOP)
-    # ray_bottom = image_raytrace_probecolor_direction(image, 10, ImageRaytraceProbeColorDirection.BOTTOM)
-    # ray_topleft = image_raytrace_probecolor_direction(image, 10, ImageRaytraceProbeColorDirection.TOPLEFT)
-    # ray_topright = image_raytrace_probecolor_direction(image, 10, ImageRaytraceProbeColorDirection.TOPRIGHT)
-    # ray_bottomleft = image_raytrace_probecolor_direction(image, 10, ImageRaytraceProbeColorDirection.BOTTOMLEFT)
-    # ray_bottomright = image_raytrace_probecolor_direction(image, 10, ImageRaytraceProbeColorDirection.BOTTOMRIGHT)
-
-    # component_list = ConnectedComponent.find_objects(PixelConnectivity.NEAREST4, image)
-    # print(f"component_list: {component_list}")
-    # if len(component_list) == 0:
-    #     mass_image = np.zeros_like(image)
-    # else:
-    #     mass_image = object_mass(component_list)
-
-    positions5x5 = [
-        (0, 0),
-        (0, 1),
-        (0, 2),
-        (0, 3),
-        (0, 4),
-        (1, 4),
-        (2, 4),
-        (3, 4),
-        (4, 4),
-        (4, 3),
-        (4, 2),
-        (4, 1),
-        (4, 0),
-        (3, 0),
-        (2, 0),
-        (1, 0),
-    ]
-
-    positions3x3 = [
-        (0, 0),
-        (0, 1),
-        (0, 2),
-        (1, 2),
-        (2, 2),
-        (2, 1),
-        (2, 0),
-        (1, 0),
-        (0, 0),
-    ]
-
-    for y in range(height):
-        for x in range(width):
-            pixel_value = image[y, x]
-            # shape3x3center_id = shape3x3center_image[y, x]
-            # shape3x3center_id = 0
-            # shape3x3center_id = mass_image[y, x]
-            # if pixel_value == most_popular_color:
-            #     shape3x3center_id |= 1
-            # if pixel_value == least_popular_color:
-            #     shape3x3center_id |= 2
-            # count_same = 0
-            # count_different = 0
-            # count_change = 0
-            # last_color = 10
-            # for pos_index, (dx, dy) in enumerate(positions3x3):
-            #     x2 = x + dx - 1
-            #     y2 = y + dy - 1
-            #     pixel_value2 = 10
-            #     if x2 >= 0 and x2 < width and y2 >= 0 and y2 < height:
-            #         pixel_value2 = image[y2, x2]
-            #     if pos_index == 0:
-            #         last_color = pixel_value2
-            #         continue
-            #     if pixel_value2 != last_color:
-            #         count_change += 1
-            #     last_color = pixel_value2
-            # shape3x3center_id = count_change
-            # ray_top_value = ray_top[y, x]
-            # ray_bottom_value = ray_bottom[y, x]
-            # ray_left_value = ray_left[y, x]
-            # ray_right_value = ray_right[y, x]
-            # ray_topleft_value = ray_topleft[y, x]
-            # ray_topright_value = ray_topright[y, x]
-            # ray_bottomleft_value = ray_bottomleft[y, x]
-            # ray_bottomright_value = ray_bottomright[y, x]
-            values = [
-                pair_id,
-                pixel_value,
-                x,
-                y,
-                width,
-                height,
-                # shape3x3center_id,
-                # ray_top_value,
-                # ray_bottom_value,
-                # ray_left_value,
-                # ray_right_value,
-                # ray_topleft_value,
-                # ray_topright_value,
-                # ray_bottomleft_value,
-                # ray_bottomright_value,
-            ]
-            for dx in range(3):
-                for dy in range(3):
-                    if dx == 1 and dy == 1:
-                        continue
-                    x2 = x + dx
-                    y2 = y + dy
-                    pixel_value2 = 10
-                    if x2 >= 0 and x2 < width and y2 >= 0 and y2 < height:
-                        pixel_value2 = image[y2, x2]
-                    values.append(pixel_value2)
-            data.append(values)
-    return data
 
 def datapoints_from_image(pair_id: int, image: np.array) -> list:
     height, width = image.shape
@@ -326,15 +190,6 @@ def xs_ys_from_input_target_pairs(input_target_pairs: list) -> tuple[list, list]
                 input_pixel_values2 = input_values[DataPoint.PIXEL_VALUES.value:-1]
                 input_x_rev = input_width - input_x - 1
                 input_y_rev = input_height - input_y - 1
-                # input_shape3x3center_id = input_values[DataPoint.SHAPE3X3CENTER_ID.value]
-                # input_ray_top_value = input_values[DataPoint.RAY_TOP.value]
-                # input_ray_bottom_value = input_values[DataPoint.RAY_BOTTOM.value]
-                # input_ray_left_value = input_values[DataPoint.RAY_LEFT.value]
-                # input_ray_right_value = input_values[DataPoint.RAY_RIGHT.value]
-                # input_ray_topleft_value = input_values[DataPoint.RAY_TOPLEFT.value]
-                # input_ray_topright_value = input_values[DataPoint.RAY_TOPRIGHT.value]
-                # input_ray_bottomleft_value = input_values[DataPoint.RAY_BOTTOMLEFT.value]
-                # input_ray_bottomright_value = input_values[DataPoint.RAY_BOTTOMRIGHT.value]
 
                 target_pair_index = target_values[DataPoint.PAIR_ID.value]
                 target_value = target_values[DataPoint.PIXEL_VALUE.value]
@@ -381,11 +236,6 @@ def xs_ys_from_input_target_pairs(input_target_pairs: list) -> tuple[list, list]
                 one_hot_input_value[input_value] = 1
                 one_hot_input_value = one_hot_input_value.tolist()
 
-                # many_bools_input_shape3x3center = np.zeros(6, dtype=int)
-                # for i in range(6):
-                #     many_bools_input_shape3x3center[i] = 1 if (input_shape3x3center_id & (1 << i)) > 0 else 0
-                # many_bools_input_shape3x3center = many_bools_input_shape3x3center.tolist()
-
                 # one hot encoding of target_value
                 one_hot_target_value = np.zeros(10, dtype=int)
                 one_hot_target_value[target_value] = 1
@@ -402,15 +252,6 @@ def xs_ys_from_input_target_pairs(input_target_pairs: list) -> tuple[list, list]
                     input_y,
                     input_width,
                     input_height,
-                    # input_shape3x3center_id,
-                    # input_ray_top_value,
-                    # input_ray_bottom_value,
-                    # input_ray_left_value,
-                    # input_ray_right_value,
-                    # input_ray_topleft_value,
-                    # input_ray_topright_value,
-                    # input_ray_bottomleft_value,
-                    # input_ray_bottomright_value,
                     # target_value,
                     target_width,
                     target_height,
@@ -433,7 +274,6 @@ def xs_ys_from_input_target_pairs(input_target_pairs: list) -> tuple[list, list]
                 xs_item += one_hot_input_value
                 # xs_item += one_hot_target_value
                 xs_item += input_pixel_values2
-                # xs_item += many_bools_input_shape3x3center
 
                 ys_item = target_value
 
@@ -456,7 +296,7 @@ def process_task(task: Task, weights: np.array, save_dir: str):
     input_data = []
     for i in range(task.count_examples + task.count_tests):
         image = task.input_images[i]
-        input_data += datapoints_from_input_image(i, image)
+        input_data += datapoints_from_image(i, image)
 
     target_data_only_examples = []
     for i in range(task.count_examples):
