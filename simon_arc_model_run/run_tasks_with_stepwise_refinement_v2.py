@@ -8,12 +8,12 @@ sys.path.insert(0, PROJECT_ROOT)
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.gallery_generator import gallery_generator_run
 from simon_arc_model.model import Model
-from simon_arc_model.work_manager_decision_tree import WorkManagerDecisionTree
+from simon_arc_model.work_manager_stepwise_refinement_v2 import WorkManagerStepwiseRefinementV2
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
 
-work_manager_class = WorkManagerDecisionTree
+work_manager_class = WorkManagerStepwiseRefinementV2
 print(f"Using WorkManager of type: {work_manager_class.__name__}")
 
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
@@ -63,7 +63,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
     wm = work_manager_class(model, taskset, cache_dir)
     # wm.discard_items_with_too_short_prompts(500)
     # wm.discard_items_with_too_long_prompts(max_prompt_length)
-    # wm.truncate_work_items(20)
+    wm.truncate_work_items(20)
     # wm.process_all_work_items()
     wm.process_all_work_items(save_dir=save_dir)
     # wm.process_all_work_items(show=True)

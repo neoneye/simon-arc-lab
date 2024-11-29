@@ -18,11 +18,11 @@ from .work_item_status import WorkItemStatus
 from .save_arcprize2024_submission_file import *
 from .work_manager_base import WorkManagerBase
 
-class WorkManagerStepwiseRefinement(WorkManagerBase):
+class WorkManagerStepwiseRefinementV1(WorkManagerBase):
     def __init__(self, model: Model, taskset: TaskSet):
         self.model = model
         self.taskset = taskset
-        self.work_items = WorkManagerStepwiseRefinement.create_work_items(taskset)
+        self.work_items = WorkManagerStepwiseRefinementV1.create_work_items(taskset)
         self.work_items_finished = []
 
     @classmethod
@@ -161,7 +161,7 @@ class WorkManagerStepwiseRefinement(WorkManagerBase):
                     status = 'correct'
                 else:
                     status = 'incorrect'
-                WorkManagerStepwiseRefinement.show_voted_image(original_work_item.task, original_work_item.test_index, the_image, status, save_dir)
+                WorkManagerStepwiseRefinementV1.show_voted_image(original_work_item.task, original_work_item.test_index, the_image, status, save_dir)
 
     @classmethod
     def show_voted_image(cls, task: Task, test_index: int, predicted_output_image: np.array, status_string: str, save_dir_path: Optional[str]):
