@@ -172,8 +172,8 @@ def xs_ys_from_input_target_pairs(input_target_pairs: list) -> tuple[list, list]
         # print(f"n: {n}")
         for y in range(n):
             for x in range(n):
-                # if x == y:
-                #     continue
+                if x == y:
+                    continue
 
                 input_values = input_data_samples[y]
                 target_values = target_data_samples[x]
@@ -197,7 +197,9 @@ def xs_ys_from_input_target_pairs(input_target_pairs: list) -> tuple[list, list]
                 target_x_rev = target_width - target_x - 1
                 target_y_rev = target_height - target_y - 1
 
-                is_correct = input_value == target_value
+                if input_pair_index != target_pair_index:
+                    raise ValueError(f"input_pair_index: {input_pair_index} target_pair_index: {target_pair_index} these are supposed to be the same")
+                pair_id = input_pair_index
 
                 dx = input_x - target_x
                 dy = input_y - target_y
@@ -225,26 +227,11 @@ def xs_ys_from_input_target_pairs(input_target_pairs: list) -> tuple[list, list]
                 #     print(f"dx: {dx} dy: {dy} angle is undefined")
                 #     angle = 0
 
-
-                same_pair_id = 1 if input_pair_index == target_pair_index else 0
-
-                # one hot encoding of input_value
-                one_hot_input_value = np.zeros(10, dtype=int)
-                one_hot_input_value[input_value] = 1
-                one_hot_input_value = one_hot_input_value.tolist()
-
-                # one hot encoding of target_value
-                one_hot_target_value = np.zeros(10, dtype=int)
-                one_hot_target_value[target_value] = 1
-                one_hot_target_value = one_hot_target_value.tolist()
-
                 xs_item = [
+                    pair_id,
                     target_x,
                     target_y,
-                    input_pair_index,
-                    target_pair_index,
-                    same_pair_id,
-                    input_value,
+                    # input_value,
                     input_x,
                     input_y,
                     input_width,
@@ -268,17 +255,27 @@ def xs_ys_from_input_target_pairs(input_target_pairs: list) -> tuple[list, list]
                     # distance1_4,
                     # angle,
                 ]
-                xs_item += one_hot_input_value
-                # xs_item += one_hot_target_value
-                xs_item += input_pixel_values2
+                if True:
+                    one_hot = np.zeros(10, dtype=int)
+                    one_hot[input_value] = 1
+                    one_hot = one_hot.tolist()
+                    xs_item += one_hot
+
+                # xs_item += one_hot_input_value
+                # xs_item += input_pixel_values2
+
+                for value in input_pixel_values2:
+                    one_hot = np.zeros(11, dtype=int)
+                    one_hot[value] = 1
+                    one_hot = one_hot.tolist()
+                    xs_item += one_hot
 
                 ys_item = target_value
 
                 extra_item = [
-                    input_pair_index,
-                    target_pair_index,
                     target_x,
                     target_y,
+                    pair_id,
                 ]
 
                 xs.append(xs_item)
@@ -378,8 +375,8 @@ def process_task(task: Task, weights: np.array, save_dir: str):
             image = np.zeros_like(expected_output_image, dtype=np.uint32)
             color_count_image.append(image)
         for i in range(len(predicted_values)):
-            target_x = extra2[i][2]
-            target_y = extra2[i][3]
+            target_x = extra2[i][0]
+            target_y = extra2[i][1]
             # v = image[target_y, target_x]
             # if predicted_values[i] == expected_output_image[target_y, target_x]:
             #     v += 1.0
