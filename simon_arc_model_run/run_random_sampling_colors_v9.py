@@ -3,7 +3,7 @@ import os
 import sys
 import numpy as np
 import random
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
 import matplotlib.pyplot as plt
 from math import sqrt
 from enum import Enum
@@ -170,124 +170,119 @@ def xs_ys_from_input_target_pairs(input_target_pairs: list) -> tuple[list, list]
         
         n = len(input_data_samples)
         # print(f"n: {n}")
-        for y in range(n):
-            for x in range(n):
-                if x == y:
-                    continue
+        for x in range(n):
 
-                input_values = input_data_samples[y]
-                target_values = target_data_samples[x]
+            input_values = input_data_samples[x]
+            target_values = target_data_samples[x]
 
-                input_pair_index = input_values[DataPoint.PAIR_ID.value]
-                input_value = input_values[DataPoint.PIXEL_VALUE.value]
-                input_x = input_values[DataPoint.X.value]
-                input_y = input_values[DataPoint.Y.value]
-                input_width = input_values[DataPoint.WIDTH.value]
-                input_height = input_values[DataPoint.HEIGHT.value]
-                input_pixel_values2 = input_values[DataPoint.PIXEL_VALUES.value:-1]
-                input_x_rev = input_width - input_x - 1
-                input_y_rev = input_height - input_y - 1
+            input_pair_index = input_values[DataPoint.PAIR_ID.value]
+            input_value = input_values[DataPoint.PIXEL_VALUE.value]
+            input_x = input_values[DataPoint.X.value]
+            input_y = input_values[DataPoint.Y.value]
+            input_width = input_values[DataPoint.WIDTH.value]
+            input_height = input_values[DataPoint.HEIGHT.value]
+            input_pixel_values2 = input_values[DataPoint.PIXEL_VALUES.value:-1]
+            input_x_rev = input_width - input_x - 1
+            input_y_rev = input_height - input_y - 1
 
-                target_pair_index = target_values[DataPoint.PAIR_ID.value]
-                target_value = target_values[DataPoint.PIXEL_VALUE.value]
-                target_x = target_values[DataPoint.X.value]
-                target_y = target_values[DataPoint.Y.value]
-                target_width = target_values[DataPoint.WIDTH.value]
-                target_height = target_values[DataPoint.HEIGHT.value]
-                target_x_rev = target_width - target_x - 1
-                target_y_rev = target_height - target_y - 1
+            target_pair_index = target_values[DataPoint.PAIR_ID.value]
+            target_value = target_values[DataPoint.PIXEL_VALUE.value]
+            target_x = target_values[DataPoint.X.value]
+            target_y = target_values[DataPoint.Y.value]
+            target_width = target_values[DataPoint.WIDTH.value]
+            target_height = target_values[DataPoint.HEIGHT.value]
+            target_x_rev = target_width - target_x - 1
+            target_y_rev = target_height - target_y - 1
 
-                if input_pair_index != target_pair_index:
-                    raise ValueError(f"input_pair_index: {input_pair_index} target_pair_index: {target_pair_index} these are supposed to be the same")
-                pair_id = input_pair_index
+            if input_pair_index != target_pair_index:
+                raise ValueError(f"input_pair_index: {input_pair_index} target_pair_index: {target_pair_index} these are supposed to be the same")
+            pair_id = input_pair_index
 
-                dx = input_x - target_x
-                dy = input_y - target_y
-                # if dx == 0 and dy == 0:
-                #     continue
-                # distance0 = abs(dx) + abs(dy)
-                distance1 = sqrt(dx * dx + dy * dy)
-                # distance2 = dx + dy
-                # distance3 = max(abs(dx), abs(dy))
-                # distance4 = min(abs(dx), abs(dy))
-                # dx2 = input_x_rev - target_x
-                # dy2 = input_y_rev - target_y
-                # distance1_2 = sqrt(dx2 * dx2 + dy2 * dy2)
-                # dx3 = input_x_rev - target_x_rev
-                # dy3 = input_y_rev - target_y_rev
-                # distance1_3 = sqrt(dx3 * dx3 + dy3 * dy3)
-                # dx4 = input_x - target_x_rev
-                # dy4 = input_y - target_y_rev
-                # distance1_4 = sqrt(dx4 * dx4 + dy4 * dy4)
+            dx = input_x - target_x
+            dy = input_y - target_y
+            # if dx == 0 and dy == 0:
+            #     continue
+            distance0 = abs(dx) + abs(dy)
+            distance1 = sqrt(dx * dx + dy * dy)
+            distance2 = dx + dy
+            distance3 = max(abs(dx), abs(dy))
+            distance4 = min(abs(dx), abs(dy))
+            # dx2 = input_x_rev - target_x
+            # dy2 = input_y_rev - target_y
+            # distance1_2 = sqrt(dx2 * dx2 + dy2 * dy2)
+            # dx3 = input_x_rev - target_x_rev
+            # dy3 = input_y_rev - target_y_rev
+            # distance1_3 = sqrt(dx3 * dx3 + dy3 * dy3)
+            # dx4 = input_x - target_x_rev
+            # dy4 = input_y - target_y_rev
+            # distance1_4 = sqrt(dx4 * dx4 + dy4 * dy4)
 
-                # find angle of dx, dy
-                # if dx != 0 or dy != 0:
-                #     angle = np.arctan2(dy, dx)
-                # else:
-                #     print(f"dx: {dx} dy: {dy} angle is undefined")
-                #     angle = 0
+            # find angle of dx, dy
+            # if dx != 0 or dy != 0:
+            #     angle = np.arctan2(dy, dx)
+            # else:
+            #     print(f"dx: {dx} dy: {dy} angle is undefined")
+            #     angle = 0
 
-                xs_item = [
-                    pair_id,
-                    target_x,
-                    target_y,
-                    # input_value,
-                    input_x,
-                    input_y,
-                    input_width,
-                    input_height,
-                    # target_value,
-                    target_width,
-                    target_height,
-                    dx,
-                    dy,
-                    input_x_rev,
-                    input_y_rev,
-                    target_x_rev,
-                    target_y_rev,
-                    # distance0,
-                    distance1,
-                    # distance2,
-                    # distance3,
-                    # distance4,
-                    # distance1_2,
-                    # distance1_3,
-                    # distance1_4,
-                    # angle,
-                ]
-                if True:
-                    one_hot = np.zeros(10, dtype=int)
-                    one_hot[input_value] = 1
-                    one_hot = one_hot.tolist()
-                    xs_item += one_hot
+            xs_item = [
+                pair_id,
+                target_x,
+                target_y,
+                input_x,
+                input_y,
+                input_width,
+                input_height,
+                target_width,
+                target_height,
+                dx,
+                dy,
+                input_x_rev,
+                input_y_rev,
+                target_x_rev,
+                target_y_rev,
+                distance0,
+                distance1,
+                distance2,
+                distance3,
+                distance4,
+                # distance1_2,
+                # distance1_3,
+                # distance1_4,
+                # angle,
+            ]
 
-                # xs_item += one_hot_input_value
-                # xs_item += input_pixel_values2
+            if True:
+                one_hot = np.zeros(10, dtype=int)
+                one_hot[input_value] = 1
+                one_hot = one_hot.tolist()
+                xs_item += one_hot
 
-                for value in input_pixel_values2:
-                    one_hot = np.zeros(11, dtype=int)
-                    one_hot[value] = 1
-                    one_hot = one_hot.tolist()
-                    xs_item += one_hot
+            for value in input_pixel_values2:
+                one_hot = np.zeros(11, dtype=int)
+                one_hot[value] = 1
+                one_hot = one_hot.tolist()
+                xs_item += one_hot
 
-                ys_item = target_value
+            ys_item = target_value
 
-                extra_item = [
-                    target_x,
-                    target_y,
-                    pair_id,
-                ]
+            extra_item = [
+                target_x,
+                target_y,
+                pair_id,
+            ]
 
-                xs.append(xs_item)
-                ys.append(ys_item)
-                extra.append(extra_item)
+            xs.append(xs_item)
+            ys.append(ys_item)
+            extra.append(extra_item)
     return xs, ys, extra
 
 def process_task(task: Task, weights: np.array, save_dir: str):
     # print(f"Processing task '{task.metadata_task_id}'")
     rng = np.random.default_rng(seed=42)
 
-    input_target_pairs = []
+    xs = []
+    ys = []
+    extra = []
     for i in range(task.count_examples):
         input_image = task.input_images[i]
         input_data = datapoints_from_image(i, input_image)
@@ -298,8 +293,12 @@ def process_task(task: Task, weights: np.array, save_dir: str):
         random.Random(i + 2000).shuffle(output_data)
         sampled_data = sample_data(input_data, output_data, rng)
 
+        the_xs, the_ys, the_extra = xs_ys_from_input_target_pairs(sampled_data)
+        xs += the_xs
+        ys += the_ys
+        extra += the_extra
+
         # print(f"EXAMPLE input: {len(input_data)} output: {len(output_data)} samples: {len(sampled_data)}")
-        input_target_pairs += sampled_data
 
     input_target_pairs_one_test = []
     if True:
@@ -318,12 +317,11 @@ def process_task(task: Task, weights: np.array, save_dir: str):
 
     # print(f"input_target_pairs: {len(input_target_pairs)} input_target_pairs_one_test: {len(input_target_pairs_one_test)}")
 
-    if len(input_target_pairs) < 2:
-        raise ValueError(f"input_target_pairs is small to make predictions")
+    if len(xs) < 2:
+        raise ValueError(f"xs is small to make predictions")
 
     output_image_to_verify = task.test_output(0)
 
-    random.Random(4).shuffle(input_target_pairs)
     random.Random(5).shuffle(input_target_pairs_one_test)
 
     # count_correct = 1
@@ -337,8 +335,10 @@ def process_task(task: Task, weights: np.array, save_dir: str):
     # print(f"count_correct: {count_correct} of {n}")
 
     # print(f"task: {task.metadata_task_id} input_target_pairs: {len(input_target_pairs)}")
-    xs, ys, extra = xs_ys_from_input_target_pairs(input_target_pairs)
+    # xs, ys, extra = xs_ys_from_input_target_pairs(input_target_pairs)
     clf = LinearRegression()
+    # clf = Ridge(alpha=0.1)
+    # clf = Lasso(alpha=0.1)
     clf.fit(xs, ys)
 
     xs2, ys2, extra2 = xs_ys_from_input_target_pairs(input_target_pairs_one_test)
