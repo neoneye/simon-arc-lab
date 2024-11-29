@@ -3,10 +3,7 @@ import os
 import sys
 import numpy as np
 import random
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.calibration import CalibratedClassifierCV
-from sklearn import tree
+from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 from math import sqrt
 from enum import Enum
@@ -307,7 +304,7 @@ def process_task(task: Task, weights: np.array, save_dir: str):
         # print(f"EXAMPLE input: {len(input_data)} output: {len(output_data)} samples: {len(sampled_data)}")
         input_target_pairs += sampled_data
 
-    input_target_pairs_one_test = input_target_pairs.copy()
+    input_target_pairs_one_test = []
     if True:
         pair_id = task.count_examples
         input_image = task.test_input(0)
@@ -324,20 +321,27 @@ def process_task(task: Task, weights: np.array, save_dir: str):
 
     # print(f"input_target_pairs: {len(input_target_pairs)} input_target_pairs_one_test: {len(input_target_pairs_one_test)}")
 
+    if len(input_target_pairs) < 2:
+        raise ValueError(f"input_target_pairs is small to make predictions")
+
     output_image_to_verify = task.test_output(0)
 
     random.Random(4).shuffle(input_target_pairs)
     random.Random(5).shuffle(input_target_pairs_one_test)
 
-    count_correct, count_total = count_correct_with_pairs(input_target_pairs)
-    if count_total == 0:
-        raise ValueError(f"count_total is zero")
-    average = count_correct / count_total
+    # count_correct = 1
+    # count_total = 100
+    # count_correct, count_total = count_correct_with_pairs(input_target_pairs)
+    # if count_total < 2:
+    #     raise ValueError(f"count_total is too small")
+    # average = count_correct / count_total
+    average = 0.1
     # print(f"average: {average}")
     # print(f"count_correct: {count_correct} of {n}")
 
+    # print(f"task: {task.metadata_task_id} input_target_pairs: {len(input_target_pairs)}")
     xs, ys, extra = xs_ys_from_input_target_pairs(input_target_pairs)
-    clf = DecisionTreeClassifier(random_state=42, max_depth=10)
+    clf = LinearRegression()
     clf.fit(xs, ys)
 
     xs2, ys2, extra2 = xs_ys_from_input_target_pairs(input_target_pairs_one_test)
@@ -352,7 +356,8 @@ def process_task(task: Task, weights: np.array, save_dir: str):
     pred_count_correct = 0
     pred_count_incorrect = 0
     for i in range(len(predicted_values)):
-        if predicted_values[i] == ys2[i]:
+        diff = abs(predicted_values[i] - ys2[i])
+        if diff < 0.01:
             pred_count_correct += 1
         else:
             pred_count_incorrect += 1
@@ -373,17 +378,16 @@ def process_task(task: Task, weights: np.array, save_dir: str):
             image = np.zeros_like(expected_output_image, dtype=np.uint32)
             color_count_image.append(image)
         for i in range(len(predicted_values)):
-            target_pair_id = extra2[i][1]
-            if target_pair_id != task.count_examples:
-                continue
             target_x = extra2[i][2]
             target_y = extra2[i][3]
             # v = image[target_y, target_x]
             # if predicted_values[i] == expected_output_image[target_y, target_x]:
             #     v += 1.0
             # image[target_y, target_x] = v
-            color = predicted_values[i]
-            color_count_image[color][target_y, target_x] += 1
+            color_float = predicted_values[i]
+            color = int(color_float)
+            if color >= 0 and color <= 9:
+                color_count_image[color][target_y, target_x] += 1
         
         height, width = expected_output_image.shape
         image = np.zeros((height, width), dtype=np.uint8)
