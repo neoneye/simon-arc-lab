@@ -131,6 +131,15 @@ class DecisionTreeFeature(Enum):
     BIGRAM_ROWCOL = 'bigram_rowcol'
     COLOR_POPULARITY = 'color_popularity'
 
+    @classmethod
+    def names_joined_with_comma(cls, features: set['DecisionTreeFeature']) -> str:
+        """
+        Human readable compact representation of multiple features.
+        """
+        names_unordered = [feature.name for feature in features]
+        names_sorted = sorted(names_unordered)
+        return ','.join(names_sorted)
+
 class DecisionTreePredictOutputResult:
     def __init__(self, width: int, height: int, probabilities: np.array):
         self.width = width
