@@ -65,7 +65,8 @@ FEATURES_5 = [
 ]
 
 class WorkManagerDecisionTree(WorkManagerBase):
-    def __init__(self, taskset: TaskSet, cache_dir: Optional[str] = None):
+    def __init__(self, dataset_id: str, taskset: TaskSet, cache_dir: Optional[str] = None):
+        self.dataset_id = dataset_id
         self.taskset = taskset
         self.work_items = WorkManagerDecisionTree.create_work_items(taskset)
         self.cache_dir = cache_dir
@@ -114,7 +115,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
         incorrect_prediction_metadata = f'{current_date} model=decisiontree_v1 features={features_pretty}'
         # print(f"incorrect_prediction_metadata: {incorrect_prediction_metadata}")
         incorrect_prediction_jsonl_path = os.path.join(save_dir, 'incorrect_predictions.jsonl')
-        incorrect_prediction_dataset_id = 'arcagi'
+        incorrect_prediction_dataset_id = self.dataset_id
 
         correct_count = 0
         correct_task_id_set = set()
