@@ -65,7 +65,7 @@ FEATURES_5 = [
 ]
 
 class WorkManagerDecisionTree(WorkManagerBase):
-    def __init__(self, model: any, taskset: TaskSet, cache_dir: Optional[str] = None):
+    def __init__(self, taskset: TaskSet, cache_dir: Optional[str] = None):
         self.taskset = taskset
         self.work_items = WorkManagerDecisionTree.create_work_items(taskset)
         self.cache_dir = cache_dir

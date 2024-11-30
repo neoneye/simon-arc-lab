@@ -50,8 +50,6 @@ print(f"Number of task ids to ignore: {len(taskids_to_ignore)}")
 cache_dir = 'run_tasks_result/cache_decisiontree'
 os.makedirs(cache_dir, exist_ok=True)
 
-model = None
-
 number_of_items_in_list = len(groupname_pathtotaskdir_list)
 for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
     save_dir = f'run_tasks_result/{run_id}/{groupname}'
@@ -60,7 +58,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
     taskset = TaskSet.load_directory(path_to_task_dir)
     # taskset.remove_tasks_by_id(taskids_to_ignore, verbose=False)
 
-    wm = work_manager_class(model, taskset, cache_dir)
+    wm = work_manager_class(taskset, cache_dir)
     # wm.discard_items_with_too_short_prompts(500)
     # wm.discard_items_with_too_long_prompts(max_prompt_length)
     # wm.truncate_work_items(20)
