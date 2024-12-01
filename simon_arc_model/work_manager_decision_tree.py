@@ -123,7 +123,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
         for original_work_item in pbar:
             work_item = original_work_item
 
-            ts = TaskSimilarity.create_with_task(work_item.task)
+            # ts = TaskSimilarity.create_with_task(work_item.task)
 
             image_and_score = []
 
@@ -140,21 +140,25 @@ class WorkManagerDecisionTree(WorkManagerBase):
                             predicted_output = np.load(cache_file)
                             # print(f"Loaded from cache: {cache_file}")
                 if predicted_output is None:
-                    predicted_output = DecisionTreeUtil.predict_output(
+                    previous_prediction_mask = None
+                    predicted_output_result = DecisionTreeUtil.predict_output(
                         work_item.task, 
                         work_item.test_index, 
-                        last_predicted_output, 
+                        last_predicted_output,
+                        previous_prediction_mask,
                         refinement_index, 
                         noise_level,
                         features
                     )
+                    predicted_output = predicted_output_result.images(1)[0]
                     if cache_file is not None:
                         np.save(cache_file, predicted_output)
 
                 last_predicted_output = predicted_output
-                score = ts.measure_test_prediction(predicted_output, work_item.test_index)
+                # score = ts.measure_test_prediction(predicted_output, work_item.test_index)
                 # print(f"task: {work_item.task.metadata_task_id} score: {score} refinement_index: {refinement_index} noise_level: {noise_level}")
-                image_and_score.append((predicted_output, score))
+                # image_and_score.append((predicted_output, score))
+                best_image = predicted_output
 
                 temp_work_item = WorkItem(
                     work_item.task.clone(), 
@@ -177,7 +181,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                         incorrect_prediction_metadata
                     )
 
-            best_image, best_score = max(image_and_score, key=lambda x: x[1])
+            # best_image, best_score = max(image_and_score, key=lambda x: x[1])
             # print(f"task: {work_item.task.metadata_task_id} best_score: {best_score}")
 
             work_item.predicted_output_image = best_image

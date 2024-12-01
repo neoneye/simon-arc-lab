@@ -45,6 +45,7 @@ print(f"Number of task ids to ignore: {len(taskids_to_ignore)}")
 
 cache_dir = 'run_tasks_result/cache_decisiontree'
 os.makedirs(cache_dir, exist_ok=True)
+cache_dir = None
 
 incorrect_predictions_jsonl_path = 'run_tasks_result/incorrect_predictions.jsonl'
 
