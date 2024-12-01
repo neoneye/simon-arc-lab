@@ -141,15 +141,23 @@ class WorkManagerDecisionTree(WorkManagerBase):
                             # print(f"Loaded from cache: {cache_file}")
                 if predicted_output is None:
                     previous_prediction_mask = None
-                    predicted_output_result = DecisionTreeUtil.predict_output(
-                        work_item.task, 
-                        work_item.test_index, 
-                        last_predicted_output,
-                        previous_prediction_mask,
-                        refinement_index, 
-                        noise_level,
-                        features
-                    )
+                    try:
+                        predicted_output_result = DecisionTreeUtil.predict_output(
+                            work_item.task, 
+                            work_item.test_index, 
+                            last_predicted_output,
+                            previous_prediction_mask,
+                            refinement_index, 
+                            noise_level,
+                            features
+                        )
+                    except Exception as e:
+                        # if the error text contains Soft-error, then it is a soft error, and we can skip the task
+                        if 'Soft-error' in str(e):
+                            print(f"Soft-error for task {work_item.task.metadata_task_id} test={work_item.test_index}. Error: {e}")
+                            break
+                        raise e
+
                     predicted_output = predicted_output_result.images(1)[0]
                     if cache_file is not None:
                         np.save(cache_file, predicted_output)

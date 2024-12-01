@@ -480,6 +480,8 @@ class DecisionTreeUtil:
         mass_compare_adjacent_columns = None
         mass_compare_adjacent_columns_width = 0
         if (DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL in features) or (DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2 in features):
+            if width < 2 or height < 2:
+                raise ValueError('IMAGE_MASS_COMPARE_ADJACENT_ROWCOL+IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2 requires at least 2x2 image. Soft-error.')
             mass_compare_adjacent_rows = image_mass_compare_adjacent_rows(image, 0, 1, 2)
             mass_compare_adjacent_rows_height = mass_compare_adjacent_rows.shape[0]
             mass_compare_adjacent_columns = image_mass_compare_adjacent_columns(image, 0, 1, 2)
