@@ -2,29 +2,47 @@
 
 Command line interface.
 
-## Run the solver that uses decisiontrees
+## The decisiontree solver
 
-Identify what ARC-AGI puzzles that are predicted correct/incorrect. Creates a dir, where each prediction can be inspected.
+In the ARC Prize 2024 contest, my decisiontree solver got `score=1`. It solved 1 of the 100 hidden puzzles.
 
+The decisiontree solver is better than the llm solver.
+
+This code creates a dir, where each prediction can be inspected.
+
+Here is a visualization of the solved puzzles:
+- [ARC-AGI training](https://neoneye.github.io/simon-arc-lab-web/model/2024-oct-17-1318/arcagi_training/)
+- [ARC-AGI evaluation](https://neoneye.github.io/simon-arc-lab-web/model/2024-oct-17-1318/arcagi_evaluation/)
+
+To run the solver:
 ```bash
-(venv) PROMPT> python simon_arc_model_run/run_tasks_with_decisiontree.py 
-Run id: 20241112_144837
+python simon_arc_model_run/run_tasks_with_decisiontree.py
+Run id: 20241201_121749
 Using WorkManager of type: WorkManagerDecisionTree
 Number of task ids to ignore: 93
-Processing 1 of 1. Group name 'arcagi_training'. Results will be saved to 'run_tasks_result/20241112_144837/arcagi_training'
+Processing 1 of 1. Group name 'arcagi_training'. Results will be saved to 'run_tasks_result/20241201_121749/arcagi_training'
 Loading 405 tasks from /Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training
-Saving images to directory: run_tasks_result/20241112_144837/arcagi_training
-Processing work items: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 20/20 [00:31<00:00,  1.57s/it, correct=0]
-Removed 0 work items where the input and output is identical. Remaining are 20 work items.
-Number of correct solutions: 0
-None_INCORRECT: 20
+Saving images to directory: run_tasks_result/20241201_121749/arcagi_training
+Processing work items: 100%|████████████████████████████████████████████████████████| 273/273 [00:33<00:00,  8.25it/s, correct=39]
+Removed 4 work items where the input and output is identical. Remaining are 269 work items.
+Number of correct solutions: 39
+None_INCORRECT: 229
+None_CORRECT: 40
 ```
 
+## The LLM solver
 
-## Run the solver that uses LLM
+In the ARC Prize 2024 contest, my llm solver got `score=1`. It solved 1 of the 100 hidden puzzles.
 
-Identify what ARC-AGI puzzles that are predicted correct/incorrect. Creates a dir, where each prediction can be inspected.
+It's based on the `CodeT5` llm. The prompt and response use RLE compression. The llm is worse than the decisiontree solver.
 
+This code creates a dir, where each prediction can be inspected.
+
+Here is a visualization of the solved puzzles:
+- [ARC-AGI training](https://neoneye.github.io/simon-arc-lab-web/model/625/arcagi_training/)
+- [ARC-AGI evaluation](https://neoneye.github.io/simon-arc-lab-web/model/625/arcagi_evaluation/)
+
+To run the solver:
 ```bash
 (venv) PROMPT> python simon_arc_model_run/run_tasks_with_llm.py 
 Using WorkManager of type: WorkManagerSimple
@@ -61,18 +79,5 @@ dataset=solve_translate group=translate_yplus1 predict=image image_width=small i
 
 Incorrect sum: 1
 dataset=solve_translate group=translate_xminus1 predict=image image_width=small image_height=small task_pixels=b: 1
-CTRL-C to abort
-```
-
-## Run tasks
-
-Export the predicted outputs as images.
-
-```bash
-(venv) PROMPT> python simon_arc_model_run/run_tasks.py
-Loading 405 tasks from /absolute/path/to/arc-dataset-collection/dataset/ARC/data/training
-Removed 130 work items with too long prompt. Remaining are 292 work items.
-Saving images to directory: run_tasks_result
-Processing work items:   3%|██▋       | 8/292 [00:08<06:26,  1.36s/it, correct=0]
 CTRL-C to abort
 ```
