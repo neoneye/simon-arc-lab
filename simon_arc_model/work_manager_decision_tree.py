@@ -19,7 +19,7 @@ from .work_item_status import WorkItemStatus
 from .save_arcprize2024_submission_file import *
 from .work_manager_base import WorkManagerBase
 from .decision_tree_util import DecisionTreeUtil, DecisionTreeFeature
-from .track_incorrect_prediction import track_incorrect_prediction
+from .track_incorrect_prediction import TrackIncorrectPrediction
 
 # Correct 59, Solves 1 of the hidden ARC tasks
 # ARC-AGI training=41, evaluation=17
@@ -65,11 +65,12 @@ FEATURES_5 = [
 ]
 
 class WorkManagerDecisionTree(WorkManagerBase):
-    def __init__(self, dataset_id: str, taskset: TaskSet, cache_dir: Optional[str] = None):
+    def __init__(self, dataset_id: str, taskset: TaskSet, cache_dir: Optional[str] = None, incorrect_predictions_jsonl_path: Optional[str] = None):
         self.dataset_id = dataset_id
         self.taskset = taskset
         self.work_items = WorkManagerDecisionTree.create_work_items(taskset)
         self.cache_dir = cache_dir
+        self.incorrect_predictions_jsonl_path = incorrect_predictions_jsonl_path
 
     @classmethod
     def create_work_items(cls, taskset: TaskSet) -> list['WorkItem']:
@@ -109,13 +110,15 @@ class WorkManagerDecisionTree(WorkManagerBase):
         features = set(FEATURES_2)
 
         # Track incorrect predictions
-        enable_tracking_of_incorrect_predictions = True
         current_date: str = datetime.datetime.now().isoformat()
         features_pretty = DecisionTreeFeature.names_joined_with_comma(features)
         incorrect_prediction_metadata = f'{current_date} model=decisiontree_v1 features={features_pretty}'
         # print(f"incorrect_prediction_metadata: {incorrect_prediction_metadata}")
-        incorrect_prediction_jsonl_path = os.path.join(save_dir, 'incorrect_predictions.jsonl')
         incorrect_prediction_dataset_id = self.dataset_id
+        if self.incorrect_predictions_jsonl_path is not None:
+            track_incorrect_prediction = TrackIncorrectPrediction.load_from_jsonl(self.incorrect_predictions_jsonl_path)
+        else:
+            track_incorrect_prediction = None
 
         correct_count = 0
         correct_task_id_set = set()
@@ -169,10 +172,9 @@ class WorkManagerDecisionTree(WorkManagerBase):
                 if save_dir is not None:
                     temp_work_item.show(save_dir)
 
-                if enable_tracking_of_incorrect_predictions:
-                    track_incorrect_prediction(
+                if track_incorrect_prediction is not None:
+                    track_incorrect_prediction.track_incorrect_prediction(
                         temp_work_item,
-                        incorrect_prediction_jsonl_path, 
                         incorrect_prediction_dataset_id, 
                         predicted_output,
                         incorrect_prediction_metadata
