@@ -1,9 +1,7 @@
 import os
-import datetime
 from tqdm import tqdm
 import numpy as np
 from typing import Optional
-from simon_arc_lab.rle.deserialize import DeserializeError
 from simon_arc_lab.image_distort import *
 from simon_arc_lab.image_noise import *
 from simon_arc_lab.image_vote import *
@@ -65,7 +63,8 @@ FEATURES_5 = [
 ]
 
 class WorkManagerDecisionTree(WorkManagerBase):
-    def __init__(self, dataset_id: str, taskset: TaskSet, cache_dir: Optional[str] = None, incorrect_predictions_jsonl_path: Optional[str] = None):
+    def __init__(self, run_id: str, dataset_id: str, taskset: TaskSet, cache_dir: Optional[str] = None, incorrect_predictions_jsonl_path: Optional[str] = None):
+        self.run_id = run_id
         self.dataset_id = dataset_id
         self.taskset = taskset
         self.work_items = WorkManagerDecisionTree.create_work_items(taskset)
@@ -110,10 +109,8 @@ class WorkManagerDecisionTree(WorkManagerBase):
         features = set(FEATURES_2)
 
         # Track incorrect predictions
-        current_date: str = datetime.datetime.now().isoformat()
         features_pretty = DecisionTreeFeature.names_joined_with_comma(features)
-        incorrect_prediction_metadata = f'{current_date} model=decisiontree_v1 features={features_pretty}'
-        # print(f"incorrect_prediction_metadata: {incorrect_prediction_metadata}")
+        incorrect_prediction_metadata = f'run={self.run_id} solver=decisiontree_v1 features={features_pretty}'
         incorrect_prediction_dataset_id = self.dataset_id
         if self.incorrect_predictions_jsonl_path is not None:
             track_incorrect_prediction = TrackIncorrectPrediction.load_from_jsonl(self.incorrect_predictions_jsonl_path)
