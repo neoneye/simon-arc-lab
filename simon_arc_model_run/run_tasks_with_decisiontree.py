@@ -47,7 +47,9 @@ cache_dir = 'run_tasks_result/cache_decisiontree'
 os.makedirs(cache_dir, exist_ok=True)
 cache_dir = None
 
-incorrect_predictions_jsonl_path = 'run_tasks_result/incorrect_predictions.jsonl'
+#incorrect_predictions_jsonl_path = 'run_tasks_result/incorrect_predictions.jsonl'
+#incorrect_predictions_jsonl_path = '/Users/neoneye/nobackup/git/arc-bad-predictions/data.jsonl'
+incorrect_predictions_jsonl_path = None
 
 number_of_items_in_list = len(datasetid_groupname_pathtotaskdir_list)
 for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_groupname_pathtotaskdir_list):

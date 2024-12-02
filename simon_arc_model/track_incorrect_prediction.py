@@ -93,6 +93,7 @@ class TrackIncorrectPrediction:
         if (task_id, test_index, predicted_output_key) in self.taskid_testindex_predictedoutput_set:
             print(f"Skipping duplicate incorrect prediction. {task_id} {test_index}")
             return
+        print(f"Added prediction. {task_id} {test_index}")
         self.save_incorrect_prediction(
             self.jsonl_path,
             dataset_id,
