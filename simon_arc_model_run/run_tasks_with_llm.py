@@ -14,8 +14,9 @@ from simon_arc_model.work_manager_simple import WorkManagerSimple
 CONTEXT_SIZE_LIMIT = (512, 500)
 # CONTEXT_SIZE_LIMIT = (1024, 1000)
 
+# model_iteration, predictor_id = (471, 'v1')
 model_iteration, predictor_id = (625, 'v1')
-model_iteration, predictor_id = (768, 'v3')
+# model_iteration, predictor_id = (768, 'v3')
 model_name = f'simon-arc-lab-model{model_iteration}'
 model_directory = f'/Users/neoneye/nobackup/git/{model_name}'
 
@@ -64,8 +65,8 @@ if os.path.isfile(csv_file):
 print(f"Number of task ids to ignore: {len(taskids_to_ignore)}")
 
 # incorrect_predictions_jsonl_path = 'run_tasks_result/incorrect_predictions.jsonl'
-incorrect_predictions_jsonl_path = '/Users/neoneye/nobackup/git/arc-bad-predictions/data.jsonl'
-# incorrect_predictions_jsonl_path = None
+# incorrect_predictions_jsonl_path = '/Users/neoneye/nobackup/git/arc-bad-predictions/data.jsonl'
+incorrect_predictions_jsonl_path = None
 
 number_of_items_in_list = len(datasetid_groupname_pathtotaskdir_list)
 for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_groupname_pathtotaskdir_list):
