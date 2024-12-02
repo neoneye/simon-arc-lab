@@ -15,25 +15,30 @@ from .work_manager_base import WorkManagerBase
 from .track_incorrect_prediction import TrackIncorrectPrediction
 
 class WorkManagerSimple(WorkManagerBase):
-    def __init__(self, run_id: str, dataset_id: str, model: Model, taskset: TaskSet, model_name: str, incorrect_predictions_jsonl_path: Optional[str] = None):
+    def __init__(self, run_id: str, dataset_id: str, model: Model, taskset: TaskSet, model_name: str, predictor_id: str, incorrect_predictions_jsonl_path: Optional[str] = None):
         self.run_id = run_id
         self.dataset_id = dataset_id
         self.model = model
         self.taskset = taskset
-        self.work_items = WorkManagerSimple.create_work_items(taskset)
+        self.predictor_id = predictor_id
+        self.work_items = WorkManagerSimple.create_work_items(taskset, predictor_id)
         self.model_name = model_name
         self.incorrect_predictions_jsonl_path = incorrect_predictions_jsonl_path
 
     @classmethod
-    def create_work_items(cls, taskset: TaskSet) -> list['WorkItem']:
+    def create_work_items(cls, taskset: TaskSet, predictor_id: str) -> list['WorkItem']:
         task_mutator_class_list = [TaskMutatorOriginal, TaskMutatorTranspose]
         refinement_step = None
         work_items = []
         for task in taskset.tasks:
             for test_index in range(task.count_tests):
                 for task_mutator_class in task_mutator_class_list:
-                    predictor = PredictOutputV1(task, test_index, task_mutator_class)
-                    # predictor = PredictOutputV3(task, test_index, task_mutator_class)
+                    if predictor_id == 'v1':
+                        predictor = PredictOutputV1(task, test_index, task_mutator_class)
+                    elif predictor_id == 'v3':
+                        predictor = PredictOutputV3(task, test_index, task_mutator_class)
+                    else:
+                        raise ValueError(f'Unknown predictor_id: {predictor_id}')
                     work_item = WorkItem(task, test_index, refinement_step, predictor)
                     try:
                         prompt = work_item.predictor.prompt()
@@ -60,7 +65,13 @@ class WorkManagerSimple(WorkManagerBase):
             os.makedirs(save_dir, exist_ok=True)
 
         # Track incorrect predictions
-        incorrect_prediction_metadata = f'run={self.run_id} solver={self.model_name}_CodeT5_RLE_input_and_RLE_output'
+        if self.predictor_id == 'v1':
+            model_description = 'CodeT5_RLE_input_and_RLE_output'
+        elif self.predictor_id == 'v3':
+            model_description = 'CodeT5_RLE_input_and_pixel_output'
+        else:
+            raise ValueError(f'Unknown predictor_id: {self.predictor_id}')
+        incorrect_prediction_metadata = f'run={self.run_id} solver={self.model_name}_{model_description}'
         incorrect_prediction_dataset_id = self.dataset_id
         if self.incorrect_predictions_jsonl_path is not None:
             track_incorrect_prediction = TrackIncorrectPrediction.load_from_jsonl(self.incorrect_predictions_jsonl_path)

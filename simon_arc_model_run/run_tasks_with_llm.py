@@ -14,12 +14,10 @@ from simon_arc_model.work_manager_simple import WorkManagerSimple
 CONTEXT_SIZE_LIMIT = (512, 500)
 # CONTEXT_SIZE_LIMIT = (1024, 1000)
 
-model_iteration = 625
+model_iteration, predictor_id = (625, 'v1')
+model_iteration, predictor_id = (768, 'v3')
 model_name = f'simon-arc-lab-model{model_iteration}'
 model_directory = f'/Users/neoneye/nobackup/git/{model_name}'
-
-work_manager_class = WorkManagerSimple
-print(f"Using WorkManager of type: {work_manager_class.__name__}")
 
 # check if the model is a dir in the file system
 if not os.path.isdir(model_directory):
@@ -77,7 +75,7 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
     taskset = TaskSet.load_directory(path_to_task_dir)
     # taskset.remove_tasks_by_id(taskids_to_ignore, verbose=False)
 
-    wm = work_manager_class(run_id, dataset_id, model, taskset, model_name, incorrect_predictions_jsonl_path)
+    wm = WorkManagerSimple(run_id, dataset_id, model, taskset, model_name, predictor_id, incorrect_predictions_jsonl_path)
     # wm.discard_items_with_too_short_prompts(500)
     wm.discard_items_with_too_long_prompts(max_prompt_length)
     # wm.truncate_work_items(50)
