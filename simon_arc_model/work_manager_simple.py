@@ -12,12 +12,17 @@ from .work_item_list import WorkItemList
 from .work_item_status import WorkItemStatus
 from .save_arcprize2024_submission_file import *
 from .work_manager_base import WorkManagerBase
+from .track_incorrect_prediction import TrackIncorrectPrediction
 
 class WorkManagerSimple(WorkManagerBase):
-    def __init__(self, model: Model, taskset: TaskSet):
+    def __init__(self, run_id: str, dataset_id: str, model: Model, taskset: TaskSet, model_name: str, incorrect_predictions_jsonl_path: Optional[str] = None):
+        self.run_id = run_id
+        self.dataset_id = dataset_id
         self.model = model
         self.taskset = taskset
         self.work_items = WorkManagerSimple.create_work_items(taskset)
+        self.model_name = model_name
+        self.incorrect_predictions_jsonl_path = incorrect_predictions_jsonl_path
 
     @classmethod
     def create_work_items(cls, taskset: TaskSet) -> list['WorkItem']:
@@ -27,8 +32,8 @@ class WorkManagerSimple(WorkManagerBase):
         for task in taskset.tasks:
             for test_index in range(task.count_tests):
                 for task_mutator_class in task_mutator_class_list:
-                    # predictor = PredictOutputV1(task, test_index, task_mutator_class)
-                    predictor = PredictOutputV3(task, test_index, task_mutator_class)
+                    predictor = PredictOutputV1(task, test_index, task_mutator_class)
+                    # predictor = PredictOutputV3(task, test_index, task_mutator_class)
                     work_item = WorkItem(task, test_index, refinement_step, predictor)
                     try:
                         prompt = work_item.predictor.prompt()
@@ -54,6 +59,14 @@ class WorkManagerSimple(WorkManagerBase):
             print(f'Saving images to directory: {save_dir}')
             os.makedirs(save_dir, exist_ok=True)
 
+        # Track incorrect predictions
+        incorrect_prediction_metadata = f'run={self.run_id} solver={self.model_name}_CodeT5_RLE_input_and_RLE_output'
+        incorrect_prediction_dataset_id = self.dataset_id
+        if self.incorrect_predictions_jsonl_path is not None:
+            track_incorrect_prediction = TrackIncorrectPrediction.load_from_jsonl(self.incorrect_predictions_jsonl_path)
+        else:
+            track_incorrect_prediction = None
+
         correct_count = 0
         correct_task_id_set = set()
         pbar = tqdm(self.work_items, desc="Processing work items")
@@ -70,6 +83,14 @@ class WorkManagerSimple(WorkManagerBase):
                 work_item.show()
             if save_dir is not None:
                 work_item.show(save_dir)
+
+            if track_incorrect_prediction is not None:
+                track_incorrect_prediction.track_incorrect_prediction(
+                    work_item,
+                    incorrect_prediction_dataset_id, 
+                    work_item.predicted_output_image,
+                    incorrect_prediction_metadata
+                )
 
     def summary(self):
         correct_task_id_set = set()

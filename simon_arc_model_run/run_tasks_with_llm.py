@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import sys
 
@@ -13,7 +14,7 @@ from simon_arc_model.work_manager_simple import WorkManagerSimple
 CONTEXT_SIZE_LIMIT = (512, 500)
 # CONTEXT_SIZE_LIMIT = (1024, 1000)
 
-model_iteration = 757
+model_iteration = 625
 model_name = f'simon-arc-lab-model{model_iteration}'
 model_directory = f'/Users/neoneye/nobackup/git/{model_name}'
 
@@ -25,22 +26,24 @@ if not os.path.isdir(model_directory):
     print(f"Model directory '{model_directory}' does not exist.")
     sys.exit(1)
 
+run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+print(f"Run id: {run_id}")
+
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
 if not os.path.isdir(path_to_arc_dataset_collection_dataset):
     print(f"ARC dataset collection directory '{path_to_arc_dataset_collection_dataset}' does not exist.")
     sys.exit(1)
 
-groupname_pathtotaskdir_list = [
-    ('arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
-    # ('arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
-    # ('tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
-    # ('tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data/symmetry_rect_input_image_and_extract_a_particular_tile')),
-    # ('miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
-    # ('conceptarc', os.path.join(path_to_arc_dataset_collection_dataset, 'ConceptARC/data')),
-    # ('testdata', os.path.join(PROJECT_ROOT, 'testdata', 'ARC-AGI/data')),
+datasetid_groupname_pathtotaskdir_list = [
+    ('ARC-AGI', 'arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
+    ('ARC-AGI', 'arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
+    # ('arc-dataset-tama', 'tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
+    # ('Mini-ARC', 'miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
+    # ('ConceptARC', 'conceptarc', os.path.join(path_to_arc_dataset_collection_dataset, 'ConceptARC/data')),
+    # ('ARC-AGI', 'testdata', os.path.join(PROJECT_ROOT, 'testdata', 'ARC-AGI/data')),
 ]
 
-for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
+for dataset_id, groupname, path_to_task_dir in datasetid_groupname_pathtotaskdir_list:
     if not os.path.isdir(path_to_task_dir):
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
@@ -62,15 +65,19 @@ if os.path.isfile(csv_file):
         taskids_to_ignore = set(taskids)
 print(f"Number of task ids to ignore: {len(taskids_to_ignore)}")
 
-number_of_items_in_list = len(groupname_pathtotaskdir_list)
-for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
-    save_dir = f'run_tasks_result/{model_iteration}/{groupname}'
+# incorrect_predictions_jsonl_path = 'run_tasks_result/incorrect_predictions.jsonl'
+incorrect_predictions_jsonl_path = '/Users/neoneye/nobackup/git/arc-bad-predictions/data.jsonl'
+# incorrect_predictions_jsonl_path = None
+
+number_of_items_in_list = len(datasetid_groupname_pathtotaskdir_list)
+for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_groupname_pathtotaskdir_list):
+    save_dir = f'run_tasks_result/{run_id}/{groupname}'
     print(f"Processing {index+1} of {number_of_items_in_list}. Group name '{groupname}'. Results will be saved to '{save_dir}'")
 
     taskset = TaskSet.load_directory(path_to_task_dir)
     # taskset.remove_tasks_by_id(taskids_to_ignore, verbose=False)
 
-    wm = work_manager_class(model, taskset)
+    wm = work_manager_class(run_id, dataset_id, model, taskset, model_name, incorrect_predictions_jsonl_path)
     # wm.discard_items_with_too_short_prompts(500)
     wm.discard_items_with_too_long_prompts(max_prompt_length)
     # wm.truncate_work_items(50)
