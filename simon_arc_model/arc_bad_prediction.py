@@ -25,13 +25,15 @@ class ARCBadPredictionDataset:
     def __init__(self) -> None:
         self.records: list[ARCBadPredictionRecord] = []
 
-    def load(self, file_path: str) -> None:
+    @classmethod
+    def load(cls, file_path: str) -> 'ARCBadPredictionDataset':
         """
         Loads the "ARC-Bad-Prediction" dataset from a JSON Lines file.
 
         Parameters:
             file_path (str): The path to the JSON Lines (.jsonl) file containing the dataset.
         """
+        result_dataset = ARCBadPredictionDataset()
         with open(file_path, 'r', encoding='utf-8') as file:
             for line_number, line in enumerate(file, start=1):
                 line = line.strip()
@@ -59,7 +61,7 @@ class ARCBadPredictionDataset:
                         metadata=metadata
                     )
 
-                    self.records.append(record)
+                    result_dataset.records.append(record)
 
                 except json.JSONDecodeError as e:
                     print(f"JSON decoding error on line {line_number}: {e}")
@@ -69,6 +71,7 @@ class ARCBadPredictionDataset:
                     print(f"Type error on line {line_number}: {e}")
                 except Exception as e:
                     print(f"Unexpected error on line {line_number}: {e}")
+        return result_dataset
 
     def display_sample_records(self, sample_size: int = 5) -> None:
         """
@@ -99,6 +102,5 @@ class ARCBadPredictionDataset:
 
 if __name__ == "__main__":
     dataset_file: str = '/Users/neoneye/nobackup/git/arc-bad-prediction/data.jsonl'
-    dataset = ARCBadPredictionDataset()
-    dataset.load(dataset_file)
+    dataset = ARCBadPredictionDataset.load(dataset_file)
     dataset.display_sample_records()
