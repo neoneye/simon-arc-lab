@@ -3,36 +3,15 @@ import numpy as np
 from typing import Optional
 from simon_arc_lab.task import Task
 from simon_arc_lab.show_prediction_result import show_prediction_result
-from simon_arc_lab.rle.deserialize import DeserializeError
-from .predict_output_base import PredictOutputBase
 from .work_item_status import WorkItemStatus
 
 class WorkItem:
-    def __init__(self, task: Task, test_index: int, refinement_step: Optional[int], predictor: PredictOutputBase):
-        self.predictor_name = predictor.name()
-        # print(f'WorkItem: task={task.metadata_task_id} test={test_index} predictor={self.predictor_name}')
+    def __init__(self, task: Task, test_index: int):
+        # print(f'WorkItem: task={task.metadata_task_id} test={test_index}')
         self.task = task
         self.test_index = test_index
-        self.refinement_step = refinement_step
-        self.predictor = predictor
         self.predicted_output_image = None
         self.status = WorkItemStatus.UNASSIGNED
-
-    def process(self, context: dict):
-        self.predictor.execute(context)
-
-        task = self.task
-        test_index = self.test_index
-        task_id = task.metadata_task_id
-        expected_output_image = task.test_output(test_index)
-
-        try:
-            self.predicted_output_image = self.predictor.predicted_image()
-        except DeserializeError as e:
-            # print(f'RLE decoding error for task {task_id} test={test_index}. Error: {e} score={e.score}')
-            self.status = WorkItemStatus.PROBLEM_DESERIALIZE
-            return
-        self.assign_status()
 
     def assign_status(self):
         if self.predicted_output_image is None:
@@ -49,6 +28,48 @@ class WorkItem:
         else:
             self.status = WorkItemStatus.INCORRECT
 
+    def title_fields(self) -> list:
+        """
+        Optional fields to include in the title of the visualization.
+        When the field is None, it is not included in the title.
+
+        Override this function if you want to customize the title.
+        """
+        return [
+            self.task.metadata_task_id,
+            f'test={self.test_index}',
+            self.status.to_string(),
+        ]
+    
+    def filename_fields(self) -> list:
+        """
+        Optional fields to include in the filename of the visualization.
+        When the field is None, it is not included in the filename.
+
+        Override this function if you want to customize the filename.
+        """
+        return [
+            self.task.metadata_task_id,
+            f'test{self.test_index}',
+            self.status.to_string(),
+        ]
+    
+    def resolve_title(self) -> str:
+        """
+        Human readable title for the visualization.
+        """
+        title_items_optional = self.title_fields()
+        title_items = [item for item in title_items_optional if item is not None]
+        return ' '.join(title_items)
+    
+    def resolve_filename(self) -> str:
+        """
+        Human readable filename for the visualization png image.
+        """
+        filename_items_optional = self.filename_fields()
+        filename_items = [item for item in filename_items_optional if item is not None]
+        return '_'.join(filename_items) + '.png'
+
     def show(self, save_dir_path: Optional[str] = None):
         self.show_predicted_output_image(self.predicted_output_image, save_dir_path)
 
@@ -56,40 +77,11 @@ class WorkItem:
         task = self.task
         test_index = self.test_index
         input_image = task.test_input(test_index)
-        task_id = task.metadata_task_id
-        status_string = self.status.to_string()
 
         expected_output_image = task.test_output(test_index)
 
-        # Human readable title
-        if self.refinement_step is not None:
-            title_step = f'step={self.refinement_step} '
-        else:
-            title_step = None
-        title_items_optional = [
-            task_id,
-            f'test={test_index}',
-            title_step,
-            self.predictor_name,
-            status_string,
-        ]
-        title_items = [item for item in title_items_optional if item is not None]
-        title = ' '.join(title_items)
-
-        # Format filename
-        if self.refinement_step is not None:
-            filename_step = f'step{self.refinement_step} '
-        else:
-            filename_step = None
-        filename_items_optional = [
-            task_id,
-            f'test{test_index}',
-            filename_step,
-            self.predictor_name,
-            status_string,
-        ]
-        filename_items = [item for item in filename_items_optional if item is not None]
-        filename = '_'.join(filename_items) + '.png'
+        title = self.resolve_title()
+        filename = self.resolve_filename()
 
         if save_dir_path is not None:
             save_path = os.path.join(save_dir_path, filename)

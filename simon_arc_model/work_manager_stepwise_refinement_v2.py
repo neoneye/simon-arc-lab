@@ -2,7 +2,6 @@ import os
 from tqdm import tqdm
 import numpy as np
 from typing import Optional
-from simon_arc_lab.rle.deserialize import DeserializeError
 from simon_arc_lab.image_distort import *
 from simon_arc_lab.image_noise import *
 from simon_arc_lab.image_vote import *
@@ -12,8 +11,8 @@ from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.task_color_profile import TaskColorProfile
 from simon_arc_lab.task_similarity import TaskSimilarity
 from simon_arc_lab.show_prediction_result import show_prediction_result, show_multiple_images
-from .predict_output_donothing import PredictOutputDoNothing
 from .work_item import WorkItem
+from .work_item_with_refinementstep import WorkItemWithRefinementStep
 from .work_item_list import WorkItemList
 from .work_item_status import WorkItemStatus
 from .save_arcprize2024_submission_file import *
@@ -77,7 +76,7 @@ class WorkManagerStepwiseRefinementV2(WorkManagerBase):
                 continue
 
             for test_index in range(task.count_tests):
-                work_item = WorkItem(task, test_index, None, PredictOutputDoNothing())
+                work_item = WorkItem(task, test_index)
                 work_items.append(work_item)
         return work_items
 
@@ -342,11 +341,10 @@ class WorkManagerStepwiseRefinementV2(WorkManagerBase):
                             value = 1.0
                         problem_image[y, x] = value
 
-            temp_work_item = WorkItem(
+            temp_work_item = WorkItemWithRefinementStep(
                 work_item.task.clone(), 
                 work_item.test_index, 
-                refinement_index, 
-                PredictOutputDoNothing()
+                refinement_index
             )
             temp_work_item.predicted_output_image = predicted_output
             temp_work_item.assign_status()

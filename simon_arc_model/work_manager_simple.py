@@ -7,7 +7,7 @@ from simon_arc_lab.taskset import TaskSet
 from .model import Model
 from .predict_output_v1 import *
 from .predict_output_v3 import *
-from .work_item import WorkItem
+from .work_item_with_predictor import WorkItemWithPredictor
 from .work_item_list import WorkItemList
 from .work_item_status import WorkItemStatus
 from .save_arcprize2024_submission_file import *
@@ -39,7 +39,7 @@ class WorkManagerSimple(WorkManagerBase):
                         predictor = PredictOutputV3(task, test_index, task_mutator_class)
                     else:
                         raise ValueError(f'Unknown predictor_id: {predictor_id}')
-                    work_item = WorkItem(task, test_index, refinement_step, predictor)
+                    work_item = WorkItemWithPredictor(task, test_index, refinement_step, predictor)
                     try:
                         prompt = work_item.predictor.prompt()
                         work_items.append(work_item)
