@@ -202,6 +202,18 @@ class Task:
         from .task_show_matplotlib import task_show_matplotlib
         task_show_matplotlib(self, show_grid, show_answer, save_path)
 
+    def has_same_input_output_size_for_all_examples(self) -> bool:
+        """
+        Check if all examples have the same size for input and output images.
+        If so, then it's likely that the test input/output images have the same size.
+        """
+        for pair_index in range(self.count_examples):
+            input_image = self.example_input(pair_index)
+            output_image = self.example_output(pair_index)
+            if input_image.shape != output_image.shape:
+                return False
+        return True
+
     def __str__(self):
         if self.metadata_task_id is not None:
             task_id_pretty = f"Task: '{self.metadata_task_id}'"

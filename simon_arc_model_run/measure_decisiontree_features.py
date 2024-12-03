@@ -260,7 +260,7 @@ for (groupname, path_to_task_dir) in groupname_pathtotaskdir_list:
     pending_tasks = []
     number_of_tasks_with_different_input_output_size = 0
     for task in taskset.tasks:
-        if DecisionTreeUtil.has_same_input_output_size_for_all_examples(task):
+        if task.has_same_input_output_size_for_all_examples():
             pending_tasks.append(task)
         else:
             number_of_tasks_with_different_input_output_size += 1

@@ -158,5 +158,15 @@ class TestTask(unittest.TestCase):
         self.assertTrue(np.array_equal(task.test_input(0), input1))
         self.assertTrue(np.array_equal(task.test_output(0), output1))
 
+    def test_has_same_input_output_size_for_all_examples_true(self):
+        filename = 'testdata/ARC-AGI/data/evaluation/00dbd492.json'
+        task = Task.load_arcagi1(filename)
+        self.assertTrue(task.has_same_input_output_size_for_all_examples())
+
+    def test_has_same_input_output_size_for_all_examples_false(self):
+        filename = 'testdata/ARC-AGI/data/evaluation/50aad11f.json'
+        task = Task.load_arcagi1(filename)
+        self.assertFalse(task.has_same_input_output_size_for_all_examples())
+
 if __name__ == '__main__':
     unittest.main()

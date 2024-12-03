@@ -72,7 +72,7 @@ class WorkManagerStepwiseRefinementV2(WorkManagerBase):
     def create_work_items(cls, taskset: TaskSet) -> list['WorkItem']:
         work_items = []
         for task in taskset.tasks:
-            if DecisionTreeUtil.has_same_input_output_size_for_all_examples(task) == False:
+            if task.has_same_input_output_size_for_all_examples() == False:
                 continue
 
             for test_index in range(task.count_tests):
