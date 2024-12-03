@@ -207,18 +207,6 @@ class WorkManagerDecisionTree(WorkManagerBase):
         correct_count = len(correct_task_id_set)
         print(f'Number of correct solutions: {correct_count}')
 
-        counters = {}
-        for work_item in self.work_items:
-            predictor_name = work_item.predictor_name
-            status_name = work_item.status.name
-            key = f'{predictor_name}_{status_name}'
-            if key in counters:
-                counters[key] += 1
-            else:
-                counters[key] = 1
-        for key, count in counters.items():
-            print(f'{key}: {count}')
-
     def save_arcprize2024_submission_file(self, path_to_json_file: str):
         json_dict = collect_predictions_as_arcprize2024_submission_dict(self.taskset, self.work_items)
         save_arcprize2024_submission_file(path_to_json_file, json_dict)
