@@ -7,8 +7,9 @@ sys.path.insert(0, PROJECT_ROOT)
 
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.gallery_generator import gallery_generator_run
-from simon_arc_model.work_manager_stepwise_refinement_v2 import WorkManagerStepwiseRefinementV2
+from simon_arc_model.work_manager_stepwise_refinement_v3 import WorkManagerStepwiseRefinementV3
 from simon_arc_model.arc_bad_prediction import *
+from simon_arc_model.work_item_with_previousprediction import WorkItemWithPreviousPrediction
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -45,13 +46,14 @@ print(f"Number of task ids to ignore: {len(taskids_to_ignore)}")
 
 cache_dir = 'run_tasks_result/cache_decisiontree'
 os.makedirs(cache_dir, exist_ok=True)
+cache_dir = None
 
 arc_bad_prediction_file = '/Users/neoneye/nobackup/git/arc-bad-prediction/data.jsonl'
-dataset = ARCBadPredictionDataset.load(arc_bad_prediction_file)
-# dataset.display_sample_records()
+arc_bad_prediction_dataset = ARCBadPredictionDataset.load(arc_bad_prediction_file)
+# arc_bad_prediction_dataset.display_sample_records()
 
 dataset_task = set()
-for record in dataset.records:
+for record in arc_bad_prediction_dataset.records:
     dataset_id = record.dataset
     task_id = record.task
     dataset_task.add((dataset_id, task_id))
@@ -65,6 +67,7 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
 
     taskset = TaskSet.load_directory(path_to_task_dir)
 
+    # Keep only that are present in the arc-bad-prediction dataset. Remove the rest.
     task_ids_to_ignore = set()
     for task in taskset.tasks:
         task_id = task.metadata_task_id
@@ -74,11 +77,46 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
             task_ids_to_ignore.add(task_id)
     taskset.remove_tasks_by_id(taskids_to_ignore, verbose=False)
 
-    print(f"Number of tasks for processing: {len(taskset.tasks)}")
-    continue
+    if len(taskset.tasks) == 0:
+        print(f"Skipping group: {groupname}, due to no tasks to process.")
+        continue
 
-    wm = WorkManagerStepwiseRefinementV2(taskset, cache_dir)
-    wm.truncate_work_items(20)
+    print(f"Number of tasks for processing: {len(taskset.tasks)}")
+
+    # Create work items for each bad prediction
+    work_items = []
+
+    already_processed = set()
+    for task in taskset.tasks:
+        if task.has_same_input_output_size_for_all_examples() == False:
+            continue
+        task_id = task.metadata_task_id
+        find_key = (dataset_id, task_id)
+        for record in arc_bad_prediction_dataset.records:
+            record_dataset_id = record.dataset
+            record_task_id = record.task
+            record_key = (record_dataset_id, record_task_id)
+            if find_key != record_key:
+                continue
+
+            test_index = record.test_index
+            if test_index >= task.count_tests:
+                print(f"Skipping task: {task_id}, due to test index {test_index} is out of range.")
+                continue
+
+            # Only take the first bad prediction for each task. Ignore the rest of the bad predictions.
+            process_key = (dataset_id, task_id, test_index)
+            if process_key in already_processed:
+                continue
+            already_processed.add(process_key)
+
+            work_item = WorkItemWithPreviousPrediction(task, test_index, record.predicted_output)
+            work_items.append(work_item)
+
+    print(f"Number of work items: {len(work_items)}")
+
+    wm = WorkManagerStepwiseRefinementV3(taskset, work_items, cache_dir)
+    wm.truncate_work_items(40)
     # wm.process_all_work_items()
     wm.process_all_work_items(save_dir=save_dir)
     # wm.process_all_work_items(show=True)
