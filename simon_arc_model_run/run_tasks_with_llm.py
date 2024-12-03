@@ -64,8 +64,8 @@ if os.path.isfile(csv_file):
         taskids_to_ignore = set(taskids)
 print(f"Number of task ids to ignore: {len(taskids_to_ignore)}")
 
-# incorrect_predictions_jsonl_path = 'run_tasks_result/incorrect_predictions.jsonl'
-# incorrect_predictions_jsonl_path = '/Users/neoneye/nobackup/git/arc-bad-predictions/data.jsonl'
+# incorrect_predictions_jsonl_path = 'run_tasks_result/incorrect_prediction.jsonl'
+# incorrect_predictions_jsonl_path = '/Users/neoneye/nobackup/git/arc-bad-prediction/data.jsonl'
 incorrect_predictions_jsonl_path = None
 
 number_of_items_in_list = len(datasetid_groupname_pathtotaskdir_list)
