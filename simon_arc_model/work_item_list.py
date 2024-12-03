@@ -1,5 +1,6 @@
 import numpy as np
 from .work_item import WorkItem
+from .work_item_with_predictor import WorkItemWithPredictor
 
 class WorkItemList:
     @classmethod
@@ -10,6 +11,9 @@ class WorkItemList:
         count_before = len(work_items)
         filtered_work_items = []
         for work_item in work_items:
+            if not isinstance(work_item, WorkItemWithPredictor):
+                filtered_work_items.append(work_item)
+                continue
             prompt_length = len(work_item.predictor.prompt())
             if prompt_length <= max_prompt_length:
                 filtered_work_items.append(work_item)
@@ -25,6 +29,9 @@ class WorkItemList:
         count_before = len(work_items)
         filtered_work_items = []
         for work_item in work_items:
+            if not isinstance(work_item, WorkItemWithPredictor):
+                filtered_work_items.append(work_item)
+                continue
             prompt_length = len(work_item.predictor.prompt())
             if prompt_length >= min_prompt_length:
                 filtered_work_items.append(work_item)
