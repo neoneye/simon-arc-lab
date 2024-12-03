@@ -102,5 +102,5 @@ class ARCBadPredictionDataset:
 
 if __name__ == "__main__":
     dataset_file: str = '/Users/neoneye/nobackup/git/arc-bad-prediction/data.jsonl'
-    dataset = ARCBadPredictionDataset.load(dataset_file)
-    dataset.display_sample_records()
+    arc_bad_prediction_dataset = ARCBadPredictionDataset.load(dataset_file)
+    arc_bad_prediction_dataset.display_sample_records()
