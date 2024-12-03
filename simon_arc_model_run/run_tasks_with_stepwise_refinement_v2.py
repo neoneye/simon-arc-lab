@@ -7,7 +7,6 @@ sys.path.insert(0, PROJECT_ROOT)
 
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.gallery_generator import gallery_generator_run
-from simon_arc_model.model import Model
 from simon_arc_model.work_manager_stepwise_refinement_v2 import WorkManagerStepwiseRefinementV2
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -46,8 +45,6 @@ print(f"Number of task ids to ignore: {len(taskids_to_ignore)}")
 
 cache_dir = 'run_tasks_result/cache_decisiontree'
 os.makedirs(cache_dir, exist_ok=True)
-
-model = None
 
 number_of_items_in_list = len(groupname_pathtotaskdir_list)
 for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_list):
