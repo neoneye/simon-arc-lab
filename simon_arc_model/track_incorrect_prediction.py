@@ -1,3 +1,10 @@
+"""
+Populate the "ARC-Bad-Prediction" dataset.
+https://huggingface.co/datasets/neoneye/arc-bad-prediction
+
+When encountering an incorrect prediction, that is somewhat ok, 
+then it may be a candidate for the "ARC-Bad-Prediction" dataset.
+"""
 import json
 import os
 import numpy as np
