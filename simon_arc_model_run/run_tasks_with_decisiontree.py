@@ -7,7 +7,6 @@ sys.path.insert(0, PROJECT_ROOT)
 
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.gallery_generator import gallery_generator_run
-from simon_arc_model.model import Model
 from simon_arc_model.work_manager_decision_tree import WorkManagerDecisionTree
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -60,8 +59,6 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
     # taskset.remove_tasks_by_id(taskids_to_ignore, verbose=False)
 
     wm = WorkManagerDecisionTree(run_id, dataset_id, taskset, cache_dir, incorrect_predictions_jsonl_path)
-    # wm.discard_items_with_too_short_prompts(500)
-    # wm.discard_items_with_too_long_prompts(max_prompt_length)
     # wm.truncate_work_items(20)
     # wm.process_all_work_items()
     wm.process_all_work_items(save_dir=save_dir)

@@ -87,10 +87,10 @@ class WorkManagerDecisionTree(WorkManagerBase):
         self.work_items = self.work_items[:max_count]
 
     def discard_items_with_too_long_prompts(self, max_prompt_length: int):
-        self.work_items = WorkItemList.discard_items_with_too_long_prompts(self.work_items, max_prompt_length)
+        pass
 
     def discard_items_with_too_short_prompts(self, min_prompt_length: int):
-        self.work_items = WorkItemList.discard_items_with_too_short_prompts(self.work_items, min_prompt_length)
+        pass
 
     def discard_items_where_predicted_output_is_identical_to_the_input(self):
         self.work_items = WorkItemList.discard_items_where_predicted_output_is_identical_to_the_input(self.work_items)

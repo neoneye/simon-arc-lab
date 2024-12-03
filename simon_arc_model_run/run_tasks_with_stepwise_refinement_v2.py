@@ -13,9 +13,6 @@ from simon_arc_model.work_manager_stepwise_refinement_v2 import WorkManagerStepw
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
 
-work_manager_class = WorkManagerStepwiseRefinementV2
-print(f"Using WorkManager of type: {work_manager_class.__name__}")
-
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
 if not os.path.isdir(path_to_arc_dataset_collection_dataset):
     print(f"ARC dataset collection directory '{path_to_arc_dataset_collection_dataset}' does not exist.")
@@ -60,9 +57,7 @@ for index, (groupname, path_to_task_dir) in enumerate(groupname_pathtotaskdir_li
     taskset = TaskSet.load_directory(path_to_task_dir)
     # taskset.remove_tasks_by_id(taskids_to_ignore, verbose=False)
 
-    wm = work_manager_class(model, taskset, cache_dir)
-    # wm.discard_items_with_too_short_prompts(500)
-    # wm.discard_items_with_too_long_prompts(max_prompt_length)
+    wm = WorkManagerStepwiseRefinementV2(taskset, cache_dir)
     wm.truncate_work_items(20)
     # wm.process_all_work_items()
     wm.process_all_work_items(save_dir=save_dir)
