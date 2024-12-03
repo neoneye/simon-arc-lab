@@ -98,7 +98,7 @@ class ARCBadPredictionDataset:
             print(f"  Metadata: {record.metadata}\n")
 
 if __name__ == "__main__":
-    dataset_file: str = '/Users/neoneye/nobackup/git/arc-bad-predictions/data.jsonl'
+    dataset_file: str = '/Users/neoneye/nobackup/git/arc-bad-prediction/data.jsonl'
     dataset = ARCBadPredictionDataset()
     dataset.load(dataset_file)
     dataset.display_sample_records()
