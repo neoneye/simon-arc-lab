@@ -224,15 +224,19 @@ class WorkManagerStepwiseRefinementV3(WorkManagerBase):
             if True:
                 last_predicted_correctness = np.ones_like(work_item.previous_predicted_output_image, dtype=np.uint8)
                 noise_level = 50
-                prediction = DecisionTreeUtil.predict_output(
-                    work_item.task, 
-                    work_item.test_index, 
-                    work_item.previous_predicted_output_image,
-                    last_predicted_correctness,
-                    refinement_index, 
-                    noise_level,
-                    FEATURES_3,
-                )
+                try:
+                    prediction = DecisionTreeUtil.predict_output(
+                        work_item.task, 
+                        work_item.test_index, 
+                        work_item.previous_predicted_output_image,
+                        last_predicted_correctness,
+                        refinement_index, 
+                        noise_level,
+                        FEATURES_3,
+                    )
+                except Exception as e:
+                    print(f'Error: {e} with task {work_item.task.metadata_task_id} test: {work_item.test_index} uniqueid: {work_item.unique_id}')
+                    return
                 n_predicted_images = prediction.images(1)
                 best_image = n_predicted_images[0]
                 confidence_map = prediction.confidence_map()

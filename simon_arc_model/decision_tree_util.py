@@ -854,6 +854,9 @@ class DecisionTreeUtil:
 
     @classmethod
     def predict_output(cls, task: Task, test_index: int, previous_prediction_image: Optional[np.array], previous_prediction_mask: Optional[np.array], refinement_index: int, noise_level: int, features: set[DecisionTreeFeature]) -> DecisionTreePredictOutputResult:
+        if task.has_same_input_output_size_for_all_examples() == False:
+            raise ValueError('The decisiontree only works for puzzles where input/output have the same size')
+        
         has_previous_prediction_image = previous_prediction_image is not None
         has_previous_prediction_mask = previous_prediction_mask is not None
         if has_previous_prediction_image != has_previous_prediction_mask:
@@ -863,6 +866,10 @@ class DecisionTreeUtil:
         if has_previous:
             if previous_prediction_image.shape != previous_prediction_mask.shape:
                 raise ValueError('previous_prediction_image and previous_prediction_mask must have the same size')
+            
+            test_input_image = task.test_input(test_index)
+            if previous_prediction_image.shape != test_input_image.shape:
+                raise ValueError('previous_prediction_image and test_input_image must have the same size')
 
         xs = []
         ys = []
