@@ -16,6 +16,7 @@ class ARCBadPredictionRecord:
     test_index: int
     predicted_output: np.array
     metadata: str
+    line_number: int
 
 class ARCBadPredictionDataset:
     """
@@ -58,7 +59,8 @@ class ARCBadPredictionDataset:
                         task=task,
                         test_index=test_index,
                         predicted_output=predicted_output,
-                        metadata=metadata
+                        metadata=metadata,
+                        line_number=line_number
                     )
 
                     result_dataset.records.append(record)
@@ -98,7 +100,8 @@ class ARCBadPredictionDataset:
             print(f"  Task: {record.task}")
             print(f"  Test Index: {record.test_index}")
             print(f"  Predicted Output:\n{record.predicted_output}")
-            print(f"  Metadata: {record.metadata}\n")
+            print(f"  Metadata: {record.metadata}")
+            print(f"  Line Number: {record.line_number}\n")
 
 if __name__ == "__main__":
     dataset_file: str = '/Users/neoneye/nobackup/git/arc-bad-prediction/data.jsonl'
