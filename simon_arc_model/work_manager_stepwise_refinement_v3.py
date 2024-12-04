@@ -13,7 +13,6 @@ from simon_arc_lab.task_similarity import TaskSimilarity
 from simon_arc_lab.show_prediction_result import show_prediction_result, show_multiple_images
 from .work_item import WorkItem
 from .work_item_with_previousprediction import WorkItemWithPreviousPrediction
-from .work_item_with_refinementstep import WorkItemWithRefinementStep
 from .work_item_list import WorkItemList
 from .work_item_status import WorkItemStatus
 from .save_arcprize2024_submission_file import *
@@ -367,10 +366,11 @@ class WorkManagerStepwiseRefinementV3(WorkManagerBase):
                             value = 1.0
                         problem_image[y, x] = value
 
-            temp_work_item = WorkItemWithRefinementStep(
+            temp_work_item = WorkItemWithPreviousPrediction(
                 work_item.task.clone(), 
-                work_item.test_index, 
-                refinement_index
+                work_item.test_index,
+                work_item.previous_predicted_output_image.copy(),
+                work_item.unique_id 
             )
             temp_work_item.predicted_output_image = predicted_output
             temp_work_item.assign_status()
@@ -391,7 +391,7 @@ class WorkManagerStepwiseRefinementV3(WorkManagerBase):
             #     title_image_list.append(('arc', 'Vote', vote_image))
             # if second_best_image is not None:
             #     title_image_list.append(('arc', 'Second', second_best_image))
-            title_image_list.append(('arc', 'This Predict', predicted_output))
+            title_image_list.append(('arc', 'This Prediction', predicted_output))
             if predicted_correctness is not None:
                 title_image_list.append(('heatmap', 'Valid', predicted_correctness))
             if problem_image is not None:
