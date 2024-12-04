@@ -63,6 +63,9 @@ for record in arc_bad_prediction_dataset.records:
 
 print(f"Number of unique tasks in the arc-bad-prediction dataset: {len(dataset_task)}")
 
+incorrect_predictions_jsonl_path = arc_bad_prediction_file
+#incorrect_predictions_jsonl_path = None
+
 number_of_items_in_list = len(datasetid_groupname_pathtotaskdir_list)
 for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_groupname_pathtotaskdir_list):
     save_dir = f'run_tasks_result/{run_id}/{groupname}'
@@ -120,8 +123,8 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
 
     print(f"Number of work items: {len(work_items)}")
 
-    wm = WorkManagerStepwiseRefinementV3(taskset, work_items, cache_dir)
-    wm.truncate_work_items(40)
+    wm = WorkManagerStepwiseRefinementV3(run_id, dataset_id, taskset, work_items, cache_dir, incorrect_predictions_jsonl_path)
+    # wm.truncate_work_items(40)
     # wm.process_all_work_items()
     wm.process_all_work_items(save_dir=save_dir)
     # wm.process_all_work_items(show=True)

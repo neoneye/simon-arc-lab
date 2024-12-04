@@ -18,6 +18,7 @@ from .work_item_status import WorkItemStatus
 from .save_arcprize2024_submission_file import *
 from .work_manager_base import WorkManagerBase
 from .decision_tree_util import DecisionTreeUtil, DecisionTreeFeature
+from .track_incorrect_prediction import TrackIncorrectPrediction
 
 # Correct 59, Solves 1 of the hidden ARC tasks
 # ARC-AGI training=41, evaluation=17
@@ -63,10 +64,13 @@ FEATURES_5 = [
 ]
 
 class WorkManagerStepwiseRefinementV3(WorkManagerBase):
-    def __init__(self, taskset: TaskSet, work_items: list[WorkItemWithPreviousPrediction], cache_dir: Optional[str] = None):
+    def __init__(self, run_id: str, dataset_id: str, taskset: TaskSet, work_items: list[WorkItemWithPreviousPrediction], cache_dir: Optional[str] = None, incorrect_predictions_jsonl_path: Optional[str] = None):
+        self.run_id = run_id
+        self.dataset_id = dataset_id
         self.taskset = taskset
         self.work_items = work_items
         self.cache_dir = cache_dir
+        self.incorrect_predictions_jsonl_path = incorrect_predictions_jsonl_path
 
     def truncate_work_items(self, max_count: int):
         self.work_items = self.work_items[:max_count]
@@ -84,6 +88,14 @@ class WorkManagerStepwiseRefinementV3(WorkManagerBase):
         if save_dir is not None:
             print(f'Saving images to directory: {save_dir}')
             os.makedirs(save_dir, exist_ok=True)
+
+        # Track incorrect predictions
+        incorrect_prediction_metadata = f'run={self.run_id} solver=stepwiserefinement_v3'
+        incorrect_prediction_dataset_id = self.dataset_id
+        if self.incorrect_predictions_jsonl_path is not None:
+            track_incorrect_prediction = TrackIncorrectPrediction.load_from_jsonl(self.incorrect_predictions_jsonl_path)
+        else:
+            track_incorrect_prediction = None
 
         correct_count = 0
         correct_task_id_set = set()
@@ -105,7 +117,10 @@ class WorkManagerStepwiseRefinementV3(WorkManagerBase):
                     predicted_output_color_image, 
                     task_similarity, 
                     show, 
-                    save_dir
+                    save_dir,
+                    track_incorrect_prediction,
+                    incorrect_prediction_dataset_id,
+                    incorrect_prediction_metadata,
                 )
 
             if work_item.status == WorkItemStatus.CORRECT:
@@ -113,7 +128,19 @@ class WorkManagerStepwiseRefinementV3(WorkManagerBase):
                 correct_count = len(correct_task_id_set)
             pbar.set_postfix({'correct': correct_count})
 
-    def process_with_predicted_colorset(self, work_item: WorkItemWithPreviousPrediction, profile_index: int, predicted_output_colorset: set[int], predicted_output_color_image: np.array, task_similarity: TaskSimilarity, show: bool, save_dir: Optional[str]):
+    def process_with_predicted_colorset(
+        self, 
+        work_item: WorkItemWithPreviousPrediction, 
+        profile_index: int, 
+        predicted_output_colorset: set[int], 
+        predicted_output_color_image: np.array, 
+        task_similarity: TaskSimilarity, 
+        show: bool, 
+        save_dir: Optional[str],
+        track_incorrect_prediction: TrackIncorrectPrediction,
+        incorrect_prediction_dataset_id: str, 
+        incorrect_prediction_metadata: str,
+    ):
         # print(f"Processing task: {work_item.task.metadata_task_id} test: {work_item.test_index} profile: {profile_index}")
         # noise_levels = [95, 90, 85, 80, 75, 70, 65]
         # noise_levels = [95, 90]
@@ -245,6 +272,14 @@ class WorkManagerStepwiseRefinementV3(WorkManagerBase):
 
                 work_item.predicted_output_image = best_image
                 work_item.assign_status()
+
+                if track_incorrect_prediction is not None:
+                    track_incorrect_prediction.track_incorrect_prediction(
+                        work_item,
+                        incorrect_prediction_dataset_id, 
+                        predicted_output,
+                        incorrect_prediction_metadata
+                    )
 
             # predicted_output = vote_image.copy()
             width = 0
