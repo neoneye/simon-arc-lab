@@ -110,7 +110,8 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
                 continue
             already_processed.add(process_key)
 
-            work_item = WorkItemWithPreviousPrediction(task, test_index, record.predicted_output)
+            unique_id = str(record.line_number)
+            work_item = WorkItemWithPreviousPrediction(task, test_index, record.predicted_output, unique_id)
             work_items.append(work_item)
 
     print(f"Number of work items: {len(work_items)}")

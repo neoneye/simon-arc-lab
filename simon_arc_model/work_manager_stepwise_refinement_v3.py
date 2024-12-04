@@ -403,13 +403,14 @@ class WorkManagerStepwiseRefinementV3(WorkManagerBase):
                 f'test{work_item.test_index}',
                 f'profile{profile_index}',
                 f'step{refinement_index}',
+                f'uniqueid{work_item.unique_id}',
                 temp_work_item.status.to_string(),
             ]
             filename_items = [item for item in filename_items_optional if item is not None]
             filename = '_'.join(filename_items) + '.png'
 
             # Format the title
-            title = f'{work_item.task.metadata_task_id} test{work_item.test_index} profile{profile_index} step{refinement_index}'
+            title = f'{work_item.task.metadata_task_id} test{work_item.test_index} profile{profile_index} step{refinement_index} uniqueid{work_item.unique_id}' 
 
             # Save the image to disk or show it.
             if show:
