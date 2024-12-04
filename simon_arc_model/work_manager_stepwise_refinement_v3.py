@@ -248,15 +248,16 @@ class WorkManagerStepwiseRefinementV3(WorkManagerBase):
                 vote_image = image_vote(best_images)
 
             if True:
-                last_predicted_correctness = np.ones_like(work_item.previous_predicted_output_image, dtype=np.uint8)
+                last_predicted_correctness = np.zeros_like(work_item.previous_predicted_output_image, dtype=np.uint8)
                 noise_level = 50
+                the_refinement_index = 1
                 try:
                     prediction = DecisionTreeUtil.predict_output(
                         work_item.task, 
                         work_item.test_index, 
                         work_item.previous_predicted_output_image,
                         last_predicted_correctness,
-                        refinement_index, 
+                        the_refinement_index,
                         noise_level,
                         FEATURES_3,
                     )
