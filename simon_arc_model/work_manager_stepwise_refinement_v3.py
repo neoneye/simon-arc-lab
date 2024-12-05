@@ -249,7 +249,7 @@ class WorkManagerStepwiseRefinementV3(WorkManagerBase):
 
             if True:
                 last_predicted_correctness = np.zeros_like(work_item.previous_predicted_output_image, dtype=np.uint8)
-                noise_level = 75
+                noise_level = 90
                 the_refinement_index = 1
                 try:
                     prediction = DecisionTreeUtil.predict_output(
