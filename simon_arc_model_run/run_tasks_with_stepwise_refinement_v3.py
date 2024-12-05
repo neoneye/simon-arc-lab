@@ -11,8 +11,7 @@ from simon_arc_model.work_manager_stepwise_refinement_v3 import WorkManagerStepw
 from simon_arc_model.arc_bad_prediction import *
 from simon_arc_model.work_item_with_previousprediction import WorkItemWithPreviousPrediction
 
-only_first_bad_prediction = True
-only_first_bad_prediction = False
+max_number_of_bad_predictions_per_task = 3
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -92,7 +91,7 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
     # Create work items for each bad prediction
     work_items = []
 
-    already_processed = set()
+    count_key_occurences = dict()
     for task in taskset.tasks:
         if task.has_same_input_output_size_for_all_examples() == False:
             continue
@@ -110,12 +109,13 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
                 print(f"Skipping task: {task_id}, due to test index {test_index} is out of range.")
                 continue
 
-            # Only take the first bad prediction for each task. Ignore the rest of the bad predictions.
+            # Only take the first N bad predictions for each task. Ignore the rest of the bad predictions.
             process_key = (dataset_id, task_id, test_index)
-            if process_key in already_processed:
-                if only_first_bad_prediction:
-                    continue
-            already_processed.add(process_key)
+            count = count_key_occurences.get(process_key, 0)
+            count += 1
+            count_key_occurences[process_key] = count
+            if count > max_number_of_bad_predictions_per_task:
+                continue
 
             unique_id = str(record.line_number)
             work_item = WorkItemWithPreviousPrediction(task, test_index, record.predicted_output, unique_id)
