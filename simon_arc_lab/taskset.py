@@ -48,6 +48,25 @@ class TaskSet:
             print(f"Removed {count_remove} tasks. Remaining tasks: {len(new_tasks)}")
         self.tasks = new_tasks
 
+    def keep_tasks_with_id(self, task_ids_to_keep: set[str], verbose: bool=False):
+        """
+        Keep the tasks from the TaskSet with the task ids. Remove the rest.
+
+        Sometime this is useful to focus on a groups on a few specific tasks.
+        """
+        new_tasks = []
+        count_remove = 0
+        for task in self.tasks:
+            if task.metadata_task_id in task_ids_to_keep:
+                new_tasks.append(task)
+                continue
+            count_remove += 1
+            if verbose:
+                print(f"Removing task id: {task.metadata_task_id}")
+        if verbose:
+            print(f"Removed {count_remove} tasks. Remaining tasks: {len(new_tasks)}")
+        self.tasks = new_tasks
+
     def task_ids(self) -> list[str]:
         return [task.metadata_task_id for task in self.tasks]
 

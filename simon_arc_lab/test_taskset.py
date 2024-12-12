@@ -26,3 +26,10 @@ class TestTaskSet(unittest.TestCase):
         actual = taskset.task_ids()
         expected = ["3428a4f5"]
         self.assertEqual(actual, expected)
+
+    def test_keep_tasks_with_id(self):
+        taskset = TaskSet.load_kaggle_arcprize2024_json('testdata/kaggle-arc-prize-2024-challenges-truncated.json')
+        taskset.keep_tasks_with_id({"007bbfb7"})
+        actual = taskset.task_ids()
+        expected = ["007bbfb7"]
+        self.assertEqual(actual, expected)
