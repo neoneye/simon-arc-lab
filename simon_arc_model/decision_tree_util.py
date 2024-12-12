@@ -27,6 +27,11 @@ from simon_arc_lab.show_prediction_result import show_prediction_result
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.calibration import CalibratedClassifierCV
+from sklearn.ensemble import StackingClassifier
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
 from sklearn import tree
 from scipy.stats import entropy
 import matplotlib.pyplot as plt
@@ -967,8 +972,46 @@ class DecisionTreeUtil:
 
         clf = None
         try:
-            clf_inner = DecisionTreeClassifier(random_state=42)
-            current_clf = CalibratedClassifierCV(clf_inner, method='isotonic', cv=5)
+            # Define multiple "weak" or at least base estimators
+            # estimators = [
+            #     ('knn', KNeighborsClassifier(n_neighbors=5)),
+            #     ('svc', SVC(probability=True, kernel='linear'))
+            # ]
+
+            # # The final estimator (meta-learner) that takes predictions of the above as features
+            # final_estimator = LogisticRegression()
+
+            # # Create the stacking ensemble
+            # current_clf = StackingClassifier(
+            #     estimators=estimators,
+            #     final_estimator=final_estimator,
+            #     cv=5
+            # )
+
+            # current_clf = DecisionTreeClassifier(max_depth=1)
+
+            weak_learner = DecisionTreeClassifier(max_depth=1)
+
+            # Create an AdaBoost classifier that sequentially adds weak learners
+            current_clf = AdaBoostClassifier(
+                base_estimator=weak_learner,
+                n_estimators=50,
+                learning_rate=1.0,
+                random_state=42,
+                algorithm='SAMME'
+            )
+
+            # weak_learner = DecisionTreeClassifier(max_depth=1)
+
+            # # Create an AdaBoost classifier that sequentially adds weak learners
+            # current_clf = AdaBoostClassifier(
+            #     estimator=weak_learner,
+            #     n_estimators=50,
+            #     learning_rate=1.0,
+            #     random_state=42
+            # )
+            # clf_inner = DecisionTreeClassifier(random_state=42)
+            # current_clf = CalibratedClassifierCV(clf_inner, method='isotonic', cv=5)
             current_clf.fit(xs, ys)
             clf = current_clf
         except Exception as e:
