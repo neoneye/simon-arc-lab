@@ -22,7 +22,8 @@ if not os.path.isdir(path_to_arc_dataset_collection_dataset):
     sys.exit(1)
 
 datasetid_groupname_pathtotaskdir_list = [
-    ('ARC-AGI', 'arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
+    ('ARC-AGI', 'arcagi', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data')),
+    # ('ARC-AGI', 'arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
     # ('ARC-AGI', 'arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
     # ('arc-dataset-tama', 'tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
     # ('Mini-ARC', 'miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
@@ -65,6 +66,16 @@ print(f"Number of unique tasks in the arc-bad-prediction dataset: {len(dataset_t
 incorrect_predictions_jsonl_path = arc_bad_prediction_file
 #incorrect_predictions_jsonl_path = None
 
+task_ids_with_circle_spirals_list = [
+    '08573cc6',
+    'e5c44e8f',
+    '5c2c9af4',
+    'f8c80d96',
+    '28e73c20',
+]
+task_ids_with_circle_spirals = set(task_ids_with_circle_spirals_list)
+
+
 number_of_items_in_list = len(datasetid_groupname_pathtotaskdir_list)
 for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_groupname_pathtotaskdir_list):
     save_dir = f'run_tasks_result/{run_id}/{groupname}'
@@ -81,6 +92,8 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
         if not found:
             task_ids_to_ignore.add(task_id)
     taskset.remove_tasks_by_id(taskids_to_ignore, verbose=False)
+
+    taskset.keep_tasks_with_id(task_ids_with_circle_spirals, verbose=False)
 
     if len(taskset.tasks) == 0:
         print(f"Skipping group: {groupname}, due to no tasks to process.")
