@@ -123,6 +123,9 @@ class WorkManagerStepwiseRefinementV3(WorkManagerBase):
                     incorrect_prediction_metadata,
                 )
 
+                # only process the first color profile, for now
+                break
+
             if work_item.status == WorkItemStatus.CORRECT:
                 correct_task_id_set.add(work_item.task.metadata_task_id)
                 correct_count = len(correct_task_id_set)
