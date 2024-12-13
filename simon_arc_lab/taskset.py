@@ -27,6 +27,9 @@ class TaskSet:
             task.metadata_task_id = task_id
             tasks.append(task)
         return TaskSet(tasks)
+    
+    def reverse_task_list(self):
+        self.tasks.reverse()
 
     def remove_tasks_by_id(self, task_ids_to_remove: set[str], verbose: bool=False):
         """
