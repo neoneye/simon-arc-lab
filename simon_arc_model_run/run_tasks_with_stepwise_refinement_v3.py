@@ -11,7 +11,7 @@ from simon_arc_model.work_manager_stepwise_refinement_v3 import WorkManagerStepw
 from simon_arc_model.arc_bad_prediction import *
 from simon_arc_model.work_item_with_previousprediction import WorkItemWithPreviousPrediction
 
-max_number_of_bad_predictions_per_task = 3
+max_number_of_bad_predictions_per_task = 20
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -67,11 +67,11 @@ incorrect_predictions_jsonl_path = arc_bad_prediction_file
 #incorrect_predictions_jsonl_path = None
 
 task_ids_with_circle_spirals_list = [
-    '08573cc6',
-    'e5c44e8f',
-    '5c2c9af4',
-    'f8c80d96',
-    '28e73c20',
+    '08573cc6', # multi colored spiral
+    # 'e5c44e8f',
+    # '5c2c9af4',
+    # 'f8c80d96',
+    # '28e73c20', # green spiral
 ]
 task_ids_with_circle_spirals = set(task_ids_with_circle_spirals_list)
 
@@ -82,6 +82,7 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
     print(f"Processing {index+1} of {number_of_items_in_list}. Group name '{groupname}'. Results will be saved to '{save_dir}'")
 
     taskset = TaskSet.load_directory(path_to_task_dir)
+    taskset.reverse_task_list()
 
     # Keep only that are present in the arc-bad-prediction dataset. Remove the rest.
     task_ids_to_ignore = set()

@@ -63,6 +63,31 @@ FEATURES_5 = [
     DecisionTreeFeature.HISTOGRAM_ROWCOL,
 ]
 
+FEATURES_6 = [
+    DecisionTreeFeature.POSITION_XY0,
+    DecisionTreeFeature.POSITION_XY4,
+    DecisionTreeFeature.ANY_EDGE,
+    DecisionTreeFeature.ANY_CORNER,
+    DecisionTreeFeature.BOUNDING_BOXES,
+    DecisionTreeFeature.CORNER,
+    DecisionTreeFeature.CENTER,
+    DecisionTreeFeature.HISTOGRAM_ROWCOL,
+    DecisionTreeFeature.HISTOGRAM_DIAGONAL,
+    DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND,
+    DecisionTreeFeature.COMPONENT_ALL8,
+    DecisionTreeFeature.COMPONENT_NEAREST4, 
+    DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL,
+    DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2,
+    DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR, 
+    DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_ALL9, 
+    DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER, 
+    DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_CORNERS, 
+    DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4, 
+    DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5, 
+    DecisionTreeFeature.OBJECT_ID_RAY_LIST,
+    DecisionTreeFeature.EROSION_NEAREST4, 
+]
+
 class WorkManagerStepwiseRefinementV3(WorkManagerBase):
     def __init__(self, run_id: str, dataset_id: str, taskset: TaskSet, work_items: list[WorkItemWithPreviousPrediction], cache_dir: Optional[str] = None, incorrect_predictions_jsonl_path: Optional[str] = None):
         self.run_id = run_id
@@ -262,7 +287,7 @@ class WorkManagerStepwiseRefinementV3(WorkManagerBase):
                         last_predicted_correctness,
                         the_refinement_index,
                         noise_level,
-                        FEATURES_3,
+                        FEATURES_6,
                     )
                 except Exception as e:
                     print(f'Error: {e} with task {work_item.task.metadata_task_id} test: {work_item.test_index} uniqueid: {work_item.unique_id}')

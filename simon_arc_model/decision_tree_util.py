@@ -971,54 +971,55 @@ class DecisionTreeUtil:
             ys = ys[:len(ys) * 2 // 3]
 
         clf = None
-        try:
-            # Define multiple "weak" or at least base estimators
-            # estimators = [
-            #     ('knn', KNeighborsClassifier(n_neighbors=5)),
-            #     ('svc', SVC(probability=True, kernel='linear'))
-            # ]
+        if True:
+            try:
+                # raise ValueError('SIMON Ignore the AdaBoostClassifier for now')
+                # Define multiple "weak" or at least base estimators
+                # estimators = [
+                #     ('knn', KNeighborsClassifier(n_neighbors=5)),
+                #     ('svc', SVC(probability=True, kernel='linear'))
+                # ]
 
-            # # The final estimator (meta-learner) that takes predictions of the above as features
-            # final_estimator = LogisticRegression()
+                # # The final estimator (meta-learner) that takes predictions of the above as features
+                # final_estimator = LogisticRegression()
 
-            # # Create the stacking ensemble
-            # current_clf = StackingClassifier(
-            #     estimators=estimators,
-            #     final_estimator=final_estimator,
-            #     cv=5
-            # )
+                # # Create the stacking ensemble
+                # current_clf = StackingClassifier(
+                #     estimators=estimators,
+                #     final_estimator=final_estimator,
+                #     cv=5
+                # )
 
-            # current_clf = DecisionTreeClassifier(max_depth=1)
+                # current_clf = DecisionTreeClassifier(max_depth=1)
 
-            weak_learner = DecisionTreeClassifier(max_depth=1)
+                weak_learner = DecisionTreeClassifier(
+                    # criterion='gini', 
+                    # criterion='entropy', 
+                    # criterion='log_loss', 
+                    # max_depth=5,
+                    max_depth=10,
+                    # random_state=42
+                )
 
-            # Create an AdaBoost classifier that sequentially adds weak learners
-            current_clf = AdaBoostClassifier(
-                base_estimator=weak_learner,
-                n_estimators=50,
-                learning_rate=1.0,
-                random_state=42,
-                algorithm='SAMME'
-            )
-
-            # weak_learner = DecisionTreeClassifier(max_depth=1)
-
-            # # Create an AdaBoost classifier that sequentially adds weak learners
-            # current_clf = AdaBoostClassifier(
-            #     estimator=weak_learner,
-            #     n_estimators=50,
-            #     learning_rate=1.0,
-            #     random_state=42
-            # )
-            # clf_inner = DecisionTreeClassifier(random_state=42)
-            # current_clf = CalibratedClassifierCV(clf_inner, method='isotonic', cv=5)
-            current_clf.fit(xs, ys)
-            clf = current_clf
-        except Exception as e:
-            print(f'Error: {e}')
+                # Create an AdaBoost classifier that sequentially adds weak learners
+                current_clf = AdaBoostClassifier(
+                    estimator=weak_learner,
+                    n_estimators=40,
+                    learning_rate=0.01,
+                    random_state=42,
+                    algorithm='SAMME'
+                )
+                # print(f'Fitting AdaBoostClassifier: {current_clf}')
+                # clf_inner = DecisionTreeClassifier(random_state=42)
+                # current_clf = CalibratedClassifierCV(clf_inner, method='isotonic', cv=5)
+                current_clf.fit(xs, ys)
+                # print(f'After fitting AdaBoostClassifier: {current_clf}')
+                clf = current_clf
+            except Exception as e:
+                print(f'Error: {e}')
         if clf is None:
             print('Falling back to DecisionTreeClassifier')
-            clf = DecisionTreeClassifier(random_state=42)
+            clf = DecisionTreeClassifier(random_state=42, max_depth=8)
             clf.fit(xs, ys)
 
         input_image = task.test_input(test_index)
