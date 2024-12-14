@@ -268,10 +268,13 @@ class DecisionTreeUtil:
                     continue
                 igs = ImageGaussianSplatting(component.mask)
                 if np.isnan(igs.angle) or np.isinf(igs.angle):
+                    print(f'Skipping component with invalid angle. angle={igs.angle}')
                     continue
                 if np.isnan(igs.spread_primary) or np.isinf(igs.spread_primary):
+                    print(f'Skipping component with invalid spread_primary. spread_primary={igs.spread_primary}')
                     continue
                 if np.isnan(igs.spread_secondary) or np.isinf(igs.spread_secondary):
+                    print(f'Skipping component with invalid spread_secondary. spread_secondary={igs.spread_secondary}')
                     continue
                 # loop over non-zero pixels
                 for x in range(width):

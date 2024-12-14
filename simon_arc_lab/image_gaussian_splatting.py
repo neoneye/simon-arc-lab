@@ -19,11 +19,18 @@ class ImageGaussianSplatting:
         # Find pixel indices of interest
         self.y, self.x = np.nonzero(image)
 
-        if len(self.x) < 2 or len(self.y) < 2:
-            # Not enough data to calculate covariance
+        if len(self.x) == 0 or len(self.y) == 0:
+            # No pixels of interest
             self.x_c = self.y_c = 0
             self.primary_dir = self.secondary_dir = np.array([0, 0])
             self.angle = self.spread_primary = self.spread_secondary = float('nan')
+            return
+
+        if len(self.x) == 1 and len(self.y) == 1:
+            # Exactly one pixel of interest
+            self.x_c, self.y_c = self.x[0], self.y[0]
+            self.primary_dir = self.secondary_dir = np.array([0, 0])
+            self.angle = self.spread_primary = self.spread_secondary = 0
             return
         
         # Compute the center (centroid)
