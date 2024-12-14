@@ -21,7 +21,7 @@ class ImageGaussianSplatting:
 
         if len(self.x) == 0 or len(self.y) == 0:
             # No pixels of interest
-            self.x_c = self.y_c = 0
+            self.x_c = self.y_c = float('nan')
             self.primary_dir = self.secondary_dir = np.array([0, 0])
             self.angle = self.spread_primary = self.spread_secondary = float('nan')
             return
@@ -59,7 +59,6 @@ class ImageGaussianSplatting:
         print(f"Secondary spread: {self.spread_secondary:.2f}")
 
     def show(self):
-        # Visualize the results
         plt.imshow(self.image, cmap='gray', origin='lower')
         plt.scatter([self.x_c], [self.y_c], color='red', label='Center')
 
@@ -67,8 +66,8 @@ class ImageGaussianSplatting:
             # Add ellipse to the visualization
             ellipse = Ellipse(
                 (self.x_c, self.y_c),
-                width=2 * self.spread_primary,
-                height=2 * self.spread_secondary,
+                width=2 * self.spread_primary if self.spread_primary > 0 else 1,
+                height=2 * self.spread_secondary if self.spread_secondary > 0 else 1,
                 angle=np.degrees(self.angle),
                 edgecolor='blue',
                 facecolor='none',
@@ -77,6 +76,7 @@ class ImageGaussianSplatting:
             )
             plt.gca().add_patch(ellipse)
 
+            # Draw primary and secondary directions
             plt.quiver(
                 self.x_c, self.y_c, self.primary_dir[0], self.primary_dir[1],
                 color='blue', scale=3, label='Primary direction'
@@ -85,6 +85,13 @@ class ImageGaussianSplatting:
                 self.x_c, self.y_c, self.secondary_dir[0], self.secondary_dir[1],
                 color='green', scale=3, label='Secondary direction'
             )
+
+        # Reversing the y-axis does not work, the quiver's are not rotated correctly
+        # So this particular plot is upside down
+        # plt.gca().invert_yaxis()
+        # plt.xlim(-0.5, self.image.shape[1] - 0.5)
+        # plt.ylim(-0.5, self.image.shape[0] - 0.5)
+
         plt.legend()
         plt.title("2D Gaussian Splatting Analysis")
         plt.show()
@@ -92,8 +99,9 @@ class ImageGaussianSplatting:
 if __name__ == "__main__":
     # Generate a test image
     image = np.zeros((100, 100))
-    image[90:95, 70:75] = 1
-    image[30:70, 30:70] = 1
+    image[30:35, 10:25] = 1
+    image[65:75, 90:95] = 1
+    image[40:60, 30:70] = 1
     image[60:80, 60:80] = 1
 
     # Perform Gaussian splatting analysis
