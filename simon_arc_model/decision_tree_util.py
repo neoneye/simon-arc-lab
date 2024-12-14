@@ -1080,7 +1080,7 @@ class DecisionTreeUtil:
             except Exception as e:
                 print(f'Error: {e}')
         if clf is None:
-            print('Falling back to DecisionTreeClassifier')
+            # print('Falling back to DecisionTreeClassifier')
             clf = DecisionTreeClassifier(random_state=42, max_depth=8)
             clf.fit(xs, ys)
 
