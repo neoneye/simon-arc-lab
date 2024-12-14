@@ -48,7 +48,7 @@ class ImageGaussianSplatting:
         # Extract angle and spread
         self.primary_dir = eigenvectors[:, 1] # Eigenvector of the largest eigenvalue
         self.secondary_dir = eigenvectors[:, 0] # Orthogonal eigenvector
-        self.angle = np.arctan2(self.primary_dir[1], self.primary_dir[0]) # Angle in radians
+        self.angle = np.arctan2(self.primary_dir[1], self.primary_dir[0]) % np.pi  # Angle in [0, π[
         self.spread_primary = np.sqrt(eigenvalues[1])
         self.spread_secondary = np.sqrt(eigenvalues[0])
 
