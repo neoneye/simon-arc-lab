@@ -1,9 +1,19 @@
+"""
+2D Gaussian Splatting Analysis
+https://en.wikipedia.org/wiki/Gaussian_splatting
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 
 class ImageGaussianSplatting:
     def __init__(self, image: np.array):
+        """
+        Perform Gaussian splatting analysis on a 2D binary image.
+
+        Args:
+            image (np.array): 2D binary. The object of interest should be represented by 1s.
+        """
         self.image = image
 
         # Find pixel indices of interest
