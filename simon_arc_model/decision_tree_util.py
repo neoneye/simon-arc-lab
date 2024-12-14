@@ -5,6 +5,7 @@ from simon_arc_lab.image_util import *
 from simon_arc_lab.image_rect import *
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
+from simon_arc_lab.image_gaussian_splatting import ImageGaussianSplatting
 from simon_arc_lab.image_shape3x3_opposite import ImageShape3x3Opposite
 from simon_arc_lab.image_shape3x3_center import ImageShape3x3Center
 from simon_arc_lab.image_shape3x3_histogram import *
@@ -36,6 +37,7 @@ from sklearn import tree
 from scipy.stats import entropy
 import matplotlib.pyplot as plt
 from enum import Enum
+import math
 
 class Transformation(Enum):
     DO_NOTHING = 'do_nothing'
@@ -255,6 +257,30 @@ class DecisionTreeUtil:
                             if mask_value == 1:
                                 object_shape[y, x] = value
                 object_shape_list.append(object_shape)
+
+        image_gaussian_splatting_angle = np.zeros((height, width), dtype=np.float32)
+        image_gaussian_splatting_spread_primary = np.zeros((height, width), dtype=np.float32)
+        image_gaussian_splatting_spread_secondary = np.zeros((height, width), dtype=np.float32)
+        for component_index, components in enumerate(components_list):
+            for component in components:
+                if not np.any(component.mask):
+                    print('Skipping component with no mask')
+                    continue
+                igs = ImageGaussianSplatting(component.mask)
+                if np.isnan(igs.angle) or np.isinf(igs.angle):
+                    continue
+                if np.isnan(igs.spread_primary) or np.isinf(igs.spread_primary):
+                    continue
+                if np.isnan(igs.spread_secondary) or np.isinf(igs.spread_secondary):
+                    continue
+                # loop over non-zero pixels
+                for x in range(width):
+                    for y in range(height):
+                        mask_value = component.mask[y, x]
+                        if mask_value == 1:
+                            image_gaussian_splatting_angle[y, x] = igs.angle
+                            image_gaussian_splatting_spread_primary[y, x] = igs.spread_primary
+                            image_gaussian_splatting_spread_secondary[y, x] = igs.spread_secondary
 
         # Image with object ids
         object_ids_list = []
@@ -825,6 +851,15 @@ class DecisionTreeUtil:
                         values.append(bigrams_left_right[y, x])
                     else:
                         values.append(257)
+
+                if True:
+                    value_angle = image_gaussian_splatting_angle[y, x]
+                    values.append(math.cos(value_angle))
+                    values.append(math.sin(value_angle))
+                    value_spread_primary = image_gaussian_splatting_spread_primary[y, x]
+                    value_spread_secondary = image_gaussian_splatting_spread_secondary[y, x]
+                    values.append(value_spread_primary)
+                    values.append(value_spread_secondary)
 
                 values_list.append(values)
         return values_list
