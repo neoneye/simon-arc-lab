@@ -11,7 +11,7 @@ from simon_arc_model.work_manager_stepwise_refinement_v3 import WorkManagerStepw
 from simon_arc_model.arc_bad_prediction import *
 from simon_arc_model.work_item_with_previousprediction import WorkItemWithPreviousPrediction
 
-max_number_of_bad_predictions_per_task = 20
+max_number_of_bad_predictions_per_task = 2
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -22,9 +22,9 @@ if not os.path.isdir(path_to_arc_dataset_collection_dataset):
     sys.exit(1)
 
 datasetid_groupname_pathtotaskdir_list = [
-    ('ARC-AGI', 'arcagi', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data')),
-    # ('ARC-AGI', 'arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
-    # ('ARC-AGI', 'arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
+    # ('ARC-AGI', 'arcagi', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data')),
+    ('ARC-AGI', 'arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
+    ('ARC-AGI', 'arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
     # ('arc-dataset-tama', 'tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
     # ('Mini-ARC', 'miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
     # ('ConceptARC', 'conceptarc', os.path.join(path_to_arc_dataset_collection_dataset, 'ConceptARC/data')),
@@ -67,10 +67,10 @@ incorrect_predictions_jsonl_path = arc_bad_prediction_file
 #incorrect_predictions_jsonl_path = None
 
 task_ids_with_circle_spirals_list = [
-    '08573cc6', # multi colored spiral
-    # 'e5c44e8f',
-    # '5c2c9af4',
-    # 'f8c80d96',
+    # '08573cc6', # multi colored spiral
+    'e5c44e8f',
+    '5c2c9af4',
+    'f8c80d96',
     # '28e73c20', # green spiral
 ]
 task_ids_with_circle_spirals = set(task_ids_with_circle_spirals_list)
@@ -94,7 +94,7 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
             task_ids_to_ignore.add(task_id)
     taskset.remove_tasks_by_id(taskids_to_ignore, verbose=False)
 
-    taskset.keep_tasks_with_id(task_ids_with_circle_spirals, verbose=False)
+    # taskset.keep_tasks_with_id(task_ids_with_circle_spirals, verbose=False)
 
     if len(taskset.tasks) == 0:
         print(f"Skipping group: {groupname}, due to no tasks to process.")

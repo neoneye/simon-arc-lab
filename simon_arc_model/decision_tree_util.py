@@ -261,6 +261,8 @@ class DecisionTreeUtil:
         image_gaussian_splatting_angle = np.zeros((height, width), dtype=np.float32)
         image_gaussian_splatting_spread_primary = np.zeros((height, width), dtype=np.float32)
         image_gaussian_splatting_spread_secondary = np.zeros((height, width), dtype=np.float32)
+        image_gaussian_splatting_center_x = np.zeros((height, width), dtype=np.float32)
+        image_gaussian_splatting_center_y = np.zeros((height, width), dtype=np.float32)
         for component_index, components in enumerate(components_list):
             for component in components:
                 if not np.any(component.mask):
@@ -284,6 +286,8 @@ class DecisionTreeUtil:
                             image_gaussian_splatting_angle[y, x] = igs.angle
                             image_gaussian_splatting_spread_primary[y, x] = igs.spread_primary
                             image_gaussian_splatting_spread_secondary[y, x] = igs.spread_secondary
+                            image_gaussian_splatting_center_x[y, x] = igs.x_c
+                            image_gaussian_splatting_center_y[y, x] = igs.y_c
 
         # Image with object ids
         object_ids_list = []
@@ -859,12 +863,26 @@ class DecisionTreeUtil:
 
                 if True:
                     value_angle = image_gaussian_splatting_angle[y, x]
-                    values.append(math.cos(value_angle))
-                    values.append(math.sin(value_angle))
-                    value_spread_primary = image_gaussian_splatting_spread_primary[y, x]
-                    value_spread_secondary = image_gaussian_splatting_spread_secondary[y, x]
-                    values.append(value_spread_primary)
-                    values.append(value_spread_secondary)
+                    # values.append(math.cos(value_angle))
+                    # values.append(math.sin(value_angle))
+                    # values.append(image_gaussian_splatting_spread_primary[y, x])
+                    # values.append(image_gaussian_splatting_spread_secondary[y, x])
+                    # values.append(image_gaussian_splatting_center_x[y, x])
+                    # values.append(image_gaussian_splatting_center_y[y, x])
+                    a = image_gaussian_splatting_spread_primary[y, x]
+                    b = image_gaussian_splatting_spread_secondary[y, x]
+                    a05 = a / 2
+                    a2 = a * 2
+                    b05 = b / 2
+                    b2 = b * 2
+                    values.append(a < b05)
+                    values.append(a >= b05 and a < b)
+                    values.append(a >= b and a < b2)
+                    values.append(a >= b2)
+                    values.append(b < a05)
+                    values.append(b >= a05 and b < a)
+                    values.append(b >= a and b < a2)
+                    values.append(b >= a2)
 
                 values_list.append(values)
         return values_list
