@@ -234,7 +234,9 @@ class DecisionTreeUtil:
         ignore_mask = np.zeros_like(image)
         components_list = []
         for component_pixel_connectivity in component_pixel_connectivity_list:
-            components = ConnectedComponent.find_objects_with_ignore_mask_inner(component_pixel_connectivity, image, ignore_mask)
+            # get a binary mask, where the image is 5 and the rest is not 5
+            image2 = np.where(image != 0, 1, 0)
+            components = ConnectedComponent.find_objects_with_ignore_mask_inner(component_pixel_connectivity, image2, ignore_mask)
             components_list.append(components)
 
         object_shape_list = []
@@ -1031,7 +1033,7 @@ class DecisionTreeUtil:
             ys = ys[:len(ys) * 2 // 3]
 
         clf = None
-        if True:
+        if False:
             try:
                 # raise ValueError('SIMON Ignore the AdaBoostClassifier for now')
                 # Define multiple "weak" or at least base estimators

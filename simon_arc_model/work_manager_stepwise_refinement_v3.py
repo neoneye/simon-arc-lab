@@ -74,7 +74,7 @@ FEATURES_6 = [
     # DecisionTreeFeature.HISTOGRAM_ROWCOL,
     # DecisionTreeFeature.HISTOGRAM_DIAGONAL,
     # DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND,
-    # DecisionTreeFeature.COMPONENT_ALL8,
+    DecisionTreeFeature.COMPONENT_ALL8,
     # DecisionTreeFeature.COMPONENT_NEAREST4, 
     # DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL,
     # DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2,

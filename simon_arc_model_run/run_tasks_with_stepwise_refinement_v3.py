@@ -22,8 +22,8 @@ if not os.path.isdir(path_to_arc_dataset_collection_dataset):
     sys.exit(1)
 
 datasetid_groupname_pathtotaskdir_list = [
-    ('ARC-AGI', 'arcagi', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data')),
-    # ('ARC-AGI', 'arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
+    # ('ARC-AGI', 'arcagi', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data')),
+    ('ARC-AGI', 'arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
     # ('ARC-AGI', 'arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
     # ('arc-dataset-tama', 'tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
     # ('Mini-ARC', 'miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
@@ -94,7 +94,7 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
             task_ids_to_ignore.add(task_id)
     taskset.remove_tasks_by_id(taskids_to_ignore, verbose=False)
 
-    taskset.keep_tasks_with_id(task_ids_with_circle_spirals, verbose=False)
+    # taskset.keep_tasks_with_id(task_ids_with_circle_spirals, verbose=False)
 
     if len(taskset.tasks) == 0:
         print(f"Skipping group: {groupname}, due to no tasks to process.")
@@ -138,7 +138,7 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
     print(f"Number of work items: {len(work_items)}")
 
     wm = WorkManagerStepwiseRefinementV3(run_id, dataset_id, taskset, work_items, cache_dir, incorrect_predictions_jsonl_path)
-    # wm.truncate_work_items(40)
+    wm.truncate_work_items(40)
     # wm.process_all_work_items()
     wm.process_all_work_items(save_dir=save_dir)
     # wm.process_all_work_items(show=True)
