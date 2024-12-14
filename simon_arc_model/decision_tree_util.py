@@ -685,9 +685,11 @@ class DecisionTreeUtil:
                             xx = x + rx - k
                             yy = y + ry - k
                             if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                                values.append(0)
+                                mass = 0
                             else:
-                                values.append(object_masses[yy, xx])
+                                mass = object_masses[yy, xx]
+                            values.append(mass)
+                            # values.append(int(np.sqrt(mass) * 10.0))
 
                 for object_distance in object_distance_list:
                     values.append(object_distance[y, x])
