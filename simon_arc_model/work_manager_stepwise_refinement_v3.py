@@ -86,6 +86,7 @@ FEATURES_6 = [
     # DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5, 
     # DecisionTreeFeature.OBJECT_ID_RAY_LIST,
     # DecisionTreeFeature.EROSION_NEAREST4, 
+    # DecisionTreeFeature.GAUSSIAN_SPLATTING,
 ]
 
 class WorkManagerStepwiseRefinementV3(WorkManagerBase):

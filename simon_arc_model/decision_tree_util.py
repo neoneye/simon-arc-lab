@@ -137,6 +137,7 @@ class DecisionTreeFeature(Enum):
     IDENTIFY_OBJECT_SHAPE = 'identify_object_shape'
     BIGRAM_ROWCOL = 'bigram_rowcol'
     COLOR_POPULARITY = 'color_popularity'
+    GAUSSIAN_SPLATTING = 'gaussian_splatting'
 
     @classmethod
     def names_joined_with_comma(cls, features: set['DecisionTreeFeature']) -> str:
@@ -258,36 +259,37 @@ class DecisionTreeUtil:
                                 object_shape[y, x] = value
                 object_shape_list.append(object_shape)
 
-        image_gaussian_splatting_angle = np.zeros((height, width), dtype=np.float32)
-        image_gaussian_splatting_spread_primary = np.zeros((height, width), dtype=np.float32)
-        image_gaussian_splatting_spread_secondary = np.zeros((height, width), dtype=np.float32)
-        image_gaussian_splatting_center_x = np.zeros((height, width), dtype=np.float32)
-        image_gaussian_splatting_center_y = np.zeros((height, width), dtype=np.float32)
-        for component_index, components in enumerate(components_list):
-            for component in components:
-                if not np.any(component.mask):
-                    print('Skipping component with no mask')
-                    continue
-                igs = ImageGaussianSplatting(component.mask)
-                if np.isnan(igs.angle) or np.isinf(igs.angle):
-                    print(f'Skipping component with invalid angle. angle={igs.angle}')
-                    continue
-                if np.isnan(igs.spread_primary) or np.isinf(igs.spread_primary):
-                    print(f'Skipping component with invalid spread_primary. spread_primary={igs.spread_primary}')
-                    continue
-                if np.isnan(igs.spread_secondary) or np.isinf(igs.spread_secondary):
-                    print(f'Skipping component with invalid spread_secondary. spread_secondary={igs.spread_secondary}')
-                    continue
-                # loop over non-zero pixels
-                for x in range(width):
-                    for y in range(height):
-                        mask_value = component.mask[y, x]
-                        if mask_value == 1:
-                            image_gaussian_splatting_angle[y, x] = igs.angle
-                            image_gaussian_splatting_spread_primary[y, x] = igs.spread_primary
-                            image_gaussian_splatting_spread_secondary[y, x] = igs.spread_secondary
-                            image_gaussian_splatting_center_x[y, x] = igs.x_c
-                            image_gaussian_splatting_center_y[y, x] = igs.y_c
+        if DecisionTreeFeature.GAUSSIAN_SPLATTING in features:
+            image_gaussian_splatting_angle = np.zeros((height, width), dtype=np.float32)
+            image_gaussian_splatting_spread_primary = np.zeros((height, width), dtype=np.float32)
+            image_gaussian_splatting_spread_secondary = np.zeros((height, width), dtype=np.float32)
+            image_gaussian_splatting_center_x = np.zeros((height, width), dtype=np.float32)
+            image_gaussian_splatting_center_y = np.zeros((height, width), dtype=np.float32)
+            for component_index, components in enumerate(components_list):
+                for component in components:
+                    if not np.any(component.mask):
+                        print('Skipping component with no mask')
+                        continue
+                    igs = ImageGaussianSplatting(component.mask)
+                    if np.isnan(igs.angle) or np.isinf(igs.angle):
+                        print(f'Skipping component with invalid angle. angle={igs.angle}')
+                        continue
+                    if np.isnan(igs.spread_primary) or np.isinf(igs.spread_primary):
+                        print(f'Skipping component with invalid spread_primary. spread_primary={igs.spread_primary}')
+                        continue
+                    if np.isnan(igs.spread_secondary) or np.isinf(igs.spread_secondary):
+                        print(f'Skipping component with invalid spread_secondary. spread_secondary={igs.spread_secondary}')
+                        continue
+                    # loop over non-zero pixels
+                    for x in range(width):
+                        for y in range(height):
+                            mask_value = component.mask[y, x]
+                            if mask_value == 1:
+                                image_gaussian_splatting_angle[y, x] = igs.angle
+                                image_gaussian_splatting_spread_primary[y, x] = igs.spread_primary
+                                image_gaussian_splatting_spread_secondary[y, x] = igs.spread_secondary
+                                image_gaussian_splatting_center_x[y, x] = igs.x_c
+                                image_gaussian_splatting_center_y[y, x] = igs.y_c
 
         # Image with object ids
         object_ids_list = []
@@ -861,7 +863,7 @@ class DecisionTreeUtil:
                     else:
                         values.append(257)
 
-                if True:
+                if DecisionTreeFeature.GAUSSIAN_SPLATTING in features:
                     value_angle = image_gaussian_splatting_angle[y, x]
                     # values.append(math.cos(value_angle))
                     # values.append(math.sin(value_angle))
