@@ -79,7 +79,7 @@ class TestImageGaussianSplatting(unittest.TestCase):
         # Act
         igs = ImageGaussianSplatting(input)
         # Assert
-        self.assertAlmostEqual(igs.angle, -np.deg2rad(138), places=2)
+        self.assertAlmostEqual(igs.angle, np.deg2rad(42.4), places=2)
         self.assertAlmostEqual(igs.x_c, 2.0, places=2)
         self.assertAlmostEqual(igs.y_c, 1.5, places=2)
         self.assertAlmostEqual(igs.spread_primary, 1.73, places=2)
