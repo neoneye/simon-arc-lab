@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 import sys
+from tqdm import tqdm
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
@@ -89,9 +90,10 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
 
     gallery_records = []
 
-    for task in taskset.tasks:
-        if task.has_same_input_output_size_for_all_examples() == False:
-            continue
+    for task in tqdm(taskset.tasks, desc=f"Processing tasks in {groupname}"):
+        # for task in taskset.tasks:
+        #     if task.has_same_input_output_size_for_all_examples() == False:
+        #         continue
         task_id = task.metadata_task_id
         find_key = (dataset_id, task_id)
         found_records = []
