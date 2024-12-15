@@ -6,12 +6,12 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
 from simon_arc_lab.taskset import TaskSet
-from simon_arc_lab.gallery_generator import gallery_generator_run
+from simon_arc_lab.gallery_generator_score import *
 from simon_arc_lab.task_similarity import TaskSimilarity
 from simon_arc_lab.show_prediction_result import show_multiple_images
 from simon_arc_model.arc_bad_prediction import *
 
-max_number_of_bad_predictions_per_task = 3
+max_number_of_bad_predictions_per_task = 5
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -87,6 +87,8 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
 
     print(f"Number of tasks for processing: {len(taskset.tasks)}")
 
+    gallery_records = []
+
     for task in taskset.tasks:
         if task.has_same_input_output_size_for_all_examples() == False:
             continue
@@ -132,6 +134,17 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
             title = f"{dataset_id} {task_id} {test_index} row{unique_id} score{score}"
             show_multiple_images(title_image_list, title=title, save_path=save_path)
 
+            group = f'{dataset_id} {task_id} {test_index}'
+            gallery_record = GalleryRecordWithScore(
+                group=group,
+                image_file_path=save_path, 
+                score=score,
+                row_id=unique_id,
+            )
+            gallery_records.append(gallery_record)
+
+    gallery_records.sort(key=lambda x: x.score, reverse=True)
+    # print(gallery_records)
 
     gallery_title = f'{groupname}, {run_id}'
-    gallery_generator_run(save_dir, title=gallery_title)
+    gallery_generator_score_run(gallery_records, save_dir, title=f"{groupname}, {run_id}")

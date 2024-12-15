@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ title }}</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; background-color: #333; color: #fff; }
+  .controls { margin-bottom: 20px; }
+  .controls button { margin-right: 10px; cursor: pointer; }
+
+  /* By default, no categories are shown */
+  .category { display: none; }
+
+  /* Show categories based on body class */
+  body.show-best .category.best { display: block; }
+  body.show-worst .category.worst { display: block; }
+  body.show-all .category.all { display: block; }
+
+  .container { display: flex; flex-wrap: wrap; gap: 1px; }
+  .image-card { padding: 10px; text-align: center; width: 250px; background-color: #202020; }
+  .image-card img { max-width: 100%; height: auto; }
+  .image-card p { margin: 0; }
+</style>
+<script>
+  function showCategory(category) {
+    document.body.className = 'show-' + category;
+  }
+</script>
+</head>
+<body class="show-all">
+<h1>{{ title }}</h1>
+<div class="controls">
+  <button onclick="showCategory('all')">All</button>
+  <button onclick="showCategory('best')">Best</button>
+  <button onclick="showCategory('worst')">Worst</button>
+</div>
+
+<div class="category all">
+  <div class="container">
+    {{ image_cards_all }}
+  </div>
+</div>
+
+<div class="category best">
+  <div class="container">
+    {{ image_cards_best }}
+  </div>
+</div>
+        
+<div class="category worst">
+  <div class="container">
+    {{ image_cards_worst }}
+  </div>
+</div>
+        
+</body>
+</html>
