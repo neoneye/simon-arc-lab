@@ -17,6 +17,15 @@
 #
 # IDEA: compare all input histograms with each other, and determine what features are common.
 # IDEA: compare example output histograms with each other, and determine what features are common.
+#
+# fractals, incorrect predictions are often scoring 100, despite being incorrect.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=007bbfb7
+#
+# symmetry, incorrect predictions are often scoring 100, despite being incorrect.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=1b60fb0c
+#
+# horizontal trigrams, incorrect predictions are often scoring 100, despite being incorrect.
+# https://neoneye.github.io/arc/edit.html?dataset=ARC&task=a699fb00
 import numpy as np
 from .task import Task
 from .image_with_cache import ImageWithCache
