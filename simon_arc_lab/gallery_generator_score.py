@@ -50,9 +50,10 @@ def gallery_generator_score_run(gallery_records: list[GalleryRecordWithScore], s
     image_cards_best_list = []
     image_cards_worst_list = []
 
+    k = 5
     for g_name, recs in groups.items():
-        best_3 = recs[:3]
-        worst_3 = recs[-3:]
+        best_3 = recs[:k]
+        worst_3 = recs[-k:]
         all_items = recs
 
         image_cards_all_list.extend(format_multiple_image_cards(all_items))

@@ -12,7 +12,7 @@ from simon_arc_lab.task_similarity import TaskSimilarity
 from simon_arc_lab.show_prediction_result import show_multiple_images
 from simon_arc_model.arc_bad_prediction import *
 
-max_number_of_bad_predictions_per_task = 5
+max_number_of_bad_predictions_per_task = 10
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -23,12 +23,12 @@ if not os.path.isdir(path_to_arc_dataset_collection_dataset):
     sys.exit(1)
 
 datasetid_groupname_pathtotaskdir_list = [
-    ('ARC-AGI', 'arcagi', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data')),
-    # ('ARC-AGI', 'arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
-    # ('ARC-AGI', 'arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
-    # ('arc-dataset-tama', 'tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
-    # ('Mini-ARC', 'miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
-    # ('ConceptARC', 'conceptarc', os.path.join(path_to_arc_dataset_collection_dataset, 'ConceptARC/data')),
+    # ('ARC-AGI', 'arcagi', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data')),
+    ('ARC-AGI', 'arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
+    ('ARC-AGI', 'arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
+    ('arc-dataset-tama', 'tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
+    ('Mini-ARC', 'miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
+    ('ConceptARC', 'conceptarc', os.path.join(path_to_arc_dataset_collection_dataset, 'ConceptARC/data')),
     # ('ARC-AGI', 'testdata', os.path.join(PROJECT_ROOT, 'testdata', 'ARC-AGI/data')),
 ]
 
@@ -80,7 +80,7 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
             task_ids_to_ignore.add(task_id)
     taskset.remove_tasks_by_id(task_ids_to_ignore, verbose=False)
 
-    taskset.keep_tasks_with_id(task_ids_with_circle_spirals, verbose=False)
+    # taskset.keep_tasks_with_id(task_ids_with_circle_spirals, verbose=False)
 
     if len(taskset.tasks) == 0:
         print(f"Skipping group: {groupname}, due to no tasks to process.")
@@ -90,11 +90,11 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
 
     gallery_records = []
 
-    for task in tqdm(taskset.tasks, desc=f"Processing tasks in {groupname}"):
-        # for task in taskset.tasks:
-        #     if task.has_same_input_output_size_for_all_examples() == False:
-        #         continue
+    pbar = tqdm(taskset.tasks, desc=f"Processing tasks in {groupname}", dynamic_ncols=True)
+    for task in pbar:
         task_id = task.metadata_task_id
+        pbar.set_postfix_str(f"Task: {task_id}")
+
         find_key = (dataset_id, task_id)
         found_records = []
         for record in arc_bad_prediction_dataset.records:
