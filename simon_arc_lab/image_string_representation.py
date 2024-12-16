@@ -8,8 +8,10 @@ class ImageToStringConfig:
     fallback_symbol: str
     separator_horizontal: str
     separator_vertical: str
-    show_column_names: Optional[str] # None|'A'
-    prefix_with_line_number: Optional[str] # None|'1'
+    top_column_mode: Optional[str] # None|'A'
+    bottom_column_mode: Optional[str] # None|'A'
+    prefix_column_symbol: Optional[str] # None|''|' '
+    prefix_with_line_number: Optional[str] # None|'1'|'-1'
     # IDEA: suffix_with_line_number: enum = False|OneBased|ZeroBased
 
     @staticmethod
@@ -25,21 +27,30 @@ class ImageToStringConfig:
         height, width = image.shape
         rows = []
 
+        def append_column_names(column_name_mode: Optional[str]):
+            if column_name_mode is None:
+                return
+            if column_name_mode == 'A':
+                items = []
+                if self.prefix_column_symbol is not None:
+                    items.append(self.prefix_column_symbol)
+                for x in range(width):
+                    items.append(self.spreadsheet_column_name(x))
+                row = self.separator_horizontal.join(items)
+                rows.append(row)
+                return
+            raise ValueError(f"Invalid column_name_mode: {column_name_mode}")
+
         # top row with column names
-        if self.show_column_names == 'A':
-            items = []
-            if self.prefix_with_line_number is not None:
-                items.append('')
-            for x in range(width):
-                items.append(self.spreadsheet_column_name(x))
-            row = self.separator_horizontal.join(items)
-            rows.append(row)
+        append_column_names(self.top_column_mode)
 
         # loop over the rows
         for y in range(height):
             items = []
             if self.prefix_with_line_number == '1':
                 items.append(str(y + 1))
+            if self.prefix_with_line_number == '-1':
+                items.append(str(height - y))
             
             # loop over the pixels in the current row
             for x in range(width):
@@ -53,6 +64,9 @@ class ImageToStringConfig:
                 items.append(symbol)
             row = self.separator_horizontal.join(items)
             rows.append(row)
+
+        # bottom row with column names
+        append_column_names(self.bottom_column_mode)
         return self.separator_vertical.join(rows)
 
 def image_to_string(image: np.array) -> str:
@@ -74,7 +88,9 @@ def image_to_string(image: np.array) -> str:
         fallback_symbol='.',
         separator_horizontal='',
         separator_vertical='\n',
-        show_column_names=None,
+        top_column_mode=None,
+        bottom_column_mode=None,
+        prefix_column_symbol=None,
         prefix_with_line_number=None,
     )
     return config.image_to_string(image)
@@ -135,7 +151,9 @@ def image_to_string_long_lowercase_colornames(image: np.array) -> str:
         fallback_symbol='white',
         separator_horizontal=' ',
         separator_vertical='\n',
-        show_column_names=None,
+        top_column_mode=None,
+        bottom_column_mode=None,
+        prefix_column_symbol=None,
         prefix_with_line_number=None,
     )
     return config.image_to_string(image)
@@ -159,7 +177,9 @@ def image_to_string_spreadsheet_v1(image: np.array) -> str:
         fallback_symbol='error',
         separator_horizontal=',',
         separator_vertical='\n',
-        show_column_names='A',
+        top_column_mode='A',
+        bottom_column_mode=None,
+        prefix_column_symbol='',
         prefix_with_line_number='1',
     )
     return config.image_to_string(image)
@@ -196,12 +216,14 @@ def image_to_string_emoji_circles_v1(image: np.array) -> str:
         fallback_symbol='❌',
         separator_horizontal='',
         separator_vertical='\n',
-        show_column_names=None,
+        top_column_mode=None,
+        bottom_column_mode=None,
+        prefix_column_symbol=None,
         prefix_with_line_number=None,
     )
     return config.image_to_string(image)
 
-def image_to_string_emoji_chess_v1(image: np.array) -> str:
+def image_to_string_emoji_chess_without_indices_v1(image: np.array) -> str:
     """
     Convert an image to an chess string representation, like this:
 
@@ -235,7 +257,50 @@ def image_to_string_emoji_chess_v1(image: np.array) -> str:
         fallback_symbol='♞',
         separator_horizontal='',
         separator_vertical='\n',
-        show_column_names=None,
+        top_column_mode=None,
+        bottom_column_mode=None,
+        prefix_column_symbol=None,
         prefix_with_line_number=None,
+    )
+    return config.image_to_string(image)
+
+def image_to_string_emoji_chess_with_indices_v1(image: np.array) -> str:
+    """
+    Convert an image to an chess string representation, like this:
+
+    from
+    [[1, 2, 3], [4, 5, 6]]
+
+    to
+    "2♕♖♗\n1♘♙♚\n ABC"
+
+    Why use an chess string representation?
+    The chess game have their own unicode symbols.
+    Maybe it's a good representation for LLM's.
+    The chess emoji's gets tokenized with variable length between 1 and 3 tokens for each chess emoji.
+    It doesn't tokenize well, I doubt that it's a good representation for LLM's.
+    https://platform.openai.com/tokenizer
+    """
+    pixel_to_symbol = {
+        0: '♔', # black
+        1: '♕', # blue
+        2: '♖', # red
+        3: '♗', # green
+        4: '♘', # yellow
+        5: '♙', # grey
+        6: '♚', # purple
+        7: '♛', # orange
+        8: '♜', # cyan
+        9: '♝', # brown
+    }
+    config = ImageToStringConfig(
+        pixel_to_symbol=pixel_to_symbol,
+        fallback_symbol='♞',
+        separator_horizontal='',
+        separator_vertical='\n',
+        top_column_mode=None,
+        bottom_column_mode='A',
+        prefix_column_symbol=' ',
+        prefix_with_line_number='-1',
     )
     return config.image_to_string(image)

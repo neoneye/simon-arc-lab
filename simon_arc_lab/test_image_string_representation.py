@@ -53,11 +53,20 @@ class TestImageStringRepresentation(unittest.TestCase):
         expected = "⚫🔵🔴🟢\n🟡⚪🟣🟠\n🟦🟤❌❌"
         self.assertEqual(actual, expected)
 
-    def test_40001_image_to_string_emoji_chess_v1(self):
+    def test_40001_image_to_string_emoji_chess_without_indices_v1(self):
         image = np.array([
             [0, 1, 2, 3], 
             [4, 5, 6, 7],
             [8, 9, 10, 11]], dtype=np.uint8)
-        actual = image_to_string_emoji_chess_v1(image)
+        actual = image_to_string_emoji_chess_without_indices_v1(image)
         expected = "♔♕♖♗\n♘♙♚♛\n♜♝♞♞"
+        self.assertEqual(actual, expected)
+
+    def test_40002_image_to_string_emoji_chess_with_indices_v1(self):
+        image = np.array([
+            [0, 1, 2, 3], 
+            [4, 5, 6, 7],
+            [8, 9, 10, 11]], dtype=np.uint8)
+        actual = image_to_string_emoji_chess_with_indices_v1(image)
+        expected = "3♔♕♖♗\n2♘♙♚♛\n1♜♝♞♞\n ABCD"
         self.assertEqual(actual, expected)
