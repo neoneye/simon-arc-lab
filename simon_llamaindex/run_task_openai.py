@@ -45,7 +45,8 @@ task_ids_of_interest = [
 
 def format_color(colorid: int) -> str:
     colorname = IMAGETOSTRING_COLORNAME.convert_pixel_to_symbol(colorid)
-    return f"{colorname} ({colorid})"
+    emoji = IMAGETOSTRING_EMOJI_CIRCLE_V1.convert_pixel_to_symbol(colorid)
+    return f"(id{colorid} {colorname} {emoji})"
 
 def format_color_list(colorid_list: list[int]) -> str:
     items = []
@@ -57,7 +58,7 @@ def serialize_image(image: np.array) -> str:
     histogram = Histogram.create_with_image(image)
     height, width = image.shape
     items = []
-    items.append("details about image:")
+    items.append("details:")
     items.append(f"- width: {width}")
     items.append(f"- height: {height}")
     items.append(f"- number_of_unique_colors: {histogram.number_of_unique_colors()}")
@@ -97,7 +98,7 @@ def serialize_image(image: np.array) -> str:
     items.append("```")
     items.append("")
     items.append("")
-    items.append("representation: emoji circles")
+    items.append("representation: emoji")
     items.append("```")
     items.append(image_to_string_emoji_circles_v1(image))
     items.append("```")
@@ -125,7 +126,9 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
             input_image = task.example_input(example_index)
             print(f"Example: {example_index}")
             print("Input:")
-            print(serialize_image(input_image))
+            s = serialize_image(input_image)
+            print(s)
+            print(f"bytes: {len(s)}")
             break
 
 exit()
