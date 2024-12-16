@@ -19,21 +19,21 @@ class TestImageStringRepresentation(unittest.TestCase):
             [4, 5, 6]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_20000_image_to_string_long_lowercase_colornames(self):
+    def test_20000_image_to_string_colorname(self):
         image = np.array([
             [0, 1, 2, 3], 
             [4, 5, 6, 7],
             [8, 9, 10, 11]], dtype=np.uint8)
-        actual = image_to_string_long_lowercase_colornames(image)
+        actual = image_to_string_colorname(image)
         expected = "black blue red green\nyellow grey purple orange\ncyan brown white white"
         self.assertEqual(actual, expected)
 
     def test_30000_spreadsheet_column_name(self):
-        self.assertEqual(ImageToStringConfig.spreadsheet_column_name(0), 'A')
-        self.assertEqual(ImageToStringConfig.spreadsheet_column_name(25), 'Z')
-        self.assertEqual(ImageToStringConfig.spreadsheet_column_name(26), 'AA')
-        self.assertEqual(ImageToStringConfig.spreadsheet_column_name(51), 'AZ')
-        self.assertEqual(ImageToStringConfig.spreadsheet_column_name(52), 'BA')
+        self.assertEqual(ImageToString.spreadsheet_column_name(0), 'A')
+        self.assertEqual(ImageToString.spreadsheet_column_name(25), 'Z')
+        self.assertEqual(ImageToString.spreadsheet_column_name(26), 'AA')
+        self.assertEqual(ImageToString.spreadsheet_column_name(51), 'AZ')
+        self.assertEqual(ImageToString.spreadsheet_column_name(52), 'BA')
 
     def test_30001_image_to_string_spreadsheet_v1(self):
         image = np.array([

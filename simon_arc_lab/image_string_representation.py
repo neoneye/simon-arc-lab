@@ -3,7 +3,7 @@ from typing import Optional
 from dataclasses import dataclass
 
 @dataclass
-class ImageToStringConfig:
+class ImageToString:
     pixel_to_symbol: Optional[dict]
     fallback_symbol: str
     separator_horizontal: str
@@ -30,7 +30,7 @@ class ImageToStringConfig:
             return self.pixel_to_symbol[pixel_value]
         return self.fallback_symbol
 
-    def image_to_string(self, image: np.array) -> str:
+    def apply(self, image: np.array) -> str:
         height, width = image.shape
         rows = []
 
@@ -85,7 +85,7 @@ def image_to_string(image: np.array) -> str:
     Check how the string representation gets tokenized.
     https://platform.openai.com/tokenizer
     """
-    config = ImageToStringConfig(
+    config = ImageToString(
         pixel_to_symbol=None,
         fallback_symbol='.',
         separator_horizontal='',
@@ -95,7 +95,7 @@ def image_to_string(image: np.array) -> str:
         prefix_column_symbol=None,
         prefix_with_line_number=None,
     )
-    return config.image_to_string(image)
+    return config.apply(image)
 
 def image_from_string(s: str) -> np.array:
     """
@@ -121,7 +121,45 @@ def image_from_string(s: str) -> np.array:
                 image[y, x] = int(c)
     return image
 
-def image_to_string_long_lowercase_colornames(image: np.array) -> str:
+# ARC-AGI color names
+
+COLORNAME_BLACK = 'black'
+COLORNAME_BLUE = 'blue'
+COLORNAME_RED = 'red'
+COLORNAME_GREEN = 'green'
+COLORNAME_YELLOW = 'yellow'
+COLORNAME_GREY = 'grey'
+COLORNAME_PURPLE = 'purple'
+COLORNAME_ORANGE = 'orange'
+COLORNAME_CYAN = 'cyan'
+COLORNAME_BROWN = 'brown'
+COLORNAME_WHITE = 'white'
+
+COLORID_TO_COLORNAME = {
+    0: COLORNAME_BLACK,
+    1: COLORNAME_BLUE,
+    2: COLORNAME_RED,
+    3: COLORNAME_GREEN,
+    4: COLORNAME_YELLOW,
+    5: COLORNAME_GREY,
+    6: COLORNAME_PURPLE,
+    7: COLORNAME_ORANGE,
+    8: COLORNAME_CYAN,
+    9: COLORNAME_BROWN,
+}
+
+IMAGETOSTRING_COLORNAME = ImageToString(
+    pixel_to_symbol=COLORID_TO_COLORNAME,
+    fallback_symbol=COLORNAME_WHITE,
+    separator_horizontal=' ',
+    separator_vertical='\n',
+    top_column_mode=None,
+    bottom_column_mode=None,
+    prefix_column_symbol=None,
+    prefix_with_line_number=None,
+)
+
+def image_to_string_colorname(image: np.array) -> str:
     """
     Convert an image to a long string representation, like this:
 
@@ -136,29 +174,7 @@ def image_to_string_long_lowercase_colornames(image: np.array) -> str:
     Use long color names to reduce the number of tokens.
     https://platform.openai.com/tokenizer
     """
-    pixel_to_symbol = {
-        0: 'black',
-        1: 'blue',
-        2: 'red',
-        3: 'green',
-        4: 'yellow',
-        5: 'grey',
-        6: 'purple',
-        7: 'orange',
-        8: 'cyan',
-        9: 'brown',
-    }
-    config = ImageToStringConfig(
-        pixel_to_symbol=pixel_to_symbol,
-        fallback_symbol='white',
-        separator_horizontal=' ',
-        separator_vertical='\n',
-        top_column_mode=None,
-        bottom_column_mode=None,
-        prefix_column_symbol=None,
-        prefix_with_line_number=None,
-    )
-    return config.image_to_string(image)
+    return IMAGETOSTRING_COLORNAME.apply(image)
 
 def image_to_string_spreadsheet_v1(image: np.array) -> str:
     """
@@ -174,7 +190,7 @@ def image_to_string_spreadsheet_v1(image: np.array) -> str:
     Spreadsheets are used everywhere, and LLM's may have been trained on spreadsheets.
     Maybe it's a good representation for LLM's.
     """
-    config = ImageToStringConfig(
+    config = ImageToString(
         pixel_to_symbol=None,
         fallback_symbol='error',
         separator_horizontal=',',
@@ -184,7 +200,7 @@ def image_to_string_spreadsheet_v1(image: np.array) -> str:
         prefix_column_symbol='',
         prefix_with_line_number='1',
     )
-    return config.image_to_string(image)
+    return config.apply(image)
 
 def image_to_string_emoji_circles_v1(image: np.array) -> str:
     """
@@ -213,7 +229,7 @@ def image_to_string_emoji_circles_v1(image: np.array) -> str:
         8: '🟦',  # blue square (used for cyan)
         9: '🟤',  # brown circle
     }
-    config = ImageToStringConfig(
+    config = ImageToString(
         pixel_to_symbol=pixel_to_symbol,
         fallback_symbol='❌',
         separator_horizontal='',
@@ -223,7 +239,7 @@ def image_to_string_emoji_circles_v1(image: np.array) -> str:
         prefix_column_symbol=None,
         prefix_with_line_number=None,
     )
-    return config.image_to_string(image)
+    return config.apply(image)
 
 def image_to_string_emoji_chess_without_indices_v1(image: np.array) -> str:
     """
@@ -254,7 +270,7 @@ def image_to_string_emoji_chess_without_indices_v1(image: np.array) -> str:
         8: '♜', # cyan
         9: '♝', # brown
     }
-    config = ImageToStringConfig(
+    config = ImageToString(
         pixel_to_symbol=pixel_to_symbol,
         fallback_symbol='♞',
         separator_horizontal='',
@@ -264,7 +280,7 @@ def image_to_string_emoji_chess_without_indices_v1(image: np.array) -> str:
         prefix_column_symbol=None,
         prefix_with_line_number=None,
     )
-    return config.image_to_string(image)
+    return config.apply(image)
 
 def image_to_string_emoji_chess_with_indices_v1(image: np.array) -> str:
     """
@@ -295,7 +311,7 @@ def image_to_string_emoji_chess_with_indices_v1(image: np.array) -> str:
         8: '♜', # cyan
         9: '♝', # brown
     }
-    config = ImageToStringConfig(
+    config = ImageToString(
         pixel_to_symbol=pixel_to_symbol,
         fallback_symbol='♞',
         separator_horizontal='',
@@ -305,4 +321,4 @@ def image_to_string_emoji_chess_with_indices_v1(image: np.array) -> str:
         prefix_column_symbol=' ',
         prefix_with_line_number='-1',
     )
-    return config.image_to_string(image)
+    return config.apply(image)
