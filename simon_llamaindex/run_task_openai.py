@@ -1,6 +1,7 @@
 from datetime import datetime
 import sys
 import os
+import numpy as np
 from dotenv import dotenv_values
 from llama_index.llms.openai import OpenAI
 
@@ -9,6 +10,8 @@ sys.path.insert(0, PROJECT_ROOT)
 
 from simon_arc_lab.task import Task
 from simon_arc_lab.taskset import TaskSet
+from simon_arc_lab.image_string_representation import *
+from simon_arc_lab.histogram import Histogram
 
 dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.env'))
 dotenv_dict = dotenv_values(dotenv_path=dotenv_path)
@@ -40,6 +43,50 @@ task_ids_of_interest = [
     '0b17323b'
 ]
 
+def serialize_image(image: np.array) -> str:
+    histogram = Histogram.create_with_image(image)
+    height, width = image.shape
+    items = []
+    items.append("details about image:")
+    items.append(f"- width: {width}")
+    items.append(f"- height: {height}")
+    items.append(f"- number_of_unique_colors: {histogram.number_of_unique_colors()}")
+    most_popular_colors = histogram.most_popular_color_list()
+    if len(most_popular_colors) == 1:
+        items.append(f"- most popular color: {most_popular_colors[0]}")
+    else:
+        items.append(f"- most popular colors: {most_popular_colors} They have the same count.")
+    least_popular_colors = histogram.least_popular_color_list()
+    if len(least_popular_colors) == 1:
+        items.append(f"- least popular color: {least_popular_colors[0]}")
+    else:
+        items.append(f"- least popular colors: {least_popular_colors} They have the same count.")
+    items.append("")
+    items.append("")
+    items.append("representation: digits")
+    items.append("```")
+    items.append(image_to_string(image))
+    items.append("```")
+    items.append("")
+    items.append("")
+    items.append("representation: color names")
+    items.append("```")
+    items.append(image_to_string_long_lowercase_colornames(image))
+    items.append("```")
+    items.append("")
+    items.append("")
+    items.append("representation: Excel")
+    items.append("```")
+    items.append(image_to_string_spreadsheet_v1(image))
+    items.append("```")
+    items.append("")
+    items.append("")
+    items.append("representation: emoji circles")
+    items.append("```")
+    items.append(image_to_string_emoji_circles_v1(image))
+    items.append("```")
+    return "\n".join(items)
+
 number_of_items_in_list = len(datasetid_groupname_pathtotaskdir_list)
 for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_groupname_pathtotaskdir_list):
     save_dir = f'run_tasks_result/{run_id}/{groupname}'
@@ -54,6 +101,16 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
 
     print(f"Number of tasks for processing: {len(taskset.tasks)}")
 
+    for task in taskset.tasks:
+        task_id = task.metadata_task_id
+        print(f"Task id: {task_id}")
+
+        for example_index in range(task.count_examples):
+            input_image = task.example_input(example_index)
+            print(f"Example: {example_index}")
+            print("Input:")
+            print(serialize_image(input_image))
+            break
 
 exit()
 
