@@ -28,7 +28,23 @@ class TestImageStringRepresentation(unittest.TestCase):
         expected = "black blue red green\nyellow grey purple orange\ncyan brown white white"
         self.assertEqual(actual, expected)
 
-    def test_30000_image_to_string_emoji_circles_v1(self):
+    def test_30000_spreadsheet_column_name(self):
+        self.assertEqual(ImageToStringConfig.spreadsheet_column_name(0), 'A')
+        self.assertEqual(ImageToStringConfig.spreadsheet_column_name(25), 'Z')
+        self.assertEqual(ImageToStringConfig.spreadsheet_column_name(26), 'AA')
+        self.assertEqual(ImageToStringConfig.spreadsheet_column_name(51), 'AZ')
+        self.assertEqual(ImageToStringConfig.spreadsheet_column_name(52), 'BA')
+
+    def test_30001_image_to_string_spreadsheet_v1(self):
+        image = np.array([
+            [0, 1, 2, 3], 
+            [4, 5, 6, 7],
+            [8, 9, 10, 11]], dtype=np.uint8)
+        actual = image_to_string_spreadsheet_v1(image)
+        expected = ",A,B,C,D\n1,0,1,2,3\n2,4,5,6,7\n3,8,9,10,11"
+        self.assertEqual(actual, expected)
+
+    def test_40000_image_to_string_emoji_circles_v1(self):
         image = np.array([
             [0, 1, 2, 3], 
             [4, 5, 6, 7],
@@ -37,7 +53,7 @@ class TestImageStringRepresentation(unittest.TestCase):
         expected = "⚫🔵🔴🟢\n🟡⚪🟣🟠\n🟦🟤❌❌"
         self.assertEqual(actual, expected)
 
-    def test_40000_image_to_string_emoji_chess_v1(self):
+    def test_40001_image_to_string_emoji_chess_v1(self):
         image = np.array([
             [0, 1, 2, 3], 
             [4, 5, 6, 7],

@@ -8,14 +8,40 @@ class ImageToStringConfig:
     fallback_symbol: str
     separator_horizontal: str
     separator_vertical: str
-    # IDEA: prefix_with_line_number: enum = False|OneBased|ZeroBased
+    show_column_names: Optional[str] # None|'A'
+    prefix_with_line_number: Optional[str] # None|'1'
     # IDEA: suffix_with_line_number: enum = False|OneBased|ZeroBased
+
+    @staticmethod
+    def spreadsheet_column_name(column_index: int) -> str:
+        if column_index < 26:
+            # A-Z
+            return chr(ord('A') + column_index)
+        else:
+            # 'AA', 'AB', 'AC', ... 'ZZ'
+            return chr(ord('A') + column_index // 26 - 1) + chr(ord('A') + column_index % 26)
 
     def image_to_string(self, image: np.array) -> str:
         height, width = image.shape
         rows = []
+
+        # top row with column names
+        if self.show_column_names == 'A':
+            items = []
+            if self.prefix_with_line_number is not None:
+                items.append('')
+            for x in range(width):
+                items.append(self.spreadsheet_column_name(x))
+            row = self.separator_horizontal.join(items)
+            rows.append(row)
+
+        # loop over the rows
         for y in range(height):
             items = []
+            if self.prefix_with_line_number == '1':
+                items.append(str(y + 1))
+            
+            # loop over the pixels in the current row
             for x in range(width):
                 pixel = image[y, x]
                 if self.pixel_to_symbol is None:
@@ -48,6 +74,8 @@ def image_to_string(image: np.array) -> str:
         fallback_symbol='.',
         separator_horizontal='',
         separator_vertical='\n',
+        show_column_names=None,
+        prefix_with_line_number=None,
     )
     return config.image_to_string(image)
 
@@ -107,6 +135,32 @@ def image_to_string_long_lowercase_colornames(image: np.array) -> str:
         fallback_symbol='white',
         separator_horizontal=' ',
         separator_vertical='\n',
+        show_column_names=None,
+        prefix_with_line_number=None,
+    )
+    return config.image_to_string(image)
+
+def image_to_string_spreadsheet_v1(image: np.array) -> str:
+    """
+    Convert an image to a spreadsheet like string representation, like this:
+
+    from
+    [[1, 2, 3], [4, 5, 6]]
+
+    to
+    ",A,B,C\n1,1,2,3\n2,4,5,6"
+
+    Why use an spreadsheet like string representation?
+    Spreadsheets are used everywhere, and LLM's may have been trained on spreadsheets.
+    Maybe it's a good representation for LLM's.
+    """
+    config = ImageToStringConfig(
+        pixel_to_symbol=None,
+        fallback_symbol='error',
+        separator_horizontal=',',
+        separator_vertical='\n',
+        show_column_names='A',
+        prefix_with_line_number='1',
     )
     return config.image_to_string(image)
 
@@ -142,6 +196,8 @@ def image_to_string_emoji_circles_v1(image: np.array) -> str:
         fallback_symbol='❌',
         separator_horizontal='',
         separator_vertical='\n',
+        show_column_names=None,
+        prefix_with_line_number=None,
     )
     return config.image_to_string(image)
 
@@ -179,6 +235,7 @@ def image_to_string_emoji_chess_v1(image: np.array) -> str:
         fallback_symbol='♞',
         separator_horizontal='',
         separator_vertical='\n',
+        show_column_names=None,
+        prefix_with_line_number=None,
     )
     return config.image_to_string(image)
-
