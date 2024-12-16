@@ -43,6 +43,16 @@ task_ids_of_interest = [
     '0b17323b'
 ]
 
+def format_color(colorid: int) -> str:
+    colorname = IMAGETOSTRING_COLORNAME.convert_pixel_to_symbol(colorid)
+    return f"{colorname} ({colorid})"
+
+def format_color_list(colorid_list: list[int]) -> str:
+    items = []
+    for colorid in colorid_list:
+        items.append(format_color(colorid))
+    return ", ".join(items)
+
 def serialize_image(image: np.array) -> str:
     histogram = Histogram.create_with_image(image)
     height, width = image.shape
@@ -52,15 +62,17 @@ def serialize_image(image: np.array) -> str:
     items.append(f"- height: {height}")
     items.append(f"- number_of_unique_colors: {histogram.number_of_unique_colors()}")
     most_popular_colors = histogram.most_popular_color_list()
+    most_popular_color_items_str = format_color_list(most_popular_colors)
     if len(most_popular_colors) == 1:
-        items.append(f"- most popular color: {most_popular_colors[0]}")
+        items.append(f"- most popular color: {most_popular_color_items_str}")
     else:
-        items.append(f"- most popular colors: {most_popular_colors} They have the same count.")
+        items.append(f"- most popular colors: {most_popular_color_items_str} They have the same count.")
     least_popular_colors = histogram.least_popular_color_list()
+    least_popular_color_items_str = format_color_list(least_popular_colors)
     if len(least_popular_colors) == 1:
-        items.append(f"- least popular color: {least_popular_colors[0]}")
+        items.append(f"- least popular color: {least_popular_color_items_str}")
     else:
-        items.append(f"- least popular colors: {least_popular_colors} They have the same count.")
+        items.append(f"- least popular colors: {least_popular_color_items_str} They have the same count.")
     items.append("")
     items.append("")
     items.append("representation: digits")
@@ -71,7 +83,7 @@ def serialize_image(image: np.array) -> str:
     items.append("")
     items.append("representation: color names")
     items.append("```")
-    items.append(image_to_string_long_lowercase_colornames(image))
+    items.append(image_to_string_colorname(image))
     items.append("```")
     items.append("")
     items.append("")
