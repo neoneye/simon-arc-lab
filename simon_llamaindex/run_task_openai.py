@@ -40,7 +40,8 @@ for dataset_id, groupname, path_to_task_dir in datasetid_groupname_pathtotaskdir
         sys.exit(1)
 
 task_ids_of_interest = [
-    '0b17323b'
+    '0b17323b',
+    '08573cc6',
 ]
 
 def format_color(colorid: int) -> str:
@@ -58,7 +59,7 @@ def serialize_image(image: np.array) -> str:
     histogram = Histogram.create_with_image(image)
     height, width = image.shape
     items = []
-    items.append("details:")
+    items.append("")
     items.append(f"- width: {width}")
     items.append(f"- height: {height}")
     items.append(f"- number_of_unique_colors: {histogram.number_of_unique_colors()}")
@@ -104,10 +105,32 @@ def serialize_image(image: np.array) -> str:
     items.append("```")
     return "\n".join(items)
 
+def create_prompt_for_task(task: Task) -> str:
+    items = []
+    items.append("# Puzzle solving")
+    items.append("what ARC (Abstraction & Reasoning Corpus) transformation happens here?")
+    items.append("")
+    for example_index in range(task.count_examples):
+        if example_index > 0:
+            items.append("")
+            items.append("")
+        input_image = task.example_input(example_index)
+        output_image = task.example_output(example_index)
+        items.append(f'## Transformation {example_index} Input')
+        items.append(serialize_image(input_image))
+        items.append("")
+        items.append("")
+        items.append(f'## Transformation {example_index} Output')
+        items.append(serialize_image(output_image))
+    result = "\n".join(items)
+    print(f"bytes: {len(result)}")
+    return result
+
 number_of_items_in_list = len(datasetid_groupname_pathtotaskdir_list)
 for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_groupname_pathtotaskdir_list):
     save_dir = f'run_tasks_result/{run_id}/{groupname}'
     print(f"Processing {index+1} of {number_of_items_in_list}. Group name '{groupname}'. Results will be saved to '{save_dir}'")
+    os.makedirs(save_dir, exist_ok=True)
 
     taskset = TaskSet.load_directory(path_to_task_dir)
     taskset.keep_tasks_with_id(set(task_ids_of_interest), verbose=False)
@@ -122,14 +145,11 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
         task_id = task.metadata_task_id
         print(f"Task id: {task_id}")
 
-        for example_index in range(task.count_examples):
-            input_image = task.example_input(example_index)
-            print(f"Example: {example_index}")
-            print("Input:")
-            s = serialize_image(input_image)
-            print(s)
-            print(f"bytes: {len(s)}")
-            break
+        prompt = create_prompt_for_task(task)
+        filename = f'{task_id}_prompt.md'
+        filepath = os.path.join(save_dir, filename)
+        with open(filepath, 'w') as f:
+            f.write(prompt)
 
 exit()
 
