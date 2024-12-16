@@ -12,6 +12,7 @@ from simon_arc_lab.task import Task
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.image_string_representation import *
 from simon_arc_lab.histogram import Histogram
+from simon_arc_lab.task_color_profile import *
 
 dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.env'))
 dotenv_dict = dotenv_values(dotenv_path=dotenv_path)
@@ -105,7 +106,10 @@ def serialize_image(image: np.array) -> str:
     items.append("```")
     return "\n".join(items)
 
-def create_prompt_for_task(task: Task) -> str:
+def create_prompt_for_task(task: Task, test_index: int) -> str:
+    tcp = TaskColorProfile(task)
+    color_profile_prediction = tcp.predict_output_colors_for_test_index(test_index)
+    print(f"color_profile_prediction: {color_profile_prediction}")
     items = []
     items.append("# Puzzle solving")
     items.append("what ARC (Abstraction & Reasoning Corpus) transformation happens here?")
@@ -122,6 +126,26 @@ def create_prompt_for_task(task: Task) -> str:
         items.append("")
         items.append(f'## Transformation {example_index} Output')
         items.append(serialize_image(output_image))
+
+    if True:
+        items.append("")
+        items.append("")
+        input_image = task.test_input(test_index)
+        items.append(f'## Transformation Test Input')
+        items.append(serialize_image(input_image))
+        items.append("")
+        items.append("")
+        items.append(f'## Transformation Test Output')
+        items.append("")
+        items.append("This is what the model should predict. Before giving the answer, please reflect on what transformation happens.")
+        items.append("")
+        for y, (certain, color_set) in enumerate(color_profile_prediction.certain_colorset_list):
+            color_list = list(color_set)
+            color_list.sort()
+            color_list_str = format_color_list(color_list)
+            items.append(f"- color that are likely to be in the output: {color_list_str}")
+
+
     result = "\n".join(items)
     print(f"bytes: {len(result)}")
     return result
@@ -145,11 +169,12 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
         task_id = task.metadata_task_id
         print(f"Task id: {task_id}")
 
-        prompt = create_prompt_for_task(task)
-        filename = f'{task_id}_prompt.md'
-        filepath = os.path.join(save_dir, filename)
-        with open(filepath, 'w') as f:
-            f.write(prompt)
+        for test_index in range(task.count_tests):
+            prompt = create_prompt_for_task(task, test_index)
+            filename = f'{task_id}_test{test_index}_prompt.md'
+            filepath = os.path.join(save_dir, filename)
+            with open(filepath, 'w') as f:
+                f.write(prompt)
 
 exit()
 
