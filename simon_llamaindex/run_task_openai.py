@@ -112,7 +112,7 @@ def create_prompt_for_task(task: Task, test_index: int) -> str:
     color_profile_prediction = tcp.predict_output_colors_for_test_index(test_index)
 
     items = []
-    items.append("# Puzzle solving")
+    items.append("### Preamble")
     items.append("You are an expert in ARC (Abstraction & Reasoning Corpus).")
     items.append("")
     items.append("You are also an LLM so tokenization may impact how you see the image.") 
@@ -120,6 +120,12 @@ def create_prompt_for_task(task: Task, test_index: int) -> str:
     items.append("for example the color 'blue' may be just a single token, or it may be multiple tokens.")
     items.append("You cannot assume that the image you perceive is correct due to the tokenization.")
     items.append("For this reason multiple representations are provided, so you can better reason about the puzzle.")
+    items.append("")
+    items.append("Be aware about of keeping the number of response tokens fairly short, to minimize energy consumption.")
+    items.append("In your response, please don't repeat one of the input images, since it's already in the prompt. It's a waste of tokens.")
+    items.append("If you need to refer to a particular image, then write what transformation N input/output -> representation name.")
+    items.append("")
+    items.append("# The ARC puzzle")
     items.append("")
     for example_index in range(task.count_examples):
         if example_index > 0:
