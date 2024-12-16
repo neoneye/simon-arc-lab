@@ -45,6 +45,7 @@ for dataset_id, groupname, path_to_task_dir in datasetid_groupname_pathtotaskdir
 task_ids_of_interest = [
     '0b17323b',
     '08573cc6',
+    '6c434453',
 ]
 
 def format_color(colorid: int) -> str:
@@ -225,10 +226,11 @@ This yields a concise, text-based compression.
     items.append("")
     items.append("Apply the hypothesized rule to the 'train 1 input' and see if it yields the 'train 1 output' image.")
     items.append("")
-    items.append("# Task D - For all the training pairs, what transformation happens from the input to the output?")
-    items.append("")
-    items.append("Apply the hypothesized rules to all the remaining training pairs and see if it yields the corresponding output images.")
-    items.append("")
+    if task.count_examples > 2:
+        items.append("# Task D - For all the training pairs, what transformation happens from the input to the output?")
+        items.append("")
+        items.append("Apply the hypothesized rules to all the remaining training pairs and see if it yields the corresponding output images.")
+        items.append("")
     items.append("# Task E - Predict the output using the generalized transformation")
     items.append("")
     # items.append("Use emoji representation for the output.")
@@ -241,6 +243,9 @@ This yields a concise, text-based compression.
     items.append("Describe the transformation from the input to the output.")
     items.append("Verify that the pixels in the output are placed at the same positions that you had in mind.")
     items.append("After the double check, rate how confident you now are in your prediction.")
+    items.append("")
+    items.append("# Task G")
+    items.append("create a RLE representation of the predicted output")
     items.append("")
 
     result = "\n".join(items)
