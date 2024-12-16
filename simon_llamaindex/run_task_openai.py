@@ -14,6 +14,7 @@ from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.image_string_representation import *
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.task_color_profile import *
+from simon_arc_lab.rle.serialize import serialize
 
 dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.env'))
 dotenv_dict = dotenv_values(dotenv_path=dotenv_path)
@@ -105,6 +106,20 @@ def serialize_image(image: np.array) -> str:
     items.append("```")
     items.append(image_to_string_emoji_circles_v1(image))
     items.append("```")
+    items.append("")
+    items.append("")
+    items.append("representation: RLE")
+    items.append("```")
+    rle = serialize(image)
+    items.append(rle)
+    items.append("```")
+    items.append("")
+    items.append("")
+    items.append("representation: RLE transposed")
+    items.append("```")
+    rle = serialize(image.transpose())
+    items.append(rle)
+    items.append("```")
     return "\n".join(items)
 
 def create_prompt_for_task(task: Task, test_index: int) -> str:
@@ -125,6 +140,21 @@ def create_prompt_for_task(task: Task, test_index: int) -> str:
     items.append("In your response, please don't repeat one of the input images, since it's already in the prompt. It's a waste of tokens.")
     items.append("If you need to refer to a particular image, then write what transformation N input/output -> representation name.")
     items.append("")
+    items.append("")
+
+    rle_algorithm = """
+Regarding "representation RLE".
+This algorithm applies run-length encoding (RLE) to images, reducing sequences of identical pixels to shorter symbolic forms. 
+It starts by noting the image's width and height, then processes each line. If an entire line is the same color, it writes that color once. 
+Otherwise, it breaks the line into consecutive runs of identical pixels, using letters `a` through `z` to represent runs of lengths 2 to 27, 
+followed by the color. Single pixels are just written as their color value. When a line repeats the previous one, it's marked with a comma only. 
+This yields a concise, text-based compression.
+"""
+    items.append(rle_algorithm)
+    items.append("")
+    items.append("")
+
+
     items.append("# The ARC puzzle")
     items.append("")
     for example_index in range(task.count_examples):
