@@ -50,7 +50,7 @@ task_ids_of_interest = [
 def format_color(colorid: int) -> str:
     colorname = IMAGETOSTRING_COLORNAME.convert_pixel_to_symbol(colorid)
     emoji = IMAGETOSTRING_EMOJI_CIRCLE_V1.convert_pixel_to_symbol(colorid)
-    return f"(id{colorid} {colorname} {emoji})"
+    return f"({colorid} {colorname} {emoji})"
 
 def format_color_list(colorid_list: list[int]) -> str:
     items = []
@@ -153,6 +153,11 @@ This yields a concise, text-based compression.
     items.append(rle_algorithm)
     items.append("")
     items.append("")
+    items.append("Use a likert scale for your confidence level.")
+    items.append("Strongly negative, weakly negative, medium, weakly positive, strongly positive.")
+    items.append("Whenever there is an observation you are making, please write it down with your confidence level about it.")
+    items.append("")
+    items.append("")
 
 
     items.append("# The ARC puzzle")
@@ -163,21 +168,23 @@ This yields a concise, text-based compression.
             items.append("")
         input_image = task.example_input(example_index)
         output_image = task.example_output(example_index)
-        items.append(f'## Transformation {example_index} Input')
+        items.append(f'## Train Pair {example_index} Input')
         items.append(serialize_image(input_image))
         items.append("")
         items.append("")
-        items.append(f'## Transformation {example_index} Output')
+        items.append(f'## Train Pair {example_index} Output')
         items.append(serialize_image(output_image))
 
     items.append("")
     items.append("")
     input_image = task.test_input(test_index)
-    items.append(f'## Transformation Test Input')
+    # items.append(f'## Test Pair {task.count_examples} Input')
+    items.append('## Test Pair Input')
     items.append(serialize_image(input_image))
     items.append("")
     items.append("")
-    items.append(f'## Transformation Test Output')
+    items.append('## Test Pair Output')
+    # items.append(f'## Pair {task.count_examples} Output')
     items.append("")
     items.append("This is what the model should predict. Before giving the answer, please reflect on what transformation happens.")
     items.append("")
@@ -189,13 +196,22 @@ This yields a concise, text-based compression.
         items.append(f"- I guess these colors are likely present in the output: {color_list_str}")
 
     items.append("")
-    items.append("# Task A - What transformation happens?")
+    items.append("# Task A - For each pair, what transformation happens from the input to the output?")
     items.append("")
-    items.append("# Task B - Predict the output")
+    items.append("# Task B - What do the transformations have in common and can it be generalized")
     items.append("")
-    items.append("Use emoji representation for the output.")
+    items.append("# Task C - Predict the output using the generalized transformation")
     items.append("")
-    items.append("# Task C - double check your own answer")
+    # items.append("Use emoji representation for the output.")
+    items.append("Use excel speadsheet representation for the output.")
+    items.append("")
+    items.append("Rate how confident you are in your prediction.")
+    items.append("")
+    items.append("# Task D - double check your own answer")
+    items.append("")
+    items.append("Describe the transformation from the input to the output.")
+    items.append("Verify that the pixels in the output are placed at the same positions that you had in mind.")
+    items.append("After the double check, rate how confident you now are in your prediction.")
     items.append("")
 
     result = "\n".join(items)
