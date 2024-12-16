@@ -73,6 +73,10 @@ def serialize_image(image: np.array) -> str:
         items.append(f"- least popular color: {least_popular_color_items_str}")
     else:
         items.append(f"- least popular colors: {least_popular_color_items_str} They have the same count.")
+    for color in histogram.unique_colors():
+        count = histogram.get_count_for_color(color)
+        color_str = format_color(color)
+        items.append(f"- color {color_str}, count {count}")
     items.append("")
     items.append("")
     items.append("representation: digits")
