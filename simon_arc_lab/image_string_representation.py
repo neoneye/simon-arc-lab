@@ -202,6 +202,30 @@ def image_to_string_spreadsheet_v1(image: np.array) -> str:
     )
     return config.apply(image)
 
+COLORID_TO_EMOJI_CIRCLE_V1 = {
+    0: '⚫',  # black circle
+    1: '🔵',  # blue circle
+    2: '🔴',  # red circle
+    3: '🟢',  # green circle
+    4: '🟡',  # yellow circle
+    5: '⚪',  # white circle (used as grey)
+    6: '🟣',  # purple circle
+    7: '🟠',  # orange circle
+    8: '🟦',  # blue square (used for cyan)
+    9: '🟤',  # brown circle
+}
+
+IMAGETOSTRING_EMOJI_CIRCLE_V1 = ImageToString(
+    pixel_to_symbol=COLORID_TO_EMOJI_CIRCLE_V1,
+    fallback_symbol='❌',
+    separator_horizontal='',
+    separator_vertical='\n',
+    top_column_mode=None,
+    bottom_column_mode=None,
+    prefix_column_symbol=None,
+    prefix_with_line_number=None,
+)
+
 def image_to_string_emoji_circles_v1(image: np.array) -> str:
     """
     Convert an image to an emoji string representation, like this:
@@ -217,29 +241,7 @@ def image_to_string_emoji_circles_v1(image: np.array) -> str:
     It doesn't tokenize well, I doubt that it's a good representation for LLM's.
     https://platform.openai.com/tokenizer
     """
-    pixel_to_symbol = {
-        0: '⚫',  # black circle
-        1: '🔵',  # blue circle
-        2: '🔴',  # red circle
-        3: '🟢',  # green circle
-        4: '🟡',  # yellow circle
-        5: '⚪',  # white circle (used as grey)
-        6: '🟣',  # purple circle
-        7: '🟠',  # orange circle
-        8: '🟦',  # blue square (used for cyan)
-        9: '🟤',  # brown circle
-    }
-    config = ImageToString(
-        pixel_to_symbol=pixel_to_symbol,
-        fallback_symbol='❌',
-        separator_horizontal='',
-        separator_vertical='\n',
-        top_column_mode=None,
-        bottom_column_mode=None,
-        prefix_column_symbol=None,
-        prefix_with_line_number=None,
-    )
-    return config.apply(image)
+    return IMAGETOSTRING_EMOJI_CIRCLE_V1.apply(image)
 
 def image_to_string_emoji_chess_without_indices_v1(image: np.array) -> str:
     """
