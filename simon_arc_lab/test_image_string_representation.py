@@ -27,3 +27,21 @@ class TestImageStringRepresentation(unittest.TestCase):
         actual = image_to_string_long_lowercase_colornames(image)
         expected = "black blue red green\nyellow grey purple orange\ncyan brown white white"
         self.assertEqual(actual, expected)
+
+    def test_30000_image_to_string_emoji_circles_v1(self):
+        image = np.array([
+            [0, 1, 2, 3], 
+            [4, 5, 6, 7],
+            [8, 9, 10, 11]], dtype=np.uint8)
+        actual = image_to_string_emoji_circles_v1(image)
+        expected = "⚫🔵🔴🟢\n🟡⚪🟣🟠\n🟦🟤❌❌"
+        self.assertEqual(actual, expected)
+
+    def test_40000_image_to_string_emoji_chess_v1(self):
+        image = np.array([
+            [0, 1, 2, 3], 
+            [4, 5, 6, 7],
+            [8, 9, 10, 11]], dtype=np.uint8)
+        actual = image_to_string_emoji_chess_v1(image)
+        expected = "♔♕♖♗\n♘♙♚♛\n♜♝♞♞"
+        self.assertEqual(actual, expected)

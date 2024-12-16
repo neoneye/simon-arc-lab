@@ -110,3 +110,75 @@ def image_to_string_long_lowercase_colornames(image: np.array) -> str:
     )
     return config.image_to_string(image)
 
+def image_to_string_emoji_circles_v1(image: np.array) -> str:
+    """
+    Convert an image to an emoji string representation, like this:
+
+    from
+    [[1, 2, 3], [4, 5, 6]]
+
+    to
+    "🔵🔴🟢\n🟡⚪🟣"
+
+    Why use an emoji string representation?
+    The emoji's gets tokenized with variable length between 1 and 3 tokens for each emoji.
+    It doesn't tokenize well, I doubt that it's a good representation for LLM's.
+    https://platform.openai.com/tokenizer
+    """
+    pixel_to_symbol = {
+        0: '⚫',  # black circle
+        1: '🔵',  # blue circle
+        2: '🔴',  # red circle
+        3: '🟢',  # green circle
+        4: '🟡',  # yellow circle
+        5: '⚪',  # white circle (used as grey)
+        6: '🟣',  # purple circle
+        7: '🟠',  # orange circle
+        8: '🟦',  # blue square (used for cyan)
+        9: '🟤',  # brown circle
+    }
+    config = ImageToStringConfig(
+        pixel_to_symbol=pixel_to_symbol,
+        fallback_symbol='❌',
+        separator_horizontal='',
+        separator_vertical='\n',
+    )
+    return config.image_to_string(image)
+
+def image_to_string_emoji_chess_v1(image: np.array) -> str:
+    """
+    Convert an image to an chess string representation, like this:
+
+    from
+    [[1, 2, 3], [4, 5, 6]]
+
+    to
+    "♕♖♗\n♘♙♚"
+
+    Why use an chess string representation?
+    The chess game have their own unicode symbols.
+    Maybe it's a good representation for LLM's.
+    The chess emoji's gets tokenized with variable length between 1 and 3 tokens for each chess emoji.
+    It doesn't tokenize well, I doubt that it's a good representation for LLM's.
+    https://platform.openai.com/tokenizer
+    """
+    pixel_to_symbol = {
+        0: '♔', # black
+        1: '♕', # blue
+        2: '♖', # red
+        3: '♗', # green
+        4: '♘', # yellow
+        5: '♙', # grey
+        6: '♚', # purple
+        7: '♛', # orange
+        8: '♜', # cyan
+        9: '♝', # brown
+    }
+    config = ImageToStringConfig(
+        pixel_to_symbol=pixel_to_symbol,
+        fallback_symbol='♞',
+        separator_horizontal='',
+        separator_vertical='\n',
+    )
+    return config.image_to_string(image)
+
