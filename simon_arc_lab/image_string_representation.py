@@ -23,6 +23,13 @@ class ImageToStringConfig:
             # 'AA', 'AB', 'AC', ... 'ZZ'
             return chr(ord('A') + column_index // 26 - 1) + chr(ord('A') + column_index % 26)
 
+    def convert_pixel_to_symbol(self, pixel_value: int) -> str:
+        if self.pixel_to_symbol is None:
+            return str(pixel_value)
+        if pixel_value in self.pixel_to_symbol:
+            return self.pixel_to_symbol[pixel_value]
+        return self.fallback_symbol
+
     def image_to_string(self, image: np.array) -> str:
         height, width = image.shape
         rows = []
@@ -54,13 +61,8 @@ class ImageToStringConfig:
             
             # loop over the pixels in the current row
             for x in range(width):
-                pixel = image[y, x]
-                if self.pixel_to_symbol is None:
-                    symbol = str(pixel)
-                elif pixel in self.pixel_to_symbol:
-                    symbol = self.pixel_to_symbol[pixel]
-                else:
-                    symbol = self.fallback_symbol
+                pixel_value = image[y, x]
+                symbol = self.convert_pixel_to_symbol(pixel_value)
                 items.append(symbol)
             row = self.separator_horizontal.join(items)
             rows.append(row)
