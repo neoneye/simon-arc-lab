@@ -2,7 +2,7 @@ import numpy as np
 from typing import Tuple, Optional
 import re
 
-def image_to_dictionary(image: np.array, include_size: bool, background_color: Optional[int]) -> dict:
+def image_to_dictionary(image: np.array, include_size: bool, background_color: Optional[int]) -> str:
     """
     Creates a python dictionary with x, y coordinates as keys and colors as values.
     
@@ -16,6 +16,8 @@ def image_to_dictionary(image: np.array, include_size: bool, background_color: O
     
     If include_size is true, then it will include the width and height of the image, like this
     {'width':3,'height':2,(0,0):0,(1,0):1,(2,0):2,(0,1):0,(1,1):1,(2,1):2}
+
+    The dictionary string is as compact as possible, so it can be used with LLM's and not waste tokens on unnecessary spaces.
     """
     height, width = image.shape
     items = []
@@ -32,16 +34,30 @@ def image_to_dictionary(image: np.array, include_size: bool, background_color: O
             items.append(f"({x},{y}):{pixel}")
     return "{" + ",".join(items) + "}"
 
-# Equivalent to the lazy_static regex in Rust
-EXTRACT_STRING_VALUE = re.compile(r"'(\w+)'\s*:\s*(\d+)")
-EXTRACT_X_Y_COLOR = re.compile(r"\(\s*(\d+)\s*,\s*(\d+)\s*\)\s*:\s*(\d+)")
+# lazy initialization of regex
+_regex_extract_string_value = None
+
+def get_regex_extract_string_value():
+    global _regex_extract_string_value
+    if _regex_extract_string_value is None:
+        _regex_extract_string_value = re.compile(r"'(\w+)'\s*:\s*(\d+)")
+    return _regex_extract_string_value
+
+# lazy initialization of regex
+_regex_x_y_color = None
+
+def get_regex_x_y_color():
+    global _regex_x_y_color
+    if _regex_x_y_color is None:
+        _regex_x_y_color = re.compile(r"\(\s*(\d+)\s*,\s*(\d+)\s*\)\s*:\s*(\d+)")
+    return _regex_x_y_color
 
 def dictionary_to_image(input_str: str) -> Tuple[np.array, str|None]:
     # Extract width, height, background
     found_width = None
     found_height = None
     found_background = None
-    for match in EXTRACT_STRING_VALUE.finditer(input_str):
+    for match in get_regex_extract_string_value().finditer(input_str):
         key = match.group(1)
         value = int(match.group(2))
         if key == "width":
@@ -62,7 +78,7 @@ def dictionary_to_image(input_str: str) -> Tuple[np.array, str|None]:
 
     # Assign pixel values
     count_outside = 0
-    for match in EXTRACT_X_Y_COLOR.finditer(input_str):
+    for match in get_regex_x_y_color().finditer(input_str):
         x = int(match.group(1))
         y = int(match.group(2))
         color = int(match.group(3))
