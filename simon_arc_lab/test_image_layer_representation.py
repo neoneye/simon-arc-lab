@@ -86,8 +86,7 @@ class Split2(Node):
             self.child_split_b.print_tree(indent + "  ")
 
     @staticmethod
-    def find_split(direction: SplitDirection, image: np.array) -> Optional['Split2']:
-        verbose = True
+    def find_split(direction: SplitDirection, image: np.array, verbose: bool) -> Optional['Split2']:
         height, width = image.shape
 
         found_score = 0
@@ -134,36 +133,39 @@ class Split2(Node):
         return Split2(direction, found_size_a, found_size_b, found_score, found_image_a, found_image_b, found_histogram_a, found_histogram_b)
     
 
-def process_inner(input_x: int, input_y: int, image: np.array, histogram: Histogram, current_depth: int, max_depth: int) -> Optional[Node]:
-    height, width = image.shape
+def process_inner(input_x: int, input_y: int, input_image: np.array, input_histogram: Histogram, current_depth: int, max_depth: int, verbose: bool) -> Optional[Node]:
+    height, width = input_image.shape
     assert width > 0 and height > 0
 
-    number_of_unique_colors = histogram.number_of_unique_colors()
+    number_of_unique_colors = input_histogram.number_of_unique_colors()
     assert number_of_unique_colors > 0
     if number_of_unique_colors == 1:
-        print("single color. Cannot be split further")
-        h, w = image.shape
-        colors = histogram.unique_colors_set()
+        if verbose:
+            print("single color. Cannot be split further")
+        colors = input_histogram.unique_colors_set()
         assert len(colors) == 1
         solid_color = colors.pop()
-        return Solid(input_x, input_y, w, h, solid_color)
+        return Solid(input_x, input_y, width, height, solid_color)
 
     if current_depth >= max_depth:
-        print("max depth reached")
-        return MultiColorImage(input_x, input_y, image, histogram)
+        if verbose:
+            print("max depth reached")
+        return MultiColorImage(input_x, input_y, input_image, input_histogram)
 
-    print("can be split further")
-    candidate_a = Split2.find_split(SplitDirection.LR, image)
-    image_transposed = image.transpose()
-    candidate_b = Split2.find_split(SplitDirection.TB, image_transposed)
+    if verbose:
+        print("can be split further")
+    candidate_a = Split2.find_split(SplitDirection.LR, input_image, verbose)
+    candidate_b = Split2.find_split(SplitDirection.TB, input_image.transpose(), verbose)
 
-    print(f"candidate_a:{candidate_a}")
-    print(f"candidate_b:{candidate_b}")
+    if verbose:
+        print(f"candidate_a:{candidate_a}")
+        print(f"candidate_b:{candidate_b}")
     score_a = 0 if candidate_a is None else candidate_a.score
     score_b = 0 if candidate_b is None else candidate_b.score
     if score_a == 0 and score_b == 0:
-        print("no candidates found. Not sure how to proceed")
-        return MultiColorImage(input_x, input_y, image, histogram)
+        if verbose:
+            print("no candidates found. Not sure how to proceed")
+        return MultiColorImage(input_x, input_y, input_image, input_histogram)
     
     candidate = None
     split_a_x = input_x
@@ -179,8 +181,8 @@ def process_inner(input_x: int, input_y: int, image: np.array, histogram: Histog
         split_b_x = split_a_x
         split_b_y = split_a_y + candidate.size_b
     
-    candidate.child_split_a = process_inner(split_a_x, split_a_y, candidate.image_a, candidate.histogram_a, current_depth + 1, max_depth)
-    candidate.child_split_b = process_inner(split_b_x, split_b_y, candidate.image_b, candidate.histogram_b, current_depth + 1, max_depth)
+    candidate.child_split_a = process_inner(split_a_x, split_a_y, candidate.image_a, candidate.histogram_a, current_depth + 1, max_depth, verbose)
+    candidate.child_split_b = process_inner(split_b_x, split_b_y, candidate.image_b, candidate.histogram_b, current_depth + 1, max_depth, verbose)
 
     return candidate
 
@@ -188,9 +190,11 @@ def process(image: np.array) -> str:
     print("----------- simon is testing ---------")
 
     histogram = Histogram.create_with_image(image)
+    verbose = True
+    verbose = False
     x = 0
     y = 0
-    candidate = process_inner(x, y, image, histogram, 0, 4)
+    candidate = process_inner(x, y, image, histogram, 0, 4, verbose)
     candidate.print_tree("")
 
     return 'ok'
