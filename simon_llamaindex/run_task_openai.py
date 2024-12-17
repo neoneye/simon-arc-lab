@@ -12,6 +12,7 @@ sys.path.insert(0, PROJECT_ROOT)
 from simon_arc_lab.task import Task
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.image_string_representation import *
+from simon_arc_lab.image_sparse_representation import *
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.task_color_profile import *
 from simon_arc_lab.rle.serialize import serialize
@@ -106,6 +107,13 @@ def serialize_image(image: np.array) -> str:
     items.append("representation: emoji")
     items.append("```")
     items.append(image_to_string_emoji_circles_v1(image))
+    items.append("```")
+    items.append("")
+    items.append("")
+    items.append("representation: python dictionary")
+    items.append("```python")
+    dict_str = image_to_dictionary(image, include_size=True, background_color=histogram.most_popular_color())
+    items.append(dict_str)
     items.append("```")
     items.append("")
     items.append("")
