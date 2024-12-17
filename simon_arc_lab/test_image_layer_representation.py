@@ -25,13 +25,15 @@ class Node(ABC):
         pass
 
 class Solid(Node):
-    def __init__(self, width: int, height: int, color: int):
+    def __init__(self, x: int, y: int, width: int, height: int, color: int):
+        self.x = x
+        self.y = y
         self.width = width
         self.height = height
         self.color = color
 
     def __str__(self):
-        return f"Solid width:{self.width} height:{self.height} color:{self.color}"
+        return f"Solid x:{self.x} y:{self.y} width:{self.width} height:{self.height} color:{self.color}"
 
     def __repr__(self):
         return self.__str__()
@@ -40,14 +42,16 @@ class Solid(Node):
         print(f"{indent}{self}")
 
 class MultiColorImage(Node):
-    def __init__(self, image: np.array, histogram: Histogram):
+    def __init__(self, x: int, y: int, image: np.array, histogram: Histogram):
+        self.x = x
+        self.y = y
         self.image = image
         self.histogram = histogram
 
     def __str__(self):
         height, width = self.image.shape
         number_of_unique_colors = self.histogram.number_of_unique_colors()
-        return f"MultiColorImage width:{width} height:{height} number_of_unique_colors:{number_of_unique_colors}"
+        return f"MultiColorImage x:{self.x} y:{self.y} width:{width} height:{height} number_of_unique_colors:{number_of_unique_colors}"
 
     def __repr__(self):
         return self.__str__()
@@ -130,7 +134,7 @@ class Split2(Node):
         return Split2(direction, found_size_a, found_size_b, found_score, found_image_a, found_image_b, found_histogram_a, found_histogram_b)
     
 
-def process_inner(image: np.array, histogram: Histogram, current_depth: int, max_depth: int) -> Optional[Node]:
+def process_inner(input_x: int, input_y: int, image: np.array, histogram: Histogram, current_depth: int, max_depth: int) -> Optional[Node]:
     height, width = image.shape
     assert width > 0 and height > 0
 
@@ -142,11 +146,11 @@ def process_inner(image: np.array, histogram: Histogram, current_depth: int, max
         colors = histogram.unique_colors_set()
         assert len(colors) == 1
         solid_color = colors.pop()
-        return Solid(w, h, solid_color)
+        return Solid(input_x, input_y, w, h, solid_color)
 
     if current_depth >= max_depth:
         print("max depth reached")
-        return MultiColorImage(image, histogram)
+        return MultiColorImage(input_x, input_y, image, histogram)
 
     print("can be split further")
     candidate_a = Split2.find_split(SplitDirection.LR, image)
@@ -159,33 +163,40 @@ def process_inner(image: np.array, histogram: Histogram, current_depth: int, max
     score_b = 0 if candidate_b is None else candidate_b.score
     if score_a == 0 and score_b == 0:
         print("no candidates found. Not sure how to proceed")
-        return MultiColorImage(image, histogram)
+        return MultiColorImage(input_x, input_y, image, histogram)
     
     candidate = None
+    split_a_x = input_x
+    split_a_y = input_y
     if score_a >= score_b:
         candidate = candidate_a
+        split_b_x = split_a_x + candidate.size_a
+        split_b_y = split_a_y
     else:
         candidate_b.image_a = candidate_b.image_a.transpose()
         candidate_b.image_b = candidate_b.image_b.transpose()
         candidate = candidate_b
+        split_b_x = split_a_x
+        split_b_y = split_a_y + candidate.size_b
     
-    candidate.child_split_a = process_inner(candidate.image_a, candidate.histogram_a, current_depth + 1, max_depth)
-    candidate.child_split_b = process_inner(candidate.image_b, candidate.histogram_b, current_depth + 1, max_depth)
+    candidate.child_split_a = process_inner(split_a_x, split_a_y, candidate.image_a, candidate.histogram_a, current_depth + 1, max_depth)
+    candidate.child_split_b = process_inner(split_b_x, split_b_y, candidate.image_b, candidate.histogram_b, current_depth + 1, max_depth)
 
     return candidate
 
 def process(image: np.array) -> str:
     print("----------- simon is testing ---------")
-    height, width = image.shape
 
     histogram = Histogram.create_with_image(image)
-    candidate = process_inner(image, histogram, 0, 3)
+    x = 0
+    y = 0
+    candidate = process_inner(x, y, image, histogram, 0, 4)
     candidate.print_tree("")
 
     return 'ok'
 
 class TestImageLayerRepresentation(unittest.TestCase):
-    def xtest_10000_top_bottom(self):
+    def xtest_10000_direction_top_bottom(self):
         image = np.array([
             [5, 5, 5, 5, 5],
             [5, 5, 5, 5, 5],
@@ -194,10 +205,20 @@ class TestImageLayerRepresentation(unittest.TestCase):
         actual = process(image)
         print(actual)
 
-    def xtest_10000_left_right(self):
+    def xtest_11000_direction_left_right(self):
         image = np.array([
             [5, 5, 3, 1],
             [5, 5, 3, 1],
+            [5, 5, 3, 1],
+            [5, 5, 3, 1],
+            [5, 5, 3, 1]], dtype=np.uint8)
+        actual = process(image)
+        print(actual)
+
+    def xtest_11000_direction_mixed(self):
+        image = np.array([
+            [5, 5, 3, 1],
+            [7, 7, 7, 7],
             [5, 5, 3, 1],
             [5, 5, 3, 1],
             [5, 5, 3, 1]], dtype=np.uint8)
