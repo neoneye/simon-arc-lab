@@ -60,8 +60,12 @@ class MultiColorImage(Node):
         print(f"{indent}{self}")
 
 class Split2(Node):
-    def __init__(self, direction: SplitDirection, size_a: int, size_b: int, score: int, image_a: np.array, image_b: np.array, histogram_a: Histogram, histogram_b: Histogram):
+    def __init__(self, direction: SplitDirection, x: int, y: int, width: int, height: int, size_a: int, size_b: int, score: int, image_a: np.array, image_b: np.array, histogram_a: Histogram, histogram_b: Histogram):
         self.direction = direction
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
         self.size_a = size_a
         self.size_b = size_b
         self.score = score
@@ -73,7 +77,7 @@ class Split2(Node):
         self.child_split_b = None
 
     def __str__(self):
-        return f"{self.direction.name} size_a:{self.size_a}, size_b:{self.size_b} score:{self.score}"
+        return f"{self.direction.name} x:{self.x} y:{self.y} width:{self.width} height:{self.height} size_a:{self.size_a} size_b:{self.size_b} score:{self.score}"
 
     def __repr__(self):
         return self.__str__()
@@ -86,7 +90,11 @@ class Split2(Node):
             self.child_split_b.print_tree(indent + "  ")
 
     @staticmethod
-    def find_split(direction: SplitDirection, image: np.array, verbose: bool) -> Optional['Split2']:
+    def find_split(direction: SplitDirection, x: int, y: int, image: np.array, verbose: bool) -> Optional['Split2']:
+        original_height, original_width = image.shape
+        if direction == SplitDirection.TB:
+            image = image.transpose()
+
         height, width = image.shape
 
         found_score = 0
@@ -130,8 +138,25 @@ class Split2(Node):
             return None
         if verbose:
             print(f"found_score:{found_score}")
-        return Split2(direction, found_size_a, found_size_b, found_score, found_image_a, found_image_b, found_histogram_a, found_histogram_b)
-    
+
+        if direction == SplitDirection.TB:
+            found_image_a = found_image_a.transpose()
+            found_image_b = found_image_b.transpose()
+
+        return Split2(
+            direction, 
+            x, 
+            y, 
+            original_height, 
+            original_width, 
+            found_size_a, 
+            found_size_b, 
+            found_score, 
+            found_image_a, 
+            found_image_b, 
+            found_histogram_a, 
+            found_histogram_b
+        )
 
 def process_inner(input_x: int, input_y: int, input_image: np.array, input_histogram: Histogram, current_depth: int, max_depth: int, verbose: bool) -> Optional[Node]:
     height, width = input_image.shape
@@ -154,8 +179,8 @@ def process_inner(input_x: int, input_y: int, input_image: np.array, input_histo
 
     if verbose:
         print("can be split further")
-    candidate_a = Split2.find_split(SplitDirection.LR, input_image, verbose)
-    candidate_b = Split2.find_split(SplitDirection.TB, input_image.transpose(), verbose)
+    candidate_a = Split2.find_split(SplitDirection.LR, input_x, input_y, input_image, verbose)
+    candidate_b = Split2.find_split(SplitDirection.TB, input_x, input_y, input_image, verbose)
 
     if verbose:
         print(f"candidate_a:{candidate_a}")
@@ -175,8 +200,6 @@ def process_inner(input_x: int, input_y: int, input_image: np.array, input_histo
         split_b_x = split_a_x + candidate.size_a
         split_b_y = split_a_y
     else:
-        candidate_b.image_a = candidate_b.image_a.transpose()
-        candidate_b.image_b = candidate_b.image_b.transpose()
         candidate = candidate_b
         split_b_x = split_a_x
         split_b_y = split_a_y + candidate.size_b
