@@ -39,6 +39,22 @@ class Solid(Node):
     def print_tree(self, indent: str):
         print(f"{indent}{self}")
 
+class MultiColorImage(Node):
+    def __init__(self, image: np.array, histogram: Histogram):
+        self.image = image
+        self.histogram = histogram
+
+    def __str__(self):
+        height, width = self.image.shape
+        number_of_unique_colors = self.histogram.number_of_unique_colors()
+        return f"MultiColorImage width:{width} height:{height} number_of_unique_colors:{number_of_unique_colors}"
+
+    def __repr__(self):
+        return self.__str__()
+    
+    def print_tree(self, indent: str):
+        print(f"{indent}{self}")
+
 class Split2(Node):
     def __init__(self, direction: SplitDirection, size_a: int, size_b: int, score: int, image_a: np.array, image_b: np.array, histogram_a: Histogram, histogram_b: Histogram):
         self.direction = direction
@@ -114,11 +130,25 @@ class Split2(Node):
         return Split2(direction, found_size_a, found_size_b, found_score, found_image_a, found_image_b, found_histogram_a, found_histogram_b)
     
 
-def process_inner(image: np.array, current_depth: int, max_depth: int) -> Optional[Node]:
-    if current_depth >= max_depth:
-        return None
+def process_inner(image: np.array, histogram: Histogram, current_depth: int, max_depth: int) -> Optional[Node]:
     height, width = image.shape
+    assert width > 0 and height > 0
 
+    number_of_unique_colors = histogram.number_of_unique_colors()
+    assert number_of_unique_colors > 0
+    if number_of_unique_colors == 1:
+        print("single color. Cannot be split further")
+        h, w = image.shape
+        colors = histogram.unique_colors_set()
+        assert len(colors) == 1
+        solid_color = colors.pop()
+        return Solid(w, h, solid_color)
+
+    if current_depth >= max_depth:
+        print("max depth reached")
+        return MultiColorImage(image, histogram)
+
+    print("can be split further")
     candidate_a = Split2.find_split(SplitDirection.LR, image)
     image_transposed = image.transpose()
     candidate_b = Split2.find_split(SplitDirection.TB, image_transposed)
@@ -128,7 +158,9 @@ def process_inner(image: np.array, current_depth: int, max_depth: int) -> Option
     score_a = 0 if candidate_a is None else candidate_a.score
     score_b = 0 if candidate_b is None else candidate_b.score
     if score_a == 0 and score_b == 0:
-        return None
+        print("no candidates found. Not sure how to proceed")
+        return MultiColorImage(image, histogram)
+    
     candidate = None
     if score_a >= score_b:
         candidate = candidate_a
@@ -137,27 +169,8 @@ def process_inner(image: np.array, current_depth: int, max_depth: int) -> Option
         candidate_b.image_b = candidate_b.image_b.transpose()
         candidate = candidate_b
     
-    if candidate.histogram_a.number_of_unique_colors() > 1:
-        print("A can be split further")
-        candidate.child_split_a = process_inner(candidate.image_a, current_depth + 1, max_depth)
-    else:
-        print("A is a single color")
-        h, w = candidate.image_a.shape
-        colors = candidate.histogram_a.unique_colors_set()
-        assert len(colors) == 1
-        solid_color = colors.pop()
-        candidate.child_split_a = Solid(w, h, solid_color)
-
-    if candidate.histogram_b.number_of_unique_colors() > 1:
-        print("B can be split further")
-        candidate.child_split_b = process_inner(candidate.image_b, current_depth + 1, max_depth)
-    else:
-        print("B is a single color")
-        h, w = candidate.image_b.shape
-        colors = candidate.histogram_b.unique_colors_set()
-        assert len(colors) == 1
-        solid_color = colors.pop()
-        candidate.child_split_b = Solid(w, h, solid_color)
+    candidate.child_split_a = process_inner(candidate.image_a, candidate.histogram_a, current_depth + 1, max_depth)
+    candidate.child_split_b = process_inner(candidate.image_b, candidate.histogram_b, current_depth + 1, max_depth)
 
     return candidate
 
@@ -165,7 +178,8 @@ def process(image: np.array) -> str:
     print("----------- simon is testing ---------")
     height, width = image.shape
 
-    candidate = process_inner(image, 0, 3)
+    histogram = Histogram.create_with_image(image)
+    candidate = process_inner(image, histogram, 0, 3)
     candidate.print_tree("")
 
     return 'ok'
