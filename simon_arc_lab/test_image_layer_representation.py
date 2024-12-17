@@ -2,6 +2,7 @@ import unittest
 from typing import Dict, Tuple, Optional
 import numpy as np
 from enum import Enum
+from abc import ABC, abstractmethod
 from .histogram import Histogram
 
 class SplitDirection(Enum):
@@ -18,7 +19,27 @@ def image_split2_left_right(image: np.array, split: int) -> Tuple[np.array, np.a
     right = image[:, split:]
     return left, right
 
-class Split2:
+class Node(ABC):
+    @abstractmethod
+    def print_tree(self, indent: str):
+        pass
+
+class Solid(Node):
+    def __init__(self, width: int, height: int, color: int):
+        self.width = width
+        self.height = height
+        self.color = color
+
+    def __str__(self):
+        return f"Solid width:{self.width} height:{self.height} color:{self.color}"
+
+    def __repr__(self):
+        return self.__str__()
+    
+    def print_tree(self, indent: str):
+        print(f"{indent}{self}")
+
+class Split2(Node):
     def __init__(self, direction: SplitDirection, size_a: int, size_b: int, score: int, image_a: np.array, image_b: np.array, histogram_a: Histogram, histogram_b: Histogram):
         self.direction = direction
         self.size_a = size_a
@@ -93,7 +114,7 @@ class Split2:
         return Split2(direction, found_size_a, found_size_b, found_score, found_image_a, found_image_b, found_histogram_a, found_histogram_b)
     
 
-def process_inner(image: np.array, current_depth: int, max_depth: int) -> Optional[Split2]:
+def process_inner(image: np.array, current_depth: int, max_depth: int) -> Optional[Node]:
     if current_depth >= max_depth:
         return None
     height, width = image.shape
@@ -121,12 +142,22 @@ def process_inner(image: np.array, current_depth: int, max_depth: int) -> Option
         candidate.child_split_a = process_inner(candidate.image_a, current_depth + 1, max_depth)
     else:
         print("A is a single color")
+        h, w = candidate.image_a.shape
+        colors = candidate.histogram_a.unique_colors_set()
+        assert len(colors) == 1
+        solid_color = colors.pop()
+        candidate.child_split_a = Solid(w, h, solid_color)
 
     if candidate.histogram_b.number_of_unique_colors() > 1:
         print("B can be split further")
         candidate.child_split_b = process_inner(candidate.image_b, current_depth + 1, max_depth)
     else:
         print("B is a single color")
+        h, w = candidate.image_b.shape
+        colors = candidate.histogram_b.unique_colors_set()
+        assert len(colors) == 1
+        solid_color = colors.pop()
+        candidate.child_split_b = Solid(w, h, solid_color)
 
     return candidate
 
@@ -137,47 +168,24 @@ def process(image: np.array) -> str:
     candidate = process_inner(image, 0, 3)
     candidate.print_tree("")
 
-    # candidate_a = Split2.find_split(SplitDirection.LR, image)
-    # image_transposed = image.transpose()
-    # candidate_b = Split2.find_split(SplitDirection.TB, image_transposed)
-
-    # print(f"candidate_a:{candidate_a}")
-    # print(f"candidate_b:{candidate_b}")
-    # score_a = 0 if candidate_a is None else candidate_a.score
-    # score_b = 0 if candidate_b is None else candidate_b.score
-    # if score_a == 0 and score_b == 0:
-    #     return 'none'
-    # if score_a > score_b:
-    #     if candidate_a.histogram_left.number_of_unique_colors() > 1:
-    #         print("left can be split further")
-    #     else:
-    #         print("left is a single color")
-
-    #     if candidate_a.histogram_right.number_of_unique_colors() > 1:
-    #         print("right can be split further")
-    #     else:
-    #         print("right is a single color")
-
-    #     return 'left|right'
-
-    # if candidate_b.histogram_left.number_of_unique_colors() > 1:
-    #     print("top can be split further")
-    # else:
-    #     print("top is a single color")
-
-    # if candidate_b.histogram_right.number_of_unique_colors() > 1:
-    #     print("bottom can be split further")
-    # else:
-    #     print("bottom is a single color")
-    # return 'top|bottom'
     return 'ok'
 
 class TestImageLayerRepresentation(unittest.TestCase):
-    def xtest_10000_a(self):
+    def xtest_10000_top_bottom(self):
         image = np.array([
             [5, 5, 5, 5, 5],
             [5, 5, 5, 5, 5],
             [3, 3, 3, 3, 3],
             [1, 1, 1, 1, 1]], dtype=np.uint8)
+        actual = process(image)
+        print(actual)
+
+    def xtest_10000_left_right(self):
+        image = np.array([
+            [5, 5, 3, 1],
+            [5, 5, 3, 1],
+            [5, 5, 3, 1],
+            [5, 5, 3, 1],
+            [5, 5, 3, 1]], dtype=np.uint8)
         actual = process(image)
         print(actual)
