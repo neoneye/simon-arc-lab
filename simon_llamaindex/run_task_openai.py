@@ -1,6 +1,7 @@
 from datetime import datetime
 import sys
 import os
+import json
 from tqdm import tqdm
 import numpy as np
 from dotenv import dotenv_values
@@ -86,13 +87,20 @@ def serialize_image(image: np.array) -> str:
         items.append(f"- color {color_str}, count {count}")
     items.append("")
     items.append("")
-    items.append("representation: digits")
+    items.append("representation: json")
+    items.append("```json")
+    json_str = json.dumps(image.tolist(), separators=(',', ':'))
+    items.append(json_str)
+    items.append("```")
+    items.append("")
+    items.append("")
+    items.append("representation: digit")
     items.append("```")
     items.append(image_to_string(image))
     items.append("```")
     items.append("")
     items.append("")
-    items.append("representation: color names")
+    items.append("representation: color")
     items.append("```")
     items.append(image_to_string_colorname(image))
     items.append("```")
@@ -242,7 +250,8 @@ This yields a concise, text-based compression.
     items.append("# Task E - Predict the output using the generalized transformation")
     items.append("")
     # items.append("Use emoji representation for the output.")
-    items.append("Use excel speadsheet representation for the output.")
+    # items.append("Use excel speadsheet representation for the output.")
+    items.append("For the output, use json representation wrapped in triple backticks. Use newline to separate rows, so it's human readable.")
     items.append("")
     items.append("Rate how confident you are in your prediction.")
     items.append("")
@@ -252,9 +261,9 @@ This yields a concise, text-based compression.
     items.append("Verify that the pixels in the output are placed at the same positions that you had in mind.")
     items.append("After the double check, rate how confident you now are in your prediction.")
     items.append("")
-    items.append("# Task G")
-    items.append("create a RLE representation of the predicted output")
-    items.append("")
+    # items.append("# Task G")
+    # items.append("create a RLE representation of the predicted output")
+    # items.append("")
 
     result = "\n".join(items)
     # print(f"bytes: {len(result)}")
