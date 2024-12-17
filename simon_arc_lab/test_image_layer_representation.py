@@ -19,27 +19,23 @@ def image_split2_left_right(image: np.array, split: int) -> Tuple[np.array, np.a
     return left, right
 
 class Split2:
-    def __init__(self, direction: SplitDirection, split: int, score: int, image_a: np.array, image_b: np.array, histogram_a: Histogram, histogram_b: Histogram):
+    def __init__(self, direction: SplitDirection, size_a: int, size_b: int, score: int, image_a: np.array, image_b: np.array, histogram_a: Histogram, histogram_b: Histogram):
         self.direction = direction
-        self.split = split
+        self.size_a = size_a
+        self.size_b = size_b
         self.score = score
-        self.image_left = image_a
-        self.image_right = image_b
+        self.image_a = image_a
+        self.image_b = image_b
         self.histogram_a = histogram_a
         self.histogram_b = histogram_b
         self.child_split_a = None
         self.child_split_b = None
 
     def __str__(self):
-        return f"{self.direction.name} split:{self.split}, score:{self.score}"
+        return f"{self.direction.name} size_a:{self.size_a}, size_b:{self.size_b} score:{self.score}"
 
     def __repr__(self):
         return self.__str__()
-    
-    # def pretty_str(self):
-    #     if self.direction == SplitDirection.LR:
-    #         width_left = self.image_left.shape[1]
-    #         return f"LR split:{self.split}, score:{self.score}"
     
     def print_tree(self, indent: str):
         print(f"{indent}{self}")
@@ -54,43 +50,47 @@ class Split2:
         height, width = image.shape
 
         found_score = 0
-        found_image_left = None
-        found_image_right = None
-        found_histogram_left = None
-        found_histogram_right = None
+        found_image_a = None
+        found_image_b = None
+        found_histogram_a = None
+        found_histogram_b = None
+        found_size_a = None
+        found_size_b = None
         # find optimal left-right split determined by score
         for i in range(width-1):
-            split = i + 1
-            image_left, image_right = image_split2_left_right(image, split)
-            width_left = split
-            width_right = width - split
-            assert width_left == image_left.shape[1]
-            assert width_right == image_right.shape[1]
-            histogram_left = Histogram.create_with_image(image_left)
-            histogram_right = Histogram.create_with_image(image_right)
-            color_diff = histogram_left.unique_colors_set() - histogram_right.unique_colors_set()
+            size_a = i + 1
+            image_left, image_right = image_split2_left_right(image, size_a)
+            size_b = width - size_a
+            assert size_a == image_left.shape[1]
+            assert size_b == image_right.shape[1]
+            assert size_a + size_b == width
+            histogram_a = Histogram.create_with_image(image_left)
+            histogram_b = Histogram.create_with_image(image_right)
+            color_diff = histogram_a.unique_colors_set() - histogram_b.unique_colors_set()
             if verbose:
-                print(f"split:{split}, left:{histogram_left.number_of_unique_colors()}, right:{histogram_right.number_of_unique_colors()} diff:{color_diff}")
+                print(f"size_a:{size_a}, size_b:{size_b} a:{histogram_a.number_of_unique_colors()}, b:{histogram_b.number_of_unique_colors()} diff:{color_diff}")
             if len(color_diff) == 0:
                 continue
-            width_diff = abs(width_left - width_right)
+            width_diff = abs(size_a - size_b)
             score = len(color_diff) * (width - width_diff)
             if score <= found_score:
                 continue
             if verbose:
-                print(f"found better split:{split}, score:{score}")
+                print(f"found better size_a:{size_a}, size_b:{size_b} score:{score}")
             found_score = score
-            found_image_left = image_left
-            found_image_right = image_right
-            found_histogram_left = histogram_left
-            found_histogram_right = histogram_right
+            found_size_a = size_a
+            found_size_b = size_b
+            found_image_a = image_left
+            found_image_b = image_right
+            found_histogram_a = histogram_a
+            found_histogram_b = histogram_b
         if found_score == 0:
             if verbose:
                 print("no candidates found")
             return None
         if verbose:
             print(f"found_score:{found_score}")
-        return Split2(direction, split, found_score, found_image_left, found_image_right, found_histogram_left, found_histogram_right)
+        return Split2(direction, found_size_a, found_size_b, found_score, found_image_a, found_image_b, found_histogram_a, found_histogram_b)
     
 
 def process_inner(image: np.array, current_depth: int, max_depth: int) -> Optional[Split2]:
@@ -109,20 +109,22 @@ def process_inner(image: np.array, current_depth: int, max_depth: int) -> Option
     if score_a == 0 and score_b == 0:
         return None
     candidate = None
-    if score_a > score_b:
+    if score_a >= score_b:
         candidate = candidate_a
     else:
+        candidate_b.image_a = candidate_b.image_a.transpose()
+        candidate_b.image_b = candidate_b.image_b.transpose()
         candidate = candidate_b
     
     if candidate.histogram_a.number_of_unique_colors() > 1:
         print("A can be split further")
-        candidate.child_split_a = process_inner(candidate.image_left, current_depth + 1, max_depth)
+        candidate.child_split_a = process_inner(candidate.image_a, current_depth + 1, max_depth)
     else:
         print("A is a single color")
 
     if candidate.histogram_b.number_of_unique_colors() > 1:
         print("B can be split further")
-        candidate.child_split_b = process_inner(candidate.image_right, current_depth + 1, max_depth)
+        candidate.child_split_b = process_inner(candidate.image_b, current_depth + 1, max_depth)
     else:
         print("B is a single color")
 
