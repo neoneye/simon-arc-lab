@@ -4,8 +4,6 @@ import os
 import json
 from tqdm import tqdm
 import numpy as np
-from dotenv import dotenv_values
-from llama_index.llms.openai import OpenAI
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
@@ -19,9 +17,6 @@ from simon_arc_lab.task_color_profile import *
 from simon_arc_lab.bsp_tree import *
 from simon_arc_lab.image_to_python import *
 from simon_arc_lab.rle.serialize import serialize
-
-dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.env'))
-dotenv_dict = dotenv_values(dotenv_path=dotenv_path)
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -51,6 +46,9 @@ task_ids_of_interest = [
     '08573cc6',
     '6c434453',
     '21f83797',
+    # '13713586',
+    # '1c02dbbe',
+    # '29700607',
 ]
 
 def format_color(colorid: int) -> str:
@@ -343,23 +341,3 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
             filepath = os.path.join(save_dir, filename)
             with open(filepath, 'w') as f:
                 f.write(prompt)
-
-exit()
-
-llm = OpenAI(
-    model="gpt-4o-mini",
-    api_key=dotenv_dict['OPENAI_API_KEY'],
-)
-
-from llama_index.core.llms import ChatMessage
-
-messages = [
-    ChatMessage(
-        role="system", content="You are a pirate with a colorful personality"
-    ),
-    ChatMessage(role="user", content="What is your name"),
-]
-resp = llm.stream_chat(messages)
-
-for r in resp:
-    print(r.delta, end="")
