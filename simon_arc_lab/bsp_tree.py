@@ -4,7 +4,7 @@ https://en.wikipedia.org/wiki/Binary_space_partitioning
 
 The tree is built by recursively splitting the image into two smaller parts.
 """
-from typing import Dict, Tuple, Optional
+from typing import Tuple, Optional
 import numpy as np
 from enum import Enum
 from abc import ABC, abstractmethod
@@ -200,7 +200,7 @@ class SplitNode(Node):
             found_histogram_b
         )
 
-def process_inner(input_x: int, input_y: int, input_image: np.array, input_histogram: Histogram, current_depth: int, max_depth: int, verbose: bool) -> Optional[Node]:
+def create_bsp_tree_inner(input_x: int, input_y: int, input_image: np.array, input_histogram: Histogram, current_depth: int, max_depth: int, verbose: bool) -> Optional[Node]:
     height, width = input_image.shape
     assert width > 0 and height > 0
 
@@ -246,8 +246,8 @@ def process_inner(input_x: int, input_y: int, input_image: np.array, input_histo
         split_b_x = split_a_x
         split_b_y = split_a_y + node.size_a
     
-    node.child_node_a = process_inner(split_a_x, split_a_y, node.image_a, node.histogram_a, current_depth + 1, max_depth, verbose)
-    node.child_node_b = process_inner(split_b_x, split_b_y, node.image_b, node.histogram_b, current_depth + 1, max_depth, verbose)
+    node.child_node_a = create_bsp_tree_inner(split_a_x, split_a_y, node.image_a, node.histogram_a, current_depth + 1, max_depth, verbose)
+    node.child_node_b = create_bsp_tree_inner(split_b_x, split_b_y, node.image_b, node.histogram_b, current_depth + 1, max_depth, verbose)
 
     return node
 
@@ -255,7 +255,7 @@ def create_bsp_tree(image: np.array, max_depth: int, verbose: bool) -> Node:
     histogram = Histogram.create_with_image(image)
     x = 0
     y = 0
-    node = process_inner(x, y, image, histogram, 0, max_depth, verbose)
+    node = create_bsp_tree_inner(x, y, image, histogram, 0, max_depth, verbose)
     if verbose:
         node.print_tree("")
     return node

@@ -1,7 +1,6 @@
 import unittest
 import textwrap
 import numpy as np
-from .histogram import Histogram
 from .bsp_tree import *
 
 def process(image: np.array, max_depth: int, verbose: bool=False) -> str:
@@ -9,7 +8,19 @@ def process(image: np.array, max_depth: int, verbose: bool=False) -> str:
     return node.tree_to_string("|")
 
 class TestBSPTree(unittest.TestCase):
-    def test_10000_direction_topbottom(self):
+    def test_10000_solid_color(self):
+        image = np.array([
+            [5, 5, 5, 5, 5],
+            [5, 5, 5, 5, 5],
+            [5, 5, 5, 5, 5]], dtype=np.uint8)
+        actual = process(image, 3)
+
+        expected = textwrap.dedent("""
+        |0_0_5_3 color:5
+        """).strip()
+        self.assertEqual(actual, expected)
+
+    def test_11000_direction_topbottom(self):
         image = np.array([
             [5, 5, 5, 5, 5],
             [5, 5, 5, 5, 5],
@@ -26,7 +37,7 @@ class TestBSPTree(unittest.TestCase):
         """).strip()
         self.assertEqual(actual, expected)
 
-    def test_11000_direction_leftright(self):
+    def test_12000_direction_leftright(self):
         image = np.array([
             [5, 5, 3, 1],
             [5, 5, 3, 1],
@@ -44,7 +55,7 @@ class TestBSPTree(unittest.TestCase):
         """).strip()
         self.assertEqual(actual, expected)
 
-    def test_11000_direction_leftright_and_direction_topbottom(self):
+    def test_13000_direction_leftright_and_direction_topbottom(self):
         image = np.array([
             [5, 5, 3, 1],
             [7, 7, 7, 7],
