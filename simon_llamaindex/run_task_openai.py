@@ -216,6 +216,11 @@ This yields a concise, text-based compression.
     items.append("positions defined by the coordinates of the blue pixels. Or some other color or pattern.")
     items.append("")
     items.append("")
+    items.append("ARC color mapping (color id, color name, emoji)")
+    for i in range(10):
+        items.append(f"- {format_color(i)}")
+    items.append("")
+    items.append("")
 
 
     items.append("# The ARC puzzle")
