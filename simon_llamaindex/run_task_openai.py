@@ -17,6 +17,7 @@ from simon_arc_lab.image_sparse_representation import *
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.task_color_profile import *
 from simon_arc_lab.bsp_tree import *
+from simon_arc_lab.image_to_python import *
 from simon_arc_lab.rle.serialize import serialize
 
 dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.env'))
@@ -156,7 +157,7 @@ def serialize_image(image: np.array) -> str:
         items.append(rle)
         items.append("```")
 
-    if True:
+    if False:
         items.append("")
         items.append("")
         items.append("representation: BSP tree")
@@ -164,6 +165,19 @@ def serialize_image(image: np.array) -> str:
         bsp_node = create_bsp_tree(image, max_depth=10, verbose=False)
         bsp_str = bsp_node.tree_to_string("|")
         items.append(bsp_str)
+        items.append("```")
+
+    if True:
+        config = ImageToPythonConfig()
+        config.max_depth=30
+        config.verbose=False
+        image_to_python = ImageToPython(image, config)
+        image_to_python.build()
+        items.append("")
+        items.append("")
+        items.append("representation: numpy array")
+        items.append("```python")
+        items.append(image_to_python.python_code)
         items.append("```")
 
     return "\n".join(items)
