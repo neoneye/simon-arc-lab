@@ -16,6 +16,7 @@ from simon_arc_lab.image_string_representation import *
 from simon_arc_lab.image_sparse_representation import *
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.task_color_profile import *
+from simon_arc_lab.bsp_tree import *
 from simon_arc_lab.rle.serialize import serialize
 
 dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.env'))
@@ -48,6 +49,7 @@ task_ids_of_interest = [
     '0b17323b',
     '08573cc6',
     '6c434453',
+    '21f83797',
 ]
 
 def format_color(colorid: int) -> str:
@@ -85,58 +87,85 @@ def serialize_image(image: np.array) -> str:
         count = histogram.get_count_for_color(color)
         color_str = format_color(color)
         items.append(f"- color {color_str}, count {count}")
-    items.append("")
-    items.append("")
-    items.append("representation: json")
-    items.append("```json")
-    json_str = json.dumps(image.tolist(), separators=(',', ':'))
-    items.append(json_str)
-    items.append("```")
-    items.append("")
-    items.append("")
-    items.append("representation: digit")
-    items.append("```")
-    items.append(image_to_string(image))
-    items.append("```")
-    items.append("")
-    items.append("")
-    items.append("representation: color")
-    items.append("```")
-    items.append(image_to_string_colorname(image))
-    items.append("```")
-    items.append("")
-    items.append("")
-    items.append("representation: Excel")
-    items.append("```")
-    items.append(image_to_string_spreadsheet_v1(image))
-    items.append("```")
-    items.append("")
-    items.append("")
-    items.append("representation: emoji")
-    items.append("```")
-    items.append(image_to_string_emoji_circles_v1(image))
-    items.append("```")
-    items.append("")
-    items.append("")
-    items.append("representation: python dictionary")
-    items.append("```python")
-    dict_str = image_to_dictionary(image, include_size=True, background_color=histogram.most_popular_color())
-    items.append(dict_str)
-    items.append("```")
-    items.append("")
-    items.append("")
-    items.append("representation: RLE")
-    items.append("```")
-    rle = serialize(image)
-    items.append(rle)
-    items.append("```")
-    items.append("")
-    items.append("")
-    items.append("representation: RLE transposed")
-    items.append("```")
-    rle = serialize(image.transpose())
-    items.append(rle)
-    items.append("```")
+
+    if True:
+        items.append("")
+        items.append("")
+        items.append("representation: json")
+        items.append("```json")
+        json_str = json.dumps(image.tolist(), separators=(',', ':'))
+        items.append(json_str)
+        items.append("```")
+
+    if True:
+        items.append("")
+        items.append("")
+        items.append("representation: digit")
+        items.append("```")
+        items.append(image_to_string(image))
+        items.append("```")
+
+    if True:
+        items.append("")
+        items.append("")
+        items.append("representation: color")
+        items.append("```")
+        items.append(image_to_string_colorname(image))
+        items.append("```")
+
+    if True:
+        items.append("")
+        items.append("")
+        items.append("representation: Excel")
+        items.append("```")
+        items.append(image_to_string_spreadsheet_v1(image))
+        items.append("```")
+
+    if True:
+        items.append("")
+        items.append("")
+        items.append("representation: emoji")
+        items.append("```")
+        items.append(image_to_string_emoji_circles_v1(image))
+        items.append("```")
+
+    if True:
+        items.append("")
+        items.append("")
+        items.append("representation: python dictionary")
+        items.append("```python")
+        dict_str = image_to_dictionary(image, include_size=True, background_color=histogram.most_popular_color())
+        items.append(dict_str)
+        items.append("```")
+
+    if True:
+        items.append("")
+        items.append("")
+        items.append("representation: RLE")
+        items.append("```")
+        rle = serialize(image)
+        items.append(rle)
+        items.append("```")
+
+    if True:
+        items.append("")
+        items.append("")
+        items.append("representation: RLE transposed")
+        items.append("```")
+        rle = serialize(image.transpose())
+        items.append(rle)
+        items.append("```")
+
+    if True:
+        items.append("")
+        items.append("")
+        items.append("representation: BSP tree")
+        items.append("```")
+        bsp_node = create_bsp_tree(image, max_depth=10, verbose=False)
+        bsp_str = bsp_node.tree_to_string("|")
+        items.append(bsp_str)
+        items.append("```")
+
     return "\n".join(items)
 
 def create_prompt_for_task(task: Task, test_index: int) -> str:
