@@ -24,7 +24,7 @@ class Node(ABC):
     def print_tree(self, indent: str):
         pass
 
-class Solid(Node):
+class SolidNode(Node):
     def __init__(self, x: int, y: int, width: int, height: int, color: int):
         self.x = x
         self.y = y
@@ -33,7 +33,7 @@ class Solid(Node):
         self.color = color
 
     def __str__(self):
-        return f"Solid x:{self.x} y:{self.y} width:{self.width} height:{self.height} color:{self.color}"
+        return f"SolidNode x:{self.x} y:{self.y} width:{self.width} height:{self.height} color:{self.color}"
 
     def __repr__(self):
         return self.__str__()
@@ -41,7 +41,7 @@ class Solid(Node):
     def print_tree(self, indent: str):
         print(f"{indent}{self}")
 
-class MultiColorImage(Node):
+class ImageNode(Node):
     def __init__(self, x: int, y: int, image: np.array, histogram: Histogram):
         self.x = x
         self.y = y
@@ -59,7 +59,7 @@ class MultiColorImage(Node):
     def print_tree(self, indent: str):
         print(f"{indent}{self}")
 
-class Split2(Node):
+class SplitNode(Node):
     def __init__(self, direction: SplitDirection, x: int, y: int, width: int, height: int, size_a: int, size_b: int, score: int, image_a: np.array, image_b: np.array, histogram_a: Histogram, histogram_b: Histogram):
         self.direction = direction
         self.x = x
@@ -77,7 +77,7 @@ class Split2(Node):
         self.child_split_b = None
 
     def __str__(self):
-        return f"{self.direction.name} x:{self.x} y:{self.y} width:{self.width} height:{self.height} size_a:{self.size_a} size_b:{self.size_b} score:{self.score}"
+        return f"SplitNode direction:{self.direction.name} x:{self.x} y:{self.y} width:{self.width} height:{self.height} size_a:{self.size_a} size_b:{self.size_b} score:{self.score}"
 
     def __repr__(self):
         return self.__str__()
@@ -90,7 +90,7 @@ class Split2(Node):
             self.child_split_b.print_tree(indent + "  ")
 
     @staticmethod
-    def find_split(direction: SplitDirection, x: int, y: int, image: np.array, verbose: bool) -> Optional['Split2']:
+    def find_split(direction: SplitDirection, x: int, y: int, image: np.array, verbose: bool) -> Optional['SplitNode']:
         original_height, original_width = image.shape
         if direction == SplitDirection.TB:
             image = image.transpose()
@@ -143,7 +143,7 @@ class Split2(Node):
             found_image_a = found_image_a.transpose()
             found_image_b = found_image_b.transpose()
 
-        return Split2(
+        return SplitNode(
             direction, 
             x, 
             y, 
@@ -170,46 +170,46 @@ def process_inner(input_x: int, input_y: int, input_image: np.array, input_histo
         colors = input_histogram.unique_colors_set()
         assert len(colors) == 1
         solid_color = colors.pop()
-        return Solid(input_x, input_y, width, height, solid_color)
+        return SolidNode(input_x, input_y, width, height, solid_color)
 
     if current_depth >= max_depth:
         if verbose:
             print("max depth reached")
-        return MultiColorImage(input_x, input_y, input_image, input_histogram)
+        return ImageNode(input_x, input_y, input_image, input_histogram)
 
     if verbose:
         print("can be split further")
-    candidate_a = Split2.find_split(SplitDirection.LR, input_x, input_y, input_image, verbose)
-    candidate_b = Split2.find_split(SplitDirection.TB, input_x, input_y, input_image, verbose)
+    split_node_lr = SplitNode.find_split(SplitDirection.LR, input_x, input_y, input_image, verbose)
+    split_node_tb = SplitNode.find_split(SplitDirection.TB, input_x, input_y, input_image, verbose)
 
     if verbose:
-        print(f"candidate_a:{candidate_a}")
-        print(f"candidate_b:{candidate_b}")
-    score_a = 0 if candidate_a is None else candidate_a.score
-    score_b = 0 if candidate_b is None else candidate_b.score
+        print(f"split_node_lr: {split_node_lr}")
+        print(f"split_node_tb: {split_node_tb}")
+    score_a = 0 if split_node_lr is None else split_node_lr.score
+    score_b = 0 if split_node_tb is None else split_node_tb.score
     if score_a == 0 and score_b == 0:
         if verbose:
             print("no candidates found. Not sure how to proceed")
-        return MultiColorImage(input_x, input_y, input_image, input_histogram)
+        return ImageNode(input_x, input_y, input_image, input_histogram)
     
-    candidate = None
+    node = None
     split_a_x = input_x
     split_a_y = input_y
     if score_a >= score_b:
-        candidate = candidate_a
-        split_b_x = split_a_x + candidate.size_a
+        node = split_node_lr
+        split_b_x = split_a_x + node.size_a
         split_b_y = split_a_y
     else:
-        candidate = candidate_b
+        node = split_node_tb
         split_b_x = split_a_x
-        split_b_y = split_a_y + candidate.size_b
+        split_b_y = split_a_y + node.size_a
     
-    candidate.child_split_a = process_inner(split_a_x, split_a_y, candidate.image_a, candidate.histogram_a, current_depth + 1, max_depth, verbose)
-    candidate.child_split_b = process_inner(split_b_x, split_b_y, candidate.image_b, candidate.histogram_b, current_depth + 1, max_depth, verbose)
+    node.child_split_a = process_inner(split_a_x, split_a_y, node.image_a, node.histogram_a, current_depth + 1, max_depth, verbose)
+    node.child_split_b = process_inner(split_b_x, split_b_y, node.image_b, node.histogram_b, current_depth + 1, max_depth, verbose)
 
-    return candidate
+    return node
 
-def process(image: np.array) -> str:
+def process(image: np.array) -> Node:
     print("----------- simon is testing ---------")
 
     histogram = Histogram.create_with_image(image)
@@ -217,10 +217,10 @@ def process(image: np.array) -> str:
     verbose = False
     x = 0
     y = 0
-    candidate = process_inner(x, y, image, histogram, 0, 4, verbose)
-    candidate.print_tree("")
+    node = process_inner(x, y, image, histogram, 0, 4, verbose)
+    node.print_tree("")
 
-    return 'ok'
+    return node
 
 class TestImageLayerRepresentation(unittest.TestCase):
     def xtest_10000_direction_top_bottom(self):
