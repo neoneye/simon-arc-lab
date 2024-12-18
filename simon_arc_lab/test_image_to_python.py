@@ -10,6 +10,15 @@ def process(image: np.array, max_depth: int, verbose: bool=False) -> str:
     image_to_python.build()
     return image_to_python.python_code
 
+def process_with_backgound_color(image: np.array, max_depth: int, background_color: int, verbose: bool=False) -> str:
+    config = ImageToPythonConfig()
+    config.max_depth=max_depth
+    config.verbose=verbose
+    config.background_color=background_color
+    image_to_python = ImageToPython(image, config)
+    image_to_python.build()
+    return image_to_python.python_code
+
 class TestImageToPython(unittest.TestCase):
     def test_10000_solid_color(self):
         image = np.array([
@@ -58,3 +67,9 @@ class TestImageToPython(unittest.TestCase):
         image = np.zeros((99, 51), dtype=np.uint8)
         image[50:52, 25:27] = 1
         process(image, 10)
+
+    def test_30000_custom_background_color(self):
+        image = np.zeros((9, 9), dtype=np.uint8)
+        image[1:8, 1:8] = 42
+        process_with_backgound_color(image, 10, 42)
+        process_with_backgound_color(image, 10, 0)
