@@ -5,6 +5,9 @@ from .bsp_tree import *
 
 def process(image: np.array, max_depth: int, verbose: bool=False) -> str:
     node = create_bsp_tree(image, max_depth, verbose)
+    recreated_image = node.to_image()
+    if np.array_equal(image, recreated_image) == False:
+        raise Exception("The recreated image is not equal to the original image.")
     return node.tree_to_string("|")
 
 class TestBSPTree(unittest.TestCase):

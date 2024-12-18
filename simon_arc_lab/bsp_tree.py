@@ -41,6 +41,11 @@ class Node(ABC):
         x, y, width, height = self.rectangle()
         return f"{x}_{y}_{width}_{height}"
 
+    @abstractmethod
+    def to_image(self) -> np.array:
+        pass
+
+
 class SolidNode(Node):
     def __init__(self, x: int, y: int, width: int, height: int, color: int):
         self.x = x
@@ -63,6 +68,9 @@ class SolidNode(Node):
 
     def tree_to_string(self, indent: str) -> str:
         return f"{indent}{self.rectangle_to_compact_string()} color:{self.color}"
+
+    def to_image(self) -> np.array:
+        return np.full((self.height, self.width), self.color, dtype=np.uint8)
 
 class ImageNode(Node):
     def __init__(self, x: int, y: int, image: np.array, histogram: Histogram):
@@ -89,6 +97,9 @@ class ImageNode(Node):
     def tree_to_string(self, indent: str) -> str:
         colors_str = self.histogram.unique_colors_pretty()
         return f"{indent}{self.rectangle_to_compact_string()} image-with-colors:{colors_str}"
+
+    def to_image(self) -> np.array:
+        return self.image
 
 class SplitNode(Node):
     def __init__(self, direction: SplitDirection, x: int, y: int, width: int, height: int, size_a: int, size_b: int, score: int, image_a: np.array, image_b: np.array, histogram_a: Histogram, histogram_b: Histogram):
@@ -130,6 +141,20 @@ class SplitNode(Node):
         if self.child_node_b is not None:
             s += "\n" + self.child_node_b.tree_to_string(indent + ".")
         return s
+
+    def to_image(self) -> np.array:
+        assert self.child_node_a is not None
+        assert self.child_node_b is not None
+        if self.direction == SplitDirection.LR:
+            image_a = self.child_node_a.to_image()
+            image_b = self.child_node_b.to_image()
+            return np.hstack((image_a, image_b))
+        elif self.direction == SplitDirection.TB:
+            image_a = self.child_node_a.to_image()
+            image_b = self.child_node_b.to_image()
+            return np.vstack((image_a, image_b))
+        else:
+            raise ValueError("Invalid direction")
 
     @staticmethod
     def find_split(direction: SplitDirection, x: int, y: int, image: np.array, verbose: bool) -> Optional['SplitNode']:
