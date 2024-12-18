@@ -10,7 +10,7 @@ class SplitDirection(Enum):
     LR = 'left_right'
     TB = 'top_bottom'
 
-def image_split2_left_right(image: np.array, split: int) -> Tuple[np.array, np.array]:
+def image_split_left_right(image: np.array, split: int) -> Tuple[np.array, np.array]:
     height, width = image.shape
     if width < 2 or height < 1:
         raise ValueError("image is too small to split")
@@ -66,11 +66,11 @@ class ImageNode(Node):
         self.y = y
         self.image = image
         self.histogram = histogram
-        self.number_of_unique_colors = self.histogram.number_of_unique_colors()
 
     def __str__(self):
         height, width = self.image.shape
-        return f"MultiColorImage x:{self.x} y:{self.y} width:{width} height:{height} number_of_unique_colors:{self.number_of_unique_colors}"
+        colors_str = self.histogram.unique_colors_pretty()
+        return f"ImageNode x:{self.x} y:{self.y} width:{width} height:{height} unique_colors:{colors_str}"
 
     def __repr__(self):
         return self.__str__()
@@ -145,7 +145,7 @@ class SplitNode(Node):
         # find optimal left-right split determined by score
         for i in range(width-1):
             size_a = i + 1
-            image_left, image_right = image_split2_left_right(image, size_a)
+            image_left, image_right = image_split_left_right(image, size_a)
             size_b = width - size_a
             assert size_a == image_left.shape[1]
             assert size_b == image_right.shape[1]
