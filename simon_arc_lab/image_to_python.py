@@ -12,14 +12,15 @@ class PythonGeneratorVisitor(NodeVisitor):
     image[:, x:x+width] = color # fill an entire column
     image[y, x] = color # set a single pixel
     """
-    def __init__(self, original_image: np.array):
+    def __init__(self, original_image: np.array, background_color: Optional[int]):
         height, width = original_image.shape
         self.original_image = original_image
         self.original_image_height = height
         self.original_image_width = width
 
-        histogram = Histogram.create_with_image(original_image)
-        background_color = histogram.most_popular_color()
+        if background_color is None:
+            histogram = Histogram.create_with_image(original_image)
+            background_color = histogram.most_popular_color()
         self.background_color = background_color
 
         self.lines = []
@@ -69,6 +70,7 @@ class ImageToPythonConfig:
     verbose = False
     verify_bsptree_recreates_image = True
     verify_python_recreates_image = True
+    background_color = None
 
 class ImageToPython:
     def __init__(self, image: np.array, config: ImageToPythonConfig):
@@ -86,7 +88,7 @@ class ImageToPython:
             if np.array_equal(self.image, recreated_image_from_bsp) == False:
                 raise Exception("The image recreated from BSP is not equal to the original image.")
         
-        v = PythonGeneratorVisitor(self.image)
+        v = PythonGeneratorVisitor(self.image, background_color=self.config.background_color)
         node.accept(v)
         python_code = v.get_code()
         self.python_code = python_code
