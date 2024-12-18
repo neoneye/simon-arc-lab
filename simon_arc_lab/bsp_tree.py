@@ -24,6 +24,19 @@ def image_split_left_right(image: np.array, split: int) -> Tuple[np.array, np.ar
     right = image[:, split:]
     return left, right
 
+class NodeVisitor(ABC):
+    @abstractmethod
+    def visit_solid_node(self, node: 'SolidNode'):
+        pass
+
+    @abstractmethod
+    def visit_image_node(self, node: 'ImageNode'):
+        pass
+
+    @abstractmethod
+    def visit_split_node(self, node: 'SplitNode'):
+        pass
+
 class Node(ABC):
     @abstractmethod
     def print_tree(self, indent: str):
@@ -45,6 +58,9 @@ class Node(ABC):
     def to_image(self) -> np.array:
         pass
 
+    @abstractmethod
+    def accept(self, visitor: NodeVisitor):
+        pass
 
 class SolidNode(Node):
     def __init__(self, x: int, y: int, width: int, height: int, color: int):
@@ -71,6 +87,9 @@ class SolidNode(Node):
 
     def to_image(self) -> np.array:
         return np.full((self.height, self.width), self.color, dtype=np.uint8)
+
+    def accept(self, visitor: NodeVisitor):
+        visitor.visit_solid_node(self)
 
 class ImageNode(Node):
     def __init__(self, x: int, y: int, image: np.array, histogram: Histogram):
@@ -100,6 +119,9 @@ class ImageNode(Node):
 
     def to_image(self) -> np.array:
         return self.image
+
+    def accept(self, visitor: NodeVisitor):
+        visitor.visit_image_node(self)
 
 class SplitNode(Node):
     def __init__(self, direction: SplitDirection, x: int, y: int, width: int, height: int, size_a: int, size_b: int, score: int, image_a: np.array, image_b: np.array, histogram_a: Histogram, histogram_b: Histogram):
@@ -155,6 +177,13 @@ class SplitNode(Node):
             return np.vstack((image_a, image_b))
         else:
             raise ValueError("Invalid direction")
+
+    def accept(self, visitor: NodeVisitor):
+        visitor.visit_split_node(self)
+        if self.child_node_a is not None:
+            self.child_node_a.accept(visitor)
+        if self.child_node_b is not None:
+            self.child_node_b.accept(visitor)
 
     @staticmethod
     def find_split(direction: SplitDirection, x: int, y: int, image: np.array, verbose: bool) -> Optional['SplitNode']:
