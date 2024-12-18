@@ -1,46 +1,14 @@
 import unittest
 import numpy as np
 from .image_to_python import *
-from .bsp_tree import *
 
 def process(image: np.array, max_depth: int, verbose: bool=False) -> str:
-    node = create_bsp_tree(image, max_depth, verbose)
-    recreated_image_from_bsp = node.to_image()
-    if np.array_equal(image, recreated_image_from_bsp) == False:
-        raise Exception("The image recreated from BSP is not equal to the original image.")
-    
-    v = PythonGeneratorVisitor(image)
-    node.accept(v)
-    python_code = v.get_code()
-    if verbose:
-        print(f"# python code that recreates the image\n{python_code}\n\n")
-
-    # Prepare a separate namespace for exec
-    exec_namespace = {}
-    
-    # Optionally, include necessary imports in the namespace
-    exec_namespace['np'] = np
-    
-    try:
-        # Execute the generated Python code within the namespace
-        exec(python_code, exec_namespace)
-    except Exception as e:
-        print("Error executing the generated code:", e)
-        bsp_tree = node.tree_to_string("|")
-        print("bsp_tree=", bsp_tree)
-        raise e
-    
-    # Retrieve the 'image' variable from the namespace
-    recreated_image_from_python = exec_namespace.get('image', None)
-
-    if np.array_equal(image, recreated_image_from_python) == False:
-        if verbose:
-            print(f"Argh, the python code does not recreates the original image!")
-        raise Exception("The image recreated from Python is not equal to the original image.")
-
-    if verbose:
-        print(f"Great, the python code recreates the image correctly!")
-    return python_code
+    config = ImageToPythonConfig()
+    config.max_depth=max_depth
+    config.verbose=verbose
+    image_to_python = ImageToPython(image, config)
+    image_to_python.build()
+    return image_to_python.python_code
 
 class TestImageToPython(unittest.TestCase):
     def test_10000_solid_color(self):
