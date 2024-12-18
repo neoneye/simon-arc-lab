@@ -139,6 +139,17 @@ class SplitNode(Node):
 
         height, width = image.shape
 
+        splits = []
+        for i in range(width-1):
+            size_a = i + 1
+            size_b = width - size_a
+            splits.append((size_a, size_b))
+        # sort splits by distance from equal split, if there is a tie, the first split is chosen
+        splits.sort(key=lambda x: abs(x[0] - x[1]))
+        if verbose:
+            print(f"splits:{splits}")
+
+        found = False
         found_score = 0
         found_image_a = None
         found_image_b = None
@@ -146,11 +157,10 @@ class SplitNode(Node):
         found_histogram_b = None
         found_size_a = None
         found_size_b = None
+
         # find optimal left-right split determined by score
-        for i in range(width-1):
-            size_a = i + 1
+        for (size_a, size_b) in splits:
             image_left, image_right = image_split_left_right(image, size_a)
-            size_b = width - size_a
             assert size_a == image_left.shape[1]
             assert size_b == image_right.shape[1]
             assert size_a + size_b == width
@@ -163,10 +173,11 @@ class SplitNode(Node):
                 continue
             width_diff = abs(size_a - size_b)
             score = len(color_diff) * (width - width_diff)
-            if score <= found_score:
+            if found and score <= found_score:
                 continue
             if verbose:
                 print(f"found better size_a:{size_a}, size_b:{size_b} score:{score}")
+            found = True
             found_score = score
             found_size_a = size_a
             found_size_b = size_b
@@ -174,9 +185,9 @@ class SplitNode(Node):
             found_image_b = image_right
             found_histogram_a = histogram_a
             found_histogram_b = histogram_b
-        if found_score == 0:
+        if found == False:
             if verbose:
-                print("no candidates found")
+                print(f"no candidates found. Tried {len(splits)} splits")
             return None
         if verbose:
             print(f"found_score:{found_score}")

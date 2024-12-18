@@ -82,3 +82,12 @@ class TestBSPTree(unittest.TestCase):
         |...3_2_1_3 color:1
         """).strip()
         self.assertEqual(actual, expected)
+
+    def xtest_20000_one_pixel_in_the_center(self):
+        """
+        This test is disabled, because it doesn't fully split the image into solid colors.
+        """
+        image = np.zeros((99, 51), dtype=np.uint8)
+        image[50, 25] = 1
+        actual = process(image, 6, True)
+        print(actual)
