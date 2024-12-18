@@ -1,4 +1,5 @@
 import unittest
+import textwrap
 from typing import Dict, Tuple, Optional
 import numpy as np
 from enum import Enum
@@ -24,6 +25,18 @@ class Node(ABC):
     def print_tree(self, indent: str):
         pass
 
+    @abstractmethod
+    def rectangle(self) -> Tuple[int, int, int, int]:
+        pass
+
+    @abstractmethod
+    def tree_to_string(self, indent: str) -> str:
+        pass
+
+    def rectangle_to_compact_string(self) -> str:
+        x, y, width, height = self.rectangle()
+        return f"{x}_{y}_{width}_{height}"
+
 class SolidNode(Node):
     def __init__(self, x: int, y: int, width: int, height: int, color: int):
         self.x = x
@@ -41,23 +54,37 @@ class SolidNode(Node):
     def print_tree(self, indent: str):
         print(f"{indent}{self}")
 
+    def rectangle(self) -> Tuple[int, int, int, int]:
+        return self.x, self.y, self.width, self.height
+
+    def tree_to_string(self, indent: str) -> str:
+        return f"{indent}{self.rectangle_to_compact_string()} color:{self.color}"
+
 class ImageNode(Node):
     def __init__(self, x: int, y: int, image: np.array, histogram: Histogram):
         self.x = x
         self.y = y
         self.image = image
         self.histogram = histogram
+        self.number_of_unique_colors = self.histogram.number_of_unique_colors()
 
     def __str__(self):
         height, width = self.image.shape
-        number_of_unique_colors = self.histogram.number_of_unique_colors()
-        return f"MultiColorImage x:{self.x} y:{self.y} width:{width} height:{height} number_of_unique_colors:{number_of_unique_colors}"
+        return f"MultiColorImage x:{self.x} y:{self.y} width:{width} height:{height} number_of_unique_colors:{self.number_of_unique_colors}"
 
     def __repr__(self):
         return self.__str__()
     
     def print_tree(self, indent: str):
         print(f"{indent}{self}")
+
+    def rectangle(self) -> Tuple[int, int, int, int]:
+        height, width = self.image.shape
+        return self.x, self.y, width, height
+
+    def tree_to_string(self, indent: str) -> str:
+        colors_str = self.histogram.unique_colors_pretty()
+        return f"{indent}{self.rectangle_to_compact_string()} image-with-colors:{colors_str}"
 
 class SplitNode(Node):
     def __init__(self, direction: SplitDirection, x: int, y: int, width: int, height: int, size_a: int, size_b: int, score: int, image_a: np.array, image_b: np.array, histogram_a: Histogram, histogram_b: Histogram):
@@ -88,6 +115,17 @@ class SplitNode(Node):
             self.child_split_a.print_tree(indent + "  ")
         if self.child_split_b is not None:
             self.child_split_b.print_tree(indent + "  ")
+
+    def rectangle(self) -> Tuple[int, int, int, int]:
+        return self.x, self.y, self.width, self.height
+
+    def tree_to_string(self, indent: str) -> str:
+        s = f"{indent}{self.rectangle_to_compact_string()} split:{self.direction.name}"
+        if self.child_split_a is not None:
+            s += "\n" + self.child_split_a.tree_to_string(indent + ".")
+        if self.child_split_b is not None:
+            s += "\n" + self.child_split_b.tree_to_string(indent + ".")
+        return s
 
     @staticmethod
     def find_split(direction: SplitDirection, x: int, y: int, image: np.array, verbose: bool) -> Optional['SplitNode']:
@@ -209,45 +247,79 @@ def process_inner(input_x: int, input_y: int, input_image: np.array, input_histo
 
     return node
 
-def process(image: np.array) -> Node:
-    print("----------- simon is testing ---------")
-
+def create_nodes_with_image(image: np.array, max_depth: int, verbose: bool) -> Node:
     histogram = Histogram.create_with_image(image)
-    verbose = True
-    verbose = False
     x = 0
     y = 0
-    node = process_inner(x, y, image, histogram, 0, 4, verbose)
-    node.print_tree("")
-
+    node = process_inner(x, y, image, histogram, 0, max_depth, verbose)
+    if verbose:
+        node.print_tree("")
     return node
 
+def process(image: np.array, max_depth: int, verbose: bool=False) -> str:
+    node = create_nodes_with_image(image, max_depth, verbose)
+    return node.tree_to_string("|")
+
 class TestImageLayerRepresentation(unittest.TestCase):
-    def xtest_10000_direction_top_bottom(self):
+    def test_10000_direction_topbottom(self):
         image = np.array([
             [5, 5, 5, 5, 5],
             [5, 5, 5, 5, 5],
             [3, 3, 3, 3, 3],
             [1, 1, 1, 1, 1]], dtype=np.uint8)
-        actual = process(image)
-        print(actual)
+        actual = process(image, 3)
 
-    def xtest_11000_direction_left_right(self):
+        expected = textwrap.dedent("""
+        |0_0_5_4 split:TB
+        |.0_0_5_2 color:5
+        |.0_2_5_2 split:TB
+        |..0_2_5_1 color:3
+        |..0_3_5_1 color:1
+        """).strip()
+        self.assertEqual(actual, expected)
+
+    def test_11000_direction_leftright(self):
         image = np.array([
             [5, 5, 3, 1],
             [5, 5, 3, 1],
             [5, 5, 3, 1],
             [5, 5, 3, 1],
             [5, 5, 3, 1]], dtype=np.uint8)
-        actual = process(image)
-        print(actual)
+        actual = process(image, 3)
 
-    def xtest_11000_direction_mixed(self):
+        expected = textwrap.dedent("""
+        |0_0_4_5 split:LR
+        |.0_0_2_5 color:5
+        |.2_0_2_5 split:LR
+        |..2_0_1_5 color:3
+        |..3_0_1_5 color:1
+        """).strip()
+        self.assertEqual(actual, expected)
+
+    def test_11000_direction_leftright_and_direction_topbottom(self):
         image = np.array([
             [5, 5, 3, 1],
             [7, 7, 7, 7],
             [5, 5, 3, 1],
             [5, 5, 3, 1],
             [5, 5, 3, 1]], dtype=np.uint8)
-        actual = process(image)
-        print(actual)
+        actual = process(image, 4)
+
+        expected = textwrap.dedent("""
+        |0_0_4_5 split:LR
+        |.0_0_2_5 split:TB
+        |..0_0_2_2 split:TB
+        |...0_0_2_1 color:5
+        |...0_1_2_1 color:7
+        |..0_2_2_3 color:5
+        |.2_0_2_5 split:TB
+        |..2_0_2_2 split:TB
+        |...2_0_2_1 split:LR
+        |....2_0_1_1 color:3
+        |....3_0_1_1 color:1
+        |...2_1_2_1 color:7
+        |..2_2_2_3 split:LR
+        |...2_2_1_3 color:3
+        |...3_2_1_3 color:1
+        """).strip()
+        self.assertEqual(actual, expected)
