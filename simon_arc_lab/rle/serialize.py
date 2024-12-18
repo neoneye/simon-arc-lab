@@ -1,3 +1,12 @@
+"""
+RLE compression
+
+This algorithm applies run-length encoding (RLE) to images, reducing sequences of identical pixels to shorter symbolic forms. 
+It starts by noting the image's width and height, then processes each line. If an entire line is the same color, it writes that color once. 
+Otherwise, it breaks the line into consecutive runs of identical pixels, using letters `a` through `z` to represent runs of lengths 2 to 27, 
+followed by the color. Single pixels are just written as their color value. When a line repeats the previous one, it's marked with a comma only. 
+This yields a concise, text-based compression.
+"""
 import numpy as np
 from .deserialize import deserialize
 
