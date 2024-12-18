@@ -83,11 +83,46 @@ class TestBSPTree(unittest.TestCase):
         """).strip()
         self.assertEqual(actual, expected)
 
-    def xtest_20000_one_pixel_in_the_center(self):
-        """
-        This test is disabled, because it doesn't fully split the image into solid colors.
-        """
+    def test_20000_small_image_with_one_pixel_in_the_center(self):
+        image = np.zeros((3, 3), dtype=np.uint8)
+        image[1, 1] = 42
+        actual = process(image, 4)
+
+        expected = textwrap.dedent("""
+        |0_0_3_3 split:LR
+        |.0_0_2_3 split:TB
+        |..0_0_2_2 split:LR
+        |...0_0_1_2 color:0
+        |...1_0_1_2 split:TB
+        |....1_0_1_1 color:0
+        |....1_1_1_1 color:42
+        |..0_2_2_1 color:0
+        |.2_0_1_3 color:0
+        """).strip()
+        self.assertEqual(actual, expected)
+
+    def test_20001_big_image_with_one_pixel_in_the_center(self):
         image = np.zeros((99, 51), dtype=np.uint8)
         image[50, 25] = 1
-        actual = process(image, 6, True)
-        print(actual)
+        actual = process(image, 8)
+
+        expected = textwrap.dedent("""
+        |0_0_51_99 split:TB
+        |.0_0_51_51 split:LR
+        |..0_0_26_51 split:LR
+        |...0_0_13_51 color:0
+        |...13_0_13_51 split:LR
+        |....13_0_6_51 color:0
+        |....19_0_7_51 split:LR
+        |.....19_0_3_51 color:0
+        |.....22_0_4_51 split:LR
+        |......22_0_2_51 color:0
+        |......24_0_2_51 split:LR
+        |.......24_0_1_51 color:0
+        |.......25_0_1_51 split:TB
+        |........25_0_1_50 color:0
+        |........25_50_1_1 color:1
+        |..26_0_25_51 color:0
+        |.0_51_51_48 color:0
+        """).strip()
+        self.assertEqual(actual, expected)

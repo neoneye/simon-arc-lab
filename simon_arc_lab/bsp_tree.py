@@ -139,6 +139,11 @@ class SplitNode(Node):
 
         height, width = image.shape
 
+        if width < 2 or height < 1:
+            if verbose:
+                print("image is too small to split")
+            return None
+        
         splits = []
         for i in range(width-1):
             size_a = i + 1
@@ -169,10 +174,12 @@ class SplitNode(Node):
             color_diff = histogram_a.unique_colors_set() - histogram_b.unique_colors_set()
             if verbose:
                 print(f"size_a:{size_a}, size_b:{size_b} a:{histogram_a.number_of_unique_colors()}, b:{histogram_b.number_of_unique_colors()} diff:{color_diff}")
-            if len(color_diff) == 0:
+            if found and len(color_diff) == 0:
+                if verbose:
+                    print(f"no color diff. Skipping size_a:{size_a}, size_b:{size_b}")
                 continue
             width_diff = abs(size_a - size_b)
-            score = len(color_diff) * (width - width_diff)
+            score = (len(color_diff) * (width - width_diff)) + 1
             if found and score <= found_score:
                 continue
             if verbose:
