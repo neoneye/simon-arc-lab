@@ -100,8 +100,8 @@ class SplitNode(Node):
         self.image_b = image_b
         self.histogram_a = histogram_a
         self.histogram_b = histogram_b
-        self.child_split_a = None
-        self.child_split_b = None
+        self.child_node_a = None
+        self.child_node_b = None
 
     def __str__(self):
         return f"SplitNode direction:{self.direction.name} x:{self.x} y:{self.y} width:{self.width} height:{self.height} size_a:{self.size_a} size_b:{self.size_b} score:{self.score}"
@@ -111,20 +111,20 @@ class SplitNode(Node):
     
     def print_tree(self, indent: str):
         print(f"{indent}{self}")
-        if self.child_split_a is not None:
-            self.child_split_a.print_tree(indent + "  ")
-        if self.child_split_b is not None:
-            self.child_split_b.print_tree(indent + "  ")
+        if self.child_node_a is not None:
+            self.child_node_a.print_tree(indent + "  ")
+        if self.child_node_b is not None:
+            self.child_node_b.print_tree(indent + "  ")
 
     def rectangle(self) -> Tuple[int, int, int, int]:
         return self.x, self.y, self.width, self.height
 
     def tree_to_string(self, indent: str) -> str:
         s = f"{indent}{self.rectangle_to_compact_string()} split:{self.direction.name}"
-        if self.child_split_a is not None:
-            s += "\n" + self.child_split_a.tree_to_string(indent + ".")
-        if self.child_split_b is not None:
-            s += "\n" + self.child_split_b.tree_to_string(indent + ".")
+        if self.child_node_a is not None:
+            s += "\n" + self.child_node_a.tree_to_string(indent + ".")
+        if self.child_node_b is not None:
+            s += "\n" + self.child_node_b.tree_to_string(indent + ".")
         return s
 
     @staticmethod
@@ -242,8 +242,8 @@ def process_inner(input_x: int, input_y: int, input_image: np.array, input_histo
         split_b_x = split_a_x
         split_b_y = split_a_y + node.size_a
     
-    node.child_split_a = process_inner(split_a_x, split_a_y, node.image_a, node.histogram_a, current_depth + 1, max_depth, verbose)
-    node.child_split_b = process_inner(split_b_x, split_b_y, node.image_b, node.histogram_b, current_depth + 1, max_depth, verbose)
+    node.child_node_a = process_inner(split_a_x, split_a_y, node.image_a, node.histogram_a, current_depth + 1, max_depth, verbose)
+    node.child_node_b = process_inner(split_b_x, split_b_y, node.image_b, node.histogram_b, current_depth + 1, max_depth, verbose)
 
     return node
 
