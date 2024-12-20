@@ -16,6 +16,7 @@ from simon_arc_lab.connected_component import *
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_string_representation import image_to_string
 from simon_arc_lab.show_prediction_result import show_multiple_images
+from simon_arc_lab.python_image_builder import PythonImageBuilder
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -52,65 +53,6 @@ task_ids_of_interest = [
     # '29700607',
     # '1a2e2828',
 ]
-
-class PythonImageBuilder:
-    """
-    Generate Python code with rectangles
-
-    image=np.zeros((10,20),dtype=np.uint8)
-    image[y:y+height, x:x+width] = color # fill a rectangle
-    image[y, x:x+width] = color # fill multiple columns
-    image[:, x:x+width] = color # fill an entire column
-    image[y, x] = color # set a single pixel
-    """
-    def __init__(self, original_image: np.array, background_color: Optional[int], name: Optional[str]):
-        height, width = original_image.shape
-        self.original_image = original_image
-        self.original_image_height = height
-        self.original_image_width = width
-
-        if background_color is None:
-            histogram = Histogram.create_with_image(original_image)
-            background_color = histogram.most_popular_color()
-        self.background_color = background_color
-
-        if name is None:
-            name = "image"
-        self.name = name
-
-        self.lines = []
-        if background_color is None or background_color == 0:
-            self.lines.append(f"{name}=np.zeros(({height},{width}),dtype=np.uint8)")
-        else:
-            self.lines.append(f"{name}=np.full(({height},{width}),{background_color},dtype=np.uint8)")
-
-    def rectangle(self, x: int, y: int, width: int, height: int, color: int):
-        assert width >= 1 and height >= 1
-        assert x >= 0 and y >= 0
-
-        if color == self.background_color:
-            return
-        
-        if width == 1:
-            x_str = str(x)
-        else:
-            x_str = f"{x}:{x+width}"
-        if width == self.original_image_width and x == 0:
-            x_str = ":"
-
-        if height == 1:
-            y_str = str(y)
-        else:
-            y_str = f"{y}:{y+height}"
-        if height == self.original_image_height and y == 0:
-            y_str = ":"
-
-        code = f"{self.name}[{y_str},{x_str}]={color}"
-        self.lines.append(code)
-
-    def get_code(self) -> str:
-        return "\n".join(self.lines)
-
 
 def analyze_image(image: np.array, image_id: str) -> list[str]:
     background_color = 0

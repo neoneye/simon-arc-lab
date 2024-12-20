@@ -1,6 +1,7 @@
 import numpy as np
 from dataclasses import dataclass
 from .bsp_tree import *
+from .python_image_builder import PythonImageBuilder
 
 class PythonGeneratorVisitor(NodeVisitor):
     """
@@ -13,47 +14,13 @@ class PythonGeneratorVisitor(NodeVisitor):
     image[y, x] = color # set a single pixel
     """
     def __init__(self, original_image: np.array, background_color: Optional[int]):
-        height, width = original_image.shape
-        self.original_image = original_image
-        self.original_image_height = height
-        self.original_image_width = width
-
-        if background_color is None:
-            histogram = Histogram.create_with_image(original_image)
-            background_color = histogram.most_popular_color()
-        self.background_color = background_color
-
-        self.lines = []
-        if background_color is None or background_color == 0:
-            self.lines.append(f"image=np.zeros(({height},{width}),dtype=np.uint8)")
-        else:
-            self.lines.append(f"image=np.full(({height},{width}),{background_color},dtype=np.uint8)")
+        self.python_image_builder = PythonImageBuilder(original_image, background_color, name="image")
 
     def visit_solid_node(self, node: SolidNode):
         x, y, width, height = node.rectangle()
         assert width >= 1 and height >= 1
         assert x >= 0 and y >= 0
-
-        color = node.color
-        if color == self.background_color:
-            return
-        
-        if width == 1:
-            x_str = str(x)
-        else:
-            x_str = f"{x}:{x+width}"
-        if width == self.original_image_width and x == 0:
-            x_str = ":"
-
-        if height == 1:
-            y_str = str(y)
-        else:
-            y_str = f"{y}:{y+height}"
-        if height == self.original_image_height and y == 0:
-            y_str = ":"
-
-        code = f"image[{y_str},{x_str}]={color}"
-        self.lines.append(code)
+        self.python_image_builder.rectangle(x, y, width, height, node.color)
 
     def visit_image_node(self, node: ImageNode):
         raise Exception("visit_image_node. The fully populated BSP tree should not contain any ImageNode's")
@@ -61,8 +28,8 @@ class PythonGeneratorVisitor(NodeVisitor):
     def visit_split_node(self, node: SplitNode):
         pass
 
-    def get_code(self) -> str:
-        return "\n".join(self.lines)
+    def python_code(self) -> str:
+        return self.python_image_builder.python_code()
 
 @dataclass
 class ImageToPythonConfig:
@@ -90,7 +57,7 @@ class ImageToPython:
         
         v = PythonGeneratorVisitor(self.image, background_color=self.config.background_color)
         node.accept(v)
-        python_code = v.get_code()
+        python_code = v.python_code()
         self.python_code = python_code
         if verbose:
             print(f"# python code that recreates the image\n{python_code}\n\n")
