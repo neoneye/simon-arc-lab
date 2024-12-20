@@ -15,6 +15,7 @@ from simon_arc_lab.pixel_connectivity import PixelConnectivity
 from simon_arc_lab.connected_component import *
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_string_representation import image_to_string
+from simon_arc_lab.show_prediction_result import show_multiple_images
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -180,6 +181,38 @@ def analyze_task(task: Task, test_index: int):
     s = '\n'.join(rows)
     print(s)
 
+def verify_task(task: Task, test_index: int):
+
+    output3 = np.zeros((13,13), dtype=np.uint8)
+    output3[2,0:11] = 2
+    output3[2:13,11] = 8
+    output3[4,1:9] = 2
+    output3[4:12,9] = 8
+    output3[5:13,1] = 8
+    output3[5,3:5] = 2
+    output3[5,6] = 1
+    output3[6:11,3] = 8
+    output3[7,4:10] = 2
+    output3[9,5:11] = 8
+    output3[12,2:12] = 2
+
+    predicted_output_image = output3
+    expected_output_image = task.test_output(test_index)
+    input_image = task.test_input(test_index)
+
+    is_correct = np.array_equal(predicted_output_image, expected_output_image)
+
+    status = "correct" if is_correct else "incorrect"
+
+    title_image_list = [
+        ('arc', 'input', input_image),
+        ('arc', 'target', expected_output_image),
+        ('arc', 'predicted', predicted_output_image),
+    ]
+    title = f"{task.metadata_task_id} status: {status}"
+    show_multiple_images(title_image_list, title=title)
+
+
 number_of_items_in_list = len(datasetid_groupname_pathtotaskdir_list)
 for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_groupname_pathtotaskdir_list):
     save_dir = f'run_tasks_result/{run_id}/{groupname}'
@@ -202,6 +235,7 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
 
         for test_index in range(task.count_tests):
             analyze_task(task, test_index)
+            # verify_task(task, test_index)
             # filename = f'{task_id}_test{test_index}_prompt.md'
             # filepath = os.path.join(save_dir, filename)
             # with open(filepath, 'w') as f:
