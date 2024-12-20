@@ -15,6 +15,7 @@ Files in this dir makes use of some python packages, that the other parts of the
 ```bash
 PROMPT> pip install python-dotenv
 PROMPT> pip install llama-index llama-index-llms-openai
+PROMPT> pip install llama-index-llms-ollama
 ```
 
 ## Usage
