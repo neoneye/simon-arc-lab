@@ -1,6 +1,5 @@
 import unittest
 import numpy as np
-from typing import Optional
 from .python_image_builder import PythonImageBuilder
 
 class TestPythonImageBuilder(unittest.TestCase):

@@ -13,7 +13,6 @@ from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.shape import *
 from simon_arc_lab.pixel_connectivity import PixelConnectivity
 from simon_arc_lab.connected_component import *
-from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_string_representation import image_to_string
 from simon_arc_lab.show_prediction_result import show_multiple_images
 from simon_arc_lab.python_image_builder import PythonImageBuilder
