@@ -332,6 +332,11 @@ def create_prompt_type_short(task: Task, test_index: int) -> str:
     json_string = new_task.to_arcagi1_json(True)
 
     items = []
+    # items.append("# Requirements")
+    # items.append("")
+    # items.append("- The response must be markdown format. Don't use no formatting. Don't use reStructuredText.")
+    # items.append("- The headings Task A, Task B, Task C must be short. Don't change the headings.")
+    items.append("")
     items.append("# ARC Puzzle")
     items.append("")
     items.append("```json")
