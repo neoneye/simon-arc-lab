@@ -42,10 +42,11 @@ for dataset_id, groupname, path_to_task_dir in datasetid_groupname_pathtotaskdir
         sys.exit(1)
 
 task_ids_of_interest = [
-    '0b17323b',
-    '08573cc6',
-    '6c434453',
-    '21f83797',
+    '6fa7a44f',
+    # '0b17323b',
+    # '08573cc6',
+    # '6c434453',
+    # '21f83797',
     # '13713586',
     # '1c02dbbe',
     # '29700607',
@@ -180,7 +181,7 @@ def serialize_image(image: np.array) -> str:
 
     return "\n".join(items)
 
-def create_prompt_for_task(task: Task, test_index: int) -> str:
+def create_prompt_type_long(task: Task, test_index: int) -> str:
     tcp = TaskColorProfile(task)
     color_profile_prediction = tcp.predict_output_colors_for_test_index(test_index)
 
@@ -315,6 +316,58 @@ This yields a concise, text-based compression.
     # print(f"bytes: {len(result)}")
     return result
 
+def create_prompt_type_short(task: Task, test_index: int) -> str:
+    new_task = Task()
+    for example_index in range(task.count_examples):
+        input_image = task.example_input(example_index)
+        output_image = task.example_output(example_index)
+        new_task.append_pair(input_image, output_image, True)
+    
+    test_input_image = task.test_input(test_index)
+    new_task.append_pair(test_input_image, None, False)
+
+    test_output_image = task.test_output(test_index)
+    print(f"test_output_image: {test_output_image.tolist()}")
+
+    json_string = new_task.to_arcagi1_json(True)
+
+    items = []
+    items.append("# ARC Puzzle")
+    items.append("")
+    items.append("```json")
+    items.append(json_string)
+    items.append("```")
+    items.append("")
+    items.append("The `test.output` is not provided, and it's up to you to solve it.")
+    items.append("")
+    items.append("# Task A")
+    items.append("")
+    items.append("Think step by step.")
+    items.append("- What does all the inputs have in common.")
+    items.append("- What does all the outputs have in common.")
+    items.append("- What does input/outputs have in common.")
+    items.append("- Identify what transformation is happening from input to output.")
+    items.append("- Verify that the transformation rules work on all input/output pairs.")
+    items.append("")
+    items.append("# Task B")
+    items.append("")
+    items.append("Go ahead and solve this ARC puzzle.")
+    items.append("")
+    items.append("# Task C")
+    items.append("")
+    items.append("Convert the `test.output` data to json format.")
+    items.append("")
+    items.append("The section must contain only the json data wrapped in three back quotes, like this:")
+    items.append("```json")
+    items.append("[[1,2,3],[4,5,6]]")
+    items.append("```")
+    items.append("")
+    
+    result = "\n".join(items)
+    print(result)
+    # print(f"bytes: {len(result)}")
+    return result
+
 number_of_items_in_list = len(datasetid_groupname_pathtotaskdir_list)
 for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_groupname_pathtotaskdir_list):
     save_dir = f'run_tasks_result/{run_id}/{groupname}'
@@ -336,7 +389,8 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
         pbar.set_postfix_str(f"Task: {task_id}")
 
         for test_index in range(task.count_tests):
-            prompt = create_prompt_for_task(task, test_index)
+            # prompt = create_prompt_type_long(task, test_index)
+            prompt = create_prompt_type_short(task, test_index)
             filename = f'{task_id}_test{test_index}_prompt.md'
             filepath = os.path.join(save_dir, filename)
             with open(filepath, 'w') as f:
