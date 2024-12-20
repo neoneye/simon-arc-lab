@@ -13,6 +13,7 @@ from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.shape import *
 from simon_arc_lab.pixel_connectivity import PixelConnectivity
 from simon_arc_lab.connected_component import *
+from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_string_representation import image_to_string
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -49,7 +50,66 @@ task_ids_of_interest = [
     # '1a2e2828',
 ]
 
-def analyze_image(image: np.array):
+class PythonImageBuilder:
+    """
+    Generate Python code with rectangles
+
+    image=np.zeros((10,20),dtype=np.uint8)
+    image[y:y+height, x:x+width] = color # fill a rectangle
+    image[y, x:x+width] = color # fill multiple columns
+    image[:, x:x+width] = color # fill an entire column
+    image[y, x] = color # set a single pixel
+    """
+    def __init__(self, original_image: np.array, background_color: Optional[int], name: Optional[str]):
+        height, width = original_image.shape
+        self.original_image = original_image
+        self.original_image_height = height
+        self.original_image_width = width
+
+        if background_color is None:
+            histogram = Histogram.create_with_image(original_image)
+            background_color = histogram.most_popular_color()
+        self.background_color = background_color
+
+        if name is None:
+            name = "image"
+        self.name = name
+
+        self.lines = []
+        if background_color is None or background_color == 0:
+            self.lines.append(f"{name}=np.zeros(({height},{width}),dtype=np.uint8)")
+        else:
+            self.lines.append(f"{name}=np.full(({height},{width}),{background_color},dtype=np.uint8)")
+
+    def rectangle(self, x: int, y: int, width: int, height: int, color: int):
+        assert width >= 1 and height >= 1
+        assert x >= 0 and y >= 0
+
+        if color == self.background_color:
+            return
+        
+        if width == 1:
+            x_str = str(x)
+        else:
+            x_str = f"{x}:{x+width}"
+        if width == self.original_image_width and x == 0:
+            x_str = ":"
+
+        if height == 1:
+            y_str = str(y)
+        else:
+            y_str = f"{y}:{y+height}"
+        if height == self.original_image_height and y == 0:
+            y_str = ":"
+
+        code = f"{self.name}[{y_str},{x_str}]={color}"
+        self.lines.append(code)
+
+    def get_code(self) -> str:
+        return "\n".join(self.lines)
+
+
+def analyze_image(image: np.array, image_id: str) -> list[str]:
     background_color = 0
     connectivity = PixelConnectivity.NEAREST4
     ignore_color = background_color
@@ -58,9 +118,12 @@ def analyze_image(image: np.array):
 
     print(f"Number of connected components: {len(connected_components)}")
 
+    python_image_builder = PythonImageBuilder(image, background_color, image_id)
+
     for connected_component_item in connected_components:
         # print(f"Connected component item: {connected_component_item}")
         mask = connected_component_item.mask
+        color = connected_component_item.color
         shape = image_find_shape(mask, verbose=False)
         if shape is None:
             print(f"Connected component item: {connected_component_item}")
@@ -69,13 +132,53 @@ def analyze_image(image: np.array):
             continue
         print(f"Shape: {shape}")
 
-def analyze_task(task: Task, index: int):
-    for i in range(task.count_examples):
-        # input_image = task.example_input(i)
-        # analyze_image(input_image)
-        output_image = task.example_output(i)
-        analyze_image(output_image)
+        if isinstance(shape, SolidRectangleShape):
+            python_image_builder.rectangle(
+                shape.rectangle.x, 
+                shape.rectangle.y, 
+                shape.rectangle.width, 
+                shape.rectangle.height, 
+                color
+            )
+        else:
+            print(f"Unhandled shape: {shape}")
+    
+    return python_image_builder.lines
 
+def analyze_task(task: Task, test_index: int):
+    rows = []
+    rows.append("")
+    rows.append("Solve this ARC puzzle.")
+    rows.append("")
+    rows.append("```python")
+    for i in range(task.count_examples):
+        rows.append(f"# pair {i}")
+        input_image = task.example_input(i)
+        input_image_id = f"input{i}"
+        input_rows = analyze_image(input_image, input_image_id)
+        rows.extend(input_rows)
+
+        output_image = task.example_output(i)
+        output_image_id = f"output{i}"
+        output_rows = analyze_image(output_image, output_image_id)
+        rows.extend(output_rows)
+    
+    if True:
+        rows.append(f"# pair {task.count_examples}")
+        input_image = task.test_input(test_index)
+        input_image_id = f"input{task.count_examples}"
+        input_rows = analyze_image(input_image, input_image_id)
+        rows.extend(input_rows)
+    
+    output_image_id = f"output{task.count_examples}"
+    rows.append(f"{output_image_id}=PREDICT THIS!")
+
+    rows.append("```")
+    rows.append("")
+    rows.append(f"Just populate the `{output_image_id}` with the correct values.")
+    rows.append("")
+    s = '\n'.join(rows)
+    print(s)
 
 number_of_items_in_list = len(datasetid_groupname_pathtotaskdir_list)
 for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_groupname_pathtotaskdir_list):
