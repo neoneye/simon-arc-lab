@@ -42,7 +42,9 @@ for dataset_id, groupname, path_to_task_dir in datasetid_groupname_pathtotaskdir
 
 task_ids_of_interest = [
     # '0b17323b',
-    '08573cc6',
+    # '08573cc6',
+    # '8403a5d5',
+    '8d510a79',
     # '6c434453',
     # '21f83797',
     # '13713586',
@@ -211,21 +213,55 @@ def verify_task(task: Task, test_index: int):
     # # Set the intersection point to Label C (1)
     # output3[5,6] = 1
 
-    output3 = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 8],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8],
-        [0, 2, 2, 2, 2, 2, 2, 2, 8, 0, 0, 0, 8],
-        [0, 8, 0, 0, 0, 0, 1, 0, 8, 0, 0, 0, 8],
-        [0, 8, 0, 2, 2, 0, 0, 0, 8, 0, 0, 0, 8],
-        [0, 8, 0, 8, 0, 0, 0, 0, 8, 0, 0, 0, 8],
-        [0, 8, 0, 8, 0, 0, 0, 0, 8, 0, 0, 0, 8],
-        [0, 8, 0, 8, 0, 0, 0, 0, 8, 0, 0, 0, 8],
-        [0, 8, 0, 8, 2, 2, 2, 2, 2, 0, 0, 0, 8],
-        [0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8],
-        [0, 8, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 8]], dtype=np.uint8)
+    # xoutput3 = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    #     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    #     [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 8],
+    #     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8],
+    #     [0, 2, 2, 2, 2, 2, 2, 2, 8, 0, 0, 0, 8],
+    #     [0, 8, 0, 0, 0, 0, 1, 0, 8, 0, 0, 0, 8],
+    #     [0, 8, 0, 2, 2, 0, 0, 0, 8, 0, 0, 0, 8],
+    #     [0, 8, 0, 8, 0, 0, 0, 0, 8, 0, 0, 0, 8],
+    #     [0, 8, 0, 8, 0, 0, 0, 0, 8, 0, 0, 0, 8],
+    #     [0, 8, 0, 8, 0, 0, 0, 0, 8, 0, 0, 0, 8],
+    #     [0, 8, 0, 8, 2, 2, 2, 2, 2, 0, 0, 0, 8],
+    #     [0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8],
+    #     [0, 8, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 8]], dtype=np.uint8)
+    
+    # output3=np.zeros((13,13),dtype=np.uint8)
+    # output3[2,0:11]=2
+    # output3[2:13,11]=8
+    # output3[4,1:9]=2
+    # output3[4:11,9]=8
+    # output3[5:13,1]=8
+    # output3[6,3:7]=2
+    # output3[6,6]=1
+    # output3[7:10,3]=8
+    # output3[9,4:10]=2
+    # output3[11,2:11]=2
 
-    predicted_output_image = output3
+    # output3=np.zeros((10,10),dtype=np.uint8)
+    # output3[:,2]=1
+    # output3[0,3]=5
+    # output3[:,4]=1
+    # output3[:,6]=1
+    # output3[0,7]=5
+    # output3[:,8]=1
+    # output3[9,5]=5
+
+    output2=np.zeros((10,10),dtype=np.uint8)
+    output2[0:3,1]=2
+    output2[0,3]=1
+    output2[0:2,7]=1
+    output2[1:3,5]=2
+    output2[3,:]=5
+    output2[4:6,1]=2
+    output2[4:9,6]=2
+    output2[4:6,9]=2
+    output2[6:10,4]=1
+    output2[8:10,0]=2
+    output2[8:10,8]=1
+
+    predicted_output_image = output2
     expected_output_image = task.test_output(test_index)
     input_image = task.test_input(test_index)
 
