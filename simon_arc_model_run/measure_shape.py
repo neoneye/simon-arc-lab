@@ -44,7 +44,8 @@ task_ids_of_interest = [
     # '0b17323b',
     # '08573cc6',
     # '8403a5d5',
-    '8d510a79',
+    # '8d510a79',
+    '6fa7a44f',
     # '6c434453',
     # '21f83797',
     # '13713586',
@@ -97,29 +98,43 @@ def analyze_task(task: Task, test_index: int):
     rows.append("```python")
     for i in range(task.count_examples):
         rows.append(f"# pair {i}")
-        input_image = task.example_input(i)
-        input_image_id = f"input{i}"
-        input_rows = analyze_image(input_image, input_image_id)
-        rows.extend(input_rows)
+        test_input_image = task.example_input(i)
+        test_input_image_id = f"input{i}"
+        test_input_rows = analyze_image(test_input_image, test_input_image_id)
+        rows.extend(test_input_rows)
 
         output_image = task.example_output(i)
-        output_image_id = f"output{i}"
-        output_rows = analyze_image(output_image, output_image_id)
+        test_output_image_id = f"output{i}"
+        output_rows = analyze_image(output_image, test_output_image_id)
         rows.extend(output_rows)
     
-    if True:
-        rows.append(f"# pair {task.count_examples}")
-        input_image = task.test_input(test_index)
-        input_image_id = f"input{task.count_examples}"
-        input_rows = analyze_image(input_image, input_image_id)
-        rows.extend(input_rows)
+    rows.append(f"# pair {task.count_examples}")
+    test_input_image = task.test_input(test_index)
+    # test_input_image_id = f"input{task.count_examples}"
+    test_input_image_id = "test_input"
+    test_input_rows = analyze_image(test_input_image, test_input_image_id)
+    rows.extend(test_input_rows)
     
-    output_image_id = f"output{task.count_examples}"
-    rows.append(f"{output_image_id}=PREDICT THIS!")
+    # test_output_image_id = f"output{task.count_examples}"
+    test_output_image_id = "test_output"
+    rows.append(f"{test_output_image_id}=PREDICT THIS!")
 
     rows.append("```")
     rows.append("")
-    rows.append(f"Just populate the `{output_image_id}` with the correct values.")
+    rows.append("Understanding the puzzle before presenting the answer.")
+    rows.append("")
+    rows.append("Carefully do step-by-step reasoning. Don't hide any reasoning steps.")
+    rows.append("")
+    rows.append("Analyze the given input-output pairs to identify the transformation pattern.")
+    rows.append("")
+    rows.append(f"Given the `{test_input_image_id}` array as defined, determine the exact numeric values of each cell in `{test_output_image_id}`.")
+    rows.append(f"Do not refer to `{test_input_image_id}` in your answer—just show the final array of digits that result")
+    rows.append(f"from applying the same transformation pattern observed in the previous pairs.")
+    rows.append("")
+    rows.append(f"Return the content of `{test_output_image_id}` as json wrapped in three back quotes, like this:")
+    rows.append(f"```json")
+    rows.append(f"[[1,2,3],[4,5,6]]")
+    rows.append(f"```")
     rows.append("")
     s = '\n'.join(rows)
     print(s)
@@ -189,20 +204,36 @@ def verify_task(task: Task, test_index: int):
     # output3[:,8]=1
     # output3[9,5]=5
 
-    output2=np.zeros((10,10),dtype=np.uint8)
-    output2[0:3,1]=2
-    output2[0,3]=1
-    output2[0:2,7]=1
-    output2[1:3,5]=2
-    output2[3,:]=5
-    output2[4:6,1]=2
-    output2[4:9,6]=2
-    output2[4:6,9]=2
-    output2[6:10,4]=1
-    output2[8:10,0]=2
-    output2[8:10,8]=1
+    # output2=np.zeros((10,10),dtype=np.uint8)
+    # output2[0:3,1]=2
+    # output2[0,3]=1
+    # output2[0:2,7]=1
+    # output2[1:3,5]=2
+    # output2[3,:]=5
+    # output2[4:6,1]=2
+    # output2[4:9,6]=2
+    # output2[4:6,9]=2
+    # output2[6:10,4]=1
+    # output2[8:10,0]=2
+    # output2[8:10,8]=1
 
-    predicted_output_image = output2
+    # output4=np.zeros((6,3),dtype=np.uint8)
+    # output4[0,0]=2
+    # output4[0,1]=9
+    # output4[0:2,2]=2
+    # output4[1,0]=8
+    # output4[1,1]=5
+    # output4[2:4,0:2]=2
+    # output4[2:4,2]=8
+    # output4[4,0]=8
+    # output4[4,1]=5
+    # output4[4:6,2]=2
+    # output4[5,0]=2
+    # output4[5,1]=9
+
+    output4 = np.array([[2, 9, 2], [8, 5, 2], [2, 2, 8], [2, 2, 8], [8, 5, 2], [2, 9, 2]], dtype=np.uint8)
+
+    predicted_output_image = output4
     expected_output_image = task.test_output(test_index)
     input_image = task.test_input(test_index)
 
