@@ -99,7 +99,7 @@ class TaskToPromptItem:
 system_prompt = "Be brief and clear in your responses"
 
 max_prompt_length = 2000
-max_response_length = 300
+max_response_length = 1000
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -135,9 +135,16 @@ os.makedirs(save_dir, exist_ok=True)
 verbose = False
 # verbose = True
 
+correct_count = 0
+pbar_posfix_dict = {
+    'correct': 0,
+    'task': 'none',
+    'response': 0,
+}
 pbar = tqdm(task_to_prompt_item_list, desc=f"Processing", dynamic_ncols=True, leave=False)
 for item in pbar:
-    pbar.set_postfix_str(f"Task: {item.task_id}")
+    pbar_posfix_dict['task'] = item.task_id
+    pbar.set_postfix(pbar_posfix_dict)
 
     prompt = item.prompt
 
@@ -161,7 +168,8 @@ for item in pbar:
         text_items.append(text_item)
 
         # show response_index in the progress bar
-        pbar.set_postfix_str(f"Task: {item.task_id} Response: {response_index+1}")
+        pbar_posfix_dict['response'] = response_index+1
+        pbar.set_postfix(pbar_posfix_dict)
 
         if verbose:
             print(text_item, end="")
@@ -214,6 +222,11 @@ for item in pbar:
         is_correct = np.array_equal(item.test_output, predicted_output_image)
     else:
         is_correct = False
+
+    if is_correct:
+        correct_count += 1
+        pbar_posfix_dict['correct'] = correct_count
+        pbar.set_postfix(pbar_posfix_dict)
 
     status = "correct" if is_correct else "incorrect"
 
