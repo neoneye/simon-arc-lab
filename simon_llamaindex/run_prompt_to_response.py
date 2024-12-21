@@ -1,6 +1,7 @@
 import os
 import json
 import time
+from datetime import datetime
 import sys
 from typing import Optional
 import numpy as np
@@ -80,6 +81,23 @@ class TaskToPromptItem:
     def __repr__(self):
         return self.__str__()
 
+def image_from_json_array(json_array: list) -> np.array:
+    if not isinstance(json_array, list):
+        raise ValueError(f"Expected json_array to be a list, but got: {type(json_array)}")
+    width = 0
+    for row in json_array:
+        width = max(width, len(row))
+    height = len(json_array)
+    image = np.full((height, width), 255, dtype=np.uint8)
+    for y, row in enumerate(json_array):
+        for x, pixel in enumerate(row):
+            image[y, x] = pixel
+    return image
+
+
+run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+print(f"Run id: {run_id}")
+
 dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.env'))
 dotenv_dict = dotenv_values(dotenv_path=dotenv_path)
 
@@ -127,6 +145,8 @@ for item in pbar:
 
     response_json = json_from_response(text)
     print(f"response_json: {response_json}")
+    image = image_from_json_array(response_json)
+    print(f"image: {image.tolist()}")
 
     print("DONE")
     break
