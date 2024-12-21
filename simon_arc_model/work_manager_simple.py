@@ -96,7 +96,7 @@ class WorkManagerSimple(WorkManagerBase):
                 work_item.show(save_dir)
 
             if track_incorrect_prediction is not None:
-                track_incorrect_prediction.track_incorrect_prediction(
+                track_incorrect_prediction.track_incorrect_prediction_with_workitem(
                     work_item,
                     incorrect_prediction_dataset_id, 
                     work_item.predicted_output_image,

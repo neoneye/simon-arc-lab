@@ -275,7 +275,7 @@ class WorkManagerStepwiseRefinementV3(WorkManagerBase):
                 work_item.assign_status()
 
                 if track_incorrect_prediction is not None:
-                    track_incorrect_prediction.track_incorrect_prediction(
+                    track_incorrect_prediction.track_incorrect_prediction_with_workitem(
                         work_item,
                         incorrect_prediction_dataset_id, 
                         predicted_output,

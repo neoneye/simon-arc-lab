@@ -181,7 +181,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                     temp_work_item.show(save_dir)
 
                 if track_incorrect_prediction is not None:
-                    track_incorrect_prediction.track_incorrect_prediction(
+                    track_incorrect_prediction.track_incorrect_prediction_with_workitem(
                         temp_work_item,
                         incorrect_prediction_dataset_id, 
                         predicted_output,

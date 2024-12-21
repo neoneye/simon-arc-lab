@@ -74,7 +74,7 @@ class TrackIncorrectPrediction:
             f.write(s)
             f.flush()
 
-    def track_incorrect_prediction(self, work_item: WorkItem, dataset_id: str, predicted_output: Optional[np.array], metadata: str) -> None:
+    def track_incorrect_prediction_with_workitem(self, work_item: WorkItem, dataset_id: str, predicted_output: Optional[np.array], metadata: str) -> None:
         """
         Track incorrect predictions and save them to a JSONL file.
 
