@@ -14,6 +14,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
 from simon_arc_lab.json_from_response import json_from_response
+from simon_arc_lab.image_from_json_array import image_from_json_array
 
 class TaskToPromptItem:
     def __init__(self, json_dict: dict, row_index: int, groupname: str, dataset_id: str, task_id: str, test_index: int, prompt: str, expected_output: np.array):
@@ -81,20 +82,6 @@ class TaskToPromptItem:
     def __repr__(self):
         return self.__str__()
 
-def image_from_json_array(json_array: list) -> np.array:
-    if not isinstance(json_array, list):
-        raise ValueError(f"Expected json_array to be a list, but got: {type(json_array)}")
-    width = 0
-    for row in json_array:
-        width = max(width, len(row))
-    height = len(json_array)
-    image = np.full((height, width), 255, dtype=np.uint8)
-    for y, row in enumerate(json_array):
-        for x, pixel in enumerate(row):
-            image[y, x] = pixel
-    return image
-
-
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
 
@@ -145,7 +132,7 @@ for item in pbar:
 
     response_json = json_from_response(text)
     print(f"response_json: {response_json}")
-    image = image_from_json_array(response_json)
+    image = image_from_json_array(response_json, padding=255)
     print(f"image: {image.tolist()}")
 
     print("DONE")
