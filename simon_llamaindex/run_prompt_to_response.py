@@ -15,6 +15,7 @@ sys.path.insert(0, PROJECT_ROOT)
 
 from simon_arc_lab.json_from_response import json_from_response
 from simon_arc_lab.image_from_json_array import image_from_json_array
+from simon_arc_lab.show_prediction_result import show_prediction_result
 
 class TaskToPromptItem:
     def __init__(self, json_dict: dict, row_index: int, groupname: str, dataset_id: str, task_id: str, test_index: int, prompt: str, test_input: np.array, test_output: np.array):
@@ -104,7 +105,7 @@ task_to_prompt_item_list = TaskToPromptItem.load_json_file(jsonl_file, show=True
 
 print(f"Number of task_to_prompt_item_list: {len(task_to_prompt_item_list)}")
 
-llm = Ollama(model="llama3.1:latest", request_timeout=120.0)
+llm = Ollama(model="llama3.1:latest", request_timeout=120.0, temperature=0.0)
 
 save_dir = f'run_tasks_result/{run_id}/'
 os.makedirs(save_dir, exist_ok=True)
@@ -146,8 +147,25 @@ for item in pbar:
 
     response_json = json_from_response(text)
     print(f"response_json: {response_json}")
-    image = image_from_json_array(response_json, padding=255)
-    print(f"image: {image.tolist()}")
+    predicted_output_image = image_from_json_array(response_json, padding=255)
+    print(f"image: {predicted_output_image.tolist()}")
+
+    is_correct = np.array_equal(item.test_output, predicted_output_image)
+    status = "correct" if is_correct else "incorrect"
+
+    filename_items_optional = [
+        item.groupname,
+        item.task_id,
+        f'test{item.test_index}',
+        status,
+    ]
+    filename_items = [item for item in filename_items_optional if item is not None]
+    filename = '_'.join(filename_items) + '.png'
+
+    save_path = os.path.join(save_dir, filename)
+
+    title = f"{item.task_id} test_index={item.test_index} {status}"
+    show_prediction_result(item.test_input, predicted_output_image, item.test_output, title, show_grid=True, save_path=save_path)
 
     print("DONE")
     break
