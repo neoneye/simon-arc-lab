@@ -107,7 +107,7 @@ dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.env'))
 dotenv_dict = dotenv_values(dotenv_path=dotenv_path)
 
 task_to_prompt_jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241221_202038/task_to_prompt.jsonl'
-task_to_prompt_item_list = TaskToPromptItem.load_json_file(task_to_prompt_jsonl_file, show=True, truncate=5)
+task_to_prompt_item_list = TaskToPromptItem.load_json_file(task_to_prompt_jsonl_file, show=True, truncate=15)
 
 print(f"Number of task_to_prompt_item_list: {len(task_to_prompt_item_list)}")
 
@@ -133,6 +133,8 @@ for item in pbar:
 
     prompt = item.prompt
 
+    error_message_list = []
+
     messages = [
         ChatMessage(
             role="system", content=system_prompt
@@ -146,7 +148,6 @@ for item in pbar:
 
     start_time = time.time()
     text_items = []
-    is_truncated = False
     for response_index, r in enumerate(resp):
         text_item = r.delta
         text_items.append(text_item)
@@ -162,7 +163,7 @@ for item in pbar:
             if verbose:
                 print(error_message)
             text_items.append(error_message)
-            is_truncated = True
+            error_message_list.append(f"ERROR: aborting response, the response length has reached max_response_length: {max_response_length}")
             break
 
     end_time = time.time()
@@ -180,7 +181,9 @@ for item in pbar:
         response_json = json_from_response(response_text)
     except Exception as e:
         response_json = None
-        print(f"Error: json_from_response returned {e}")
+        error_message_list.append(f"ERROR: json_from_response returned {e}")
+        if verbose:
+            print(f"Error: json_from_response returned {e}")
 
     if verbose:
         print(f"response_json: {response_json}")
@@ -188,11 +191,16 @@ for item in pbar:
         predicted_output_image = image_from_json_array(response_json, padding=255)
     except Exception as e:
         predicted_output_image = None
-        print(f"Error: image_from_json_array returned {e}")
+        error_message_list.append(f"ERROR: image_from_json_array returned {e}")
+        if verbose:
+            print(f"Error: image_from_json_array returned {e}")
 
     if predicted_output_image is not None:
         if verbose:
             print(f"image: {predicted_output_image.tolist()}")
+
+    if len(error_message_list) > 0:
+        predicted_output_image = None
 
     if predicted_output_image is not None:
         is_correct = np.array_equal(item.test_output, predicted_output_image)
@@ -244,6 +252,12 @@ for item in pbar:
     chat_lines.append(response_text)
     chat_lines.append("")
     chat_lines.append("---")
+    chat_lines.append("")
+    if len(error_message_list) > 0:
+        chat_lines.append("ERROR:")
+        for error in error_message_list:
+            chat_lines.append(error)
+        chat_lines.append("")
     chat_lines.append("")
     chat_lines.append(f"number of response items: {len(text_items)}")
     chat_lines.append(f"elapsed: {elapsed_time:.2f} seconds")
