@@ -1,12 +1,18 @@
 import os
 import json
 import time
+import sys
 from typing import Optional
 import numpy as np
 from tqdm import tqdm
 from dotenv import dotenv_values
 from llama_index.llms.ollama import Ollama
 from llama_index.core.llms import ChatMessage
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, PROJECT_ROOT)
+
+from simon_arc_lab.json_from_response import json_from_response
 
 class TaskToPromptItem:
     def __init__(self, json_dict: dict, row_index: int, groupname: str, dataset_id: str, task_id: str, test_index: int, prompt: str, expected_output: np.array):
@@ -81,7 +87,6 @@ jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241221_150505/
 task_to_prompt_item_list = TaskToPromptItem.load_json_file(jsonl_file, show=True, truncate=5)
 
 print(f"Number of task_to_prompt_item_list: {len(task_to_prompt_item_list)}")
-#exit()
 
 llm = Ollama(model="llama3.1:latest", request_timeout=120.0)
 
@@ -119,5 +124,9 @@ for item in pbar:
     print("\n\nfull response:")
     text = "".join(text_items)
     print(text)
+
+    response_json = json_from_response(text)
+    print(f"response_json: {response_json}")
+
     print("DONE")
     break
