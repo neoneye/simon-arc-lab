@@ -97,6 +97,8 @@ class TaskToPromptItem:
 #system_prompt = "You are an expert at solving ARC (Abstraction & reasoning corpus) puzzles"
 system_prompt = "Be brief and clear in your responses"
 
+max_response_length = 1000
+
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
 
@@ -115,6 +117,9 @@ llm_dict_as_json_string = json.dumps(llm.dict())
 save_dir = f'run_tasks_result/{run_id}/'
 os.makedirs(save_dir, exist_ok=True)
 
+verbose = False
+# verbose = True
+
 pbar = tqdm(task_to_prompt_item_list, desc=f"Processing tasks", dynamic_ncols=True, leave=False)
 for item in pbar:
     pbar.set_postfix_str(f"Task: {item.task_id}")
@@ -129,31 +134,47 @@ for item in pbar:
     ]
     resp = llm.stream_chat(messages)
 
-    print("stream response:")
+    if verbose:
+        print("stream response:")
+
     start_time = time.time()
     text_items = []
     for response_index, r in enumerate(resp):
         text_item = r.delta
         text_items.append(text_item)
-        print(text_item, end="")
-        if response_index > 10:
+
+        # show response_index in the progress bar
+        pbar.set_postfix_str(f"Task: {item.task_id} Response: {response_index+1}")
+
+        if verbose:
+            print(text_item, end="")
+
+        if response_index >= max_response_length:
             error_message = "... Too long response, skipping the rest"
-            print(error_message)
+            if verbose:
+                print(error_message)
             text_items.append(error_message)
             break
 
     end_time = time.time()
     elapsed_time = end_time - start_time
 
-    print(f"\n\nelapsed: {elapsed_time:.2f} seconds")
-    print("\n\nfull response:")
+    if verbose:
+        print(f"\n\nelapsed: {elapsed_time:.2f} seconds")
+        print("\n\nfull response:")
     response_text = "".join(text_items)
-    print(response_text)
+
+    if verbose:
+        print(response_text)
 
     response_json = json_from_response(response_text)
-    print(f"response_json: {response_json}")
+
+    if verbose:
+        print(f"response_json: {response_json}")
     predicted_output_image = image_from_json_array(response_json, padding=255)
-    print(f"image: {predicted_output_image.tolist()}")
+
+    if verbose:
+        print(f"image: {predicted_output_image.tolist()}")
 
     is_correct = np.array_equal(item.test_output, predicted_output_image)
     status = "correct" if is_correct else "incorrect"
@@ -181,6 +202,7 @@ for item in pbar:
     chat_lines.append(f"dataset_id: {item.dataset_id}")
     chat_lines.append(f"task_id: {item.task_id}")
     chat_lines.append(f"test_index: {item.test_index}")
+    chat_lines.append(f"max_response_length: {max_response_length}")
     chat_lines.append(f"elapsed: {elapsed_time:.2f} seconds")
     chat_lines.append("")
     chat_lines.append("LLM:")
