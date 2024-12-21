@@ -402,8 +402,11 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
             # prompt = create_prompt_type_long(task, test_index)
             prompt = create_prompt_type_short(task, test_index)
 
-            expected_output = task.test_output(test_index).tolist()
-            expected_output_json_str = json.dumps(expected_output, separators=(',', ':'))
+            test_input = task.test_input(test_index).tolist()
+            test_input_json_str = json.dumps(test_input, separators=(',', ':'))
+
+            test_output = task.test_output(test_index).tolist()
+            test_output_json_str = json.dumps(test_output, separators=(',', ':'))
 
             # append json to jsonl file
             jsonl_item = {
@@ -412,7 +415,8 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
                 "task": task_id,
                 "test_index": test_index,
                 "prompt": prompt,
-                "expected_output": expected_output_json_str,
+                "test_input": test_input_json_str,
+                "test_output": test_output_json_str,
             }
             with open(jsonl_filename, 'a') as f:
                 json_str = json.dumps(jsonl_item, separators=(',', ':'))

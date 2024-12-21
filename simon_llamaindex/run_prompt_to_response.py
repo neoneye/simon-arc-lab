@@ -17,7 +17,7 @@ from simon_arc_lab.json_from_response import json_from_response
 from simon_arc_lab.image_from_json_array import image_from_json_array
 
 class TaskToPromptItem:
-    def __init__(self, json_dict: dict, row_index: int, groupname: str, dataset_id: str, task_id: str, test_index: int, prompt: str, expected_output: np.array):
+    def __init__(self, json_dict: dict, row_index: int, groupname: str, dataset_id: str, task_id: str, test_index: int, prompt: str, test_input: np.array, test_output: np.array):
         if not isinstance(groupname, str):
             raise ValueError(f"Expected groupname to be a string, but got: {groupname}")
         if not isinstance(dataset_id, str):
@@ -28,8 +28,10 @@ class TaskToPromptItem:
             raise ValueError(f"Expected test_index to be an int, but got: {test_index}")
         if not isinstance(prompt, str):
             raise ValueError(f"Expected prompt to be a string, but got: {prompt}")
-        if not isinstance(expected_output, np.ndarray):
-            raise ValueError(f"Expected expected_output to be a np.ndarray, but got: {expected_output}")
+        if not isinstance(test_input, np.ndarray):
+            raise ValueError(f"Expected test_output to be a np.ndarray, but got: {test_input}")
+        if not isinstance(test_output, np.ndarray):
+            raise ValueError(f"Expected test_output to be a np.ndarray, but got: {test_output}")
 
         self.json_dict = json_dict
         self.row_index = row_index
@@ -38,7 +40,8 @@ class TaskToPromptItem:
         self.task_id = task_id
         self.test_index = test_index
         self.prompt = prompt
-        self.expected_output = expected_output
+        self.test_input = test_input
+        self.test_output = test_output
 
     @staticmethod
     def from_json_string(json_string: str, row_index: int) -> 'TaskToPromptItem':
@@ -48,9 +51,16 @@ class TaskToPromptItem:
             raise ValueError(f"Expected row_index to be an int, but got: {row_index}")
         
         dict = json.loads(json_string)
-        expected_output_json = dict['expected_output']
-        expected_output_list_of_list_of_int = json.loads(expected_output_json)
-        expected_output = np.array(expected_output_list_of_list_of_int, dtype=np.uint8)
+
+        # test_input
+        test_input_json = dict['test_input']
+        test_input_list_of_list_of_int = json.loads(test_input_json)
+        test_input = np.array(test_input_list_of_list_of_int, dtype=np.uint8)
+
+        # test_output
+        test_output_json = dict['test_output']
+        test_output_list_of_list_of_int = json.loads(test_output_json)
+        test_output = np.array(test_output_list_of_list_of_int, dtype=np.uint8)
         return TaskToPromptItem(
             json_dict=dict,
             row_index=row_index,
@@ -59,7 +69,8 @@ class TaskToPromptItem:
             task_id=dict['task'],
             test_index=dict['test_index'],
             prompt=dict['prompt'],
-            expected_output=expected_output
+            test_input=test_input,
+            test_output=test_output
         )
 
     @staticmethod
@@ -77,7 +88,7 @@ class TaskToPromptItem:
         return item_list
 
     def __str__(self):
-        return f"TaskToPromptItem(row={self.row_index} task_id={self.task_id}, prompt.len={len(self.prompt)})"
+        return f"TaskToPromptItem(row={self.row_index} task_id={self.task_id} test_index={self.test_index} prompt.len={len(self.prompt)})"
 
     def __repr__(self):
         return self.__str__()
@@ -88,12 +99,15 @@ print(f"Run id: {run_id}")
 dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.env'))
 dotenv_dict = dotenv_values(dotenv_path=dotenv_path)
 
-jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241221_150505/task_to_prompt.jsonl'
+jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241221_202038/task_to_prompt.jsonl'
 task_to_prompt_item_list = TaskToPromptItem.load_json_file(jsonl_file, show=True, truncate=5)
 
 print(f"Number of task_to_prompt_item_list: {len(task_to_prompt_item_list)}")
 
 llm = Ollama(model="llama3.1:latest", request_timeout=120.0)
+
+save_dir = f'run_tasks_result/{run_id}/'
+os.makedirs(save_dir, exist_ok=True)
 
 pbar = tqdm(task_to_prompt_item_list, desc=f"Processing tasks", dynamic_ncols=True, leave=False)
 for item in pbar:
