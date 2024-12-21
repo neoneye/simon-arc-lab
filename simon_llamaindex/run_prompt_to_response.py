@@ -94,18 +94,23 @@ class TaskToPromptItem:
     def __repr__(self):
         return self.__str__()
 
+#system_prompt = "You are an expert at solving ARC (Abstraction & reasoning corpus) puzzles"
+system_prompt = "Be brief and clear in your responses"
+
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
 
 dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.env'))
 dotenv_dict = dotenv_values(dotenv_path=dotenv_path)
 
-jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241221_202038/task_to_prompt.jsonl'
-task_to_prompt_item_list = TaskToPromptItem.load_json_file(jsonl_file, show=True, truncate=5)
+task_to_prompt_jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241221_202038/task_to_prompt.jsonl'
+task_to_prompt_item_list = TaskToPromptItem.load_json_file(task_to_prompt_jsonl_file, show=True, truncate=5)
 
 print(f"Number of task_to_prompt_item_list: {len(task_to_prompt_item_list)}")
 
 llm = Ollama(model="llama3.1:latest", request_timeout=120.0, temperature=0.0)
+llm_dict_as_json_string = json.dumps(llm.dict())
+# print(f"llm_dict_as_json_string: {llm_dict_as_json_string}")
 
 save_dir = f'run_tasks_result/{run_id}/'
 os.makedirs(save_dir, exist_ok=True)
@@ -118,7 +123,7 @@ for item in pbar:
 
     messages = [
         ChatMessage(
-            role="system", content="You are a pirate with a colorful personality"
+            role="system", content=system_prompt
         ),
         ChatMessage(role="user", content=prompt),
     ]
@@ -142,10 +147,10 @@ for item in pbar:
 
     print(f"\n\nelapsed: {elapsed_time:.2f} seconds")
     print("\n\nfull response:")
-    text = "".join(text_items)
-    print(text)
+    response_text = "".join(text_items)
+    print(response_text)
 
-    response_json = json_from_response(text)
+    response_json = json_from_response(response_text)
     print(f"response_json: {response_json}")
     predicted_output_image = image_from_json_array(response_json, padding=255)
     print(f"image: {predicted_output_image.tolist()}")
@@ -160,12 +165,53 @@ for item in pbar:
         status,
     ]
     filename_items = [item for item in filename_items_optional if item is not None]
-    filename = '_'.join(filename_items) + '.png'
+    image_filename = '_'.join(filename_items) + '.png'
+    chat_filename = '_'.join(filename_items) + '.md'
 
-    save_path = os.path.join(save_dir, filename)
+    image_save_path = os.path.join(save_dir, image_filename)
+    chat_save_path = os.path.join(save_dir, chat_filename)
 
     title = f"{item.task_id} test_index={item.test_index} {status}"
-    show_prediction_result(item.test_input, predicted_output_image, item.test_output, title, show_grid=True, save_path=save_path)
+    show_prediction_result(item.test_input, predicted_output_image, item.test_output, title, show_grid=True, save_path=image_save_path)
+
+    chat_lines = []
+    chat_lines.append(f"datasource file: {task_to_prompt_jsonl_file}")
+    chat_lines.append(f"datasource row: {item.row_index}")
+    chat_lines.append(f"groupname: {item.groupname}")
+    chat_lines.append(f"dataset_id: {item.dataset_id}")
+    chat_lines.append(f"task_id: {item.task_id}")
+    chat_lines.append(f"test_index: {item.test_index}")
+    chat_lines.append(f"elapsed: {elapsed_time:.2f} seconds")
+    chat_lines.append("")
+    chat_lines.append("LLM:")
+    chat_lines.append(llm_dict_as_json_string)
+    chat_lines.append("")
+    chat_lines.append("SYSTEM PROMPT:")
+    chat_lines.append(system_prompt)
+    chat_lines.append("")
+    chat_lines.append("---")
+    chat_lines.append("")
+    chat_lines.append("PROMPT:")
+    chat_lines.append(item.prompt)
+    chat_lines.append("")
+    chat_lines.append("---")
+    chat_lines.append("")
+    chat_lines.append("RESPONSE:")
+    chat_lines.append(response_text)
+    chat_lines.append("")
+    chat_lines.append("---")
+    chat_lines.append("")
+    chat_lines.append("expected output:")
+    chat_lines.append(f"{item.test_output.tolist()}")
+    chat_lines.append("")
+    chat_lines.append("predicted output:")
+    chat_lines.append(f"{predicted_output_image.tolist()}")
+    chat_lines.append("")
+    chat_lines.append(f"status: {status}")
+    chat_lines.append("")
+    chat_content = "\n".join(chat_lines)
+    with open(chat_save_path, 'w') as f:
+        f.write(chat_content)
 
     print("DONE")
     break
