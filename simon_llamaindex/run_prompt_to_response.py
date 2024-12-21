@@ -76,7 +76,7 @@ class TaskToPromptItem:
     @staticmethod
     def load_json_file(jsonl_path: str, show: bool, truncate: Optional[int] = None) -> list['TaskToPromptItem']:
         item_list = []
-        with open(jsonl_file, 'r') as f:
+        with open(jsonl_path, 'r') as f:
             json_rows = f.readlines()
             for row_index, json_string in enumerate(json_rows):
                 item = TaskToPromptItem.from_json_string(json_string, row_index)
