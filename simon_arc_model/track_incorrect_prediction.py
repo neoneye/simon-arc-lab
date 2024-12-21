@@ -76,6 +76,25 @@ class TrackIncorrectPrediction:
 
     def track_incorrect_prediction_with_workitem(self, work_item: WorkItem, dataset_id: str, predicted_output: Optional[np.array], metadata: str) -> None:
         """
+        Track incorrect predictions from a WorkItem and save them to a JSONL file.
+        """
+        task = work_item.task
+        test_index = work_item.test_index
+        task_id = task.metadata_task_id
+        test_output = task.test_output(test_index)
+        test_input = task.test_input(test_index)
+        self.track_incorrect_prediction_with_raw_data(
+            dataset_id, 
+            task_id, 
+            test_index, 
+            test_input, 
+            test_output, 
+            predicted_output, 
+            metadata
+        )
+
+    def track_incorrect_prediction_with_raw_data(self, dataset_id: str, task_id: str, test_index: int, test_input: np.array, test_output: np.array, predicted_output: Optional[np.array], metadata: str) -> None:
+        """
         Track incorrect predictions and save them to a JSONL file.
 
         Do some filtering, so that only interesting incorrect predictions are saved:
@@ -83,14 +102,11 @@ class TrackIncorrectPrediction:
         - Skip predictions that are identical to the input image, since this is the starting point anyways.
         - Skip predictions that have less than 2 unique colors, since they are not interesting.
         """
-        task = work_item.task
-        test_index = work_item.test_index
-        task_id = task.metadata_task_id
         if predicted_output is None:
             return
-        if np.array_equal(predicted_output, task.test_output(test_index)):
+        if np.array_equal(predicted_output, test_output):
             return
-        if np.array_equal(predicted_output, task.test_input(test_index)):
+        if np.array_equal(predicted_output, test_input):
             return
         histogram = Histogram.create_with_image(predicted_output)
         if histogram.number_of_unique_colors() < 2:
