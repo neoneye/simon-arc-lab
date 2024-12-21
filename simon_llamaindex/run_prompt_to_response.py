@@ -16,6 +16,7 @@ sys.path.insert(0, PROJECT_ROOT)
 from simon_arc_lab.json_from_response import json_from_response
 from simon_arc_lab.image_from_json_array import image_from_json_array
 from simon_arc_lab.show_prediction_result import show_prediction_result
+from simon_arc_model.track_incorrect_prediction import TrackIncorrectPrediction
 
 class TaskToPromptItem:
     def __init__(self, json_dict: dict, row_index: int, groupname: str, dataset_id: str, task_id: str, test_index: int, prompt: str, test_input: np.array, test_output: np.array):
@@ -97,7 +98,7 @@ class TaskToPromptItem:
 #system_prompt = "You are an expert at solving ARC (Abstraction & reasoning corpus) puzzles"
 system_prompt = "Be brief and clear in your responses"
 
-max_response_length = 1000
+max_response_length = 300
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -110,8 +111,14 @@ task_to_prompt_item_list = TaskToPromptItem.load_json_file(task_to_prompt_jsonl_
 
 print(f"Number of task_to_prompt_item_list: {len(task_to_prompt_item_list)}")
 
+arc_bad_prediction_file = '/Users/neoneye/nobackup/git/arc-bad-prediction/data.jsonl'
+track_incorrect_prediction = TrackIncorrectPrediction.load_from_jsonl(arc_bad_prediction_file)
+# exit()
+
 llm = Ollama(model="llama3.1:latest", request_timeout=120.0, temperature=0.0)
 llm_dict_as_json_string = json.dumps(llm.dict())
+compact_model_config_string = f"model={llm.model} temperature={llm.temperature}"
+#print(f"model name: {compact_model_config_string}")
 # print(f"llm_dict_as_json_string: {llm_dict_as_json_string}")
 
 save_dir = f'run_tasks_result/{run_id}/'
@@ -139,6 +146,7 @@ for item in pbar:
 
     start_time = time.time()
     text_items = []
+    is_truncated = False
     for response_index, r in enumerate(resp):
         text_item = r.delta
         text_items.append(text_item)
@@ -154,6 +162,7 @@ for item in pbar:
             if verbose:
                 print(error_message)
             text_items.append(error_message)
+            is_truncated = True
             break
 
     end_time = time.time()
@@ -167,16 +176,29 @@ for item in pbar:
     if verbose:
         print(response_text)
 
-    response_json = json_from_response(response_text)
+    try:
+        response_json = json_from_response(response_text)
+    except Exception as e:
+        response_json = None
+        print(f"Error: json_from_response returned {e}")
 
     if verbose:
         print(f"response_json: {response_json}")
-    predicted_output_image = image_from_json_array(response_json, padding=255)
+    try:
+        predicted_output_image = image_from_json_array(response_json, padding=255)
+    except Exception as e:
+        predicted_output_image = None
+        print(f"Error: image_from_json_array returned {e}")
 
-    if verbose:
-        print(f"image: {predicted_output_image.tolist()}")
+    if predicted_output_image is not None:
+        if verbose:
+            print(f"image: {predicted_output_image.tolist()}")
 
-    is_correct = np.array_equal(item.test_output, predicted_output_image)
+    if predicted_output_image is not None:
+        is_correct = np.array_equal(item.test_output, predicted_output_image)
+    else:
+        is_correct = False
+
     status = "correct" if is_correct else "incorrect"
 
     filename_items_optional = [
@@ -193,7 +215,8 @@ for item in pbar:
     chat_save_path = os.path.join(save_dir, chat_filename)
 
     title = f"{item.task_id} test_index={item.test_index} {status}"
-    show_prediction_result(item.test_input, predicted_output_image, item.test_output, title, show_grid=True, save_path=image_save_path)
+    if predicted_output_image is not None:
+        show_prediction_result(item.test_input, predicted_output_image, item.test_output, title, show_grid=True, save_path=image_save_path)
 
     chat_lines = []
     chat_lines.append(f"datasource file: {task_to_prompt_jsonl_file}")
@@ -203,7 +226,6 @@ for item in pbar:
     chat_lines.append(f"task_id: {item.task_id}")
     chat_lines.append(f"test_index: {item.test_index}")
     chat_lines.append(f"max_response_length: {max_response_length}")
-    chat_lines.append(f"elapsed: {elapsed_time:.2f} seconds")
     chat_lines.append("")
     chat_lines.append("LLM:")
     chat_lines.append(llm_dict_as_json_string)
@@ -223,11 +245,17 @@ for item in pbar:
     chat_lines.append("")
     chat_lines.append("---")
     chat_lines.append("")
+    chat_lines.append(f"number of response items: {len(text_items)}")
+    chat_lines.append(f"elapsed: {elapsed_time:.2f} seconds")
+    chat_lines.append("")
     chat_lines.append("expected output:")
     chat_lines.append(f"{item.test_output.tolist()}")
     chat_lines.append("")
     chat_lines.append("predicted output:")
-    chat_lines.append(f"{predicted_output_image.tolist()}")
+    if predicted_output_image is not None:
+        chat_lines.append(f"{predicted_output_image.tolist()}")
+    else:
+        chat_lines.append("None")
     chat_lines.append("")
     chat_lines.append(f"status: {status}")
     chat_lines.append("")
@@ -235,5 +263,16 @@ for item in pbar:
     with open(chat_save_path, 'w') as f:
         f.write(chat_content)
 
-    print("DONE")
-    break
+    metadata = f"run={run_id} {compact_model_config_string} elapsed={elapsed_time:.2f}"
+    track_incorrect_prediction.track_incorrect_prediction_with_raw_data(
+        item.groupname, 
+        item.task_id, 
+        item.test_index, 
+        item.test_input, 
+        item.test_output, 
+        predicted_output_image, 
+        metadata
+    )
+
+    # print("DONE")
+    # break
