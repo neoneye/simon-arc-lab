@@ -327,7 +327,7 @@ def create_prompt_type_short(task: Task, test_index: int) -> str:
     new_task.append_pair(test_input_image, None, False)
 
     test_output_image = task.test_output(test_index)
-    print(f"test_output_image: {test_output_image.tolist()}")
+    # print(f"test_output_image: {test_output_image.tolist()}")
 
     json_string = new_task.to_arcagi1_json(True)
 
@@ -369,18 +369,23 @@ def create_prompt_type_short(task: Task, test_index: int) -> str:
     items.append("")
     
     result = "\n".join(items)
-    print(result)
+    # print(result)
     # print(f"bytes: {len(result)}")
     return result
 
+save_dir_toplevel = f'run_tasks_result/{run_id}/'
+os.makedirs(save_dir_toplevel, exist_ok=True)
+
+# create a jsonl file
+jsonl_filename = f'{save_dir_toplevel}/task_to_prompt.jsonl'
+print(f"Results will be saved to '{jsonl_filename}'")
+
 number_of_items_in_list = len(datasetid_groupname_pathtotaskdir_list)
 for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_groupname_pathtotaskdir_list):
-    save_dir = f'run_tasks_result/{run_id}/{groupname}'
-    print(f"Processing {index+1} of {number_of_items_in_list}. Group name '{groupname}'. Results will be saved to '{save_dir}'")
-    os.makedirs(save_dir, exist_ok=True)
+    print(f"Processing {index+1} of {number_of_items_in_list}. Group name '{groupname}'.")
 
     taskset = TaskSet.load_directory(path_to_task_dir)
-    taskset.keep_tasks_with_id(set(task_ids_of_interest), verbose=False)
+    # taskset.keep_tasks_with_id(set(task_ids_of_interest), verbose=False)
 
     if len(taskset.tasks) == 0:
         print(f"Skipping group: {groupname}, due to no tasks to process.")
@@ -388,7 +393,7 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
 
     print(f"Number of tasks for processing: {len(taskset.tasks)}")
 
-    pbar = tqdm(taskset.tasks, desc=f"Processing tasks in {groupname}", dynamic_ncols=True)
+    pbar = tqdm(taskset.tasks, desc=f"Processing tasks in {groupname}", dynamic_ncols=True, leave=False)
     for task in pbar:
         task_id = task.metadata_task_id
         pbar.set_postfix_str(f"Task: {task_id}")
@@ -396,7 +401,21 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
         for test_index in range(task.count_tests):
             # prompt = create_prompt_type_long(task, test_index)
             prompt = create_prompt_type_short(task, test_index)
-            filename = f'{task_id}_test{test_index}_prompt.md'
-            filepath = os.path.join(save_dir, filename)
-            with open(filepath, 'w') as f:
-                f.write(prompt)
+
+            expected_output = task.test_output(test_index).tolist()
+            expected_output_json_str = json.dumps(expected_output, separators=(',', ':'))
+
+            # append json to jsonl file
+            jsonl_item = {
+                "groupname": groupname,
+                "dataset": dataset_id,
+                "task": task_id,
+                "test_index": test_index,
+                "prompt": prompt,
+                "expected_output": expected_output_json_str,
+            }
+            with open(jsonl_filename, 'a') as f:
+                json_str = json.dumps(jsonl_item, separators=(',', ':'))
+                f.write(json_str)
+                f.write("\n")
+
