@@ -98,6 +98,7 @@ class TaskToPromptItem:
 #system_prompt = "You are an expert at solving ARC (Abstraction & reasoning corpus) puzzles"
 system_prompt = "Be brief and clear in your responses"
 
+max_prompt_length = 2000
 max_response_length = 300
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -107,7 +108,14 @@ dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.env'))
 dotenv_dict = dotenv_values(dotenv_path=dotenv_path)
 
 task_to_prompt_jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241221_202038/task_to_prompt.jsonl'
-task_to_prompt_item_list = TaskToPromptItem.load_json_file(task_to_prompt_jsonl_file, show=True, truncate=15)
+task_to_prompt_item_list = TaskToPromptItem.load_json_file(task_to_prompt_jsonl_file, show=True, truncate=None)
+
+# remove items with too long prompt
+if True:
+    count_before = len(task_to_prompt_item_list)
+    task_to_prompt_item_list = [item for item in task_to_prompt_item_list if len(item.prompt) <= max_prompt_length]
+    count_diff = count_before - len(task_to_prompt_item_list)
+    print(f"Ignoring {count_diff} items with too long prompt, exceeding: {max_prompt_length}")
 
 print(f"Number of task_to_prompt_item_list: {len(task_to_prompt_item_list)}")
 
@@ -127,7 +135,7 @@ os.makedirs(save_dir, exist_ok=True)
 verbose = False
 # verbose = True
 
-pbar = tqdm(task_to_prompt_item_list, desc=f"Processing tasks", dynamic_ncols=True, leave=False)
+pbar = tqdm(task_to_prompt_item_list, desc=f"Processing", dynamic_ncols=True, leave=False)
 for item in pbar:
     pbar.set_postfix_str(f"Task: {item.task_id}")
 
