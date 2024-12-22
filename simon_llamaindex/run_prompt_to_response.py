@@ -124,7 +124,8 @@ track_incorrect_prediction = TrackIncorrectPrediction.load_from_jsonl(arc_bad_pr
 # exit()
 
 #model = "llama3.1:latest"
-model = "qwen2.5-coder:latest"
+# model = "qwen2.5-coder:latest"
+model = "llama3.2:3b"
 
 llm = Ollama(model=model, request_timeout=120.0, temperature=0.0)
 llm_dict_as_json_string = json.dumps(llm.dict())
@@ -191,7 +192,7 @@ for item in pbar:
 
     # count bytes
     response_byte_count = len(response_text.encode('utf-8'))
-    text_items_count = len(text_items)
+    response_item_count = len(text_items)
 
     if verbose:
         print(f"\n\nelapsed: {elapsed_time:.2f} seconds")
@@ -288,8 +289,8 @@ for item in pbar:
             chat_lines.append(error)
         chat_lines.append("")
     chat_lines.append("")
-    chat_lines.append(f"response text byte count: {response_byte_count}")
-    chat_lines.append(f"number of response items: {text_items_count}")
+    chat_lines.append(f"response byte count: {response_byte_count}")
+    chat_lines.append(f"response item count: {response_item_count}")
     chat_lines.append(f"elapsed: {elapsed_time:.2f} seconds")
     chat_lines.append("")
     chat_lines.append("expected output:")
@@ -307,7 +308,7 @@ for item in pbar:
     with open(chat_save_path, 'w') as f:
         f.write(chat_content)
 
-    metadata = f"run={run_id} {compact_model_config_string} elapsed={elapsed_time:.2f} response_item_count={text_items_count} response_byte_count={response_byte_count}"
+    metadata = f"run={run_id} {compact_model_config_string} elapsed={elapsed_time:.2f} response_item_count={response_item_count} response_byte_count={response_byte_count}"
     track_incorrect_prediction.track_incorrect_prediction_with_raw_data(
         item.dataset_id, 
         item.task_id, 
