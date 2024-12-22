@@ -316,7 +316,7 @@ This yields a concise, text-based compression.
     # print(f"bytes: {len(result)}")
     return result
 
-def create_prompt_type_short(task: Task, test_index: int) -> str:
+def create_prompt_type_short_json(task: Task, test_index: int) -> str:
     new_task = Task()
     for example_index in range(task.count_examples):
         input_image = task.example_input(example_index)
@@ -373,6 +373,36 @@ def create_prompt_type_short(task: Task, test_index: int) -> str:
     # print(f"bytes: {len(result)}")
     return result
 
+def create_prompt_type_short_o3_format(task: Task, test_index: int) -> str:
+    items = []
+    items.append('Find the common rule that maps an input grid to an output grid, given the examples below.')
+    items.append('')
+    for example_index in range(task.count_examples):
+        if example_index > 0:
+            items.append('')
+
+        items.append(f"Example {example_index+1}:")
+        items.append('')
+
+        input_image = task.example_input(example_index)
+        items.append('Input:')
+        items.append(image_to_string_spaces(input_image))
+
+        output_image = task.example_output(example_index)
+        items.append('Output:')
+        items.append(image_to_string_spaces(output_image))
+
+    items.append('')
+    items.append("Below is a test input grid. Predict the corresponding output grid by applying the rule you found. Your final answer should just be the text output grid itself.")
+    items.append('')
+    items.append('Input:')
+    test_input_image = task.test_input(test_index)
+    items.append(image_to_string_spaces(test_input_image))
+    items.append('')
+    
+    result = "\n".join(items)
+    return result
+
 save_dir_toplevel = f'run_tasks_result/{run_id}/'
 os.makedirs(save_dir_toplevel, exist_ok=True)
 
@@ -400,7 +430,9 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
 
         for test_index in range(task.count_tests):
             # prompt = create_prompt_type_long(task, test_index)
-            prompt = create_prompt_type_short(task, test_index)
+            # prompt = create_prompt_type_short_json(task, test_index)
+            prompt = create_prompt_type_short_o3_format(task, test_index)
+            # print(prompt)
 
             test_input = task.test_input(test_index).tolist()
             test_input_json_str = json.dumps(test_input, separators=(',', ':'))
