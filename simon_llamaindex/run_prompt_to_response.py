@@ -96,12 +96,6 @@ class TaskToPromptItem:
     def __repr__(self):
         return self.__str__()
 
-# solves 18 puzzles with llama3.1
-# system_prompt = "Be brief and clear in your responses"
-
-# solves 15 puzzles with llama3.1
-#system_prompt = "You are an expert at solving ARC (Abstraction & reasoning corpus) puzzles"
-
 # solves 1 puzzles with llama3.1, I had to terminate it halfway because it was taking too long
 # system_prompt = """You are a meticulous ARC puzzle solver. For each puzzle, you will:
 
@@ -112,10 +106,19 @@ class TaskToPromptItem:
 
 # At every step, question your assumptions and verify consistency before moving on."""
 
-# solves 14 puzzles with llama3.1
-#system_prompt = "You solve ARC puzzles by carefully examining patterns in each example. Identify the rules, verify them on all examples, then solve the test input"
+# solves 4 puzzles with llama3.1, Not having a system prompt worsens the ability to solve puzzles
+# system_prompt = None
 
-# solves 22 puzzles with llama3.1
+# solves 14 puzzles with llama3.1
+# system_prompt = "You solve ARC puzzles by carefully examining patterns in each example. Identify the rules, verify them on all examples, then solve the test input"
+
+# solves 15 puzzles with llama3.1
+# system_prompt = "You are an expert at solving ARC (Abstraction & reasoning corpus) puzzles"
+
+# solves 18 puzzles with llama3.1
+# system_prompt = "Be brief and clear in your responses"
+
+# solves 22 puzzles with llama3.1, but leaves out the reasoning steps.
 system_prompt = "Be concise"
 
 max_prompt_length = 2000
@@ -174,12 +177,13 @@ for item in pbar:
 
     error_message_list = []
 
-    messages = [
-        ChatMessage(
+    messages = []
+    if system_prompt is not None:
+        messages.append(ChatMessage(
             role="system", content=system_prompt
-        ),
-        ChatMessage(role="user", content=prompt),
-    ]
+        ))
+    messages.append(ChatMessage(role="user", content=prompt))
+
     resp = llm.stream_chat(messages)
 
     if verbose:
@@ -300,7 +304,7 @@ for item in pbar:
     chat_lines.append(llm_dict_as_json_string)
     chat_lines.append("")
     chat_lines.append("SYSTEM PROMPT:")
-    chat_lines.append(system_prompt)
+    chat_lines.append(str(system_prompt))
     chat_lines.append("")
     chat_lines.append("---")
     chat_lines.append("")
