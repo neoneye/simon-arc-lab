@@ -1,6 +1,6 @@
 import numpy as np
 
-def image_from_json_array(json_array: list, padding: int = 255) -> np.array:
+def image_from_json_array(json_array: list[list[int]], padding: int = 255) -> np.array:
     """
     Convert a list of lists of integers into a numpy array.
 

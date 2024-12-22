@@ -14,6 +14,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
 from simon_arc_lab.json_from_response import json_from_response
+from simon_arc_lab.digits_from_response import digits_from_response
 from simon_arc_lab.image_from_json_array import image_from_json_array
 from simon_arc_lab.show_prediction_result import show_prediction_result
 from simon_arc_model.track_incorrect_prediction import TrackIncorrectPrediction
@@ -107,7 +108,8 @@ print(f"Run id: {run_id}")
 dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.env'))
 dotenv_dict = dotenv_values(dotenv_path=dotenv_path)
 
-task_to_prompt_jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241221_202038/task_to_prompt.jsonl'
+#task_to_prompt_jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241221_202038_task_to_prompt_json_format/task_to_prompt.jsonl'
+task_to_prompt_jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241222_033847_task_to_prompt_o3_format/task_to_prompt.jsonl'
 task_to_prompt_item_list = TaskToPromptItem.load_json_file(task_to_prompt_jsonl_file, show=True, truncate=None)
 
 # remove items with too long prompt
@@ -123,9 +125,8 @@ arc_bad_prediction_file = '/Users/neoneye/nobackup/git/arc-bad-prediction/data.j
 track_incorrect_prediction = TrackIncorrectPrediction.load_from_jsonl(arc_bad_prediction_file)
 # exit()
 
-#model = "llama3.1:latest"
+model = "llama3.1:latest"
 # model = "qwen2.5-coder:latest"
-model = "llama3.2:3b"
 
 llm = Ollama(model=model, request_timeout=120.0, temperature=0.0)
 llm_dict_as_json_string = json.dumps(llm.dict())
@@ -201,13 +202,24 @@ for item in pbar:
     if verbose:
         print(response_text)
 
-    try:
-        response_json = json_from_response(response_text)
-    except Exception as e:
-        response_json = None
-        error_message_list.append(f"ERROR: json_from_response returned {e}")
-        if verbose:
-            print(f"Error: json_from_response returned {e}")
+    response_json = None
+    if False:
+        try:
+            response_json = json_from_response(response_text)
+        except Exception as e:
+            response_json = None
+            error_message_list.append(f"ERROR: json_from_response returned {e}")
+            if verbose:
+                print(f"Error: json_from_response returned {e}")
+
+    if True:
+        try:
+            response_json = digits_from_response(response_text)
+        except Exception as e:
+            response_json = None
+            error_message_list.append(f"ERROR: digits_from_response returned {e}")
+            if verbose:
+                print(f"Error: digits_from_response returned {e}")
 
     if verbose:
         print(f"response_json: {response_json}")
