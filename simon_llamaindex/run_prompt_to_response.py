@@ -115,7 +115,7 @@ class TaskToPromptItem:
 # solves 14 puzzles with llama3.1
 #system_prompt = "You solve ARC puzzles by carefully examining patterns in each example. Identify the rules, verify them on all examples, then solve the test input"
 
-# solves ? puzzles with llama3.1
+# solves 22 puzzles with llama3.1
 system_prompt = "Be concise"
 
 max_prompt_length = 2000
