@@ -96,8 +96,20 @@ class TaskToPromptItem:
     def __repr__(self):
         return self.__str__()
 
+# solves 18 puzzles with llama3.1
+# system_prompt = "Be brief and clear in your responses"
+
+# solves 15 puzzles with llama3.1
 #system_prompt = "You are an expert at solving ARC (Abstraction & reasoning corpus) puzzles"
-system_prompt = "Be brief and clear in your responses"
+
+system_prompt = """You are a meticulous ARC puzzle solver. For each puzzle, you will:
+
+1. Identify patterns by systematically comparing inputs and outputs in the provided examples.
+2. Formulate hypotheses about how inputs transform to outputs.
+3. Test and refine these hypotheses against all training pairs.
+4. Apply the validated rules to the test input.
+
+At every step, question your assumptions and verify consistency before moving on."""
 
 max_prompt_length = 2000
 max_response_length = 1000
