@@ -123,7 +123,10 @@ arc_bad_prediction_file = '/Users/neoneye/nobackup/git/arc-bad-prediction/data.j
 track_incorrect_prediction = TrackIncorrectPrediction.load_from_jsonl(arc_bad_prediction_file)
 # exit()
 
-llm = Ollama(model="llama3.1:latest", request_timeout=120.0, temperature=0.0)
+#model = "llama3.1:latest"
+model = "qwen2.5-coder:latest"
+
+llm = Ollama(model=model, request_timeout=120.0, temperature=0.0)
 llm_dict_as_json_string = json.dumps(llm.dict())
 compact_model_config_string = f"model={llm.model} temperature={llm.temperature}"
 #print(f"model name: {compact_model_config_string}")
@@ -184,11 +187,15 @@ for item in pbar:
 
     end_time = time.time()
     elapsed_time = end_time - start_time
+    response_text = "".join(text_items)
+
+    # count bytes
+    response_byte_count = len(response_text.encode('utf-8'))
+    text_items_count = len(text_items)
 
     if verbose:
         print(f"\n\nelapsed: {elapsed_time:.2f} seconds")
         print("\n\nfull response:")
-    response_text = "".join(text_items)
 
     if verbose:
         print(response_text)
@@ -254,6 +261,7 @@ for item in pbar:
     chat_lines.append(f"dataset_id: {item.dataset_id}")
     chat_lines.append(f"task_id: {item.task_id}")
     chat_lines.append(f"test_index: {item.test_index}")
+    chat_lines.append(f"max_prompt_length: {max_prompt_length}")
     chat_lines.append(f"max_response_length: {max_response_length}")
     chat_lines.append("")
     chat_lines.append("LLM:")
@@ -280,7 +288,8 @@ for item in pbar:
             chat_lines.append(error)
         chat_lines.append("")
     chat_lines.append("")
-    chat_lines.append(f"number of response items: {len(text_items)}")
+    chat_lines.append(f"response text byte count: {response_byte_count}")
+    chat_lines.append(f"number of response items: {text_items_count}")
     chat_lines.append(f"elapsed: {elapsed_time:.2f} seconds")
     chat_lines.append("")
     chat_lines.append("expected output:")
@@ -298,9 +307,9 @@ for item in pbar:
     with open(chat_save_path, 'w') as f:
         f.write(chat_content)
 
-    metadata = f"run={run_id} {compact_model_config_string} elapsed={elapsed_time:.2f}"
+    metadata = f"run={run_id} {compact_model_config_string} elapsed={elapsed_time:.2f} response_item_count={text_items_count} response_byte_count={response_byte_count}"
     track_incorrect_prediction.track_incorrect_prediction_with_raw_data(
-        item.groupname, 
+        item.dataset_id, 
         item.task_id, 
         item.test_index, 
         item.test_input, 
@@ -308,6 +317,3 @@ for item in pbar:
         predicted_output_image, 
         metadata
     )
-
-    # print("DONE")
-    # break
