@@ -102,14 +102,21 @@ class TaskToPromptItem:
 # solves 15 puzzles with llama3.1
 #system_prompt = "You are an expert at solving ARC (Abstraction & reasoning corpus) puzzles"
 
-system_prompt = """You are a meticulous ARC puzzle solver. For each puzzle, you will:
+# solves 1 puzzles with llama3.1, I had to terminate it halfway because it was taking too long
+# system_prompt = """You are a meticulous ARC puzzle solver. For each puzzle, you will:
 
-1. Identify patterns by systematically comparing inputs and outputs in the provided examples.
-2. Formulate hypotheses about how inputs transform to outputs.
-3. Test and refine these hypotheses against all training pairs.
-4. Apply the validated rules to the test input.
+# 1. Identify patterns by systematically comparing inputs and outputs in the provided examples.
+# 2. Formulate hypotheses about how inputs transform to outputs.
+# 3. Test and refine these hypotheses against all training pairs.
+# 4. Apply the validated rules to the test input.
 
-At every step, question your assumptions and verify consistency before moving on."""
+# At every step, question your assumptions and verify consistency before moving on."""
+
+# solves 14 puzzles with llama3.1
+#system_prompt = "You solve ARC puzzles by carefully examining patterns in each example. Identify the rules, verify them on all examples, then solve the test input"
+
+# solves ? puzzles with llama3.1
+system_prompt = "Be concise"
 
 max_prompt_length = 2000
 max_response_length = 1000
