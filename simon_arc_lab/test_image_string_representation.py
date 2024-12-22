@@ -19,6 +19,14 @@ class TestImageStringRepresentation(unittest.TestCase):
             [4, 5, 6]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
 
+    def test_11000_image_to_string_spaces(self):
+        image = np.array([
+            [1, 2, 3], 
+            [4, 5, 6]], dtype=np.uint8)
+        actual = image_to_string_spaces(image)
+        expected = "1 2 3\n4 5 6"
+        self.assertEqual(actual, expected)
+
     def test_20000_image_to_string_colorname(self):
         image = np.array([
             [0, 1, 2, 3], 

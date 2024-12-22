@@ -121,6 +121,33 @@ def image_from_string(s: str) -> np.array:
                 image[y, x] = int(c)
     return image
 
+def image_to_string_spaces(image: np.array) -> str:
+    """
+    Convert an image to a string representation with space separators, like this:
+
+    from
+    [[1, 2, 3], [4, 5, 6]]
+
+    to
+    "1 2 3\n4 5 6"
+
+    The many spaces prevents the LLM's from grouping multiple digits into a single token.
+    It's causes roughly each digit to gets its own token.
+    Check how the string representation gets tokenized.
+    https://platform.openai.com/tokenizer
+    """
+    config = ImageToString(
+        pixel_to_symbol=None,
+        fallback_symbol='.',
+        separator_horizontal=' ',
+        separator_vertical='\n',
+        top_column_mode=None,
+        bottom_column_mode=None,
+        prefix_column_symbol=None,
+        prefix_with_line_number=None,
+    )
+    return config.apply(image)
+
 # ARC-AGI color names
 
 COLORNAME_BLACK = 'black'
