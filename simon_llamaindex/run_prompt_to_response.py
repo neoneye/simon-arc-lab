@@ -128,12 +128,13 @@ class TaskToPromptItem:
 # system_prompt = "Be brief and clear in your responses"
 
 # solves 22 puzzles with llama3.1, but leaves out the reasoning steps.
-#system_prompt = "Be concise"
+system_prompt = "Be concise"
 
 # solves 1 puzzle with previous bad prediction
-#system_prompt = "The 'maybe output' is always wrong."
+# system_prompt = "The 'maybe output' is always wrong."
 
-system_prompt = "You are an ARC solver. Figure out whats wrong with the 'maybe output'. Then explain your reasoning and provide your own final answer. The answer must be different than the 'maybe output'."
+# solves 1 puzzle with previous bad prediction
+# system_prompt = "You are an ARC solver. Figure out whats wrong with the 'maybe output'. Then explain your reasoning and provide your own final answer. The answer must be different than the 'maybe output'."
 
 max_prompt_length = 2000
 max_response_length = 2000
@@ -146,7 +147,8 @@ dotenv_dict = dotenv_values(dotenv_path=dotenv_path)
 
 #task_to_prompt_jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241221_202038_task_to_prompt_json_format/task_to_prompt.jsonl'
 # task_to_prompt_jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241222_033847_task_to_prompt_o3_format/task_to_prompt.jsonl'
-task_to_prompt_jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241223_162108_task_to_prompt_o3_format_with_bad_predictions/task_to_prompt.jsonl'
+# task_to_prompt_jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241223_162108_task_to_prompt_o3_format_with_bad_predictions/task_to_prompt.jsonl'
+task_to_prompt_jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241223_203727_task_to_prompt_o3_format_with_maxlimit/task_to_prompt.jsonl'
 task_to_prompt_item_list = TaskToPromptItem.load_json_file(task_to_prompt_jsonl_file, show=True, truncate=None)
 
 # remove items with too long prompt
@@ -170,24 +172,29 @@ if PROVIDER_ID == "ollama":
     llm = Ollama(model=model, request_timeout=120.0, temperature=0.0)
 elif PROVIDER_ID == "together":
     # model = "Qwen/QwQ-32B-Preview"
-    model = "meta-llama/Llama-3.3-70B-Instruct-Turbo"
+    # model = "meta-llama/Llama-3.3-70B-Instruct-Turbo"
+    # model = "scb10x/scb10x-llama3-typhoon-v1-5-8b-instruct"
+    model = "meta-llama/Llama-3.2-3B-Instruct-Turbo"
     llm = TogetherLLM(
         model=model, 
         request_timeout=120.0, 
-        temperature=0.5,
+        temperature=0.1,
         top_p=0.7,
         top_k=50,
         repetition_penalty=1,
-        max_tokens=1024,
-        api_key=dotenv_dict['TOGETHER_API_KEY']
+        max_tokens=1024
     )
 else:
     raise ValueError(f"Unknown PROVIDER_ID: {PROVIDER_ID}")
 
+# Take a snapshot of the LLM configuration, before assigning API keys, so they don't get leaked
 llm_dict_as_json_string = json.dumps(llm.dict())
 compact_model_config_string = f"model={llm.model} temperature={llm.temperature}"
 #print(f"model name: {compact_model_config_string}")
 # print(f"llm_dict_as_json_string: {llm_dict_as_json_string}")
+
+if PROVIDER_ID == "together":
+    llm.api_key = dotenv_dict['TOGETHER_API_KEY']
 
 save_dir = f'run_tasks_result/{run_id}/'
 os.makedirs(save_dir, exist_ok=True)
