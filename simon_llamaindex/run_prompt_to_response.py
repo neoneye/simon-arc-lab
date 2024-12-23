@@ -23,7 +23,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
 from simon_arc_lab.json_from_response import json_from_response
-from simon_arc_lab.digits_from_response import digits_from_response
+from simon_arc_lab.extract_digits_from_response import extract_digits_from_response
 from simon_arc_lab.image_from_json_array import image_from_json_array
 from simon_arc_lab.show_prediction_result import show_prediction_result
 from simon_arc_model.track_incorrect_prediction import TrackIncorrectPrediction
@@ -277,12 +277,12 @@ for item in pbar:
 
     if True:
         try:
-            response_json = digits_from_response(response_text)
+            response_json = extract_digits_from_response(response_text)
         except Exception as e:
             response_json = None
-            error_message_list.append(f"ERROR: digits_from_response returned {e}")
+            error_message_list.append(f"ERROR: extract_digits_from_response returned {e}")
             if verbose:
-                print(f"Error: digits_from_response returned {e}")
+                print(f"Error: extract_digits_from_response returned {e}")
 
     if verbose:
         print(f"response_json: {response_json}")

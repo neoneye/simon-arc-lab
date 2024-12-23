@@ -2,14 +2,14 @@ import re
 import json
 from typing import Union
 
-def digits_from_response(response: str, verbose: bool=False) -> list[list[int]]:
+def extract_digits_from_response(response: str, verbose: bool=False) -> list[list[int]]:
     """
     Extract digits result from a response. Example of response:
 
     5 6 7
     8 9 0
 
-    It finds the bottom most occurrance of digits and extracts the digits.
+    It finds the bottom most occurrence of digits and extracts the digits.
     It ignores digits that occurs earlier in the document that are not the last one.
     """
 

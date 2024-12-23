@@ -1,5 +1,5 @@
 import unittest
-from .digits_from_response import digits_from_response
+from .extract_digits_from_response import extract_digits_from_response
 
 RESPONSE_VALID_A = """
 text before
@@ -35,7 +35,7 @@ text after
 
 class TestDigitsFromResponse(unittest.TestCase):
     def test_10000_response_valid_a(self):
-        actual = digits_from_response(RESPONSE_VALID_A)
+        actual = extract_digits_from_response(RESPONSE_VALID_A)
         expected = [
             [1, 2, 3], 
             [4, 5, 6]
@@ -44,10 +44,10 @@ class TestDigitsFromResponse(unittest.TestCase):
 
     def test_20000_response_invalid_a(self):
         with self.assertRaises(ValueError):
-            digits_from_response(RESPONSE_INVALID_A)
+            extract_digits_from_response(RESPONSE_INVALID_A)
 
 
     def test_20001_response_invalid_a(self):
         with self.assertRaises(ValueError):
-            digits_from_response(RESPONSE_INVALID_B)
+            extract_digits_from_response(RESPONSE_INVALID_B)
 
