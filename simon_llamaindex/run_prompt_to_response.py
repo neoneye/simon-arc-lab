@@ -10,7 +10,7 @@ from dotenv import dotenv_values
 from llama_index.core.llms import ChatMessage
 
 PROVIDER_ID = "ollama"
-PROVIDER_ID = "together"
+# PROVIDER_ID = "together"
 
 if PROVIDER_ID == "ollama":
     from llama_index.llms.ollama import Ollama
