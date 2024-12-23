@@ -119,7 +119,9 @@ class TaskToPromptItem:
 # system_prompt = "Be brief and clear in your responses"
 
 # solves 22 puzzles with llama3.1, but leaves out the reasoning steps.
-system_prompt = "Be concise"
+#system_prompt = "Be concise"
+
+system_prompt = "The 'maybe output' is always wrong."
 
 max_prompt_length = 2000
 max_response_length = 1000
@@ -131,7 +133,8 @@ dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.env'))
 dotenv_dict = dotenv_values(dotenv_path=dotenv_path)
 
 #task_to_prompt_jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241221_202038_task_to_prompt_json_format/task_to_prompt.jsonl'
-task_to_prompt_jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241222_033847_task_to_prompt_o3_format/task_to_prompt.jsonl'
+# task_to_prompt_jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241222_033847_task_to_prompt_o3_format/task_to_prompt.jsonl'
+task_to_prompt_jsonl_file = '/Users/neoneye/git/simon_arc_lab/run_tasks_result/20241223_162108_task_to_prompt_o3_format_with_bad_predictions/task_to_prompt.jsonl'
 task_to_prompt_item_list = TaskToPromptItem.load_json_file(task_to_prompt_jsonl_file, show=True, truncate=None)
 
 # remove items with too long prompt
@@ -277,6 +280,7 @@ for item in pbar:
         item.groupname,
         item.task_id,
         f'test{item.test_index}',
+        f'row{item.row_index}',
         status,
     ]
     filename_items = [item for item in filename_items_optional if item is not None]
