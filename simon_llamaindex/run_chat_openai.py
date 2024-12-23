@@ -1,5 +1,6 @@
 import os
 from dotenv import dotenv_values
+from llama_index.core.llms import ChatMessage
 from llama_index.llms.openai import OpenAI
 
 dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.env'))
@@ -9,8 +10,6 @@ llm = OpenAI(
     model="gpt-4o-mini",
     api_key=dotenv_dict['OPENAI_API_KEY'],
 )
-
-from llama_index.core.llms import ChatMessage
 
 messages = [
     ChatMessage(
