@@ -1,5 +1,5 @@
 import unittest
-from .json_from_response import json_from_response
+from .extract_json_from_response import extract_json_from_response
 
 RESPONSE_VALID_A = """
 text before
@@ -95,7 +95,7 @@ text after
 
 class TestJsonFromResponse(unittest.TestCase):
     def test_10000_response_valid_a(self):
-        actual = json_from_response(RESPONSE_VALID_A)
+        actual = extract_json_from_response(RESPONSE_VALID_A)
         expected = [
             [1, 2, 3], 
             [4, 5, 6]
@@ -103,7 +103,7 @@ class TestJsonFromResponse(unittest.TestCase):
         self.assertEqual(actual, expected)
 
     def test_10001_response_valid_b(self):
-        actual = json_from_response(RESPONSE_VALID_B)
+        actual = extract_json_from_response(RESPONSE_VALID_B)
         expected = [
             [1, 2, 3], 
             [4, 5, 6]
@@ -111,7 +111,7 @@ class TestJsonFromResponse(unittest.TestCase):
         self.assertEqual(actual, expected)
 
     def test_10002_response_valid_c(self):
-        actual = json_from_response(RESPONSE_VALID_C)
+        actual = extract_json_from_response(RESPONSE_VALID_C)
         expected = {
             "return": "this dictionary"
         }
@@ -119,9 +119,9 @@ class TestJsonFromResponse(unittest.TestCase):
 
     def test_20000_response_invalid_a(self):
         with self.assertRaises(ValueError):
-            json_from_response(RESPONSE_INVALID_A)
+            extract_json_from_response(RESPONSE_INVALID_A)
 
     def test_20001_response_invalid_a(self):
         with self.assertRaises(ValueError):
-            json_from_response(RESPONSE_INVALID_B)
+            extract_json_from_response(RESPONSE_INVALID_B)
 

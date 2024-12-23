@@ -22,7 +22,7 @@ else:
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
-from simon_arc_lab.json_from_response import json_from_response
+from simon_arc_lab.extract_json_from_response import extract_json_from_response
 from simon_arc_lab.extract_digits_from_response import extract_digits_from_response
 from simon_arc_lab.image_from_json_array import image_from_json_array
 from simon_arc_lab.show_prediction_result import show_prediction_result
@@ -268,12 +268,12 @@ for item in pbar:
     response_json = None
     if False:
         try:
-            response_json = json_from_response(response_text)
+            response_json = extract_json_from_response(response_text)
         except Exception as e:
             response_json = None
-            error_message_list.append(f"ERROR: json_from_response returned {e}")
+            error_message_list.append(f"ERROR: extract_json_from_response returned {e}")
             if verbose:
-                print(f"Error: json_from_response returned {e}")
+                print(f"Error: extract_json_from_response returned {e}")
 
     if True:
         try:

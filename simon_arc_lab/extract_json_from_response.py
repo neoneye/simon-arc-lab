@@ -2,7 +2,7 @@ import re
 import json
 from typing import Union
 
-def json_from_response(response: str, verbose: bool=False) -> Union[list, dict]:
+def extract_json_from_response(response: str, verbose: bool=False) -> Union[list, dict]:
     """
     Extract the JSON result from a response.
 
