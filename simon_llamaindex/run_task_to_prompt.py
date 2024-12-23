@@ -57,7 +57,7 @@ task_ids_of_interest = [
 
 arc_bad_prediction_file = '/Users/neoneye/nobackup/git/arc-bad-prediction/data.jsonl'
 arc_bad_prediction_dataset = None
-if True:
+if False:
     print(f"Loading arc-bad-prediction dataset from '{arc_bad_prediction_file}'")
     arc_bad_prediction_dataset = ARCBadPredictionDataset.load(arc_bad_prediction_file)
     # arc_bad_prediction_dataset.display_sample_records()
@@ -416,6 +416,40 @@ def create_prompt_type_short_o3_format(task: Task, test_index: int, previous_pre
     result = "\n".join(items)
     return result
 
+def create_prompt_type_short_o3_format_with_tweaks_v2(task: Task, test_index: int, previous_prediction: Optional[np.array]) -> str:
+    items = []
+    items.append('Find the common rule that maps an input grid to an output grid, given the examples below. Use max 100 words.')
+    items.append('')
+    for example_index in range(task.count_examples):
+        if example_index > 0:
+            items.append('')
+
+        items.append(f"Example {example_index+1}:")
+        items.append('')
+
+        input_image = task.example_input(example_index)
+        items.append('Input:')
+        items.append(image_to_string_spaces(input_image))
+
+        output_image = task.example_output(example_index)
+        items.append('Output:')
+        items.append(image_to_string_spaces(output_image))
+
+    items.append('')
+    items.append("Below is a test input grid. Predict the corresponding output grid by applying the rule you found. Your final answer should just be the text output grid itself.")
+    items.append('')
+    items.append('Input:')
+    test_input_image = task.test_input(test_index)
+    items.append(image_to_string_spaces(test_input_image))
+    if previous_prediction is not None:
+        items.append('Maybe output:')
+        items.append(image_to_string_spaces(previous_prediction))
+    items.append('')
+    
+    result = "\n".join(items)
+    return result
+
+
 save_dir_toplevel = f'run_tasks_result/{run_id}/'
 os.makedirs(save_dir_toplevel, exist_ok=True)
 
@@ -454,7 +488,8 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
         def generate_prompt_for_task(task: Task, test_index: int, previous_prediction: Optional[np.array]):
             # prompt = create_prompt_type_long(task, test_index)
             # prompt = create_prompt_type_short_json(task, test_index)
-            prompt = create_prompt_type_short_o3_format(task, test_index, previous_prediction)
+            # prompt = create_prompt_type_short_o3_format(task, test_index, previous_prediction)
+            prompt = create_prompt_type_short_o3_format_with_tweaks_v2(task, test_index, previous_prediction)
             # print(prompt)
 
             test_input = task.test_input(test_index).tolist()
