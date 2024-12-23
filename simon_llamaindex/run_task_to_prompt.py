@@ -17,6 +17,9 @@ from simon_arc_lab.task_color_profile import *
 from simon_arc_lab.bsp_tree import *
 from simon_arc_lab.image_to_python import *
 from simon_arc_lab.rle.serialize import serialize
+from simon_arc_model.arc_bad_prediction import *
+
+max_number_of_bad_predictions_per_task = 3
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -51,6 +54,13 @@ task_ids_of_interest = [
     # '1c02dbbe',
     # '29700607',
 ]
+
+arc_bad_prediction_file = '/Users/neoneye/nobackup/git/arc-bad-prediction/data.jsonl'
+arc_bad_prediction_dataset = None
+if True:
+    print(f"Loading arc-bad-prediction dataset from '{arc_bad_prediction_file}'")
+    arc_bad_prediction_dataset = ARCBadPredictionDataset.load(arc_bad_prediction_file)
+    # arc_bad_prediction_dataset.display_sample_records()
 
 def format_color(colorid: int) -> str:
     colorname = IMAGETOSTRING_COLORNAME.convert_pixel_to_symbol(colorid)
@@ -373,7 +383,7 @@ def create_prompt_type_short_json(task: Task, test_index: int) -> str:
     # print(f"bytes: {len(result)}")
     return result
 
-def create_prompt_type_short_o3_format(task: Task, test_index: int) -> str:
+def create_prompt_type_short_o3_format(task: Task, test_index: int, previous_prediction: Optional[np.array]) -> str:
     items = []
     items.append('Find the common rule that maps an input grid to an output grid, given the examples below.')
     items.append('')
@@ -398,6 +408,9 @@ def create_prompt_type_short_o3_format(task: Task, test_index: int) -> str:
     items.append('Input:')
     test_input_image = task.test_input(test_index)
     items.append(image_to_string_spaces(test_input_image))
+    if previous_prediction is not None:
+        items.append('Maybe output:')
+        items.append(image_to_string_spaces(previous_prediction))
     items.append('')
     
     result = "\n".join(items)
@@ -417,6 +430,16 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
     taskset = TaskSet.load_directory(path_to_task_dir)
     # taskset.keep_tasks_with_id(set(task_ids_of_interest), verbose=False)
 
+    if arc_bad_prediction_dataset is not None:
+        # Keep only that are present in the arc-bad-prediction dataset. Remove the rest.
+        task_ids_to_ignore = set()
+        for task in taskset.tasks:
+            task_id = task.metadata_task_id
+            if arc_bad_prediction_dataset.has_records_for_task(dataset_id, task_id):
+                continue
+            task_ids_to_ignore.add(task_id)
+        taskset.remove_tasks_by_id(task_ids_to_ignore, verbose=False)
+
     if len(taskset.tasks) == 0:
         print(f"Skipping group: {groupname}, due to no tasks to process.")
         continue
@@ -428,10 +451,10 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
         task_id = task.metadata_task_id
         pbar.set_postfix_str(f"Task: {task_id}")
 
-        for test_index in range(task.count_tests):
+        def generate_prompt_for_task(task: Task, test_index: int, previous_prediction: Optional[np.array]):
             # prompt = create_prompt_type_long(task, test_index)
             # prompt = create_prompt_type_short_json(task, test_index)
-            prompt = create_prompt_type_short_o3_format(task, test_index)
+            prompt = create_prompt_type_short_o3_format(task, test_index, previous_prediction)
             # print(prompt)
 
             test_input = task.test_input(test_index).tolist()
@@ -455,3 +478,15 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
                 f.write(json_str)
                 f.write("\n")
 
+        if arc_bad_prediction_dataset is not None:
+            for test_index in range(task.count_tests):
+                record_list = arc_bad_prediction_dataset.find_records_for_task(dataset_id, task_id, test_index)
+
+                # truncate to the first N bad predictions
+                record_list = record_list[:max_number_of_bad_predictions_per_task]
+
+                for record in record_list:
+                    generate_prompt_for_task(task, test_index, record.predicted_output)
+
+        for test_index in range(task.count_tests):
+            generate_prompt_for_task(task, test_index, None)
