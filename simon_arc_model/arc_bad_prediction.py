@@ -123,24 +123,17 @@ class ARCBadPredictionDataset:
         key = (dataset_id, task_id)
         return key in self.dataset_task
 
-    def find_records_for_task(self, dataset_id: str, task_id: str, task_count_tests: int) -> list[ARCBadPredictionRecord]:
+    def find_records_for_task(self, dataset_id: str, task_id: str, test_index: int) -> list[ARCBadPredictionRecord]:
         """
-        Slow way to find records for a given (dataset_id, task_id) pair.
+        Slow way to find records.
 
-        Returns a list of records for a given (dataset_id, task_id) pair.
+        Returns a list of records for a given (dataset_id, task_id, test_index) tuple.
         """
-        find_key = (dataset_id, task_id)
+        find_key = (dataset_id, task_id, test_index)
         found_records = []
         for record in self.records:
-            record_dataset_id = record.dataset
-            record_task_id = record.task
-            record_key = (record_dataset_id, record_task_id)
+            record_key = (record.dataset, record.task, record.test_index)
             if find_key != record_key:
-                continue
-
-            test_index = record.test_index
-            if test_index >= task_count_tests:
-                print(f"Skipping task: {task_id}, due to test index {test_index} is out of range.")
                 continue
             found_records.append(record)
 

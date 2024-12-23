@@ -86,13 +86,16 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
         task_id = task.metadata_task_id
         pbar.set_postfix_str(f"Task: {task_id}")
 
-        found_records = arc_bad_prediction_dataset.find_records_for_task(dataset_id, task_id, task.count_tests)
+        record_list = []
+        for test_index in range(task.count_tests):
+            records_for_test_index = arc_bad_prediction_dataset.find_records_for_task(dataset_id, task_id, test_index)
 
-        # truncate to the first N bad predictions
-        found_records = found_records[:max_number_of_bad_predictions_per_task]
+            # truncate to the first N bad predictions
+            records_for_test_index = records_for_test_index[:max_number_of_bad_predictions_per_task]
+            record_list.extend(records_for_test_index)
 
         ts = TaskSimilarity.create_with_task(task)
-        for record in found_records:
+        for record in record_list:
             test_index = record.test_index
             # print(f"Task: {task_id} test index: {test_index}")
             predicted_output = record.predicted_output
