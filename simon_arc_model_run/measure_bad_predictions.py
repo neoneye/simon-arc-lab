@@ -41,14 +41,6 @@ arc_bad_prediction_file = '/Users/neoneye/nobackup/git/arc-bad-prediction/data.j
 arc_bad_prediction_dataset = ARCBadPredictionDataset.load(arc_bad_prediction_file)
 # arc_bad_prediction_dataset.display_sample_records()
 
-dataset_task = set()
-for record in arc_bad_prediction_dataset.records:
-    dataset_id = record.dataset
-    task_id = record.task
-    dataset_task.add((dataset_id, task_id))
-
-print(f"Number of unique tasks in the arc-bad-prediction dataset: {len(dataset_task)}")
-
 incorrect_predictions_jsonl_path = arc_bad_prediction_file
 #incorrect_predictions_jsonl_path = None
 
@@ -74,10 +66,9 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
     task_ids_to_ignore = set()
     for task in taskset.tasks:
         task_id = task.metadata_task_id
-        key = (dataset_id, task_id)
-        found = key in dataset_task
-        if not found:
-            task_ids_to_ignore.add(task_id)
+        if arc_bad_prediction_dataset.has_records_for_task(dataset_id, task_id):
+            continue
+        task_ids_to_ignore.add(task_id)
     taskset.remove_tasks_by_id(task_ids_to_ignore, verbose=False)
 
     # taskset.keep_tasks_with_id(task_ids_with_circle_spirals, verbose=False)
@@ -95,21 +86,7 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
         task_id = task.metadata_task_id
         pbar.set_postfix_str(f"Task: {task_id}")
 
-        find_key = (dataset_id, task_id)
-        found_records = []
-        for record in arc_bad_prediction_dataset.records:
-            record_dataset_id = record.dataset
-            record_task_id = record.task
-            record_key = (record_dataset_id, record_task_id)
-            if find_key != record_key:
-                continue
-
-            test_index = record.test_index
-            if test_index >= task.count_tests:
-                print(f"Skipping task: {task_id}, due to test index {test_index} is out of range.")
-                continue
-
-            found_records.append(record)
+        found_records = arc_bad_prediction_dataset.find_records_for_task(dataset_id, task_id, task.count_tests)
 
         # truncate to the first N bad predictions
         found_records = found_records[:max_number_of_bad_predictions_per_task]
@@ -118,7 +95,7 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
         for record in found_records:
             test_index = record.test_index
             # print(f"Task: {task_id} test index: {test_index}")
-            predicted_output = np.array(record.predicted_output, dtype=np.uint8)
+            predicted_output = record.predicted_output
             # print(predicted_output)
             score = ts.measure_test_prediction(predicted_output, test_index)
             unique_id = str(record.line_number)
