@@ -7,8 +7,17 @@ from typing import Optional
 import numpy as np
 from tqdm import tqdm
 from dotenv import dotenv_values
-from llama_index.llms.ollama import Ollama
 from llama_index.core.llms import ChatMessage
+
+PROVIDER_ID = "ollama"
+PROVIDER_ID = "together"
+
+if PROVIDER_ID == "ollama":
+    from llama_index.llms.ollama import Ollama
+elif PROVIDER_ID == "together":
+    from llama_index.llms.together import TogetherLLM
+else:
+    raise ValueError(f"Unknown PROVIDER_ID: {PROVIDER_ID}")
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
@@ -121,10 +130,13 @@ class TaskToPromptItem:
 # solves 22 puzzles with llama3.1, but leaves out the reasoning steps.
 #system_prompt = "Be concise"
 
-system_prompt = "The 'maybe output' is always wrong."
+# solves 1 puzzle with previous bad prediction
+#system_prompt = "The 'maybe output' is always wrong."
+
+system_prompt = "You are an ARC solver. Figure out whats wrong with the 'maybe output'. Then explain your reasoning and provide your own final answer. The answer must be different than the 'maybe output'."
 
 max_prompt_length = 2000
-max_response_length = 1000
+max_response_length = 2000
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -150,10 +162,28 @@ arc_bad_prediction_file = '/Users/neoneye/nobackup/git/arc-bad-prediction/data.j
 track_incorrect_prediction = TrackIncorrectPrediction.load_from_jsonl(arc_bad_prediction_file)
 # exit()
 
-model = "llama3.1:latest"
-# model = "qwen2.5-coder:latest"
+llm = None
+model = None
+if PROVIDER_ID == "ollama":
+    model = "llama3.1:latest"
+    # model = "qwen2.5-coder:latest"
+    llm = Ollama(model=model, request_timeout=120.0, temperature=0.0)
+elif PROVIDER_ID == "together":
+    # model = "Qwen/QwQ-32B-Preview"
+    model = "meta-llama/Llama-3.3-70B-Instruct-Turbo"
+    llm = TogetherLLM(
+        model=model, 
+        request_timeout=120.0, 
+        temperature=0.5,
+        top_p=0.7,
+        top_k=50,
+        repetition_penalty=1,
+        max_tokens=1024,
+        api_key=dotenv_dict['TOGETHER_API_KEY']
+    )
+else:
+    raise ValueError(f"Unknown PROVIDER_ID: {PROVIDER_ID}")
 
-llm = Ollama(model=model, request_timeout=120.0, temperature=0.0)
 llm_dict_as_json_string = json.dumps(llm.dict())
 compact_model_config_string = f"model={llm.model} temperature={llm.temperature}"
 #print(f"model name: {compact_model_config_string}")
