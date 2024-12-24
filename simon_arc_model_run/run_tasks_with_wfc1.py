@@ -248,10 +248,12 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
 
         height, width = image.shape
         # add a gap between the tiles, these gap pixels describes what tiles can connect to what other tiles
-        width21 = width * 2 - 1
-        height21 = height * 2 - 1
+        gap_size = 1
+        pixel_distance = gap_size + 1
+        width_with_gaps = width * pixel_distance - 1
+        height_with_gaps = height * pixel_distance - 1
 
-        world = World(width21, height21)
+        world = World(width_with_gaps, height_with_gaps)
 
         if False:
             mid_x = width // 2
@@ -260,31 +262,31 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
             world.tileRows[mid_y][mid_x].entropy = 0
 
         if True:
-            for y in range(height21):
-                for x in range(width21):
+            for y in range(height_with_gaps):
+                for x in range(width_with_gaps):
                     possibilities = [TILE_10]
                     world.tileRows[y][x].set_possibilities(possibilities)
 
             for y in range(height):
                 for x in range(width):
                     pixel = image[y, x]
-                    x2 = x * 2
-                    y2 = y * 2
+                    dest_x = x * pixel_distance
+                    dest_y = y * pixel_distance
                     if pixel == 5:
                         possibilities = [TILE_5]
-                        world.tileRows[y2][x2].set_possibilities(possibilities)
+                        world.tileRows[dest_y][dest_x].set_possibilities(possibilities)
                     else:
                         possibilities = [TILE_1, TILE_2]
-                        world.tileRows[y2][x2].set_possibilities(possibilities)
+                        world.tileRows[dest_y][dest_x].set_possibilities(possibilities)
 
         print(f"before collapse. world.entropy: {world.getLowestEntropy()}")
         wfc_status = world.waveFunctionCollapse()
         # print(f"Wave function collapse status: {wfc_status}")
         print(f"after collapse. world.entropy: {world.getLowestEntropy()}")
 
-        new_image = np.zeros((height21, width21), dtype=np.uint8)
-        for y in range(height21):
-            for x in range(width21):
+        new_image = np.zeros((height_with_gaps, width_with_gaps), dtype=np.uint8)
+        for y in range(height_with_gaps):
+            for x in range(width_with_gaps):
                 new_image[y, x] = world.getType(x, y)
         
         title_image_list = [
