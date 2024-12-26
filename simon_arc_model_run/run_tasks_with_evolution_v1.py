@@ -10,6 +10,7 @@ sys.path.insert(0, PROJECT_ROOT)
 
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.task import Task
+from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.gallery_generator import gallery_generator_run
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -47,6 +48,13 @@ class ImageSize:
 
 class Node(ABC):
     @abstractmethod
+    def warmup_image(self, input_image: np.array) -> bool:
+        """
+        Return if the warmup was successful.
+        """
+        pass
+
+    @abstractmethod
     def compute_image(self, input_image: np.array) -> np.array:
         pass
     
@@ -66,22 +74,94 @@ class PixelNode(Node):
         return output_image
 
 class DoNothingNode(Node):
+    def warmup_image(self, input_image: np.array) -> bool:
+        return True
+
     def compute_image(self, input_image: np.array) -> np.array:
         return input_image.copy()
 
 class EdgePixelNode(PixelNode):
+    def __init__(self):
+        super().__init__()
+        self.edge_color = None
+
+    def warmup_image(self, input_image: np.array) -> bool:
+        histogram = Histogram.create_with_image(input_image)
+        self.edge_color = histogram.most_popular_color()
+        if self.edge_color is None:
+            return False
+        return True
+
     def compute_pixel(self, size: ImageSize, position: PixelPosition, pixel_value: int) -> int:
         is_edge = position.x == 0 or position.y == 0 or position.x == size.width - 1 or position.y == size.height - 1
         if is_edge:
-            return pixel_value
-        return 0
+            # return self.edge_color
+            return 0
+        return pixel_value
     
-class Solver:
+class SolverInner(ABC):
+    def warmup(self, task: Task):
+        pass
+
+    @abstractmethod
+    def compute_output(self, input_image: np.array, seed: int) -> np.array:
+        pass
+
+
+class MySolverInner(SolverInner):
     def __init__(self):
         self.nodes = [
             DoNothingNode(),
             # EdgePixelNode(),
         ]
+
+    def warmup(self, task: Task):
+        color_list = []
+        for pair_index in range(task.count_examples + task.count_tests):
+            input_image = task.input_images[pair_index]
+            histogram = Histogram.create_with_image(input_image)
+            color = histogram.most_popular_color()
+            if color is None:
+                print(f"{task.metadata_task_id} - inputs have ambiguous most popular color")
+                break
+            color_list.append(color)
+        color_set = set(color_list)
+        if len(color_set) == 1:
+            print(f"{task.metadata_task_id} - inputs agree on same most popular color: {color_set}")
+        else:
+            print(f"{task.metadata_task_id} - inputs use different most popular colors: {color_set}")
+
+    def compute_output(self, input_image: np.array, seed: int) -> np.array:
+        output_image = None
+        for node_index, node in enumerate(self.nodes):
+            if node_index == 0:
+                buffer_input = input_image
+            else:
+                buffer_input = output_image
+            output_image = node.compute_image(buffer_input)
+        return output_image
+
+class DoNothingSolverInner(SolverInner):
+    def __init__(self):
+        pass
+
+    def compute_output(self, input_image: np.array, seed: int) -> np.array:
+        return input_image.copy()
+
+class Solver:
+    def __init__(self, solver_inner: SolverInner):
+        self.solver_inner = solver_inner
+
+    @staticmethod
+    def create(task: Task) -> 'Solver':
+        if task.has_same_input_output_size_for_all_examples() == False:
+            raise ValueError("Task has different input/output sizes for examples.")
+
+        solver_inner = MySolverInner()
+        # solver_inner = DoNothingSolverInner()
+        solver_inner.warmup(task)
+        solver = Solver(solver_inner)
+        return solver
 
     def process_training_pairs(self, task: Task, seed: int) -> int:
         if task.has_same_input_output_size_for_all_examples() == False:
@@ -109,14 +189,7 @@ class Solver:
         return correct_pixels
     
     def compute_output(self, input_image: np.array, seed: int) -> np.array:
-        output_image = None
-        for node_index, node in enumerate(self.nodes):
-            if node_index == 0:
-                buffer_input = input_image
-            else:
-                buffer_input = output_image
-            output_image = node.compute_image(buffer_input)
-        return output_image
+        return self.solver_inner.compute_output(input_image, seed)
     
 number_of_items_in_list = len(datasetid_groupname_pathtotaskdir_list)
 for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_groupname_pathtotaskdir_list):
@@ -146,10 +219,16 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
             height, width = output.shape
             number_of_output_pixels_in_test_pairs += width * height
 
-    solver = Solver()
+    print("warmup start")
+    task_to_solver = dict()
+    for task in taskset.tasks:
+        solver = Solver.create(task)
+        task_to_solver[task.metadata_task_id] = solver
+    print("warmup done")
 
     number_of_iterations = 10
     for iteration_index in range(number_of_iterations):
+        solver = task_to_solver[task.metadata_task_id]
         count_correct_pixels = 0
         for task in taskset.tasks:
             seed = iteration_index * 1000 + test_index
@@ -161,6 +240,7 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
 
     test_count_correct_pixels = 0
     for task in taskset.tasks:
+        solver = task_to_solver[task.metadata_task_id]
         for test_index in range(task.count_tests):
             seed = iteration_index * 1000 + test_index
             test_count_correct_pixels += solver.process_test_pair(task, test_index, seed)
