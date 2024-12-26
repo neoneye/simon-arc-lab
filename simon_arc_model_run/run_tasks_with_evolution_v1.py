@@ -3,6 +3,7 @@ import os
 import sys
 import numpy as np
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
@@ -33,27 +34,53 @@ for dataset_id, groupname, path_to_task_dir in datasetid_groupname_pathtotaskdir
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
 
+@dataclass
+class PixelPosition:
+    x: int
+    y: int
+
+@dataclass
+class ImageSize:
+    width: int
+    height: int
+
+
 class Node(ABC):
     @abstractmethod
-    def compute_pixel(self, x: int, y: int, value: int) -> int:
-        return value
+    def compute_image(self, input_image: np.array) -> np.array:
+        pass
+    
+class PixelNode(Node):
+    @abstractmethod
+    def compute_pixel(self, size: ImageSize, position: PixelPosition, pixel_value: int) -> int:
+        return pixel_value
     
     def compute_image(self, input_image: np.array) -> np.array:
         height, width = input_image.shape
+        image_size = ImageSize(width=width, height=height)
         output_image = np.zeros((height, width), dtype=np.uint8)
         for y in range(height):
             for x in range(width):
-                output_image[y, x] = self.compute_pixel(x, y, input_image[y, x])
+                position = PixelPosition(x=x, y=y)
+                output_image[y, x] = self.compute_pixel(image_size, position, input_image[y, x])
         return output_image
 
 class DoNothingNode(Node):
-    def compute_pixel(self, x: int, y: int, value: int) -> int:
-        return value
+    def compute_image(self, input_image: np.array) -> np.array:
+        return input_image.copy()
 
+class EdgePixelNode(PixelNode):
+    def compute_pixel(self, size: ImageSize, position: PixelPosition, pixel_value: int) -> int:
+        is_edge = position.x == 0 or position.y == 0 or position.x == size.width - 1 or position.y == size.height - 1
+        if is_edge:
+            return pixel_value
+        return 0
+    
 class Solver:
     def __init__(self):
         self.nodes = [
             DoNothingNode(),
+            # EdgePixelNode(),
         ]
 
     def process_training_pairs(self, task: Task, seed: int) -> int:
