@@ -48,13 +48,6 @@ class ImageSize:
 
 class Node(ABC):
     @abstractmethod
-    def warmup_image(self, input_image: np.array) -> bool:
-        """
-        Return if the warmup was successful.
-        """
-        pass
-
-    @abstractmethod
     def compute_image(self, input_image: np.array) -> np.array:
         pass
     
@@ -74,29 +67,18 @@ class PixelNode(Node):
         return output_image
 
 class DoNothingNode(Node):
-    def warmup_image(self, input_image: np.array) -> bool:
-        return True
-
     def compute_image(self, input_image: np.array) -> np.array:
         return input_image.copy()
 
 class EdgePixelNode(PixelNode):
-    def __init__(self):
+    def __init__(self, edge_color: int):
         super().__init__()
-        self.edge_color = None
-
-    def warmup_image(self, input_image: np.array) -> bool:
-        histogram = Histogram.create_with_image(input_image)
-        self.edge_color = histogram.most_popular_color()
-        if self.edge_color is None:
-            return False
-        return True
+        self.edge_color = edge_color
 
     def compute_pixel(self, size: ImageSize, position: PixelPosition, pixel_value: int) -> int:
         is_edge = position.x == 0 or position.y == 0 or position.x == size.width - 1 or position.y == size.height - 1
         if is_edge:
-            # return self.edge_color
-            return 0
+            return self.edge_color
         return pixel_value
     
 class SolverInner(ABC):
@@ -110,12 +92,23 @@ class SolverInner(ABC):
 
 class MySolverInner(SolverInner):
     def __init__(self):
+        self.global_color_values = dict()
+        self.pair_specific_color_values = []
         self.nodes = [
             DoNothingNode(),
             # EdgePixelNode(),
         ]
 
     def warmup(self, task: Task):
+        for _ in range(task.count_examples + task.count_tests):
+            self.pair_specific_color_values.append(dict())
+        self.warmup_input_most_popular_color(task)
+
+        if self.global_color_values.get('input_most_popular_color') is not None:
+            color = self.global_color_values['input_most_popular_color']
+            self.nodes.append(EdgePixelNode(edge_color=color))
+
+    def warmup_input_most_popular_color(self, task: Task):
         color_list = []
         for pair_index in range(task.count_examples + task.count_tests):
             input_image = task.input_images[pair_index]
@@ -123,13 +116,16 @@ class MySolverInner(SolverInner):
             color = histogram.most_popular_color()
             if color is None:
                 print(f"{task.metadata_task_id} - inputs have ambiguous most popular color")
-                break
+                return
             color_list.append(color)
         color_set = set(color_list)
         if len(color_set) == 1:
             print(f"{task.metadata_task_id} - inputs agree on same most popular color: {color_set}")
+            self.global_color_values['input_most_popular_color'] = color_set.pop()
         else:
             print(f"{task.metadata_task_id} - inputs use different most popular colors: {color_set}")
+            for pair_index, color in enumerate(color_list):
+                self.pair_specific_color_values[pair_index]['input_most_popular_color'] = color
 
     def compute_output(self, input_image: np.array, seed: int) -> np.array:
         output_image = None
@@ -157,8 +153,8 @@ class Solver:
         if task.has_same_input_output_size_for_all_examples() == False:
             raise ValueError("Task has different input/output sizes for examples.")
 
-        solver_inner = MySolverInner()
         # solver_inner = DoNothingSolverInner()
+        solver_inner = MySolverInner()
         solver_inner.warmup(task)
         solver = Solver(solver_inner)
         return solver
