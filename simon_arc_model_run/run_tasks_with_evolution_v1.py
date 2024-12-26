@@ -86,27 +86,52 @@ class SolverInner(ABC):
         pass
 
     @abstractmethod
-    def compute_output(self, input_image: np.array, seed: int) -> np.array:
+    def compute_output(self, pair_index: int, input_image: np.array, seed: int) -> np.array:
         pass
 
 
 class MySolverInner(SolverInner):
     def __init__(self):
         self.global_color_values = dict()
-        self.pair_specific_color_values = []
-        self.nodes = [
-            DoNothingNode(),
-            # EdgePixelNode(),
-        ]
+        self.pair_specific_color_values = dict()
+        self.nodes_per_pair = []
 
     def warmup(self, task: Task):
-        for _ in range(task.count_examples + task.count_tests):
-            self.pair_specific_color_values.append(dict())
+        count_pairs = task.count_examples + task.count_tests
+        for _ in range(count_pairs):
+            self.nodes_per_pair.append([])
+
         self.warmup_input_most_popular_color(task)
 
         if self.global_color_values.get('input_most_popular_color') is not None:
             color = self.global_color_values['input_most_popular_color']
-            self.nodes.append(EdgePixelNode(edge_color=color))
+            for pair_index in range(count_pairs):
+                self.nodes_per_pair[pair_index].append(EdgePixelNode(edge_color=color))
+        elif self.pair_specific_color_values.get('input_most_popular_color') is not None:
+            color_list = self.pair_specific_color_values['input_most_popular_color']
+            for pair_index, color in enumerate(color_list):
+                self.nodes_per_pair[pair_index].append(EdgePixelNode(edge_color=color))
+
+        # Ensure that all pairs have the same number of nodes
+        count_min = 0
+        count_max = 0
+        for pair_index in range(count_pairs):
+            count = len(self.nodes_per_pair[pair_index])
+            if pair_index > 0:
+                count_min = min(count_min, count)
+                count_max = max(count_max, count)
+            else:
+                count_min = count
+                count_max = count
+        if count_min != count_max:
+            raise ValueError("Different number of nodes per pair")
+        
+        # If not initialized then create dummy nodes 
+        all_empty = count_min == 0
+        if all_empty:
+            for pair_index in range(task.count_examples + task.count_tests):
+                dummy_node = DoNothingNode()
+                self.nodes_per_pair[pair_index].append(dummy_node)
 
     def warmup_input_most_popular_color(self, task: Task):
         color_list = []
@@ -123,13 +148,13 @@ class MySolverInner(SolverInner):
             print(f"{task.metadata_task_id} - inputs agree on same most popular color: {color_set}")
             self.global_color_values['input_most_popular_color'] = color_set.pop()
         else:
-            print(f"{task.metadata_task_id} - inputs use different most popular colors: {color_set}")
-            for pair_index, color in enumerate(color_list):
-                self.pair_specific_color_values[pair_index]['input_most_popular_color'] = color
+            print(f"{task.metadata_task_id} - inputs use different most popular colors: {color_list}")
+            self.pair_specific_color_values['input_most_popular_color'] = color_list
 
-    def compute_output(self, input_image: np.array, seed: int) -> np.array:
+    def compute_output(self, pair_index: int, input_image: np.array, seed: int) -> np.array:
+        nodes = self.nodes_per_pair[pair_index]
         output_image = None
-        for node_index, node in enumerate(self.nodes):
+        for node_index, node in enumerate(nodes):
             if node_index == 0:
                 buffer_input = input_image
             else:
@@ -141,7 +166,7 @@ class DoNothingSolverInner(SolverInner):
     def __init__(self):
         pass
 
-    def compute_output(self, input_image: np.array, seed: int) -> np.array:
+    def compute_output(self, pair_index: int, input_image: np.array, seed: int) -> np.array:
         return input_image.copy()
 
 class Solver:
@@ -165,7 +190,7 @@ class Solver:
         
         for train_index in range(task.count_examples):
             input = task.example_input(train_index)
-            predicted_output = self.compute_output(input, seed)
+            predicted_output = self.compute_output(train_index, input, seed)
             expected_output = task.example_output(train_index)
             if predicted_output.shape != expected_output.shape:
                 return 0
@@ -177,15 +202,16 @@ class Solver:
             raise ValueError("Task has different input/output sizes for examples.")
         
         input = task.test_input(test_index)
-        predicted_output = self.compute_output(input, seed)
+        pair_id = task.count_examples + test_index
+        predicted_output = self.compute_output(pair_id, input, seed)
         expected_output = task.test_output(test_index)
         if predicted_output.shape != expected_output.shape:
             return 0
         correct_pixels = np.sum(predicted_output == expected_output)
         return correct_pixels
     
-    def compute_output(self, input_image: np.array, seed: int) -> np.array:
-        return self.solver_inner.compute_output(input_image, seed)
+    def compute_output(self, pair_index: int, input_image: np.array, seed: int) -> np.array:
+        return self.solver_inner.compute_output(pair_index, input_image, seed)
     
 number_of_items_in_list = len(datasetid_groupname_pathtotaskdir_list)
 for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_groupname_pathtotaskdir_list):
