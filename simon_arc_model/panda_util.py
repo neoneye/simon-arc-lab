@@ -620,7 +620,18 @@ class DecisionTreeUtil:
                     object_id_ray = image_raytrace_probecolor_direction(object_ids, object_id_outside_color, direction)
                     data[f'raytrace_probecolor_direction{direction}_objectid_connectivity{component_pixel_connectivity}'] = object_id_ray.flatten().tolist()
 
-        the_image_outline_all8 = image_outline_all8(image)
+        if True:
+            the_image_outline_all8 = image_outline_all8(image)
+
+            values = []
+            for y in range(height):
+                for x in range(width):
+                    is_outline = the_image_outline_all8[y, x]
+                    if is_outline == 1:
+                        values.append(100)
+                    else:
+                        values.append(-100)
+            data['image_outline_all8'] = values
 
         image_same_list = []
         n = lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap
@@ -793,12 +804,6 @@ class DecisionTreeUtil:
         for y in range(height):
             for x in range(width):
                 values = []
-
-                is_outline = the_image_outline_all8[y, x]
-                if is_outline == 1:
-                    values.append(100)
-                else:
-                    values.append(-100)
 
                 for image_same in image_same_list:
                     is_same = image_same[y, x] == 1
