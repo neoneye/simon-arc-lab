@@ -418,12 +418,12 @@ class DecisionTreeUtil:
         components_list = []
         for component_pixel_connectivity in component_pixel_connectivity_list:
             components = ConnectedComponent.find_objects_with_ignore_mask_inner(component_pixel_connectivity, image, ignore_mask)
-            components_list.append(components)
+            components_list.append((components, component_pixel_connectivity))
 
         # Column with shape info
         if DecisionTreeFeature.IDENTIFY_OBJECT_SHAPE in features:
             object_shape_image = np.zeros((height, width), dtype=np.uint32)
-            for component_index, components in enumerate(components_list):
+            for component_index, (components, component_pixel_connectivity) in enumerate(components_list):
                 for component_index, component in enumerate(components):
                     rect = find_bounding_box_ignoring_color(component.mask, 0)
                     rect_mass = rect.width * rect.height
@@ -459,7 +459,7 @@ class DecisionTreeUtil:
 
         # Image with object ids
         object_ids_list = []
-        for component_index, components in enumerate(components_list):
+        for component_index, (components, component_pixel_connectivity) in enumerate(components_list):
             object_ids = np.zeros((height, width), dtype=np.uint32)
             object_id_start = (pair_id + 1) * 1000
             if is_earlier_prediction:
@@ -474,9 +474,25 @@ class DecisionTreeUtil:
                             object_ids[y, x] = object_id
             object_ids_list.append(object_ids)
 
+            k = lookaround_size_object_ids
+            n = k * 2 + 1
+            for ry in range(n):
+                for rx in range(n):
+                    values = []
+                    for y in range(height):
+                        for x in range(width):
+                            xx = x + rx - k
+                            yy = y + ry - k
+                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                                values.append(0)
+                            else:
+                                values.append(object_ids[yy, xx])
+                    data[f'component_{component_pixel_connectivity}_lookaround_object_ids_x{rx}_y{ry}'] = values
+
+
         # Image with object mass
         object_masses_list = []
-        for components in components_list:
+        for (components, component_pixel_connectivity) in components_list:
             object_masses = np.zeros((height, width), dtype=np.uint32)
             for component_index, component in enumerate(components):
                 for y in range(height):
@@ -488,7 +504,7 @@ class DecisionTreeUtil:
 
         object_distance_list = []
         if DecisionTreeFeature.DISTANCE_INSIDE_OBJECT in features:
-            for component_index, components in enumerate(components_list):
+            for component_index, (components, component_pixel_connectivity) in enumerate(components_list):
                 object_distance_topleft = np.zeros((height, width), dtype=np.uint32)
                 object_distance_topright = np.zeros((height, width), dtype=np.uint32)
                 object_distance_bottomleft = np.zeros((height, width), dtype=np.uint32)
@@ -724,20 +740,6 @@ class DecisionTreeUtil:
                 y_rev = height - y - 1
 
                 suppress_center_pixel_lookaround = DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND in features
-                k = lookaround_size_image_pixel
-                n = k * 2 + 1
-
-                for object_ids in object_ids_list:
-                    k = lookaround_size_object_ids
-                    n = k * 2 + 1
-                    for ry in range(n):
-                        for rx in range(n):
-                            xx = x + rx - k
-                            yy = y + ry - k
-                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                                values.append(0)
-                            else:
-                                values.append(object_ids[yy, xx])
 
                 for object_masses in object_masses_list:
                     k = lookaround_size_mass
