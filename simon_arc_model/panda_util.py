@@ -206,6 +206,7 @@ class DecisionTreeUtil:
     def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> dict:
         # print(f'xs_for_input_image: pair_id={pair_id} features={features} is_earlier_prediction={is_earlier_prediction}')
         height, width = image.shape
+        pixel_count = width * height 
 
         lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 1
         lookaround_size_image_pixel = 1
@@ -504,7 +505,7 @@ class DecisionTreeUtil:
 
         data = {}
         # Column "pair_id"
-        data['pair_id'] = [pair_id] * (height * width)
+        data['pair_id'] = [pair_id] * pixel_count
 
         # Column "center_pixel"
         if DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE not in features:
@@ -537,6 +538,66 @@ class DecisionTreeUtil:
             data['is_least_popular'] = values_least_popular
             data['is_medium_popular'] = values_medium_popular
 
+        # Column "is_earlier_prediction"
+        if True:
+            value = 0 if is_earlier_prediction else 1
+            data['is_earlier_prediction'] = [value] * pixel_count
+
+        # Position related columns
+        if DecisionTreeFeature.POSITION_XY0 in features:
+            values_x = []
+            values_y = []
+            values_x_rev = []
+            values_y_rev = []
+            for y in range(height):
+                for x in range(width):
+                    x_rev = width - x - 1
+                    y_rev = height - y - 1
+                    values_x.append(x)
+                    values_y.append(y)
+                    values_x_rev.append(x_rev)
+                    values_y_rev.append(y_rev)
+            data['position_x'] = values_x
+            data['position_y'] = values_y
+            data['position_x_rev'] = values_x_rev
+            data['position_y_rev'] = values_y_rev
+
+        if DecisionTreeFeature.POSITION_XY4 in features:
+            for i in range(4):
+                values_x_plus = []
+                values_x_minus = []
+                values_y_plus = []
+                values_y_minus = []
+                values_x_rev_plus = []
+                values_x_rev_minus = []
+                values_y_rev_plus = []
+                values_y_rev_minus = []
+                for y in range(height):
+                    for x in range(width):
+                        x_rev = width - x - 1
+                        y_rev = height - y - 1
+                        j = i + 1
+                        values_x_plus.append(x + j)
+                        values_x_minus.append(x - j)
+                        values_y_plus.append(y + j)
+                        values_y_minus.append(y - j)
+                        values_x_rev_plus.append(x_rev + j)
+                        values_x_rev_minus.append(x_rev - j)
+                        values_y_rev_plus.append(y_rev + j)
+                        values_y_rev_minus.append(y_rev - j)
+                data[f'position_x_plus_{i}'] = values_x_plus
+                data[f'position_x_minus_{i}'] = values_x_minus
+                data[f'position_y_plus_{i}'] = values_y_plus
+                data[f'position_y_minus_{i}'] = values_y_minus
+                data[f'position_x_rev_plus_{i}'] = values_x_rev_plus
+                data[f'position_x_rev_minus_{i}'] = values_x_rev_minus
+                data[f'position_y_rev_plus_{i}'] = values_y_rev_plus
+                data[f'position_y_rev_minus_{i}'] = values_y_rev_minus
+
+        count_min, count_max = cls.count_values_xs(data)
+        if count_min != count_max:
+            raise ValueError(f'The lists must have the same length. However the lists have different lengths. count_min={count_min} count_max={count_max}')
+
         return data
 
         # TODO: instead of populating a list, I want to populate a pandas dataframe. How to do that?
@@ -544,55 +605,9 @@ class DecisionTreeUtil:
         for y in range(height):
             for x in range(width):
                 values = []
-                values.append(pair_id)
-
-                if DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE not in features:
-                    values.append(image[y, x])
-
-                if DecisionTreeFeature.COLOR_POPULARITY in features:
-                    k = 1
-                    n = k * 2 + 1
-                    for ry in range(n):
-                        for rx in range(n):
-                            xx = x + rx - k
-                            yy = y + ry - k
-                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                                values.append(0)
-                                values.append(0)
-                                values.append(0)
-                            else:
-                                color = image[yy, xx]
-                                is_most_popular = color in most_popular_color_set
-                                values.append(int(is_most_popular))
-                                is_least_popular = color in least_popular_color_set
-                                values.append(int(is_least_popular))
-                                is_medium_popular = is_most_popular == False and is_least_popular == False
-                                values.append(int(is_medium_popular))
-
-                if is_earlier_prediction:
-                    values.append(0)
-                else:
-                    values.append(1)
 
                 x_rev = width - x - 1
                 y_rev = height - y - 1
-
-                if DecisionTreeFeature.POSITION_XY0 in features:
-                    values.append(x)
-                    values.append(y)
-                    values.append(x_rev)
-                    values.append(y_rev)
-                if DecisionTreeFeature.POSITION_XY4 in features:
-                    for i in range(4):
-                        j = i + 1
-                        values.append(x + j)
-                        values.append(x - j)
-                        values.append(y + j)
-                        values.append(y - j)
-                        values.append(x_rev + j)
-                        values.append(x_rev - j)
-                        values.append(y_rev + j)
-                        values.append(y_rev - j)
 
                 if DecisionTreeFeature.ANY_EDGE in features:
                     is_edge = x == 0 or x_rev == 0 or y == 0 or y_rev == 0
@@ -885,11 +900,14 @@ class DecisionTreeUtil:
         assert len(xs0.keys()) == len(xs1.keys())
 
         xs0_count_min, xs0_count_max = cls.count_values_xs(xs0)
-        assert xs0_count_min == xs0_count_max
-        xs1_count_min, xs1_count_max = cls.count_values_xs(xs1)
-        assert xs1_count_min == xs1_count_max
+        if xs0_count_min != xs0_count_max:
+            raise ValueError(f'Expected same pixel count for lists in xs0 dict, {xs0_count_min} != {xs0_count_max}')
 
-        # both xs0 and xs1 have the same number of values per pixel
+        xs1_count_min, xs1_count_max = cls.count_values_xs(xs1)
+        if xs1_count_min != xs1_count_max:
+            raise ValueError(f'Expected same pixel count for lists in xs1 dict, {xs1_count_min} != {xs1_count_max}')
+
+        # both xs0 and xs1 should have the same pixel count
         assert xs0_count_min == xs1_count_min
 
         xs = {}
