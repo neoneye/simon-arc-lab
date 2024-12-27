@@ -208,6 +208,7 @@ class DecisionTreeUtil:
         height, width = image.shape
         pixel_count = width * height 
 
+        outside_color = 10
 
         data = {}
         # Column "pair_id"
@@ -385,6 +386,25 @@ class DecisionTreeUtil:
         lookaround_size_shape3x3_center = 0
         lookaround_size_shape3x3_opposite = 0
 
+        if True:
+            suppress_center_pixel_lookaround = DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND in features
+            k = lookaround_size_image_pixel
+            n = k * 2 + 1
+            for ry in range(n):
+                for rx in range(n):
+                    if suppress_center_pixel_lookaround and rx == k and ry == k:
+                        continue
+                    values = []
+                    for y in range(height):
+                        for x in range(width):
+                            xx = x + rx - k
+                            yy = y + ry - k
+                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                                values.append(outside_color)
+                            else:
+                                values.append(image[yy, xx])
+                    data[f'lookaround_image_pixel_x{rx}_y{ry}'] = values
+
         component_pixel_connectivity_list = []
         if DecisionTreeFeature.COMPONENT_NEAREST4 in features:
             component_pixel_connectivity_list.append(PixelConnectivity.NEAREST4)
@@ -487,8 +507,6 @@ class DecisionTreeUtil:
 
         image_shape3x3_opposite = ImageShape3x3Opposite.apply(image)
         image_shape3x3_center = ImageShape3x3Center.apply(image)
-
-        outside_color = 10
 
         ray_directions = [
             ImageRaytraceProbeColorDirection.TOP,
@@ -693,16 +711,6 @@ class DecisionTreeUtil:
                 suppress_center_pixel_lookaround = DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND in features
                 k = lookaround_size_image_pixel
                 n = k * 2 + 1
-                for ry in range(n):
-                    for rx in range(n):
-                        if suppress_center_pixel_lookaround and rx == k and ry == k:
-                            continue
-                        xx = x + rx - k
-                        yy = y + ry - k
-                        if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                            values.append(outside_color)
-                        else:
-                            values.append(image[yy, xx])
 
                 for object_shape in object_shape_list:
                     k = lookaround_size_shape
