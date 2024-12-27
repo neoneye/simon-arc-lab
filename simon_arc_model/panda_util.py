@@ -208,6 +208,139 @@ class DecisionTreeUtil:
         height, width = image.shape
         pixel_count = width * height 
 
+
+        data = {}
+        # Column "pair_id"
+        data['pair_id'] = [pair_id] * pixel_count
+
+        # Column "center_pixel"
+        if DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE not in features:
+            data['center_pixel'] = image.flatten().tolist()
+
+        # Column "color_popularity"
+        if DecisionTreeFeature.COLOR_POPULARITY in features:
+            values_most_popular = []
+            values_least_popular = []
+            values_medium_popular = []
+            k = 1
+            n = k * 2 + 1
+            for ry in range(n):
+                for rx in range(n):
+                    xx = x + rx - k
+                    yy = y + ry - k
+                    if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                        values_most_popular.append(0)
+                        values_least_popular.append(0)
+                        values_medium_popular.append(0)
+                    else:
+                        color = image[yy, xx]
+                        is_most_popular = color in most_popular_color_set
+                        values_most_popular.append(int(is_most_popular))
+                        is_least_popular = color in least_popular_color_set
+                        values_least_popular.append(int(is_least_popular))
+                        is_medium_popular = is_most_popular == False and is_least_popular == False
+                        values_medium_popular.append(int(is_medium_popular))
+            data['is_most_popular'] = values_most_popular
+            data['is_least_popular'] = values_least_popular
+            data['is_medium_popular'] = values_medium_popular
+
+        # Column "is_earlier_prediction"
+        if True:
+            value = 0 if is_earlier_prediction else 1
+            data['is_earlier_prediction'] = [value] * pixel_count
+
+        # Position related columns
+        if DecisionTreeFeature.POSITION_XY0 in features:
+            values_x = []
+            values_y = []
+            values_x_rev = []
+            values_y_rev = []
+            for y in range(height):
+                for x in range(width):
+                    x_rev = width - x - 1
+                    y_rev = height - y - 1
+                    values_x.append(x)
+                    values_y.append(y)
+                    values_x_rev.append(x_rev)
+                    values_y_rev.append(y_rev)
+            data['position_x'] = values_x
+            data['position_y'] = values_y
+            data['position_x_rev'] = values_x_rev
+            data['position_y_rev'] = values_y_rev
+
+        if DecisionTreeFeature.POSITION_XY4 in features:
+            for i in range(4):
+                values_x_plus = []
+                values_x_minus = []
+                values_y_plus = []
+                values_y_minus = []
+                values_x_rev_plus = []
+                values_x_rev_minus = []
+                values_y_rev_plus = []
+                values_y_rev_minus = []
+                for y in range(height):
+                    for x in range(width):
+                        x_rev = width - x - 1
+                        y_rev = height - y - 1
+                        j = i + 1
+                        values_x_plus.append(x + j)
+                        values_x_minus.append(x - j)
+                        values_y_plus.append(y + j)
+                        values_y_minus.append(y - j)
+                        values_x_rev_plus.append(x_rev + j)
+                        values_x_rev_minus.append(x_rev - j)
+                        values_y_rev_plus.append(y_rev + j)
+                        values_y_rev_minus.append(y_rev - j)
+                data[f'position_x_plus_{i}'] = values_x_plus
+                data[f'position_x_minus_{i}'] = values_x_minus
+                data[f'position_y_plus_{i}'] = values_y_plus
+                data[f'position_y_minus_{i}'] = values_y_minus
+                data[f'position_x_rev_plus_{i}'] = values_x_rev_plus
+                data[f'position_x_rev_minus_{i}'] = values_x_rev_minus
+                data[f'position_y_rev_plus_{i}'] = values_y_rev_plus
+                data[f'position_y_rev_minus_{i}'] = values_y_rev_minus
+
+        if DecisionTreeFeature.ANY_EDGE in features:
+            values = []
+            for y in range(height):
+                for x in range(width):
+                    is_edge = x == 0 or x == width - 1 or y == 0 or y == height - 1
+                    values.append(int(is_edge))
+            data['any_edge'] = values
+
+        if DecisionTreeFeature.ANY_CORNER in features:
+            values = []
+            for y in range(height):
+                for x in range(width):
+                    x_rev = width - x - 1
+                    y_rev = height - y - 1
+                    is_corner = (x == 0 and y == 0) or (x == 0 and y_rev == 0) or (x_rev == 0 and y == 0) or (x_rev == 0 and y_rev == 0)
+                    values.append(int(is_corner))
+            data['any_corner'] = values
+
+        # Columns diagonal distances
+        if True:
+            steps = [1, 3, 7]
+            for step in steps:
+                values_x_plus_y = []
+                values_x_rev_plus_y = []
+                values_x_plus_y_rev = []
+                values_x_rev_plus_y_rev = []
+                for y in range(height):
+                    for x in range(width):
+                        x_rev = width - x - 1
+                        y_rev = height - y - 1
+
+                        values_x_plus_y.append(int((x + y) & step > 0))
+                        values_x_rev_plus_y.append(int((x_rev + y) & step > 0))
+                        values_x_plus_y_rev.append(int((x + y_rev) & step > 0))
+                        values_x_rev_plus_y_rev.append(int((x_rev + y_rev) & step > 0))
+                data[f'diagonal_distance_step{step}_x_plus_y'] = values_x_plus_y
+                data[f'diagonal_distance_step{step}_x_rev_plus_y'] = values_x_rev_plus_y
+                data[f'diagonal_distance_step{step}_x_plus_y_rev'] = values_x_plus_y_rev
+                data[f'diagonal_distance_step{step}_x_rev_plus_y_rev'] = values_x_rev_plus_y_rev
+
+
         lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 1
         lookaround_size_image_pixel = 1
         lookaround_size_shape = 0
@@ -481,7 +614,6 @@ class DecisionTreeUtil:
             mass_compare_adjacent_columns = image_mass_compare_adjacent_columns(image, 0, 1, 2)
             mass_compare_adjacent_columns_width = mass_compare_adjacent_columns.shape[1]
 
-        bounding_box_list = []
         if DecisionTreeFeature.BOUNDING_BOXES in features:
             for color in range(10):
                 ignore_colors = []
@@ -489,7 +621,12 @@ class DecisionTreeUtil:
                     if ignore_color != color:
                         ignore_colors.append(ignore_color)
                 rect = find_bounding_box_multiple_ignore_colors(image, ignore_colors)
-                bounding_box_list.append(rect)
+                values = []
+                for y in range(height):
+                    for x in range(width):
+                        is_inside = x >= rect.x and x < rect.x + rect.width and y >= rect.y and y < rect.y + rect.height
+                        values.append(int(is_inside))
+                data[f'bounding_box_of_color{color}'] = values
 
         bigrams_top_bottom = None
         bigrams_left_right = None
@@ -502,115 +639,6 @@ class DecisionTreeUtil:
             for y in range(height):
                 for x in range(width-1):
                     bigrams_left_right[y, x] = image[y, x] * 10 + image[y, x+1]
-
-        data = {}
-        # Column "pair_id"
-        data['pair_id'] = [pair_id] * pixel_count
-
-        # Column "center_pixel"
-        if DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE not in features:
-            data['center_pixel'] = image.flatten().tolist()
-
-        # Column "color_popularity"
-        if DecisionTreeFeature.COLOR_POPULARITY in features:
-            values_most_popular = []
-            values_least_popular = []
-            values_medium_popular = []
-            k = 1
-            n = k * 2 + 1
-            for ry in range(n):
-                for rx in range(n):
-                    xx = x + rx - k
-                    yy = y + ry - k
-                    if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                        values_most_popular.append(0)
-                        values_least_popular.append(0)
-                        values_medium_popular.append(0)
-                    else:
-                        color = image[yy, xx]
-                        is_most_popular = color in most_popular_color_set
-                        values_most_popular.append(int(is_most_popular))
-                        is_least_popular = color in least_popular_color_set
-                        values_least_popular.append(int(is_least_popular))
-                        is_medium_popular = is_most_popular == False and is_least_popular == False
-                        values_medium_popular.append(int(is_medium_popular))
-            data['is_most_popular'] = values_most_popular
-            data['is_least_popular'] = values_least_popular
-            data['is_medium_popular'] = values_medium_popular
-
-        # Column "is_earlier_prediction"
-        if True:
-            value = 0 if is_earlier_prediction else 1
-            data['is_earlier_prediction'] = [value] * pixel_count
-
-        # Position related columns
-        if DecisionTreeFeature.POSITION_XY0 in features:
-            values_x = []
-            values_y = []
-            values_x_rev = []
-            values_y_rev = []
-            for y in range(height):
-                for x in range(width):
-                    x_rev = width - x - 1
-                    y_rev = height - y - 1
-                    values_x.append(x)
-                    values_y.append(y)
-                    values_x_rev.append(x_rev)
-                    values_y_rev.append(y_rev)
-            data['position_x'] = values_x
-            data['position_y'] = values_y
-            data['position_x_rev'] = values_x_rev
-            data['position_y_rev'] = values_y_rev
-
-        if DecisionTreeFeature.POSITION_XY4 in features:
-            for i in range(4):
-                values_x_plus = []
-                values_x_minus = []
-                values_y_plus = []
-                values_y_minus = []
-                values_x_rev_plus = []
-                values_x_rev_minus = []
-                values_y_rev_plus = []
-                values_y_rev_minus = []
-                for y in range(height):
-                    for x in range(width):
-                        x_rev = width - x - 1
-                        y_rev = height - y - 1
-                        j = i + 1
-                        values_x_plus.append(x + j)
-                        values_x_minus.append(x - j)
-                        values_y_plus.append(y + j)
-                        values_y_minus.append(y - j)
-                        values_x_rev_plus.append(x_rev + j)
-                        values_x_rev_minus.append(x_rev - j)
-                        values_y_rev_plus.append(y_rev + j)
-                        values_y_rev_minus.append(y_rev - j)
-                data[f'position_x_plus_{i}'] = values_x_plus
-                data[f'position_x_minus_{i}'] = values_x_minus
-                data[f'position_y_plus_{i}'] = values_y_plus
-                data[f'position_y_minus_{i}'] = values_y_minus
-                data[f'position_x_rev_plus_{i}'] = values_x_rev_plus
-                data[f'position_x_rev_minus_{i}'] = values_x_rev_minus
-                data[f'position_y_rev_plus_{i}'] = values_y_rev_plus
-                data[f'position_y_rev_minus_{i}'] = values_y_rev_minus
-
-        if DecisionTreeFeature.ANY_EDGE in features:
-            values = []
-            for y in range(height):
-                for x in range(width):
-                    is_edge = x == 0 or x == width - 1 or y == 0 or y == height - 1
-                    values.append(int(is_edge))
-            data['any_edge'] = values
-
-        if DecisionTreeFeature.ANY_CORNER in features:
-            values = []
-            for y in range(height):
-                for x in range(width):
-                    x_rev = width - x - 1
-                    y_rev = height - y - 1
-                    is_corner = (x == 0 and y == 0) or (x == 0 and y_rev == 0) or (x_rev == 0 and y == 0) or (x_rev == 0 and y_rev == 0)
-                    values.append(int(is_corner))
-            data['any_corner'] = values
 
         count_min, count_max = cls.count_values_xs(data)
         if count_min != count_max:
@@ -626,33 +654,6 @@ class DecisionTreeUtil:
 
                 x_rev = width - x - 1
                 y_rev = height - y - 1
-
-                steps = [1, 3, 7]
-                for step in steps:
-                    if (x + y) & step > 0:
-                        values.append(1)
-                    else:
-                        values.append(0)
-
-                    if (x_rev + y) & step > 0:
-                        values.append(1)
-                    else:
-                        values.append(0)
-
-                    if (x + y_rev) & step > 0:
-                        values.append(1)
-                    else:
-                        values.append(0)
-
-                    if (x_rev + y_rev) & step > 0:
-                        values.append(1)
-                    else:
-                        values.append(0)
-
-                if DecisionTreeFeature.BOUNDING_BOXES in features:
-                    for rect in bounding_box_list:
-                        is_inside = x >= rect.x and x < rect.x + rect.width and y >= rect.y and y < rect.y + rect.height
-                        values.append(int(is_inside))
 
                 if DecisionTreeFeature.CORNER in features:
                     corner_topleft = x == 0 and y == 0
