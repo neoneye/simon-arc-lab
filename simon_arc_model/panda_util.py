@@ -340,6 +340,27 @@ class DecisionTreeUtil:
                 data[f'diagonal_distance_step{step}_x_plus_y_rev'] = values_x_plus_y_rev
                 data[f'diagonal_distance_step{step}_x_rev_plus_y_rev'] = values_x_rev_plus_y_rev
 
+        if DecisionTreeFeature.CORNER in features:
+            values_topleft = []
+            values_topright = []
+            values_bottomleft = []
+            values_bottomright = []
+            for y in range(height):
+                for x in range(width):
+                    x_rev = width - x - 1
+                    y_rev = height - y - 1
+                    corner_topleft = x == 0 and y == 0
+                    corner_topright = x_rev == 0 and y == 0
+                    corner_bottomleft = x == 0 and y_rev == 0
+                    corner_bottomright = x_rev == 0 and y_rev == 0
+                    values_topleft.append(int(corner_topleft))
+                    values_topright.append(int(corner_topright))
+                    values_bottomleft.append(int(corner_bottomleft))
+                    values_bottomright.append(int(corner_bottomright))
+            data['corner_topleft'] = values_topleft
+            data['corner_topright'] = values_topright
+            data['corner_bottomleft'] = values_bottomleft
+            data['corner_bottomright'] = values_bottomright
 
         lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 1
         lookaround_size_image_pixel = 1
@@ -655,16 +676,6 @@ class DecisionTreeUtil:
                 x_rev = width - x - 1
                 y_rev = height - y - 1
 
-                if DecisionTreeFeature.CORNER in features:
-                    corner_topleft = x == 0 and y == 0
-                    corner_topright = x_rev == 0 and y == 0
-                    corner_bottomleft = x == 0 and y_rev == 0
-                    corner_bottomright = x_rev == 0 and y_rev == 0
-                    corner_values = [corner_topleft, corner_topright, corner_bottomleft, corner_bottomright]
-                    # convert bools to 0 or 1
-                    corner_values = [int(x) for x in corner_values]
-                    values.extend(corner_values)
-                
                 if DecisionTreeFeature.CENTER in features:
                     is_center_column = abs(x - x_rev) < 2
                     is_center_row = abs(y - y_rev) < 2
