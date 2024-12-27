@@ -362,6 +362,20 @@ class DecisionTreeUtil:
             data['corner_bottomleft'] = values_bottomleft
             data['corner_bottomright'] = values_bottomright
 
+        if DecisionTreeFeature.CENTER in features:
+            values_center_x = []
+            values_center_y = []
+            for y in range(height):
+                for x in range(width):
+                    x_rev = width - x - 1
+                    y_rev = height - y - 1
+                    is_center_column = abs(x - x_rev) < 2
+                    is_center_row = abs(y - y_rev) < 2
+                    values_center_x.append(int(is_center_column))
+                    values_center_y.append(int(is_center_row))
+            data['center_x'] = values_center_x
+            data['center_y'] = values_center_y
+
         lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 1
         lookaround_size_image_pixel = 1
         lookaround_size_shape = 0
@@ -675,12 +689,6 @@ class DecisionTreeUtil:
 
                 x_rev = width - x - 1
                 y_rev = height - y - 1
-
-                if DecisionTreeFeature.CENTER in features:
-                    is_center_column = abs(x - x_rev) < 2
-                    is_center_row = abs(y - y_rev) < 2
-                    values.append(int(is_center_column))
-                    values.append(int(is_center_row))
 
                 suppress_center_pixel_lookaround = DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND in features
                 k = lookaround_size_image_pixel
