@@ -609,10 +609,9 @@ class DecisionTreeUtil:
             ImageRaytraceProbeColorDirection.BOTTOMLEFT,
             ImageRaytraceProbeColorDirection.BOTTOMRIGHT,
         ]
-        image_ray_list = []
         for direction in ray_directions:
             image_ray = image_raytrace_probecolor_direction(image, outside_color, direction)
-            image_ray_list.append(image_ray)
+            data[f'raytrace_probecolor_direction{direction}_color'] = image_ray.flatten().tolist()
 
         object_id_ray_list = []
         if DecisionTreeFeature.OBJECT_ID_RAY_LIST in features:
@@ -795,14 +794,6 @@ class DecisionTreeUtil:
         for y in range(height):
             for x in range(width):
                 values = []
-
-                x_rev = width - x - 1
-                y_rev = height - y - 1
-
-                suppress_center_pixel_lookaround = DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND in features
-
-                for image_ray in image_ray_list:
-                    values.append(image_ray[y, x])
 
                 for object_ids in object_id_ray_list:
                     values.append(object_ids[y, x])
