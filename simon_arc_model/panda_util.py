@@ -594,6 +594,24 @@ class DecisionTreeUtil:
                 data[f'position_y_rev_plus_{i}'] = values_y_rev_plus
                 data[f'position_y_rev_minus_{i}'] = values_y_rev_minus
 
+        if DecisionTreeFeature.ANY_EDGE in features:
+            values = []
+            for y in range(height):
+                for x in range(width):
+                    is_edge = x == 0 or x == width - 1 or y == 0 or y == height - 1
+                    values.append(int(is_edge))
+            data['any_edge'] = values
+
+        if DecisionTreeFeature.ANY_CORNER in features:
+            values = []
+            for y in range(height):
+                for x in range(width):
+                    x_rev = width - x - 1
+                    y_rev = height - y - 1
+                    is_corner = (x == 0 and y == 0) or (x == 0 and y_rev == 0) or (x_rev == 0 and y == 0) or (x_rev == 0 and y_rev == 0)
+                    values.append(int(is_corner))
+            data['any_corner'] = values
+
         count_min, count_max = cls.count_values_xs(data)
         if count_min != count_max:
             raise ValueError(f'The lists must have the same length. However the lists have different lengths. count_min={count_min} count_max={count_max}')
@@ -608,14 +626,6 @@ class DecisionTreeUtil:
 
                 x_rev = width - x - 1
                 y_rev = height - y - 1
-
-                if DecisionTreeFeature.ANY_EDGE in features:
-                    is_edge = x == 0 or x_rev == 0 or y == 0 or y_rev == 0
-                    values.append(int(is_edge))
-
-                if DecisionTreeFeature.ANY_CORNER in features:
-                    is_corner = (x == 0 and y == 0) or (x == 0 and y_rev == 0) or (x_rev == 0 and y == 0) or (x_rev == 0 and y_rev == 0)
-                    values.append(int(is_corner))
 
                 steps = [1, 3, 7]
                 for step in steps:
