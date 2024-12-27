@@ -203,7 +203,7 @@ class DecisionTreePredictOutputResult:
 
 class DecisionTreeUtil:
     @classmethod
-    def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> list:
+    def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> dict:
         # print(f'xs_for_input_image: pair_id={pair_id} features={features} is_earlier_prediction={is_earlier_prediction}')
         height, width = image.shape
 
@@ -508,8 +508,36 @@ class DecisionTreeUtil:
 
         # Column "center_pixel"
         if DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE not in features:
-            data['center_pixel'] = image.flatten()
+            data['center_pixel'] = image.flatten().tolist()
 
+        # Column "color_popularity"
+        if DecisionTreeFeature.COLOR_POPULARITY in features:
+            values_most_popular = []
+            values_least_popular = []
+            values_medium_popular = []
+            k = 1
+            n = k * 2 + 1
+            for ry in range(n):
+                for rx in range(n):
+                    xx = x + rx - k
+                    yy = y + ry - k
+                    if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                        values_most_popular.append(0)
+                        values_least_popular.append(0)
+                        values_medium_popular.append(0)
+                    else:
+                        color = image[yy, xx]
+                        is_most_popular = color in most_popular_color_set
+                        values_most_popular.append(int(is_most_popular))
+                        is_least_popular = color in least_popular_color_set
+                        values_least_popular.append(int(is_least_popular))
+                        is_medium_popular = is_most_popular == False and is_least_popular == False
+                        values_medium_popular.append(int(is_medium_popular))
+            data['is_most_popular'] = values_most_popular
+            data['is_least_popular'] = values_least_popular
+            data['is_medium_popular'] = values_medium_popular
+
+        return data
 
         # TODO: instead of populating a list, I want to populate a pandas dataframe. How to do that?
         values_list = []
@@ -835,29 +863,55 @@ class DecisionTreeUtil:
 
                 values_list.append(values)
         # print(f'values_list={len(values_list)}')
-        return values_list
+        return data
 
     @classmethod
-    def merge_xs_per_pixel(cls, xs_list0: list, xs_list1: list) -> list:
-        xs_list = []
-        assert len(xs_list0) == len(xs_list1)
-        for i in range(len(xs_list0)):
-            xs = xs_list0[i] + xs_list1[i]
-            xs_list.append(xs)
-        return xs_list
+    def count_values_xs(cls, xs: dict) -> Tuple[int, int]:
+        count_min = 100000000
+        count_max = 0
+        for key in xs.keys():
+            count = len(xs[key])
+            count_min = min(count_min, count)
+            count_max = max(count_max, count)
+        return count_min, count_max
+
+    @classmethod
+    def merge_xs_per_pixel(cls, xs0: dict, xs1: dict) -> dict:
+        # print("merge_xs_per_pixel before")
+        # the keys must be the same
+        assert xs0.keys() == xs1.keys()
+
+        # both xs0 and xs1 have the same keys
+        assert len(xs0.keys()) == len(xs1.keys())
+
+        xs0_count_min, xs0_count_max = cls.count_values_xs(xs0)
+        assert xs0_count_min == xs0_count_max
+        xs1_count_min, xs1_count_max = cls.count_values_xs(xs1)
+        assert xs1_count_min == xs1_count_max
+
+        # both xs0 and xs1 have the same number of values per pixel
+        assert xs0_count_min == xs1_count_min
+
+        xs = {}
+        # Use different suffixes
+        for key in xs0.keys():
+            xs[key + "_0"] = xs0[key]
+            xs[key + "_1"] = xs1[key]
+        # print("merge_xs_per_pixel after")
+        return xs
     
     @classmethod
-    def xs_for_input_noise_images(cls, refinement_index: int, input_image: np.array, noise_image: np.array, pair_id: int, features: set[DecisionTreeFeature]) -> list:
+    def xs_for_input_noise_images(cls, refinement_index: int, input_image: np.array, noise_image: np.array, pair_id: int, features: set[DecisionTreeFeature]) -> dict:
         if refinement_index == 0:
-            xs_image = cls.xs_for_input_image(input_image, pair_id, features, False)
+            xs = cls.xs_for_input_image(input_image, pair_id, features, False)
         else:
-            xs_image0 = cls.xs_for_input_image(input_image, pair_id, features, False)
-            xs_image1 = cls.xs_for_input_image(noise_image, pair_id, features, True)
-            xs_image = cls.merge_xs_per_pixel(xs_image0, xs_image1)
-        return xs_image
+            xs0 = cls.xs_for_input_image(input_image, pair_id, features, False)
+            xs1 = cls.xs_for_input_image(noise_image, pair_id, features, True)
+            xs = cls.merge_xs_per_pixel(xs0, xs1)
+        return xs
 
     @classmethod
-    def ys_for_output_image(cls, image: int):
+    def ys_for_output_image(cls, image: int) -> list:
         height, width = image.shape
         values = []
         for y in range(height):
@@ -884,20 +938,20 @@ class DecisionTreeUtil:
             if previous_prediction_image.shape != test_input_image.shape:
                 raise ValueError('previous_prediction_image and test_input_image must have the same size')
 
-        xs = []
+        xs = None
         ys = []
 
         current_pair_id = 0
 
         transformation_ids = [
             Transformation.DO_NOTHING,
-            Transformation.ROTATE_CW,
-            Transformation.ROTATE_CCW,
-            Transformation.ROTATE_180,
-            Transformation.FLIP_X,
-            Transformation.FLIP_Y,
-            Transformation.FLIP_A,
-            Transformation.FLIP_B,
+            # Transformation.ROTATE_CW,
+            # Transformation.ROTATE_CCW,
+            # Transformation.ROTATE_180,
+            # Transformation.FLIP_X,
+            # Transformation.FLIP_Y,
+            # Transformation.FLIP_A,
+            # Transformation.FLIP_B,
             # Transformation.SKEW_UP,
             # Transformation.SKEW_DOWN,
             # Transformation.SKEW_LEFT,
@@ -967,7 +1021,15 @@ class DecisionTreeUtil:
                 pair_id = current_pair_id * count_mutations + i
                 current_pair_id += 1
                 xs_image = cls.xs_for_input_noise_images(refinement_index, input_image_mutated, noise_image_mutated, pair_id, features)
-                xs.extend(xs_image)
+                if xs is None:
+                    # print(f'iteration 0, setting xs. {type(xs_image)}')
+                    xs = xs_image
+                else:
+                    # print(f'iteration {i}, merging xs. {type(xs_image)}')
+                    for key in xs.keys():
+                        # print(f'key={key} type={type(xs[key])}')
+                        xs[key].extend(xs_image[key])
+
                 ys_image = cls.ys_for_output_image(output_image_mutated)
                 ys.extend(ys_image)
 
@@ -978,18 +1040,20 @@ class DecisionTreeUtil:
             random.Random(refinement_index).shuffle(ys)
             ys = ys[:len(ys) * 2 // 3]
 
+        xs_dataframe = pd.DataFrame(xs)
+
         clf = None
         try:
             clf_inner = DecisionTreeClassifier(random_state=42)
             current_clf = CalibratedClassifierCV(clf_inner, method='isotonic', cv=5)
-            current_clf.fit(xs, ys)
+            current_clf.fit(xs_dataframe, ys)
             clf = current_clf
         except Exception as e:
             print(f'Error: {e}')
         if clf is None:
             print('Falling back to DecisionTreeClassifier')
             clf = DecisionTreeClassifier(random_state=42)
-            clf.fit(xs, ys)
+            clf.fit(xs_dataframe, ys)
 
         input_image = task.test_input(test_index)
         height, width = input_image.shape
@@ -1035,7 +1099,8 @@ class DecisionTreeUtil:
         # tree.plot_tree(clf, filled=True)
         # plt.show()
 
-        probabilities = clf.predict_proba(xs_image)
+        xs_dataframe = pd.DataFrame(xs_image)
+        probabilities = clf.predict_proba(xs_dataframe)
         return DecisionTreePredictOutputResult(width, height, probabilities)
 
     @classmethod
