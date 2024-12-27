@@ -490,8 +490,7 @@ class DecisionTreeUtil:
                     data[f'component_{component_pixel_connectivity}_lookaround_object_ids_x{rx}_y{ry}'] = values
 
 
-        # Image with object mass
-        object_masses_list = []
+        # Columns related to mass of the object
         for (components, component_pixel_connectivity) in components_list:
             object_masses = np.zeros((height, width), dtype=np.uint32)
             for component_index, component in enumerate(components):
@@ -500,7 +499,21 @@ class DecisionTreeUtil:
                         mask_value = component.mask[y, x]
                         if mask_value == 1:
                             object_masses[y, x] = component.mass
-            object_masses_list.append(object_masses)
+
+            k = lookaround_size_mass
+            n = k * 2 + 1
+            for ry in range(n):
+                for rx in range(n):
+                    values = []
+                    for y in range(height):
+                        for x in range(width):
+                            xx = x + rx - k
+                            yy = y + ry - k
+                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                                values.append(0)
+                            else:
+                                values.append(object_masses[yy, xx])
+                    data[f'component_{component_pixel_connectivity}_lookaround_mass_x{rx}_y{ry}'] = values
 
         object_distance_list = []
         if DecisionTreeFeature.DISTANCE_INSIDE_OBJECT in features:
@@ -740,18 +753,6 @@ class DecisionTreeUtil:
                 y_rev = height - y - 1
 
                 suppress_center_pixel_lookaround = DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND in features
-
-                for object_masses in object_masses_list:
-                    k = lookaround_size_mass
-                    n = k * 2 + 1
-                    for ry in range(n):
-                        for rx in range(n):
-                            xx = x + rx - k
-                            yy = y + ry - k
-                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                                values.append(0)
-                            else:
-                                values.append(object_masses[yy, xx])
 
                 for object_distance in object_distance_list:
                     values.append(object_distance[y, x])
