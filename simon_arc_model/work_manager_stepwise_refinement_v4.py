@@ -63,6 +63,14 @@ FEATURES_5 = [
     DecisionTreeFeature.HISTOGRAM_ROWCOL,
 ]
 
+# Solves "1c02dbbe"
+FEATURES_6 = [
+    DecisionTreeFeature.BOUNDING_BOXES,
+    DecisionTreeFeature.COMPONENT_ALL8,
+    DecisionTreeFeature.GRAVITY_DRAW_TOP_TO_BOTTOM,
+    DecisionTreeFeature.GRAVITY_DRAW_TOPLEFT_TO_BOTTOMRIGHT,
+]
+
 class WorkManagerStepwiseRefinementV4(WorkManagerBase):
     def __init__(self, run_id: str, dataset_id: str, taskset: TaskSet, work_items: list[WorkItemWithPreviousPrediction], cache_dir: Optional[str] = None, incorrect_predictions_jsonl_path: Optional[str] = None):
         self.run_id = run_id
