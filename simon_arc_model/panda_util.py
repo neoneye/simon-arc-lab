@@ -420,27 +420,42 @@ class DecisionTreeUtil:
             components = ConnectedComponent.find_objects_with_ignore_mask_inner(component_pixel_connectivity, image, ignore_mask)
             components_list.append(components)
 
-        object_shape_list = []
+        # Column with shape info
         if DecisionTreeFeature.IDENTIFY_OBJECT_SHAPE in features:
+            object_shape_image = np.zeros((height, width), dtype=np.uint32)
             for component_index, components in enumerate(components_list):
-                object_shape = np.zeros((height, width), dtype=np.uint32)
                 for component_index, component in enumerate(components):
                     rect = find_bounding_box_ignoring_color(component.mask, 0)
                     rect_mass = rect.width * rect.height
-                    value = 0
+                    value = 0 # non-solid object
                     if component.mass == rect_mass:
                         if rect.width > rect.height:
-                            value = 1
+                            value = 1 # solid rectangle, landscape 
                         elif rect.width < rect.height:
-                            value = 2
+                            value = 2 # solid rectangle, portrait
                         else:
-                            value = 3
+                            value = 3 # solid rectangle, square
                     for y in range(height):
                         for x in range(width):
                             mask_value = component.mask[y, x]
                             if mask_value == 1:
-                                object_shape[y, x] = value
-                object_shape_list.append(object_shape)
+                                object_shape_image[y, x] = value
+
+            k = lookaround_size_shape
+            n = k * 2 + 1
+            for ry in range(n):
+                for rx in range(n):
+                    xx = x + rx - k
+                    yy = y + ry - k
+                    values = []
+                    for y in range(height):
+                        for x in range(width):
+                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                                values.append(0)
+                            else:
+                                values.append(object_shape_image[yy, xx])
+                    data[f'lookaround_shape_x{rx}_y{ry}'] = values
+
 
         # Image with object ids
         object_ids_list = []
@@ -711,18 +726,6 @@ class DecisionTreeUtil:
                 suppress_center_pixel_lookaround = DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND in features
                 k = lookaround_size_image_pixel
                 n = k * 2 + 1
-
-                for object_shape in object_shape_list:
-                    k = lookaround_size_shape
-                    n = k * 2 + 1
-                    for ry in range(n):
-                        for rx in range(n):
-                            xx = x + rx - k
-                            yy = y + ry - k
-                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                                values.append(0)
-                            else:
-                                values.append(object_shape[yy, xx])
 
                 for object_ids in object_ids_list:
                     k = lookaround_size_object_ids
