@@ -633,14 +633,22 @@ class DecisionTreeUtil:
                         values.append(-100)
             data['image_outline_all8'] = values
 
-        image_same_list = []
-        n = lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap
-        for dy in range(-n, n * 2):
-            for dx in range(-n, n * 2):
-                if dx == 0 and dy == 0:
-                    continue
-                image_same = count_same_color_as_center_with_one_neighbor_nowrap(image, dx, dy)
-                image_same_list.append(image_same)
+        if True:
+            n = lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap
+            for dy in range(-n, n * 2):
+                for dx in range(-n, n * 2):
+                    if dx == 0 and dy == 0:
+                        continue
+                    values = []
+                    image_same = count_same_color_as_center_with_one_neighbor_nowrap(image, dx, dy)
+                    for y in range(height):
+                        for x in range(width):
+                            is_same = image_same[y, x] == 1
+                            if is_same:
+                                values.append(100)
+                            else:
+                                values.append(-100)
+                    data[f'count_same_color_as_center_with_one_neighbor_nowrap_dx{dx}_dy{dy}'] = values
 
         if DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR in features:
             image_count_neightbors_with_same_color = count_neighbors_with_same_color_nowrap(image)
@@ -805,13 +813,6 @@ class DecisionTreeUtil:
             for x in range(width):
                 values = []
 
-                for image_same in image_same_list:
-                    is_same = image_same[y, x] == 1
-                    if is_same:
-                        values.append(100)
-                    else:
-                        values.append(-100)
-                
                 for gd_image in gravity_draw_image_list:
                     values.append(gd_image[y, x])
 
