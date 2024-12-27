@@ -515,7 +515,6 @@ class DecisionTreeUtil:
                                 values.append(object_masses[yy, xx])
                     data[f'component_{component_pixel_connectivity}_lookaround_mass_x{rx}_y{ry}'] = values
 
-        object_distance_list = []
         if DecisionTreeFeature.DISTANCE_INSIDE_OBJECT in features:
             for component_index, (components, component_pixel_connectivity) in enumerate(components_list):
                 object_distance_topleft = np.zeros((height, width), dtype=np.uint32)
@@ -540,14 +539,14 @@ class DecisionTreeUtil:
                                 object_distance_bottom[rect.y + y, rect.x + x] = rect.height - 1 - y
                                 object_distance_left[rect.y + y, rect.x + x] = x
                                 object_distance_right[rect.y + y, rect.x + x] = rect.width - 1 - x
-                object_distance_list.append(object_distance_topleft)
-                object_distance_list.append(object_distance_topright)
-                object_distance_list.append(object_distance_bottomleft)
-                object_distance_list.append(object_distance_bottomright)
-                object_distance_list.append(object_distance_top)
-                object_distance_list.append(object_distance_bottom)
-                object_distance_list.append(object_distance_left)
-                object_distance_list.append(object_distance_right)
+                data[f'connectivity{component_pixel_connectivity}_distance_inside_object_topleft'] = object_distance_topleft.flatten().tolist()
+                data[f'connectivity{component_pixel_connectivity}_distance_inside_object_topright'] = object_distance_topright.flatten().tolist()
+                data[f'connectivity{component_pixel_connectivity}_distance_inside_object_bottomleft'] = object_distance_bottomleft.flatten().tolist()
+                data[f'connectivity{component_pixel_connectivity}_distance_inside_object_bottomright'] = object_distance_bottomright.flatten().tolist()
+                data[f'connectivity{component_pixel_connectivity}_distance_inside_object_top'] = object_distance_top.flatten().tolist()
+                data[f'connectivity{component_pixel_connectivity}_distance_inside_object_bottom'] = object_distance_bottom.flatten().tolist()
+                data[f'connectivity{component_pixel_connectivity}_distance_inside_object_left'] = object_distance_left.flatten().tolist()
+                data[f'connectivity{component_pixel_connectivity}_distance_inside_object_right'] = object_distance_right.flatten().tolist()
 
         image_shape3x3_opposite = ImageShape3x3Opposite.apply(image)
         image_shape3x3_center = ImageShape3x3Center.apply(image)
@@ -753,9 +752,6 @@ class DecisionTreeUtil:
                 y_rev = height - y - 1
 
                 suppress_center_pixel_lookaround = DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND in features
-
-                for object_distance in object_distance_list:
-                    values.append(object_distance[y, x])
 
                 if True:
                     k = lookaround_size_shape3x3_opposite
