@@ -11,7 +11,7 @@ from simon_arc_model.work_manager_stepwise_refinement_v4 import WorkManagerStepw
 from simon_arc_model.arc_bad_prediction import *
 from simon_arc_model.work_item_with_previousprediction import WorkItemWithPreviousPrediction
 
-max_number_of_bad_predictions_per_task = 5
+max_number_of_bad_predictions_per_task = 4
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -72,13 +72,15 @@ task_ids_of_interest_list = [
     # '5c2c9af4',
     # 'f8c80d96',
     # '28e73c20',
-    '05a7bcf2_v2',
-    '09c534e7',
+    # '09c534e7',
+    # '05a7bcf2_v2',
     '1c02dbbe',
     '1e97544e',
     '292dd178',
     '29700607',
     '40f6cd08',
+    '3f23242b',
+    '5b526a93',
 ]
 task_ids_of_interest = set(task_ids_of_interest_list)
 
