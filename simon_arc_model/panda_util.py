@@ -472,7 +472,7 @@ class DecisionTreeUtil:
                         mask_value = component.mask[y, x]
                         if mask_value == 1:
                             object_ids[y, x] = object_id
-            object_ids_list.append(object_ids)
+            object_ids_list.append((object_ids, component_pixel_connectivity))
 
             k = lookaround_size_object_ids
             n = k * 2 + 1
@@ -613,13 +613,12 @@ class DecisionTreeUtil:
             image_ray = image_raytrace_probecolor_direction(image, outside_color, direction)
             data[f'raytrace_probecolor_direction{direction}_color'] = image_ray.flatten().tolist()
 
-        object_id_ray_list = []
         if DecisionTreeFeature.OBJECT_ID_RAY_LIST in features:
-            for object_ids in object_ids_list:
+            for (object_ids, component_pixel_connectivity) in object_ids_list:
                 for direction in ray_directions:
                     object_id_outside_color = 0
                     object_id_ray = image_raytrace_probecolor_direction(object_ids, object_id_outside_color, direction)
-                    object_id_ray_list.append(object_id_ray)
+                    data[f'raytrace_probecolor_direction{direction}_objectid_connectivity{component_pixel_connectivity}'] = object_id_ray.flatten().tolist()
 
         the_image_outline_all8 = image_outline_all8(image)
 
@@ -794,9 +793,6 @@ class DecisionTreeUtil:
         for y in range(height):
             for x in range(width):
                 values = []
-
-                for object_ids in object_id_ray_list:
-                    values.append(object_ids[y, x])
 
                 is_outline = the_image_outline_all8[y, x]
                 if is_outline == 1:
