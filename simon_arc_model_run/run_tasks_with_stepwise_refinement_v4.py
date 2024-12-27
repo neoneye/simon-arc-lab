@@ -11,7 +11,7 @@ from simon_arc_model.work_manager_stepwise_refinement_v4 import WorkManagerStepw
 from simon_arc_model.arc_bad_prediction import *
 from simon_arc_model.work_item_with_previousprediction import WorkItemWithPreviousPrediction
 
-max_number_of_bad_predictions_per_task = 3
+max_number_of_bad_predictions_per_task = 5
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -66,14 +66,21 @@ print(f"Number of unique tasks in the arc-bad-prediction dataset: {len(dataset_t
 incorrect_predictions_jsonl_path = arc_bad_prediction_file
 #incorrect_predictions_jsonl_path = None
 
-task_ids_with_circle_spirals_list = [
-    '08573cc6',
-    'e5c44e8f',
-    '5c2c9af4',
-    'f8c80d96',
-    '28e73c20',
+task_ids_of_interest_list = [
+    # '08573cc6',
+    # 'e5c44e8f',
+    # '5c2c9af4',
+    # 'f8c80d96',
+    # '28e73c20',
+    '05a7bcf2_v2',
+    '09c534e7',
+    '1c02dbbe',
+    '1e97544e',
+    '292dd178',
+    '29700607',
+    '40f6cd08',
 ]
-task_ids_with_circle_spirals = set(task_ids_with_circle_spirals_list)
+task_ids_of_interest = set(task_ids_of_interest_list)
 
 
 number_of_items_in_list = len(datasetid_groupname_pathtotaskdir_list)
@@ -93,7 +100,7 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
             task_ids_to_ignore.add(task_id)
     taskset.remove_tasks_by_id(taskids_to_ignore, verbose=False)
 
-    taskset.keep_tasks_with_id(task_ids_with_circle_spirals, verbose=False)
+    taskset.keep_tasks_with_id(task_ids_of_interest, verbose=False)
 
     if len(taskset.tasks) == 0:
         print(f"Skipping group: {groupname}, due to no tasks to process.")
