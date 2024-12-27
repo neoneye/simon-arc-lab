@@ -718,11 +718,10 @@ class DecisionTreeUtil:
             gravity_draw_directions.append(GravityDrawDirection.BOTTOMLEFT_TO_TOPRIGHT)
         if DecisionTreeFeature.GRAVITY_DRAW_BOTTOMRIGHT_TO_TOPLEFT in features:
             gravity_draw_directions.append(GravityDrawDirection.BOTTOMRIGHT_TO_TOPLEFT)
-        gravity_draw_image_list = []
         for direction in gravity_draw_directions:
             for color in range(10):
                 gd_image = image_gravity_draw(image, color, direction)
-                gravity_draw_image_list.append(gd_image)
+                data[f'gravity_draw_direction{direction}_color{color}'] = gd_image.flatten().tolist()
 
         erosion_pixel_connectivity_list = []
         if DecisionTreeFeature.EROSION_ALL8 in features:
@@ -812,9 +811,6 @@ class DecisionTreeUtil:
         for y in range(height):
             for x in range(width):
                 values = []
-
-                for gd_image in gravity_draw_image_list:
-                    values.append(gd_image[y, x])
 
                 for erosion_image in erosion_image_list:
                     values.append(erosion_image[y, x])
