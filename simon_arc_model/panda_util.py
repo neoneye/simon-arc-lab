@@ -573,7 +573,31 @@ class DecisionTreeUtil:
                         values.append((image_shape3x3_opposite[y, x] >> i) & 1)
                 data[f'shape3x3_opposite_bit{i}'] = values
 
-        image_shape3x3_center = ImageShape3x3Center.apply(image)
+        if True:
+            image_shape3x3_center = ImageShape3x3Center.apply(image)
+
+            k = lookaround_size_shape3x3_center
+            n = k * 2 + 1
+            for ry in range(n):
+                for rx in range(n):
+                    values = []
+                    for y in range(height):
+                        for x in range(width):
+                            xx = x + rx - k
+                            yy = y + ry - k
+                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                                values.append(0)
+                            else:
+                                values.append(image_shape3x3_center[yy, xx])
+                    data[f'lookaround_shape3x3_center_x{rx}_y{ry}'] = values
+
+            for i in range(8):
+                values = []
+                for y in range(height):
+                    for x in range(width):
+                        values.append((image_shape3x3_center[y, x] >> i) & 1)
+                data[f'shape3x3_center_bit{i}'] = values
+
 
         ray_directions = [
             ImageRaytraceProbeColorDirection.TOP,
@@ -776,21 +800,6 @@ class DecisionTreeUtil:
                 y_rev = height - y - 1
 
                 suppress_center_pixel_lookaround = DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND in features
-
-                if True:
-                    k = lookaround_size_shape3x3_center
-                    n = k * 2 + 1
-                    for ry in range(n):
-                        for rx in range(n):
-                            xx = x + rx - k
-                            yy = y + ry - k
-                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                                values.append(0)
-                            else:
-                                values.append(image_shape3x3_center[yy, xx])
-
-                for i in range(8):
-                    values.append((image_shape3x3_center[y, x] >> i) & 1)
 
                 for image_ray in image_ray_list:
                     values.append(image_ray[y, x])
