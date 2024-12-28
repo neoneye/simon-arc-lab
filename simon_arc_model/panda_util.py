@@ -736,10 +736,9 @@ class DecisionTreeUtil:
         if DecisionTreeFeature.EROSION_DIAGONAL in features:
             erosion_pixel_connectivity_list.append(PixelConnectivity.TLBR2)
             erosion_pixel_connectivity_list.append(PixelConnectivity.TRBL2)
-        erosion_image_list = []
         for erosion_connectivity in erosion_pixel_connectivity_list:
             erosion_image = image_erosion_multicolor(image, erosion_connectivity)
-            erosion_image_list.append(erosion_image)
+            data[f'image_erosion_multicolor_connectivity{erosion_connectivity}'] = erosion_image.flatten().tolist()
 
         shape3x3_images = []
         if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_ALL9 in features:
@@ -811,9 +810,6 @@ class DecisionTreeUtil:
         for y in range(height):
             for x in range(width):
                 values = []
-
-                for erosion_image in erosion_image_list:
-                    values.append(erosion_image[y, x])
 
                 for image_shape3x3 in shape3x3_images:
                     k = lookaround_size_shape3x3
