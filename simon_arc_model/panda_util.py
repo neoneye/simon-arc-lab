@@ -802,8 +802,6 @@ class DecisionTreeUtil:
                         values.append(int(is_inside))
                 data[f'bounding_box_of_color{color}'] = values
 
-        bigrams_top_bottom = None
-        bigrams_left_right = None
         if DecisionTreeFeature.BIGRAM_ROWCOL in features:
             bigrams_top_bottom = np.zeros((height-1, width), dtype=np.uint32)
             bigrams_left_right = np.zeros((height, width-1), dtype=np.uint32)
@@ -813,6 +811,36 @@ class DecisionTreeUtil:
             for y in range(height):
                 for x in range(width-1):
                     bigrams_left_right[y, x] = image[y, x] * 10 + image[y, x+1]
+
+            values_x = []
+            values_x_minus1 = []
+            for y in range(height):
+                for x in range(width):
+                    if x > 0:
+                        values_x_minus1.append(bigrams_left_right[y, x - 1])
+                    else:
+                        values_x_minus1.append(256)
+                    if x < width - 1:
+                        values_x.append(bigrams_left_right[y, x])
+                    else:
+                        values_x.append(257)
+            data['bigram_left_right_a'] = values_x
+            data['bigram_left_right_b'] = values_x_minus1
+
+            values_y = []
+            values_y_minus1 = []
+            for y in range(height):
+                for x in range(width):
+                    if y > 0:
+                        values_y_minus1.append(bigrams_top_bottom[y - 1, x])
+                    else:
+                        values_y_minus1.append(256)
+                    if y < height - 1:
+                        values_y.append(bigrams_top_bottom[y, x])
+                    else:
+                        values_y.append(257)
+            data['bigram_top_bottom_a'] = values_y
+            data['bigram_top_bottom_b'] = values_y_minus1
 
         count_min, count_max = cls.count_values_xs(data)
         if count_min != count_max:
@@ -899,25 +927,6 @@ class DecisionTreeUtil:
                     else:
                         comp = 5
                     values.append(comp)
-
-                if bigrams_top_bottom is not None:
-                    if y > 0:
-                        values.append(bigrams_top_bottom[y - 1, x])
-                    else:
-                        values.append(256)
-                    if y < height - 1:
-                        values.append(bigrams_top_bottom[y, x])
-                    else:
-                        values.append(257)
-                if bigrams_left_right is not None:
-                    if x > 0:
-                        values.append(bigrams_left_right[y, x - 1])
-                    else:
-                        values.append(256)
-                    if x < width - 1:
-                        values.append(bigrams_left_right[y, x])
-                    else:
-                        values.append(257)
 
                 values_list.append(values)
         # print(f'values_list={len(values_list)}')
