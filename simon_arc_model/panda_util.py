@@ -318,6 +318,49 @@ class DataFromImageBuilder:
                 is_corner = (x == 0 and y == 0) or (x == 0 and y_rev == 0) or (x_rev == 0 and y == 0) or (x_rev == 0 and y_rev == 0)
                 values.append(int(is_corner))
         self.data['any_corner'] = values
+    
+    def make_diagonal_distance(self):
+        steps = [1, 3, 7]
+        for step in steps:
+            values_x_plus_y = []
+            values_x_rev_plus_y = []
+            values_x_plus_y_rev = []
+            values_x_rev_plus_y_rev = []
+            for y in range(self.height):
+                for x in range(self.width):
+                    x_rev = self.width - x - 1
+                    y_rev = self.height - y - 1
+
+                    values_x_plus_y.append(int((x + y) & step > 0))
+                    values_x_rev_plus_y.append(int((x_rev + y) & step > 0))
+                    values_x_plus_y_rev.append(int((x + y_rev) & step > 0))
+                    values_x_rev_plus_y_rev.append(int((x_rev + y_rev) & step > 0))
+            self.data[f'diagonal_distance_step{step}_x_plus_y'] = values_x_plus_y
+            self.data[f'diagonal_distance_step{step}_x_rev_plus_y'] = values_x_rev_plus_y
+            self.data[f'diagonal_distance_step{step}_x_plus_y_rev'] = values_x_plus_y_rev
+            self.data[f'diagonal_distance_step{step}_x_rev_plus_y_rev'] = values_x_rev_plus_y_rev
+
+    def make_corner(self):
+        values_topleft = []
+        values_topright = []
+        values_bottomleft = []
+        values_bottomright = []
+        for y in range(self.height):
+            for x in range(self.width):
+                x_rev = self.width - x - 1
+                y_rev = self.height - y - 1
+                corner_topleft = x == 0 and y == 0
+                corner_topright = x_rev == 0 and y == 0
+                corner_bottomleft = x == 0 and y_rev == 0
+                corner_bottomright = x_rev == 0 and y_rev == 0
+                values_topleft.append(int(corner_topleft))
+                values_topright.append(int(corner_topright))
+                values_bottomleft.append(int(corner_bottomleft))
+                values_bottomright.append(int(corner_bottomright))
+        self.data['corner_topleft'] = values_topleft
+        self.data['corner_topright'] = values_topright
+        self.data['corner_bottomleft'] = values_bottomleft
+        self.data['corner_bottomright'] = values_bottomright
 
 class DecisionTreeUtil:
     @classmethod
@@ -354,51 +397,13 @@ class DecisionTreeUtil:
         if DecisionTreeFeature.ANY_CORNER in features:
             builder.make_any_corner()
 
-        data = builder.data
-
-        # Columns diagonal distances
         if True:
-            steps = [1, 3, 7]
-            for step in steps:
-                values_x_plus_y = []
-                values_x_rev_plus_y = []
-                values_x_plus_y_rev = []
-                values_x_rev_plus_y_rev = []
-                for y in range(height):
-                    for x in range(width):
-                        x_rev = width - x - 1
-                        y_rev = height - y - 1
-
-                        values_x_plus_y.append(int((x + y) & step > 0))
-                        values_x_rev_plus_y.append(int((x_rev + y) & step > 0))
-                        values_x_plus_y_rev.append(int((x + y_rev) & step > 0))
-                        values_x_rev_plus_y_rev.append(int((x_rev + y_rev) & step > 0))
-                data[f'diagonal_distance_step{step}_x_plus_y'] = values_x_plus_y
-                data[f'diagonal_distance_step{step}_x_rev_plus_y'] = values_x_rev_plus_y
-                data[f'diagonal_distance_step{step}_x_plus_y_rev'] = values_x_plus_y_rev
-                data[f'diagonal_distance_step{step}_x_rev_plus_y_rev'] = values_x_rev_plus_y_rev
+            builder.make_diagonal_distance()
 
         if DecisionTreeFeature.CORNER in features:
-            values_topleft = []
-            values_topright = []
-            values_bottomleft = []
-            values_bottomright = []
-            for y in range(height):
-                for x in range(width):
-                    x_rev = width - x - 1
-                    y_rev = height - y - 1
-                    corner_topleft = x == 0 and y == 0
-                    corner_topright = x_rev == 0 and y == 0
-                    corner_bottomleft = x == 0 and y_rev == 0
-                    corner_bottomright = x_rev == 0 and y_rev == 0
-                    values_topleft.append(int(corner_topleft))
-                    values_topright.append(int(corner_topright))
-                    values_bottomleft.append(int(corner_bottomleft))
-                    values_bottomright.append(int(corner_bottomright))
-            data['corner_topleft'] = values_topleft
-            data['corner_topright'] = values_topright
-            data['corner_bottomleft'] = values_bottomleft
-            data['corner_bottomright'] = values_bottomright
+            builder.make_corner()
+
+        data = builder.data
 
         if DecisionTreeFeature.CENTER in features:
             values_center_x = []
