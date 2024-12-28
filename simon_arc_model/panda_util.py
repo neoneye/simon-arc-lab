@@ -461,6 +461,23 @@ class DataFromImageBuilder:
                             values.append(object_shape_image[yy, xx])
                 self.data[f'component_{pixel_connectivity}_object_shape_x{rx}_y{ry}'] = values
 
+    def make_object_id(self, pixel_connectivity: PixelConnectivity, object_id_start: int, lookaround_size: int):
+        object_ids = self.object_ids(pixel_connectivity, object_id_start)
+        k = lookaround_size
+        n = k * 2 + 1
+        for ry in range(n):
+            for rx in range(n):
+                values = []
+                for y in range(self.height):
+                    for x in range(self.width):
+                        xx = x + rx - k
+                        yy = y + ry - k
+                        if xx < 0 or xx >= self.width or yy < 0 or yy >= self.height:
+                            values.append(0)
+                        else:
+                            values.append(object_ids[yy, xx])
+                self.data[f'component_{pixel_connectivity}_object_ids_x{rx}_y{ry}'] = values
+
 
 class DecisionTreeUtil:
     @classmethod
@@ -507,7 +524,6 @@ class DecisionTreeUtil:
             builder.make_center_xy()
 
         lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 1
-        lookaround_size_object_ids = 0
         lookaround_size_mass = 0
         lookaround_size_shape3x3 = 2
         lookaround_size_shape3x3_center = 0
@@ -543,31 +559,27 @@ class DecisionTreeUtil:
             components = builder.components(component_pixel_connectivity)
             components_list.append((components, component_pixel_connectivity))
 
-        # Image with object ids
-        object_ids_list = []
-        for component_index, (components, component_pixel_connectivity) in enumerate(components_list):
+        # Assign ids to each object
+        object_id_start_list = []
+        for component_index in range(len(component_pixel_connectivity_list)):
             object_id_start = (pair_id + 1) * 1000
             if is_earlier_prediction:
                 object_id_start += 500
             object_id_start += component_index * 777
+            object_id_start_list.append(object_id_start)
+
+        # List with object id images
+        object_ids_list = []
+        for component_index, component_pixel_connectivity in enumerate(component_pixel_connectivity_list):
+            object_id_start = object_id_start_list[component_index]
             object_ids = builder.object_ids(component_pixel_connectivity, object_id_start)
             object_ids_list.append((object_ids, component_pixel_connectivity))
 
-            k = lookaround_size_object_ids
-            n = k * 2 + 1
-            for ry in range(n):
-                for rx in range(n):
-                    values = []
-                    for y in range(height):
-                        for x in range(width):
-                            xx = x + rx - k
-                            yy = y + ry - k
-                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                                values.append(0)
-                            else:
-                                values.append(object_ids[yy, xx])
-                    data[f'component_{component_pixel_connectivity}_lookaround_object_ids_x{rx}_y{ry}'] = values
-
+        # Image with object ids
+        for component_index, component_pixel_connectivity in enumerate(component_pixel_connectivity_list):
+            object_id_start = object_id_start_list[component_index]
+            lookaround_size = 0
+            builder.make_object_id(component_pixel_connectivity, object_id_start, lookaround_size)
 
         # Columns related to mass of the object
         for (components, component_pixel_connectivity) in components_list:
