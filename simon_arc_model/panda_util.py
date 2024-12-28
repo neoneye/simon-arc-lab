@@ -788,6 +788,44 @@ class DecisionTreeUtil:
             mass_compare_adjacent_columns = image_mass_compare_adjacent_columns(image, 0, 1, 2)
             mass_compare_adjacent_columns_width = mass_compare_adjacent_columns.shape[1]
 
+            steps = []
+            if DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL in features:
+                steps.append(1)
+            if DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2 in features:
+                steps.append(2)
+            
+            for step in steps:
+                values_rows_a = []
+                values_rows_b = []
+                values_columns_a = []
+                values_columns_b = []
+                for y in range(height):
+                    for x in range(width):
+                        if y >= step:
+                            comp = mass_compare_adjacent_rows[y - step, x]
+                        else:
+                            comp = 4
+                        values_rows_a.append(comp)
+                        if x >= step:
+                            comp = mass_compare_adjacent_columns[y, x - step]
+                        else:
+                            comp = 4
+                        values_columns_a.append(comp)
+                        if y < mass_compare_adjacent_rows_height - step:
+                            comp = mass_compare_adjacent_rows[y + step, x]
+                        else:
+                            comp = 5
+                        values_rows_b.append(comp)
+                        if x < mass_compare_adjacent_columns_width - step:
+                            comp = mass_compare_adjacent_columns[y, x + step]
+                        else:
+                            comp = 5
+                        values_columns_b.append(comp)
+                data[f'image_mass_compare_adjacent_rows_a_step{step}'] = values_rows_a
+                data[f'image_mass_compare_adjacent_rows_b_step{step}'] = values_rows_b
+                data[f'image_mass_compare_adjacent_columns_a_step{step}'] = values_columns_a
+                data[f'image_mass_compare_adjacent_columns_b_step{step}'] = values_columns_b
+
         if DecisionTreeFeature.BOUNDING_BOXES in features:
             for color in range(10):
                 ignore_colors = []
@@ -883,50 +921,6 @@ class DecisionTreeUtil:
                             values.append(1)
                         else:
                             values.append(0)
-
-                if DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL in features:
-                    if y > 0:
-                        comp = mass_compare_adjacent_rows[y - 1, x]
-                    else:
-                        comp = 4
-                    values.append(comp)
-                    if x > 0:
-                        comp = mass_compare_adjacent_columns[y, x - 1]
-                    else:
-                        comp = 4
-                    values.append(comp)
-                    if y < mass_compare_adjacent_rows_height - 1:
-                        comp = mass_compare_adjacent_rows[y + 1, x]
-                    else:
-                        comp = 5
-                    values.append(comp)
-                    if x < mass_compare_adjacent_columns_width - 1:
-                        comp = mass_compare_adjacent_columns[y, x + 1]
-                    else:
-                        comp = 5
-                    values.append(comp)
-
-                if DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2 in features:
-                    if y > 1:
-                        comp = mass_compare_adjacent_rows[y - 2, x]
-                    else:
-                        comp = 4
-                    values.append(comp)
-                    if x > 1:
-                        comp = mass_compare_adjacent_columns[y, x - 2]
-                    else:
-                        comp = 4
-                    values.append(comp)
-                    if y < mass_compare_adjacent_rows_height - 2:
-                        comp = mass_compare_adjacent_rows[y + 2, x]
-                    else:
-                        comp = 5
-                    values.append(comp)
-                    if x < mass_compare_adjacent_columns_width - 2:
-                        comp = mass_compare_adjacent_columns[y, x + 2]
-                    else:
-                        comp = 5
-                    values.append(comp)
 
                 values_list.append(values)
         # print(f'values_list={len(values_list)}')
