@@ -537,6 +537,30 @@ class DataFromImageBuilder:
         self.data[f'connectivity{pixel_connectivity}_distance_inside_object_left'] = object_distance_left.flatten().tolist()
         self.data[f'connectivity{pixel_connectivity}_distance_inside_object_right'] = object_distance_right.flatten().tolist()
 
+    def make_shape3x3_opposite(self, lookaround_size: int):
+        image_shape3x3_opposite = ImageShape3x3Opposite.apply(self.image)
+        k = lookaround_size
+        n = k * 2 + 1
+        for ry in range(n):
+            for rx in range(n):
+                values = []
+                for y in range(self.height):
+                    for x in range(self.width):
+                        xx = x + rx - k
+                        yy = y + ry - k
+                        if xx < 0 or xx >= self.width or yy < 0 or yy >= self.height:
+                            values.append(0)
+                        else:
+                            values.append(image_shape3x3_opposite[yy, xx])
+                self.data[f'shape3x3_opposite_x{rx}_y{ry}'] = values
+
+        for i in range(3):
+            values = []
+            for y in range(self.height):
+                for x in range(self.width):
+                    values.append((image_shape3x3_opposite[y, x] >> i) & 1)
+            self.data[f'shape3x3_opposite_bit{i}'] = values
+
 
 class DecisionTreeUtil:
     @classmethod
@@ -585,7 +609,6 @@ class DecisionTreeUtil:
         lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 1
         lookaround_size_shape3x3 = 2
         lookaround_size_shape3x3_center = 0
-        lookaround_size_shape3x3_opposite = 0
 
         if True:
             suppress_center_pixel_lookaround = DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND in features
@@ -609,8 +632,6 @@ class DecisionTreeUtil:
             lookaround_size_shape = 0
             for component_pixel_connectivity in component_pixel_connectivity_list:
                 builder.make_object_shape(component_pixel_connectivity, lookaround_size_shape)
-
-        data = builder.data
 
         components_list = []
         for component_pixel_connectivity in component_pixel_connectivity_list:
@@ -650,29 +671,10 @@ class DecisionTreeUtil:
                 builder.make_distance_inside_object(pixel_connectivity)
 
         if True:
-            image_shape3x3_opposite = ImageShape3x3Opposite.apply(image)
+            lookaround_size = 0
+            builder.make_shape3x3_opposite(lookaround_size)
 
-            k = lookaround_size_shape3x3_opposite
-            n = k * 2 + 1
-            for ry in range(n):
-                for rx in range(n):
-                    values = []
-                    for y in range(height):
-                        for x in range(width):
-                            xx = x + rx - k
-                            yy = y + ry - k
-                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                                values.append(0)
-                            else:
-                                values.append(image_shape3x3_opposite[yy, xx])
-                    data[f'lookaround_shape3x3_opposite_x{rx}_y{ry}'] = values
-
-            for i in range(3):
-                values = []
-                for y in range(height):
-                    for x in range(width):
-                        values.append((image_shape3x3_opposite[y, x] >> i) & 1)
-                data[f'shape3x3_opposite_bit{i}'] = values
+        data = builder.data
 
         if True:
             image_shape3x3_center = ImageShape3x3Center.apply(image)
