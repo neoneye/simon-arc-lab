@@ -503,6 +503,41 @@ class DataFromImageBuilder:
                             values.append(object_masses[yy, xx])
                 self.data[f'component_{pixel_connectivity}_object_mass_x{rx}_y{ry}'] = values
 
+    def make_distance_inside_object(self, pixel_connectivity: PixelConnectivity):
+        components = self.components(pixel_connectivity)
+        shape = self.image.shape
+        object_distance_topleft = np.zeros(shape, dtype=np.uint32)
+        object_distance_topright = np.zeros(shape, dtype=np.uint32)
+        object_distance_bottomleft = np.zeros(shape, dtype=np.uint32)
+        object_distance_bottomright = np.zeros(shape, dtype=np.uint32)
+        object_distance_top = np.zeros(shape, dtype=np.uint32)
+        object_distance_bottom = np.zeros(shape, dtype=np.uint32)
+        object_distance_left = np.zeros(shape, dtype=np.uint32)
+        object_distance_right = np.zeros(shape, dtype=np.uint32)
+        for component in components:
+            rect = find_bounding_box_ignoring_color(component.mask, 0)
+            for y in range(rect.height):
+                for x in range(rect.width):
+                    mask_value = component.mask[y + rect.y, x + rect.x]
+                    if mask_value == 1:
+                        object_distance_topleft[rect.y + y, rect.x + x] = x + y
+                        object_distance_topright[rect.y + y, (rect.x + rect.width - 1) - x] = rect.width - 1 - x + y
+                        object_distance_bottomleft[(rect.y + rect.height - 1) - y, rect.x + x] = x + rect.height - 1 - y
+                        object_distance_bottomright[(rect.y + rect.height - 1) - y, (rect.x + rect.width - 1) - x] = rect.width - 1 - x + rect.height - 1 - y
+                        object_distance_top[rect.y + y, rect.x + x] = y
+                        object_distance_bottom[rect.y + y, rect.x + x] = rect.height - 1 - y
+                        object_distance_left[rect.y + y, rect.x + x] = x
+                        object_distance_right[rect.y + y, rect.x + x] = rect.width - 1 - x
+        self.data[f'connectivity{pixel_connectivity}_distance_inside_object_topleft'] = object_distance_topleft.flatten().tolist()
+        self.data[f'connectivity{pixel_connectivity}_distance_inside_object_topright'] = object_distance_topright.flatten().tolist()
+        self.data[f'connectivity{pixel_connectivity}_distance_inside_object_bottomleft'] = object_distance_bottomleft.flatten().tolist()
+        self.data[f'connectivity{pixel_connectivity}_distance_inside_object_bottomright'] = object_distance_bottomright.flatten().tolist()
+        self.data[f'connectivity{pixel_connectivity}_distance_inside_object_top'] = object_distance_top.flatten().tolist()
+        self.data[f'connectivity{pixel_connectivity}_distance_inside_object_bottom'] = object_distance_bottom.flatten().tolist()
+        self.data[f'connectivity{pixel_connectivity}_distance_inside_object_left'] = object_distance_left.flatten().tolist()
+        self.data[f'connectivity{pixel_connectivity}_distance_inside_object_right'] = object_distance_right.flatten().tolist()
+
+
 class DecisionTreeUtil:
     @classmethod
     def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> dict:
@@ -611,37 +646,8 @@ class DecisionTreeUtil:
             builder.make_object_mass(component_pixel_connectivity, lookaround_size)
 
         if DecisionTreeFeature.DISTANCE_INSIDE_OBJECT in features:
-            for component_index, (components, component_pixel_connectivity) in enumerate(components_list):
-                object_distance_topleft = np.zeros((height, width), dtype=np.uint32)
-                object_distance_topright = np.zeros((height, width), dtype=np.uint32)
-                object_distance_bottomleft = np.zeros((height, width), dtype=np.uint32)
-                object_distance_bottomright = np.zeros((height, width), dtype=np.uint32)
-                object_distance_top = np.zeros((height, width), dtype=np.uint32)
-                object_distance_bottom = np.zeros((height, width), dtype=np.uint32)
-                object_distance_left = np.zeros((height, width), dtype=np.uint32)
-                object_distance_right = np.zeros((height, width), dtype=np.uint32)
-                for component in components:
-                    rect = find_bounding_box_ignoring_color(component.mask, 0)
-                    for y in range(rect.height):
-                        for x in range(rect.width):
-                            mask_value = component.mask[y + rect.y, x + rect.x]
-                            if mask_value == 1:
-                                object_distance_topleft[rect.y + y, rect.x + x] = x + y
-                                object_distance_topright[rect.y + y, (rect.x + rect.width - 1) - x] = rect.width - 1 - x + y
-                                object_distance_bottomleft[(rect.y + rect.height - 1) - y, rect.x + x] = x + rect.height - 1 - y
-                                object_distance_bottomright[(rect.y + rect.height - 1) - y, (rect.x + rect.width - 1) - x] = rect.width - 1 - x + rect.height - 1 - y
-                                object_distance_top[rect.y + y, rect.x + x] = y
-                                object_distance_bottom[rect.y + y, rect.x + x] = rect.height - 1 - y
-                                object_distance_left[rect.y + y, rect.x + x] = x
-                                object_distance_right[rect.y + y, rect.x + x] = rect.width - 1 - x
-                data[f'connectivity{component_pixel_connectivity}_distance_inside_object_topleft'] = object_distance_topleft.flatten().tolist()
-                data[f'connectivity{component_pixel_connectivity}_distance_inside_object_topright'] = object_distance_topright.flatten().tolist()
-                data[f'connectivity{component_pixel_connectivity}_distance_inside_object_bottomleft'] = object_distance_bottomleft.flatten().tolist()
-                data[f'connectivity{component_pixel_connectivity}_distance_inside_object_bottomright'] = object_distance_bottomright.flatten().tolist()
-                data[f'connectivity{component_pixel_connectivity}_distance_inside_object_top'] = object_distance_top.flatten().tolist()
-                data[f'connectivity{component_pixel_connectivity}_distance_inside_object_bottom'] = object_distance_bottom.flatten().tolist()
-                data[f'connectivity{component_pixel_connectivity}_distance_inside_object_left'] = object_distance_left.flatten().tolist()
-                data[f'connectivity{component_pixel_connectivity}_distance_inside_object_right'] = object_distance_right.flatten().tolist()
+            for pixel_connectivity in component_pixel_connectivity_list:
+                builder.make_distance_inside_object(pixel_connectivity)
 
         if True:
             image_shape3x3_opposite = ImageShape3x3Opposite.apply(image)
