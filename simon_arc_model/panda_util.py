@@ -209,6 +209,7 @@ class DataFromImageBuilder:
         self.outside_color = 10
         self.data = {}
         self.cache_connected_component_item_list = {}
+        self.cache_object_ids = {}
     
     def make_pair_id(self, pair_id: int):
         self.data['pair_id'] = [pair_id] * self.pixel_count
@@ -406,6 +407,25 @@ class DataFromImageBuilder:
         self.cache_connected_component_item_list[pixel_connectivity] = connected_component_item_list
         return connected_component_item_list
     
+    def object_ids(self, pixel_connectivity: PixelConnectivity, object_id_start: int) -> np.array:
+        cache_key = (pixel_connectivity, object_id_start)
+        object_ids_image = self.cache_object_ids.get(cache_key)
+        if object_ids_image is not None:
+            return object_ids_image
+        
+        components = self.components(pixel_connectivity)
+            
+        object_ids = np.zeros((self.height, self.width), dtype=np.uint32)
+        for component_index, component in enumerate(components):
+            object_id = object_id_start + component_index
+            for y in range(self.height):
+                for x in range(self.width):
+                    mask_value = component.mask[y, x]
+                    if mask_value == 1:
+                        object_ids[y, x] = object_id
+        self.cache_object_ids[cache_key] = object_ids
+        return object_ids
+
     def make_object_shape(self, pixel_connectivity: PixelConnectivity, lookaround_size_shape: int):
         components = self.components(pixel_connectivity)
         object_shape_image = np.zeros((self.height, self.width), dtype=np.uint32)
@@ -526,18 +546,11 @@ class DecisionTreeUtil:
         # Image with object ids
         object_ids_list = []
         for component_index, (components, component_pixel_connectivity) in enumerate(components_list):
-            object_ids = np.zeros((height, width), dtype=np.uint32)
             object_id_start = (pair_id + 1) * 1000
             if is_earlier_prediction:
                 object_id_start += 500
             object_id_start += component_index * 777
-            for component_index, component in enumerate(components):
-                object_id = object_id_start + component_index
-                for y in range(height):
-                    for x in range(width):
-                        mask_value = component.mask[y, x]
-                        if mask_value == 1:
-                            object_ids[y, x] = object_id
+            object_ids = builder.object_ids(component_pixel_connectivity, object_id_start)
             object_ids_list.append((object_ids, component_pixel_connectivity))
 
             k = lookaround_size_object_ids
