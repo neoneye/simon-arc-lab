@@ -215,6 +215,38 @@ class DataFromImageBuilder:
     def make_center_pixel(self):
         self.data['center_pixel'] = self.image.flatten().tolist()
 
+    def make_color_popularity(self, lookaround_size: int):
+        full_histogram = Histogram.create_with_image(self.image)
+        most_popular_color_set = set(full_histogram.most_popular_color_list())
+        least_popular_color_set = set(full_histogram.least_popular_color_list())
+
+        k = lookaround_size
+        n = k * 2 + 1
+        for ry in range(n):
+            for rx in range(n):
+                values_most_popular = []
+                values_least_popular = []
+                values_medium_popular = []
+                for y in range(self.height):
+                    for x in range(self.width):
+                        xx = x + rx - k
+                        yy = y + ry - k
+                        if xx < 0 or xx >= self.width or yy < 0 or yy >= self.height:
+                            values_most_popular.append(0)
+                            values_least_popular.append(0)
+                            values_medium_popular.append(0)
+                        else:
+                            color = self.image[yy, xx]
+                            is_most_popular = color in most_popular_color_set
+                            values_most_popular.append(int(is_most_popular))
+                            is_least_popular = color in least_popular_color_set
+                            values_least_popular.append(int(is_least_popular))
+                            is_medium_popular = is_most_popular == False and is_least_popular == False
+                            values_medium_popular.append(int(is_medium_popular))
+                self.data[f'color_popularity_is_most_popular_x{rx}_y{ry}'] = values_most_popular
+                self.data[f'color_popularity_is_least_popular_x{rx}_y{ry}'] = values_least_popular
+                self.data[f'color_popularity_is_medium_popular_x{rx}_y{ry}'] = values_medium_popular
+
 class DecisionTreeUtil:
     @classmethod
     def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> dict:
@@ -232,40 +264,11 @@ class DecisionTreeUtil:
         if DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE not in features:
             builder.make_center_pixel()
 
-        data = builder.data
-
         # Columns "color_popularity"
         if DecisionTreeFeature.COLOR_POPULARITY in features:
-            full_histogram = Histogram.create_with_image(image)
-            most_popular_color_set = set(full_histogram.most_popular_color_list())
-            least_popular_color_set = set(full_histogram.least_popular_color_list())
+            builder.make_color_popularity(1)
 
-            k = 1
-            n = k * 2 + 1
-            for ry in range(n):
-                for rx in range(n):
-                    values_most_popular = []
-                    values_least_popular = []
-                    values_medium_popular = []
-                    for y in range(height):
-                        for x in range(width):
-                            xx = x + rx - k
-                            yy = y + ry - k
-                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                                values_most_popular.append(0)
-                                values_least_popular.append(0)
-                                values_medium_popular.append(0)
-                            else:
-                                color = image[yy, xx]
-                                is_most_popular = color in most_popular_color_set
-                                values_most_popular.append(int(is_most_popular))
-                                is_least_popular = color in least_popular_color_set
-                                values_least_popular.append(int(is_least_popular))
-                                is_medium_popular = is_most_popular == False and is_least_popular == False
-                                values_medium_popular.append(int(is_medium_popular))
-                    data[f'is_most_popular_rx{rx}_ry{ry}'] = values_most_popular
-                    data[f'is_least_popular_rx{rx}_ry{ry}'] = values_least_popular
-                    data[f'is_medium_popular_rx{rx}_ry{ry}'] = values_medium_popular
+        data = builder.data
 
         # Column "is_earlier_prediction"
         if True:
