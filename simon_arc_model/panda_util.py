@@ -651,9 +651,8 @@ class DecisionTreeUtil:
                     data[f'count_same_color_as_center_with_one_neighbor_nowrap_dx{dx}_dy{dy}'] = values
 
         if DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR in features:
-            image_count_neightbors_with_same_color = count_neighbors_with_same_color_nowrap(image)
-        else:
-            image_count_neightbors_with_same_color = None
+            image_count = count_neighbors_with_same_color_nowrap(image)
+            data['count_neighbors_with_same_color'] = image_count.flatten().tolist()
 
         full_histogram = Histogram.create_with_image(image)
         most_popular_color_set = set(full_histogram.most_popular_color_list())
@@ -826,9 +825,6 @@ class DecisionTreeUtil:
         for y in range(height):
             for x in range(width):
                 values = []
-
-                if DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR in features:
-                    values.append(image_count_neightbors_with_same_color[y, x])
 
                 histograms = []
                 if DecisionTreeFeature.HISTOGRAM_ROWCOL in features:
