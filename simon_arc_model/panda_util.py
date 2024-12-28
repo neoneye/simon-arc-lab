@@ -208,6 +208,7 @@ class DataFromImageBuilder:
         self.pixel_count = self.width * self.height
         self.outside_color = 10
         self.data = {}
+        self.cache_connected_component_item_list = {}
     
     def make_pair_id(self, pair_id: int):
         self.data['pair_id'] = [pair_id] * self.pixel_count
@@ -393,7 +394,53 @@ class DataFromImageBuilder:
                         else:
                             values.append(self.image[yy, xx])
                 self.data[f'lookaround_image_pixel_x{rx}_y{ry}'] = values
-        
+    
+    def components(self, pixel_connectivity: PixelConnectivity) -> list[ConnectedComponentItem]:
+        connected_component_item_list = self.cache_connected_component_item_list.get(pixel_connectivity)
+        if connected_component_item_list is not None:
+            # print(f'Using cached connected_component_item_list for pixel_connectivity={pixel_connectivity}')
+            return connected_component_item_list
+        # print(f'Computing connected_component_item_list for pixel_connectivity={pixel_connectivity}')
+        ignore_mask = np.zeros_like(self.image)
+        connected_component_item_list = ConnectedComponent.find_objects_with_ignore_mask_inner(pixel_connectivity, self.image, ignore_mask)
+        self.cache_connected_component_item_list[pixel_connectivity] = connected_component_item_list
+        return connected_component_item_list
+    
+    def make_object_shape(self, pixel_connectivity: PixelConnectivity, lookaround_size_shape: int):
+        components = self.components(pixel_connectivity)
+        object_shape_image = np.zeros((self.height, self.width), dtype=np.uint32)
+        for component in components:
+            rect = find_bounding_box_ignoring_color(component.mask, 0)
+            rect_mass = rect.width * rect.height
+            value = 0 # non-solid object
+            if component.mass == rect_mass:
+                if rect.width > rect.height:
+                    value = 1 # solid rectangle, landscape 
+                elif rect.width < rect.height:
+                    value = 2 # solid rectangle, portrait
+                else:
+                    value = 3 # solid rectangle, square
+            for y in range(self.height):
+                for x in range(self.width):
+                    mask_value = component.mask[y, x]
+                    if mask_value == 1:
+                        object_shape_image[y, x] = value
+
+        k = lookaround_size_shape
+        n = k * 2 + 1
+        for ry in range(n):
+            for rx in range(n):
+                xx = x + rx - k
+                yy = y + ry - k
+                values = []
+                for y in range(self.height):
+                    for x in range(self.width):
+                        if xx < 0 or xx >= self.width or yy < 0 or yy >= self.height:
+                            values.append(0)
+                        else:
+                            values.append(object_shape_image[yy, xx])
+                self.data[f'component_{pixel_connectivity}_object_shape_x{rx}_y{ry}'] = values
+
 
 class DecisionTreeUtil:
     @classmethod
@@ -440,7 +487,6 @@ class DecisionTreeUtil:
             builder.make_center_xy()
 
         lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 1
-        lookaround_size_shape = 0
         lookaround_size_object_ids = 0
         lookaround_size_mass = 0
         lookaround_size_shape3x3 = 2
@@ -461,49 +507,21 @@ class DecisionTreeUtil:
             component_pixel_connectivity_list.append(PixelConnectivity.CORNER4)
 
         # Connected components
-        ignore_mask = np.zeros_like(image)
-        components_list = []
         for component_pixel_connectivity in component_pixel_connectivity_list:
-            components = ConnectedComponent.find_objects_with_ignore_mask_inner(component_pixel_connectivity, image, ignore_mask)
-            components_list.append((components, component_pixel_connectivity))
-
-        data = builder.data
+            builder.components(component_pixel_connectivity)
 
         # Column with shape info
         if DecisionTreeFeature.IDENTIFY_OBJECT_SHAPE in features:
-            for component_index, (components, component_pixel_connectivity) in enumerate(components_list):
-                object_shape_image = np.zeros((height, width), dtype=np.uint32)
-                for component_index, component in enumerate(components):
-                    rect = find_bounding_box_ignoring_color(component.mask, 0)
-                    rect_mass = rect.width * rect.height
-                    value = 0 # non-solid object
-                    if component.mass == rect_mass:
-                        if rect.width > rect.height:
-                            value = 1 # solid rectangle, landscape 
-                        elif rect.width < rect.height:
-                            value = 2 # solid rectangle, portrait
-                        else:
-                            value = 3 # solid rectangle, square
-                    for y in range(height):
-                        for x in range(width):
-                            mask_value = component.mask[y, x]
-                            if mask_value == 1:
-                                object_shape_image[y, x] = value
+            lookaround_size_shape = 0
+            for component_pixel_connectivity in component_pixel_connectivity_list:
+                builder.make_object_shape(component_pixel_connectivity, lookaround_size_shape)
 
-                k = lookaround_size_shape
-                n = k * 2 + 1
-                for ry in range(n):
-                    for rx in range(n):
-                        xx = x + rx - k
-                        yy = y + ry - k
-                        values = []
-                        for y in range(height):
-                            for x in range(width):
-                                if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                                    values.append(0)
-                                else:
-                                    values.append(object_shape_image[yy, xx])
-                        data[f'component_{component_pixel_connectivity}_object_shape_x{rx}_y{ry}'] = values
+        data = builder.data
+
+        components_list = []
+        for component_pixel_connectivity in component_pixel_connectivity_list:
+            components = builder.components(component_pixel_connectivity)
+            components_list.append((components, component_pixel_connectivity))
 
         # Image with object ids
         object_ids_list = []
