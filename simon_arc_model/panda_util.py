@@ -362,6 +362,39 @@ class DataFromImageBuilder:
         self.data['corner_bottomleft'] = values_bottomleft
         self.data['corner_bottomright'] = values_bottomright
 
+    def make_center_xy(self):
+        values_center_x = []
+        values_center_y = []
+        for y in range(self.height):
+            for x in range(self.width):
+                x_rev = self.width - x - 1
+                y_rev = self.height - y - 1
+                is_center_column = abs(x - x_rev) < 2
+                is_center_row = abs(y - y_rev) < 2
+                values_center_x.append(int(is_center_column))
+                values_center_y.append(int(is_center_row))
+        self.data['center_x'] = values_center_x
+        self.data['center_y'] = values_center_y
+
+    def make_image_pixel_color(self, lookaround_size: int, suppress_center: bool):
+        k = lookaround_size
+        n = k * 2 + 1
+        for ry in range(n):
+            for rx in range(n):
+                if suppress_center and rx == k and ry == k:
+                    continue
+                values = []
+                for y in range(self.height):
+                    for x in range(self.width):
+                        xx = x + rx - k
+                        yy = y + ry - k
+                        if xx < 0 or xx >= self.width or yy < 0 or yy >= self.height:
+                            values.append(self.outside_color)
+                        else:
+                            values.append(self.image[yy, xx])
+                self.data[f'lookaround_image_pixel_x{rx}_y{ry}'] = values
+        
+
 class DecisionTreeUtil:
     @classmethod
     def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> dict:
@@ -403,24 +436,12 @@ class DecisionTreeUtil:
         if DecisionTreeFeature.CORNER in features:
             builder.make_corner()
 
+        if DecisionTreeFeature.CENTER in features:
+            builder.make_center_xy()
+
         data = builder.data
 
-        if DecisionTreeFeature.CENTER in features:
-            values_center_x = []
-            values_center_y = []
-            for y in range(height):
-                for x in range(width):
-                    x_rev = width - x - 1
-                    y_rev = height - y - 1
-                    is_center_column = abs(x - x_rev) < 2
-                    is_center_row = abs(y - y_rev) < 2
-                    values_center_x.append(int(is_center_column))
-                    values_center_y.append(int(is_center_row))
-            data['center_x'] = values_center_x
-            data['center_y'] = values_center_y
-
         lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 1
-        lookaround_size_image_pixel = 1
         lookaround_size_shape = 0
         lookaround_size_object_ids = 0
         lookaround_size_mass = 0
@@ -430,23 +451,9 @@ class DecisionTreeUtil:
 
         if True:
             suppress_center_pixel_lookaround = DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND in features
-            k = lookaround_size_image_pixel
-            n = k * 2 + 1
-            for ry in range(n):
-                for rx in range(n):
-                    if suppress_center_pixel_lookaround and rx == k and ry == k:
-                        continue
-                    values = []
-                    for y in range(height):
-                        for x in range(width):
-                            xx = x + rx - k
-                            yy = y + ry - k
-                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                                values.append(outside_color)
-                            else:
-                                values.append(image[yy, xx])
-                    data[f'lookaround_image_pixel_x{rx}_y{ry}'] = values
-
+            lookaround_size_image_pixel = 1
+            builder.make_image_pixel_color(lookaround_size_image_pixel, suppress_center_pixel_lookaround)
+    
         component_pixel_connectivity_list = []
         if DecisionTreeFeature.COMPONENT_NEAREST4 in features:
             component_pixel_connectivity_list.append(PixelConnectivity.NEAREST4)
