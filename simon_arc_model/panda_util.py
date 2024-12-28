@@ -212,6 +212,10 @@ class DataFromImageBuilder:
     def make_pair_id(self, pair_id: int):
         self.data['pair_id'] = [pair_id] * self.pixel_count
 
+    def make_is_earlier_prediction(self, is_earlier_prediction: bool):
+        value = 0 if is_earlier_prediction else 1
+        self.data['is_earlier_prediction'] = [value] * self.pixel_count
+
     def make_center_pixel(self):
         self.data['center_pixel'] = self.image.flatten().tolist()
 
@@ -247,6 +251,74 @@ class DataFromImageBuilder:
                 self.data[f'color_popularity_is_least_popular_x{rx}_y{ry}'] = values_least_popular
                 self.data[f'color_popularity_is_medium_popular_x{rx}_y{ry}'] = values_medium_popular
 
+    def make_position_xy(self):
+        values_x = []
+        values_y = []
+        values_x_rev = []
+        values_y_rev = []
+        for y in range(self.height):
+            for x in range(self.width):
+                x_rev = self.width - x - 1
+                y_rev = self.height - y - 1
+                values_x.append(x)
+                values_y.append(y)
+                values_x_rev.append(x_rev)
+                values_y_rev.append(y_rev)
+        self.data['position_x'] = values_x
+        self.data['position_y'] = values_y
+        self.data['position_x_rev'] = values_x_rev
+        self.data['position_y_rev'] = values_y_rev
+
+    def make_position_xy_lookaround(self, lookaround_size: int):
+        for i in range(lookaround_size):
+            values_x_plus = []
+            values_x_minus = []
+            values_y_plus = []
+            values_y_minus = []
+            values_x_rev_plus = []
+            values_x_rev_minus = []
+            values_y_rev_plus = []
+            values_y_rev_minus = []
+            for y in range(self.height):
+                for x in range(self.width):
+                    x_rev = self.width - x - 1
+                    y_rev = self.height - y - 1
+                    j = i + 1
+                    values_x_plus.append(x + j)
+                    values_x_minus.append(x - j)
+                    values_y_plus.append(y + j)
+                    values_y_minus.append(y - j)
+                    values_x_rev_plus.append(x_rev + j)
+                    values_x_rev_minus.append(x_rev - j)
+                    values_y_rev_plus.append(y_rev + j)
+                    values_y_rev_minus.append(y_rev - j)
+            self.data[f'position_x_plus_{i}'] = values_x_plus
+            self.data[f'position_x_minus_{i}'] = values_x_minus
+            self.data[f'position_y_plus_{i}'] = values_y_plus
+            self.data[f'position_y_minus_{i}'] = values_y_minus
+            self.data[f'position_x_rev_plus_{i}'] = values_x_rev_plus
+            self.data[f'position_x_rev_minus_{i}'] = values_x_rev_minus
+            self.data[f'position_y_rev_plus_{i}'] = values_y_rev_plus
+            self.data[f'position_y_rev_minus_{i}'] = values_y_rev_minus
+
+    def make_any_edge(self):
+        values = []
+        for y in range(self.height):
+            for x in range(self.width):
+                is_edge = x == 0 or x == self.width - 1 or y == 0 or y == self.height - 1
+                values.append(int(is_edge))
+        self.data['any_edge'] = values
+
+    def make_any_corner(self):
+        values = []
+        for y in range(self.height):
+            for x in range(self.width):
+                x_rev = self.width - x - 1
+                y_rev = self.height - y - 1
+                is_corner = (x == 0 and y == 0) or (x == 0 and y_rev == 0) or (x_rev == 0 and y == 0) or (x_rev == 0 and y_rev == 0)
+                values.append(int(is_corner))
+        self.data['any_corner'] = values
+
 class DecisionTreeUtil:
     @classmethod
     def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> dict:
@@ -259,6 +331,7 @@ class DecisionTreeUtil:
         outside_color = 10
 
         builder.make_pair_id(pair_id)
+        builder.make_is_earlier_prediction(is_earlier_prediction)
 
         # Column "center_pixel"
         if DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE not in features:
@@ -268,81 +341,20 @@ class DecisionTreeUtil:
         if DecisionTreeFeature.COLOR_POPULARITY in features:
             builder.make_color_popularity(1)
 
-        data = builder.data
-
-        # Column "is_earlier_prediction"
-        if True:
-            value = 0 if is_earlier_prediction else 1
-            data['is_earlier_prediction'] = [value] * pixel_count
-
         # Position related columns
         if DecisionTreeFeature.POSITION_XY0 in features:
-            values_x = []
-            values_y = []
-            values_x_rev = []
-            values_y_rev = []
-            for y in range(height):
-                for x in range(width):
-                    x_rev = width - x - 1
-                    y_rev = height - y - 1
-                    values_x.append(x)
-                    values_y.append(y)
-                    values_x_rev.append(x_rev)
-                    values_y_rev.append(y_rev)
-            data['position_x'] = values_x
-            data['position_y'] = values_y
-            data['position_x_rev'] = values_x_rev
-            data['position_y_rev'] = values_y_rev
+            builder.make_position_xy()
 
         if DecisionTreeFeature.POSITION_XY4 in features:
-            for i in range(4):
-                values_x_plus = []
-                values_x_minus = []
-                values_y_plus = []
-                values_y_minus = []
-                values_x_rev_plus = []
-                values_x_rev_minus = []
-                values_y_rev_plus = []
-                values_y_rev_minus = []
-                for y in range(height):
-                    for x in range(width):
-                        x_rev = width - x - 1
-                        y_rev = height - y - 1
-                        j = i + 1
-                        values_x_plus.append(x + j)
-                        values_x_minus.append(x - j)
-                        values_y_plus.append(y + j)
-                        values_y_minus.append(y - j)
-                        values_x_rev_plus.append(x_rev + j)
-                        values_x_rev_minus.append(x_rev - j)
-                        values_y_rev_plus.append(y_rev + j)
-                        values_y_rev_minus.append(y_rev - j)
-                data[f'position_x_plus_{i}'] = values_x_plus
-                data[f'position_x_minus_{i}'] = values_x_minus
-                data[f'position_y_plus_{i}'] = values_y_plus
-                data[f'position_y_minus_{i}'] = values_y_minus
-                data[f'position_x_rev_plus_{i}'] = values_x_rev_plus
-                data[f'position_x_rev_minus_{i}'] = values_x_rev_minus
-                data[f'position_y_rev_plus_{i}'] = values_y_rev_plus
-                data[f'position_y_rev_minus_{i}'] = values_y_rev_minus
+            builder.make_position_xy_lookaround(4)
 
         if DecisionTreeFeature.ANY_EDGE in features:
-            values = []
-            for y in range(height):
-                for x in range(width):
-                    is_edge = x == 0 or x == width - 1 or y == 0 or y == height - 1
-                    values.append(int(is_edge))
-            data['any_edge'] = values
+            builder.make_any_edge()
 
         if DecisionTreeFeature.ANY_CORNER in features:
-            values = []
-            for y in range(height):
-                for x in range(width):
-                    x_rev = width - x - 1
-                    y_rev = height - y - 1
-                    is_corner = (x == 0 and y == 0) or (x == 0 and y_rev == 0) or (x_rev == 0 and y == 0) or (x_rev == 0 and y_rev == 0)
-                    values.append(int(is_corner))
-            data['any_corner'] = values
+            builder.make_any_corner()
+
+        data = builder.data
 
         # Columns diagonal distances
         if True:
