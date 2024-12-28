@@ -561,6 +561,30 @@ class DataFromImageBuilder:
                     values.append((image_shape3x3_opposite[y, x] >> i) & 1)
             self.data[f'shape3x3_opposite_bit{i}'] = values
 
+    def make_shape3x3_center(self, lookaround_size: int):
+        image_shape3x3_center = ImageShape3x3Center.apply(self.image)
+        k = lookaround_size
+        n = k * 2 + 1
+        for ry in range(n):
+            for rx in range(n):
+                values = []
+                for y in range(self.height):
+                    for x in range(self.width):
+                        xx = x + rx - k
+                        yy = y + ry - k
+                        if xx < 0 or xx >= self.width or yy < 0 or yy >= self.height:
+                            values.append(0)
+                        else:
+                            values.append(image_shape3x3_center[yy, xx])
+                self.data[f'shape3x3_center_x{rx}_y{ry}'] = values
+
+        for i in range(8):
+            values = []
+            for y in range(self.height):
+                for x in range(self.width):
+                    values.append((image_shape3x3_center[y, x] >> i) & 1)
+            self.data[f'shape3x3_center_bit{i}'] = values
+
 
 class DecisionTreeUtil:
     @classmethod
@@ -608,7 +632,6 @@ class DecisionTreeUtil:
 
         lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 1
         lookaround_size_shape3x3 = 2
-        lookaround_size_shape3x3_center = 0
 
         if True:
             suppress_center_pixel_lookaround = DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND in features
@@ -674,33 +697,11 @@ class DecisionTreeUtil:
             lookaround_size = 0
             builder.make_shape3x3_opposite(lookaround_size)
 
-        data = builder.data
-
         if True:
-            image_shape3x3_center = ImageShape3x3Center.apply(image)
+            lookaround_size = 0
+            builder.make_shape3x3_center(lookaround_size)
 
-            k = lookaround_size_shape3x3_center
-            n = k * 2 + 1
-            for ry in range(n):
-                for rx in range(n):
-                    values = []
-                    for y in range(height):
-                        for x in range(width):
-                            xx = x + rx - k
-                            yy = y + ry - k
-                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                                values.append(0)
-                            else:
-                                values.append(image_shape3x3_center[yy, xx])
-                    data[f'lookaround_shape3x3_center_x{rx}_y{ry}'] = values
-
-            for i in range(8):
-                values = []
-                for y in range(height):
-                    for x in range(width):
-                        values.append((image_shape3x3_center[y, x] >> i) & 1)
-                data[f'shape3x3_center_bit{i}'] = values
-
+        data = builder.data
 
         ray_directions = [
             ImageRaytraceProbeColorDirection.TOP,
