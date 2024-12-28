@@ -478,6 +478,30 @@ class DataFromImageBuilder:
                             values.append(object_ids[yy, xx])
                 self.data[f'component_{pixel_connectivity}_object_ids_x{rx}_y{ry}'] = values
 
+    def make_object_mass(self, pixel_connectivity: PixelConnectivity, lookaround_size: int):
+        components = self.components(pixel_connectivity)
+        object_masses = np.zeros((self.height, self.width), dtype=np.uint32)
+        for component in components:
+            for y in range(self.height):
+                for x in range(self.width):
+                    mask_value = component.mask[y, x]
+                    if mask_value == 1:
+                        object_masses[y, x] = component.mass
+
+        k = lookaround_size
+        n = k * 2 + 1
+        for ry in range(n):
+            for rx in range(n):
+                values = []
+                for y in range(self.height):
+                    for x in range(self.width):
+                        xx = x + rx - k
+                        yy = y + ry - k
+                        if xx < 0 or xx >= self.width or yy < 0 or yy >= self.height:
+                            values.append(0)
+                        else:
+                            values.append(object_masses[yy, xx])
+                self.data[f'component_{pixel_connectivity}_object_mass_x{rx}_y{ry}'] = values
 
 class DecisionTreeUtil:
     @classmethod
@@ -524,7 +548,6 @@ class DecisionTreeUtil:
             builder.make_center_xy()
 
         lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 1
-        lookaround_size_mass = 0
         lookaround_size_shape3x3 = 2
         lookaround_size_shape3x3_center = 0
         lookaround_size_shape3x3_opposite = 0
@@ -582,29 +605,10 @@ class DecisionTreeUtil:
             builder.make_object_id(component_pixel_connectivity, object_id_start, lookaround_size)
 
         # Columns related to mass of the object
-        for (components, component_pixel_connectivity) in components_list:
-            object_masses = np.zeros((height, width), dtype=np.uint32)
-            for component_index, component in enumerate(components):
-                for y in range(height):
-                    for x in range(width):
-                        mask_value = component.mask[y, x]
-                        if mask_value == 1:
-                            object_masses[y, x] = component.mass
-
-            k = lookaround_size_mass
-            n = k * 2 + 1
-            for ry in range(n):
-                for rx in range(n):
-                    values = []
-                    for y in range(height):
-                        for x in range(width):
-                            xx = x + rx - k
-                            yy = y + ry - k
-                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                                values.append(0)
-                            else:
-                                values.append(object_masses[yy, xx])
-                    data[f'component_{component_pixel_connectivity}_lookaround_mass_x{rx}_y{ry}'] = values
+        for component_index, component_pixel_connectivity in enumerate(component_pixel_connectivity_list):
+            object_id_start = object_id_start_list[component_index]
+            lookaround_size = 0
+            builder.make_object_mass(component_pixel_connectivity, lookaround_size)
 
         if DecisionTreeFeature.DISTANCE_INSIDE_OBJECT in features:
             for component_index, (components, component_pixel_connectivity) in enumerate(components_list):
