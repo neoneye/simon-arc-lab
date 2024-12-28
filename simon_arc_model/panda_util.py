@@ -201,22 +201,38 @@ class DecisionTreePredictOutputResult:
         return result_images
 
 
+class DataFromImageBuilder:
+    def __init__(self, image: np.array):
+        self.image = image
+        self.height, self.width = image.shape
+        self.pixel_count = self.width * self.height
+        self.outside_color = 10
+        self.data = {}
+    
+    def make_pair_id(self, pair_id: int):
+        self.data['pair_id'] = [pair_id] * self.pixel_count
+
+    def make_center_pixel(self):
+        self.data['center_pixel'] = self.image.flatten().tolist()
+
 class DecisionTreeUtil:
     @classmethod
     def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> dict:
         # print(f'xs_for_input_image: pair_id={pair_id} features={features} is_earlier_prediction={is_earlier_prediction}')
+        builder = DataFromImageBuilder(image)
+
         height, width = image.shape
         pixel_count = width * height 
 
         outside_color = 10
 
-        data = {}
-        # Column "pair_id"
-        data['pair_id'] = [pair_id] * pixel_count
+        builder.make_pair_id(pair_id)
 
         # Column "center_pixel"
         if DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE not in features:
-            data['center_pixel'] = image.flatten().tolist()
+            builder.make_center_pixel()
+
+        data = builder.data
 
         # Columns "color_popularity"
         if DecisionTreeFeature.COLOR_POPULARITY in features:
