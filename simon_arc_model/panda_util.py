@@ -382,7 +382,7 @@ class DecisionTreeUtil:
         lookaround_size_shape = 0
         lookaround_size_object_ids = 0
         lookaround_size_mass = 0
-        lookaround_size_shape3x3 = 0
+        lookaround_size_shape3x3 = 2
         lookaround_size_shape3x3_center = 0
         lookaround_size_shape3x3_opposite = 0
 

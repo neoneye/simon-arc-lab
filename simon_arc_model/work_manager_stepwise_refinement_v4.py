@@ -71,6 +71,16 @@ FEATURES_6 = [
     DecisionTreeFeature.GRAVITY_DRAW_TOPLEFT_TO_BOTTOMRIGHT,
 ]
 
+# Makes nice stepwise improvements to the puzzle "3f23242b"
+FEATURES_7 = [
+    DecisionTreeFeature.BOUNDING_BOXES,
+    DecisionTreeFeature.COMPONENT_ALL8,
+    DecisionTreeFeature.GRAVITY_DRAW_TOP_TO_BOTTOM,
+    DecisionTreeFeature.GRAVITY_DRAW_TOPLEFT_TO_BOTTOMRIGHT,
+    DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_ALL9,
+    DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4,
+]
+
 class WorkManagerStepwiseRefinementV4(WorkManagerBase):
     def __init__(self, run_id: str, dataset_id: str, taskset: TaskSet, work_items: list[WorkItemWithPreviousPrediction], cache_dir: Optional[str] = None, incorrect_predictions_jsonl_path: Optional[str] = None):
         self.run_id = run_id
