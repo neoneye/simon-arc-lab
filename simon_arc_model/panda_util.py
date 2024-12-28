@@ -743,23 +743,39 @@ class DecisionTreeUtil:
         shape3x3_images = []
         if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_ALL9 in features:
             image_number_of_unique_colors_all9 = ImageShape3x3Histogram.number_of_unique_colors_all9(image)
-            shape3x3_images.append(image_number_of_unique_colors_all9)
+            shape3x3_images.append((image_number_of_unique_colors_all9, 'number_of_unique_colors_all9'))
 
         if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER in features:
             image_number_of_unique_colors_around_center = ImageShape3x3Histogram.number_of_unique_colors_around_center(image)
-            shape3x3_images.append(image_number_of_unique_colors_around_center)
+            shape3x3_images.append((image_number_of_unique_colors_around_center, 'number_of_unique_colors_around_center'))
 
         if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_CORNERS in features:
             image_number_of_unique_colors_in_corners = ImageShape3x3Histogram.number_of_unique_colors_in_corners(image)
-            shape3x3_images.append(image_number_of_unique_colors_in_corners)
+            shape3x3_images.append((image_number_of_unique_colors_in_corners, 'number_of_unique_colors_in_corners'))
         
         if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4 in features:
             image_number_of_unique_colors_in_diamond4 = ImageShape3x3Histogram.number_of_unique_colors_in_diamond4(image)
-            shape3x3_images.append(image_number_of_unique_colors_in_diamond4)
+            shape3x3_images.append((image_number_of_unique_colors_in_diamond4, 'number_of_unique_colors_in_diamond4'))
         
         if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5 in features:
             image_number_of_unique_colors_in_diamond5 = ImageShape3x3Histogram.number_of_unique_colors_in_diamond5(image)
-            shape3x3_images.append(image_number_of_unique_colors_in_diamond5)
+            shape3x3_images.append((image_number_of_unique_colors_in_diamond5, 'number_of_unique_colors_in_diamond5'))
+
+        for (image_shape3x3, transformation_name) in shape3x3_images:
+            k = lookaround_size_shape3x3
+            n = k * 2 + 1
+            for ry in range(n):
+                for rx in range(n):
+                    values = []
+                    for y in range(height):
+                        for x in range(width):
+                            xx = x + rx - k
+                            yy = y + ry - k
+                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                                values.append(0)
+                            else:
+                                values.append(image_shape3x3[yy, xx] + 100)
+                    data[f'image_shape3x3_{transformation_name}_x{rx}_y{ry}'] = values
 
         mass_compare_adjacent_rows = None
         mass_compare_adjacent_rows_height = 0
@@ -810,18 +826,6 @@ class DecisionTreeUtil:
         for y in range(height):
             for x in range(width):
                 values = []
-
-                for image_shape3x3 in shape3x3_images:
-                    k = lookaround_size_shape3x3
-                    n = k * 2 + 1
-                    for ry in range(n):
-                        for rx in range(n):
-                            xx = x + rx - k
-                            yy = y + ry - k
-                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                                values.append(0)
-                            else:
-                                values.append(image_shape3x3[yy, xx] + 100)
 
                 if DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR in features:
                     values.append(image_count_neightbors_with_same_color[y, x])
