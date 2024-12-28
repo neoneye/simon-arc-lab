@@ -439,8 +439,6 @@ class DecisionTreeUtil:
         if DecisionTreeFeature.CENTER in features:
             builder.make_center_xy()
 
-        data = builder.data
-
         lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 1
         lookaround_size_shape = 0
         lookaround_size_object_ids = 0
@@ -469,10 +467,12 @@ class DecisionTreeUtil:
             components = ConnectedComponent.find_objects_with_ignore_mask_inner(component_pixel_connectivity, image, ignore_mask)
             components_list.append((components, component_pixel_connectivity))
 
+        data = builder.data
+
         # Column with shape info
         if DecisionTreeFeature.IDENTIFY_OBJECT_SHAPE in features:
-            object_shape_image = np.zeros((height, width), dtype=np.uint32)
             for component_index, (components, component_pixel_connectivity) in enumerate(components_list):
+                object_shape_image = np.zeros((height, width), dtype=np.uint32)
                 for component_index, component in enumerate(components):
                     rect = find_bounding_box_ignoring_color(component.mask, 0)
                     rect_mass = rect.width * rect.height
@@ -490,21 +490,20 @@ class DecisionTreeUtil:
                             if mask_value == 1:
                                 object_shape_image[y, x] = value
 
-            k = lookaround_size_shape
-            n = k * 2 + 1
-            for ry in range(n):
-                for rx in range(n):
-                    xx = x + rx - k
-                    yy = y + ry - k
-                    values = []
-                    for y in range(height):
-                        for x in range(width):
-                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                                values.append(0)
-                            else:
-                                values.append(object_shape_image[yy, xx])
-                    data[f'lookaround_shape_x{rx}_y{ry}'] = values
-
+                k = lookaround_size_shape
+                n = k * 2 + 1
+                for ry in range(n):
+                    for rx in range(n):
+                        xx = x + rx - k
+                        yy = y + ry - k
+                        values = []
+                        for y in range(height):
+                            for x in range(width):
+                                if xx < 0 or xx >= width or yy < 0 or yy >= height:
+                                    values.append(0)
+                                else:
+                                    values.append(object_shape_image[yy, xx])
+                        data[f'component_{component_pixel_connectivity}_object_shape_x{rx}_y{ry}'] = values
 
         # Image with object ids
         object_ids_list = []
