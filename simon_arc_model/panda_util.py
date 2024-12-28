@@ -700,6 +700,79 @@ class DecisionTreeUtil:
                 trbl_histograms.append(histogram)
             # show_prediction_result(image, skewed_image_up, None)
 
+
+        def data_with_unique_colors(histogram_per_pixel: list[Histogram], data_name: str):
+            values_color_is_present = []
+            for _ in range(10):
+                values_color_is_present.append([])
+
+            values_count = []
+            for y in range(height):
+                for x in range(width):
+                    histogram = histogram_per_pixel[y * width + x]
+                    unique_color_set = histogram.unique_colors_set()
+                    number_of_unique_colors = len(unique_color_set)
+                    values_count.append(number_of_unique_colors)
+
+                    for color in range(10):
+                        is_present = color in unique_color_set
+                        values_color_is_present[color].append(int(is_present))
+
+            data[f'unique_color_count_{data_name}'] = values_count
+            for color in range(10):
+                data[f'unique_color_present_{data_name}_color{color}'] = values_color_is_present[color]
+
+        def data_with_count_of_each_color(histogram_per_pixel: list[Histogram], data_name: str):
+            for color in range(10):
+                values_count = []
+                values_count_with_minus1 = []
+                for y in range(height):
+                    for x in range(width):
+                        histogram = histogram_per_pixel[y * width + x]
+
+                        count = histogram.get_count_for_color(color)
+                        values_count.append(count)
+
+                        if count > 0:
+                            values_count_with_minus1.append(i)
+                        else:
+                            values_count_with_minus1.append(-1)
+                data[f'histogram_{data_name}_color{color}_count'] = values_count
+    
+                if DecisionTreeFeature.HISTOGRAM_VALUE in features:
+                    data[f'histogram_{data_name}_color{color}_count_with_minus1'] = values_count_with_minus1
+
+        if DecisionTreeFeature.HISTOGRAM_ROWCOL in features:
+            row_histogram_per_pixel = []
+            for y in range(height):
+                for x in range(width):
+                    row_histogram_per_pixel.append(row_histograms[y])
+            data_with_unique_colors(row_histogram_per_pixel, 'row')
+            data_with_count_of_each_color(row_histogram_per_pixel, 'row')
+
+            column_histogram_per_pixel = []
+            for y in range(height):
+                for x in range(width):
+                    column_histogram_per_pixel.append(column_histogram[x])
+            data_with_unique_colors(column_histogram_per_pixel, 'column')
+            data_with_count_of_each_color(column_histogram_per_pixel, 'column')
+
+        if DecisionTreeFeature.HISTOGRAM_DIAGONAL in features:
+            tlbr_histogram_per_pixel = []
+            for y in range(height):
+                for x in range(width):
+                    tlbr_histogram_per_pixel.append(tlbr_histograms[x + y])
+            data_with_unique_colors(tlbr_histogram_per_pixel, 'tlbr')
+            data_with_count_of_each_color(tlbr_histogram_per_pixel, 'tlbr')
+        
+            trbl_histogram_per_pixel = []
+            for y in range(height):
+                for x in range(width):
+                    trbl_histogram_per_pixel.append(trbl_histograms[width - 1 - x + y])
+            data_with_unique_colors(trbl_histogram_per_pixel, 'trbl')
+            data_with_count_of_each_color(trbl_histogram_per_pixel, 'trbl')
+
+
         gravity_draw_directions = []
         if DecisionTreeFeature.GRAVITY_DRAW_TOP_TO_BOTTOM in features:
             gravity_draw_directions.append(GravityDrawDirection.TOP_TO_BOTTOM)
@@ -884,46 +957,6 @@ class DecisionTreeUtil:
         if count_min != count_max:
             raise ValueError(f'The lists must have the same length. However the lists have different lengths. count_min={count_min} count_max={count_max}')
 
-        return data
-
-        # TODO: instead of populating a list, I want to populate a pandas dataframe. How to do that?
-        values_list = []
-        for y in range(height):
-            for x in range(width):
-                values = []
-
-                histograms = []
-                if DecisionTreeFeature.HISTOGRAM_ROWCOL in features:
-                    histograms.append(row_histograms[y])
-                    histograms.append(column_histogram[x])
-
-                if DecisionTreeFeature.HISTOGRAM_DIAGONAL in features:
-                    tlbr_histogram = tlbr_histograms[x + y]
-                    trbl_histogram = trbl_histograms[width - 1 - x + y]
-                    histograms.append(tlbr_histogram)
-                    histograms.append(trbl_histogram)
-
-                for histogram in histograms:
-                    unique_colors = histogram.unique_colors()
-                    number_of_unique_colors = len(unique_colors)
-                    values.append(number_of_unique_colors)
-                    for i in range(10):
-                        count = histogram.get_count_for_color(i)
-                        values.append(count)
-
-                        if DecisionTreeFeature.HISTOGRAM_VALUE in features:
-                            if count > 0:
-                                values.append(i)
-                            else:
-                                values.append(-1)
-
-                        if i in unique_colors:
-                            values.append(1)
-                        else:
-                            values.append(0)
-
-                values_list.append(values)
-        # print(f'values_list={len(values_list)}')
         return data
 
     @classmethod
