@@ -134,9 +134,10 @@ class Shape(ABC):
         pass
 
 class SimpleShape(Shape):
-    def __init__(self, rectangle: Rectangle, shape: ShapeCatalogItem, scale_x: Optional[int], scale_y: Optional[int], transformation_set: set[Transformation]):
+    def __init__(self, rectangle: Rectangle, shape: ShapeCatalogItem, shape_catalog_index: int, scale_x: Optional[int], scale_y: Optional[int], transformation_set: set[Transformation]):
         self.rectangle = rectangle
         self.shape = shape
+        self.shape_catalog_index = shape_catalog_index
         self.scale_x = scale_x
         self.scale_y = scale_y
         self.transformation_set = transformation_set
@@ -216,12 +217,12 @@ def image_find_shape(image: np.array, verbose: bool = False) -> Optional[Shape]:
     catalog.populate()
 
     key = image_to_string(compressed_image)
-    shape_index = catalog.shapestring_to_index.get(key)
-    if shape_index is None:
+    shape_catalog_index = catalog.shapestring_to_index.get(key)
+    if shape_catalog_index is None:
         if verbose:
             print(compressed_image.tolist())
             print(f"Shape not found in catalog. key={key}")
         return None
 
-    shape = catalog.shapes[shape_index]
-    return SimpleShape(rect, shape, scale_x, scale_y, transformation_set)
+    shape = catalog.shapes[shape_catalog_index]
+    return SimpleShape(rect, shape, shape_catalog_index, scale_x, scale_y, transformation_set)
