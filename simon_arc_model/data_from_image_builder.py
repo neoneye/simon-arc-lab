@@ -241,6 +241,13 @@ class DataFromImageBuilder:
         shape_catalog_indexes = np.zeros((self.height, self.width), dtype=np.uint32)
         shape_scale_x = np.zeros((self.height, self.width), dtype=np.uint8)
         shape_scale_y = np.zeros((self.height, self.width), dtype=np.uint8)
+        shape_transformation_rotate_cw = np.zeros((self.height, self.width), dtype=np.uint8)
+        shape_transformation_rotate_ccw = np.zeros((self.height, self.width), dtype=np.uint8)
+        shape_transformation_rotate_180 = np.zeros((self.height, self.width), dtype=np.uint8)
+        shape_transformation_flip_x = np.zeros((self.height, self.width), dtype=np.uint8)
+        shape_transformation_flip_y = np.zeros((self.height, self.width), dtype=np.uint8)
+        shape_transformation_flip_a = np.zeros((self.height, self.width), dtype=np.uint8)
+        shape_transformation_flip_b = np.zeros((self.height, self.width), dtype=np.uint8)
         for component in components:
             shape = image_find_shape(component.mask, verbose=False)
             if shape is None:
@@ -256,6 +263,19 @@ class DataFromImageBuilder:
                         shape_scale_x[y, x] = rect.width
                         shape_scale_y[y, x] = rect.height
 
+                        if rect.width == rect.height:
+                            shape_transformation_rotate_cw[y, x] = 1
+                            shape_transformation_rotate_ccw[y, x] = 1
+                            shape_transformation_rotate_180[y, x] = 1
+                            shape_transformation_flip_x[y, x] = 1
+                            shape_transformation_flip_y[y, x] = 1
+                            shape_transformation_flip_a[y, x] = 1
+                            shape_transformation_flip_b[y, x] = 1
+                        else:
+                            shape_transformation_rotate_180[y, x] = 1
+                            shape_transformation_flip_x[y, x] = 1
+                            shape_transformation_flip_y[y, x] = 1
+
             if isinstance(shape, SimpleShape):
                 rect = shape.rectangle
                 for rel_y in range(rect.height):
@@ -263,16 +283,38 @@ class DataFromImageBuilder:
                         x = rect.x + rel_x
                         y = rect.y + rel_y
                         mask_value = component.mask[y, x]
-                        if mask_value == 1:
-                            shape_catalog_indexes[y, x] = shape.shape_catalog_index + 100
-                            if shape.scale_x is not None:
-                                shape_scale_x[y, x] = shape.scale_x
-                            if shape.scale_y is not None:
-                                shape_scale_y[y, x] = shape.scale_y
+                        if mask_value != 1:
+                            continue
+                        shape_catalog_indexes[y, x] = shape.shape_catalog_index + 100
+                        if shape.scale_x is not None:
+                            shape_scale_x[y, x] = shape.scale_x
+                        if shape.scale_y is not None:
+                            shape_scale_y[y, x] = shape.scale_y
+                        if Transformation.ROTATE_CW in shape.transformation_set:
+                            shape_transformation_rotate_cw[y, x] = 1
+                        if Transformation.ROTATE_CCW in shape.transformation_set:
+                            shape_transformation_rotate_ccw[y, x] = 1
+                        if Transformation.ROTATE_180 in shape.transformation_set:
+                            shape_transformation_rotate_180[y, x] = 1
+                        if Transformation.FLIP_X in shape.transformation_set:
+                            shape_transformation_flip_x[y, x] = 1
+                        if Transformation.FLIP_Y in shape.transformation_set:
+                            shape_transformation_flip_y[y, x] = 1
+                        if Transformation.FLIP_A in shape.transformation_set:
+                            shape_transformation_flip_a[y, x] = 1
+                        if Transformation.FLIP_B in shape.transformation_set:
+                            shape_transformation_flip_b[y, x] = 1
 
         self.data[f'shape_catalog_indexes'] = shape_catalog_indexes.flatten().tolist()
         self.data[f'shape_scale_x'] = shape_scale_x.flatten().tolist()
         self.data[f'shape_scale_y'] = shape_scale_y.flatten().tolist()
+        self.data[f'shape_transformation_rotate_cw'] = shape_transformation_rotate_cw.flatten().tolist()
+        self.data[f'shape_transformation_rotate_ccw'] = shape_transformation_rotate_ccw.flatten().tolist()
+        self.data[f'shape_transformation_rotate_180'] = shape_transformation_rotate_180.flatten().tolist()
+        self.data[f'shape_transformation_flip_x'] = shape_transformation_flip_x.flatten().tolist()
+        self.data[f'shape_transformation_flip_y'] = shape_transformation_flip_y.flatten().tolist()
+        self.data[f'shape_transformation_flip_a'] = shape_transformation_flip_a.flatten().tolist()
+        self.data[f'shape_transformation_flip_b'] = shape_transformation_flip_b.flatten().tolist()
 
     def object_ids(self, pixel_connectivity: PixelConnectivity, object_id_start: int) -> np.array:
         cache_key = (pixel_connectivity, object_id_start)
