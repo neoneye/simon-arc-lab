@@ -289,41 +289,13 @@ class DecisionTreeUtil:
         return data
 
     @classmethod
-    def merge_xs_per_pixel(cls, xs0: dict, xs1: dict) -> dict:
-        # print("merge_xs_per_pixel before")
-        # the keys must be the same
-        assert xs0.keys() == xs1.keys()
-
-        # both xs0 and xs1 have the same keys
-        assert len(xs0.keys()) == len(xs1.keys())
-
-        xs0_count_min, xs0_count_max = DictionaryWithList.length_of_lists(xs0)
-        if xs0_count_min != xs0_count_max:
-            raise ValueError(f'Expected same pixel count for lists in xs0 dict, {xs0_count_min} != {xs0_count_max}')
-
-        xs1_count_min, xs1_count_max = DictionaryWithList.length_of_lists(xs1)
-        if xs1_count_min != xs1_count_max:
-            raise ValueError(f'Expected same pixel count for lists in xs1 dict, {xs1_count_min} != {xs1_count_max}')
-
-        # both xs0 and xs1 should have the same pixel count
-        assert xs0_count_min == xs1_count_min
-
-        xs = {}
-        # Use different suffixes
-        for key in xs0.keys():
-            xs[key + "_0"] = xs0[key]
-            xs[key + "_1"] = xs1[key]
-        # print("merge_xs_per_pixel after")
-        return xs
-    
-    @classmethod
     def xs_for_input_noise_images(cls, refinement_index: int, input_image: np.array, noise_image: np.array, pair_id: int, features: set[ImageFeature]) -> dict:
         if refinement_index == 0:
             xs = cls.xs_for_input_image(input_image, pair_id, features, False)
         else:
             xs0 = cls.xs_for_input_image(input_image, pair_id, features, False)
             xs1 = cls.xs_for_input_image(noise_image, pair_id, features, True)
-            xs = cls.merge_xs_per_pixel(xs0, xs1)
+            xs = DictionaryWithList.merge_two_dictionaries_with_suffix(xs0, xs1)
         return xs
 
     @classmethod
