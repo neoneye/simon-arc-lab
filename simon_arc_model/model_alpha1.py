@@ -1,11 +1,41 @@
 """
 Version numbers use greek letters. Where `Alpha` is the 1st letter in the greek alphabet.
-This is the 1st approach in this project. Here I used an LLM with a CodeT5 model.
+This is the 1st approach in this project. Here I use an LLM with a CodeT5 model.
 The class name is `ModelAlpha1`, where `Alpha` means the 1st approach. And `1` means the 1st version.
 
 When I'm using MPS on a M1 Mac, then inference is painfully slow. Around 40 minutes.
 When I'm using CPU on a M1 Mac, then inference is fast. Around 20 minutes.
 The difference is a factor of 2. I'm not sure why the difference is so large.
+
+The model can solve 1 of the hidden ARC-AGI puzzles in the ARC-Prize-2024 contest.
+I use RLE compression to fit the entire puzzle into a tiny context length of 1024.
+IIRC Around 80% of the puzzles can be compressed to fit into a context length of 1024.
+The remaining 20% is not something I care about. 
+Had the model been better, then I would have cared about the last 20%.
+
+Lessons learned:
+The model suffers from catastrophic forgetting. Whenever I teach it something,
+then it forgets lots of other things, and have to relearn it. This is a big problem.
+Fine-tuning on puzzles that is too large, and it doesn't learn it.
+Fine-tuning on puzzles that is small, and the model learns it fairly quickly.
+Scale up gradually. Start with small puzzles, and then gradually increase the size of the puzzles.
+
+Prompt containing earlier prediction.
+My hypothesis was that the model would make use of the earlier prediction hint.
+However the model entirely ignored the earlier prediction.
+So for stepwise refinement, this is not a good approach.
+
+Response type: RLE compressed image.
+First attempt: This was what I started out with. It worked surprisingly good. 
+However I think can learn things faster with a raw pixels response type.
+When the model does an incorrect prediction, then it's hard for the model to understand what has gone wrong.
+
+Response type: Raw pixels, no RLE compression.
+Second attempt: I added this after the ARC-Prize-2024 contest had ended. 
+So I don't know how well it performs.
+My hypothesis is that the model can easier pinpoint where its prediction went wrong,
+with less catastrophic forgetting. I will have to test this hypothesis.
+
 """
 from transformers import T5ForConditionalGeneration, RobertaTokenizer
 import torch
