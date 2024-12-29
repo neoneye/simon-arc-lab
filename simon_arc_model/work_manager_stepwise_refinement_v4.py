@@ -82,6 +82,16 @@ FEATURES_7 = [
     ImageFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4,
 ]
 
+FEATURES_8 = [
+    ImageFeature.BOUNDING_BOXES,
+    ImageFeature.CENTER,
+    ImageFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND,
+    ImageFeature.IDENTIFY_OBJECT_SHAPE,
+    ImageFeature.COMPONENT_ALL8,
+    ImageFeature.GRAVITY_DRAW_TOP_TO_BOTTOM,
+    ImageFeature.GRAVITY_DRAW_TOPLEFT_TO_BOTTOMRIGHT,
+]
+
 class WorkManagerStepwiseRefinementV4(WorkManagerBase):
     def __init__(self, run_id: str, dataset_id: str, taskset: TaskSet, work_items: list[WorkItemWithPreviousPrediction], cache_dir: Optional[str] = None, incorrect_predictions_jsonl_path: Optional[str] = None):
         self.run_id = run_id
@@ -278,7 +288,7 @@ class WorkManagerStepwiseRefinementV4(WorkManagerBase):
                         last_predicted_correctness,
                         the_refinement_index,
                         noise_level,
-                        FEATURES_3,
+                        FEATURES_8,
                     )
                 except Exception as e:
                     print(f'Error: {e} with task {work_item.task.metadata_task_id} test: {work_item.test_index} uniqueid: {work_item.unique_id}')
