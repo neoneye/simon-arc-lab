@@ -389,6 +389,7 @@ class DecisionTreeUtil:
         count_min, count_max = cls.count_values_xs(data)
         if count_min != count_max:
             raise ValueError(f'The lists must have the same length. However the lists have different lengths. count_min={count_min} count_max={count_max}')
+        # print(f'number of keys: {len(data.keys())}  number of values: {count_min}')
 
         return data
 
