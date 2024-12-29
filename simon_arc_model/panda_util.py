@@ -646,6 +646,10 @@ class DataFromImageBuilder:
                             values.append(-100)
                 self.data[f'count_same_color_as_center_with_one_neighbor_nowrap_dx{dx}_dy{dy}'] = values
 
+    def make_count_neighbors_with_same_color(self):
+        image_count = count_neighbors_with_same_color_nowrap(self.image)
+        self.data['count_neighbors_with_same_color'] = image_count.flatten().tolist()
+
 
 class DecisionTreeUtil:
     @classmethod
@@ -778,8 +782,7 @@ class DecisionTreeUtil:
         data = builder.data
 
         if DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR in features:
-            image_count = count_neighbors_with_same_color_nowrap(image)
-            data['count_neighbors_with_same_color'] = image_count.flatten().tolist()
+            builder.make_count_neighbors_with_same_color()
 
         def data_with_unique_colors(histogram_per_pixel: list[Histogram], data_name: str):
             values_color_is_present = []
