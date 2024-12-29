@@ -777,6 +777,12 @@ class DataFromImageBuilder:
         self.assign_data_with_unique_colors(trbl_histogram_per_pixel, 'trbl')
         self.assign_data_with_count_of_each_color(trbl_histogram_per_pixel, enable_count_with_minus1, 'trbl')
 
+    def make_gravity_draw(self, gravity_draw_directions: list[GravityDrawDirection]):
+        for direction in gravity_draw_directions:
+            for color in range(10):
+                gd_image = image_gravity_draw(self.image, color, direction)
+                self.data[f'gravity_draw_direction{direction}_color{color}'] = gd_image.flatten().tolist()
+
 class DecisionTreeUtil:
     @classmethod
     def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> dict:
@@ -918,8 +924,6 @@ class DecisionTreeUtil:
             builder.make_histogram_tlbr(enable_count_with_minus1)
             builder.make_histogram_trbl(enable_count_with_minus1)
 
-        data = builder.data
-
         gravity_draw_directions = []
         if DecisionTreeFeature.GRAVITY_DRAW_TOP_TO_BOTTOM in features:
             gravity_draw_directions.append(GravityDrawDirection.TOP_TO_BOTTOM)
@@ -937,10 +941,9 @@ class DecisionTreeUtil:
             gravity_draw_directions.append(GravityDrawDirection.BOTTOMLEFT_TO_TOPRIGHT)
         if DecisionTreeFeature.GRAVITY_DRAW_BOTTOMRIGHT_TO_TOPLEFT in features:
             gravity_draw_directions.append(GravityDrawDirection.BOTTOMRIGHT_TO_TOPLEFT)
-        for direction in gravity_draw_directions:
-            for color in range(10):
-                gd_image = image_gravity_draw(image, color, direction)
-                data[f'gravity_draw_direction{direction}_color{color}'] = gd_image.flatten().tolist()
+        builder.make_gravity_draw(gravity_draw_directions)
+
+        data = builder.data
 
         erosion_pixel_connectivity_list = []
         if DecisionTreeFeature.EROSION_ALL8 in features:
