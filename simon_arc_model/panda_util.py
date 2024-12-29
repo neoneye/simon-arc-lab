@@ -691,6 +691,91 @@ class DataFromImageBuilder:
             if enable_count_with_minus1:
                 self.data[f'histogram_{data_name}_color{color}_count_with_minus1'] = values_count_with_minus1
 
+    def make_histogram_row(self, enable_count_with_minus1: bool):
+        """
+        A histogram per row
+        """
+        row_histograms = []
+        for y in range(self.height):
+            row = self.image[y, :]
+            # convert to 2d image
+            row_image = np.expand_dims(row, axis=0)
+            histogram = Histogram.create_with_image(row_image)
+            row_histograms.append(histogram)
+
+        row_histogram_per_pixel = []
+        for y in range(self.height):
+            for x in range(self.width):
+                row_histogram_per_pixel.append(row_histograms[y])
+        self.assign_data_with_unique_colors(row_histogram_per_pixel, 'row')
+        self.assign_data_with_count_of_each_color(row_histogram_per_pixel, enable_count_with_minus1, 'row')
+
+    def make_histogram_column(self, enable_count_with_minus1: bool):
+        """
+        A histogram per column
+        """
+        column_histogram = []
+        for x in range(self.width):
+            column = self.image[:, x]
+            # convert to 2d image
+            column_image = np.expand_dims(column, axis=0)
+            histogram = Histogram.create_with_image(column_image)
+            column_histogram.append(histogram)
+
+        column_histogram_per_pixel = []
+        for y in range(self.height):
+            for x in range(self.width):
+                column_histogram_per_pixel.append(column_histogram[x])
+        self.assign_data_with_unique_colors(column_histogram_per_pixel, 'column')
+        self.assign_data_with_count_of_each_color(column_histogram_per_pixel, enable_count_with_minus1, 'column')
+
+    def make_histogram_tlbr(self, enable_count_with_minus1: bool):
+        """
+        A histogram on the diagonal from top-left to bottom-right
+        """
+        outside_color = 10
+        tlbr_histograms = []
+        skewed_image_down = image_skew(self.image, outside_color, SkewDirection.DOWN)
+        for y in range(skewed_image_down.shape[0]):
+            row = skewed_image_down[y, :]
+            # convert to 2d image
+            row_image = np.expand_dims(row, axis=0)
+            histogram = Histogram.create_with_image(row_image)
+            histogram.remove_color(outside_color)
+            # print(f'y={y} histogram={histogram.pretty()}')
+            tlbr_histograms.append(histogram)
+        # show_prediction_result(self.image, skewed_image_down, None)
+
+        tlbr_histogram_per_pixel = []
+        for y in range(self.height):
+            for x in range(self.width):
+                tlbr_histogram_per_pixel.append(tlbr_histograms[x + y])
+        self.assign_data_with_unique_colors(tlbr_histogram_per_pixel, 'tlbr')
+        self.assign_data_with_count_of_each_color(tlbr_histogram_per_pixel, enable_count_with_minus1, 'tlbr')
+
+    def make_histogram_trbl(self, enable_count_with_minus1: bool):
+        """
+        A histogram on the diagonal from top-right to bottom-left
+        """
+        outside_color = 10
+        trbl_histograms = []
+        skewed_image_up = image_skew(self.image, outside_color, SkewDirection.UP)
+        for y in range(skewed_image_up.shape[0]):
+            row = skewed_image_up[y, :]
+            # convert to 2d image
+            row_image = np.expand_dims(row, axis=0)
+            histogram = Histogram.create_with_image(row_image)
+            histogram.remove_color(outside_color)
+            # print(f'y={y} histogram={histogram.pretty()}')
+            trbl_histograms.append(histogram)
+        # show_prediction_result(self.image, skewed_image_up, None)
+
+        trbl_histogram_per_pixel = []
+        for y in range(self.height):
+            for x in range(self.width):
+                trbl_histogram_per_pixel.append(trbl_histograms[self.width - 1 - x + y])
+        self.assign_data_with_unique_colors(trbl_histogram_per_pixel, 'trbl')
+        self.assign_data_with_count_of_each_color(trbl_histogram_per_pixel, enable_count_with_minus1, 'trbl')
 
 class DecisionTreeUtil:
     @classmethod
@@ -826,78 +911,12 @@ class DecisionTreeUtil:
         enable_count_with_minus1 = DecisionTreeFeature.HISTOGRAM_VALUE in features
 
         if DecisionTreeFeature.HISTOGRAM_ROWCOL in features:
-            # A histogram per row
-            row_histograms = []
-            for y in range(height):
-                row = image[y, :]
-                # convert to 2d image
-                row_image = np.expand_dims(row, axis=0)
-                histogram = Histogram.create_with_image(row_image)
-                row_histograms.append(histogram)
-
-            row_histogram_per_pixel = []
-            for y in range(height):
-                for x in range(width):
-                    row_histogram_per_pixel.append(row_histograms[y])
-            builder.assign_data_with_unique_colors(row_histogram_per_pixel, 'row')
-            builder.assign_data_with_count_of_each_color(row_histogram_per_pixel, enable_count_with_minus1, 'row')
-
-            # A histogram per column
-            column_histogram = []
-            for x in range(width):
-                column = image[:, x]
-                # convert to 2d image
-                column_image = np.expand_dims(column, axis=0)
-                histogram = Histogram.create_with_image(column_image)
-                column_histogram.append(histogram)
-
-            column_histogram_per_pixel = []
-            for y in range(height):
-                for x in range(width):
-                    column_histogram_per_pixel.append(column_histogram[x])
-            builder.assign_data_with_unique_colors(column_histogram_per_pixel, 'column')
-            builder.assign_data_with_count_of_each_color(column_histogram_per_pixel, enable_count_with_minus1, 'column')
+            builder.make_histogram_row(enable_count_with_minus1)
+            builder.make_histogram_column(enable_count_with_minus1)
 
         if DecisionTreeFeature.HISTOGRAM_DIAGONAL in features:
-            # A histogram on the diagonal from top-left to bottom-right
-            tlbr_histograms = []
-            skewed_image_down = image_skew(image, outside_color, SkewDirection.DOWN)
-            for y in range(skewed_image_down.shape[0]):
-                row = skewed_image_down[y, :]
-                # convert to 2d image
-                row_image = np.expand_dims(row, axis=0)
-                histogram = Histogram.create_with_image(row_image)
-                histogram.remove_color(outside_color)
-                # print(f'y={y} histogram={histogram.pretty()}')
-                tlbr_histograms.append(histogram)
-            # show_prediction_result(image, skewed_image_down, None)
-
-            tlbr_histogram_per_pixel = []
-            for y in range(height):
-                for x in range(width):
-                    tlbr_histogram_per_pixel.append(tlbr_histograms[x + y])
-            builder.assign_data_with_unique_colors(tlbr_histogram_per_pixel, 'tlbr')
-            builder.assign_data_with_count_of_each_color(tlbr_histogram_per_pixel, enable_count_with_minus1, 'tlbr')
-        
-            # A histogram on the diagonal from top-right to bottom-left
-            trbl_histograms = []
-            skewed_image_up = image_skew(image, outside_color, SkewDirection.UP)
-            for y in range(skewed_image_up.shape[0]):
-                row = skewed_image_up[y, :]
-                # convert to 2d image
-                row_image = np.expand_dims(row, axis=0)
-                histogram = Histogram.create_with_image(row_image)
-                histogram.remove_color(outside_color)
-                # print(f'y={y} histogram={histogram.pretty()}')
-                trbl_histograms.append(histogram)
-            # show_prediction_result(image, skewed_image_up, None)
-
-            trbl_histogram_per_pixel = []
-            for y in range(height):
-                for x in range(width):
-                    trbl_histogram_per_pixel.append(trbl_histograms[width - 1 - x + y])
-            builder.assign_data_with_unique_colors(trbl_histogram_per_pixel, 'trbl')
-            builder.assign_data_with_count_of_each_color(trbl_histogram_per_pixel, enable_count_with_minus1, 'trbl')
+            builder.make_histogram_tlbr(enable_count_with_minus1)
+            builder.make_histogram_trbl(enable_count_with_minus1)
 
         data = builder.data
 
