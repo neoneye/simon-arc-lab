@@ -20,7 +20,7 @@ from random import sample
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.image_pixel_similarity import image_pixel_similarity_overall
 from simon_arc_model.model import Model
-from simon_arc_model.decision_tree_util import DecisionTreeUtil, ImageFeature
+from simon_arc_model.model_beta1 import ModelBeta1, ImageFeature
 
 def featureset_id(features: set):
     names = sorted([feature.name for feature in features])
@@ -303,7 +303,7 @@ for combo_index, combo in enumerate(featurecomboitem_list):
                 
                 start_time = time.perf_counter()
 
-                predicted_output = DecisionTreeUtil.predict_output(
+                predicted_output = ModelBeta1.predict_output(
                     task, 
                     test_index, 
                     previous_prediction_image=None,

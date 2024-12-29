@@ -16,7 +16,7 @@ from .work_item_list import WorkItemList
 from .work_item_status import WorkItemStatus
 from .save_arcprize2024_submission_file import *
 from .work_manager_base import WorkManagerBase
-from .decision_tree_util import DecisionTreeUtil, ImageFeature
+from .model_beta1 import ModelBeta1, ImageFeature
 from .track_incorrect_prediction import TrackIncorrectPrediction
 
 # Correct 59, Solves 1 of the hidden ARC tasks
@@ -142,7 +142,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
                 if predicted_output is None:
                     previous_prediction_mask = None
                     try:
-                        predicted_output_result = DecisionTreeUtil.predict_output(
+                        predicted_output_result = ModelBeta1.predict_output(
                             work_item.task, 
                             work_item.test_index, 
                             last_predicted_output,

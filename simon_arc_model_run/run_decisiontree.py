@@ -6,7 +6,7 @@ sys.path.insert(0, PROJECT_ROOT)
 
 from simon_arc_lab.task import Task
 from simon_arc_lab.show_prediction_result import show_prediction_result
-from simon_arc_model.decision_tree_util import DecisionTreeUtil
+from simon_arc_model.model_beta1 import ModelBeta1
 
 # works with these
 task_path = '/Users/neoneye/git/arc-dataset-collection/dataset/ARC/data/training/b6afb2da.json'
@@ -54,7 +54,7 @@ for refinement_index in range(number_of_refinements):
     noise_level = noise_levels[refinement_index]
     print(f"Refinement {refinement_index+1}/{number_of_refinements} noise_level={noise_level}")
 
-    predicted_output = DecisionTreeUtil.predict_output(
+    predicted_output = ModelBeta1.predict_output(
         task, 
         test_index, 
         last_predicted_output, 

@@ -1,7 +1,7 @@
 """
-Version numbers using greek letters 
-Since this is the 2nd model in this project. And I used decision trees for this approach.
-The class name should be `ModelBeta1`, where `Beta` means the 2nd approach. And `1` means the 1st version.
+Version numbers use greek letters. Where `Beta` is the 2nd letter in the greek alphabet.
+This is the 2nd approach in this project. And I used decision trees for this approach.
+The class name is `ModelBeta1`, where `Beta` means the 2ndd approach. And `1` means the 1st version.
 """
 from typing import Optional
 from simon_arc_lab.task import Task
@@ -39,7 +39,7 @@ from scipy.stats import entropy
 import matplotlib.pyplot as plt
 import numpy as np
 
-class DecisionTreePredictOutputResult:
+class ModelBeta1PredictOutputResult:
     def __init__(self, width: int, height: int, probabilities: np.array):
         self.width = width
         self.height = height
@@ -98,7 +98,7 @@ class DecisionTreePredictOutputResult:
         return result_images
 
 
-class DecisionTreeUtil:
+class ModelBeta1:
     @classmethod
     def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[ImageFeature], is_earlier_prediction: bool) -> list:
         # print(f'xs_for_input_image: pair_id={pair_id} features={features} is_earlier_prediction={is_earlier_prediction}')
@@ -752,7 +752,7 @@ class DecisionTreeUtil:
         return values
 
     @classmethod
-    def predict_output(cls, task: Task, test_index: int, previous_prediction_image: Optional[np.array], previous_prediction_mask: Optional[np.array], refinement_index: int, noise_level: int, features: set[ImageFeature]) -> DecisionTreePredictOutputResult:
+    def predict_output(cls, task: Task, test_index: int, previous_prediction_image: Optional[np.array], previous_prediction_mask: Optional[np.array], refinement_index: int, noise_level: int, features: set[ImageFeature]) -> ModelBeta1PredictOutputResult:
         if task.has_same_input_output_size_for_all_examples() == False:
             raise ValueError('The decisiontree only works for puzzles where input/output have the same size')
         
@@ -922,10 +922,10 @@ class DecisionTreeUtil:
         # plt.show()
 
         probabilities = clf.predict_proba(xs_image)
-        return DecisionTreePredictOutputResult(width, height, probabilities)
+        return ModelBeta1PredictOutputResult(width, height, probabilities)
 
     @classmethod
-    def validate_output(cls, task: Task, test_index: int, prediction_to_verify: np.array, refinement_index: int, noise_level: int, features: set[ImageFeature]) -> DecisionTreePredictOutputResult:
+    def validate_output(cls, task: Task, test_index: int, prediction_to_verify: np.array, refinement_index: int, noise_level: int, features: set[ImageFeature]) -> ModelBeta1PredictOutputResult:
         xs = []
         ys = []
 
@@ -1053,7 +1053,7 @@ class DecisionTreeUtil:
                 xs_image[value_list_index].append(predicted_color)
 
         probabilities = clf.predict_proba(xs_image)
-        return DecisionTreePredictOutputResult(width, height, probabilities)
+        return ModelBeta1PredictOutputResult(width, height, probabilities)
 
         result = clf.predict(xs_image)
 

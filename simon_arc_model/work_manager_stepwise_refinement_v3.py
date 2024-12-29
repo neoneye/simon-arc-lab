@@ -17,7 +17,7 @@ from .work_item_list import WorkItemList
 from .work_item_status import WorkItemStatus
 from .save_arcprize2024_submission_file import *
 from .work_manager_base import WorkManagerBase
-from .decision_tree_util import DecisionTreeUtil, ImageFeature
+from .model_beta1 import ModelBeta1, ImageFeature
 from .track_incorrect_prediction import TrackIncorrectPrediction
 
 # Correct 59, Solves 1 of the hidden ARC tasks
@@ -213,7 +213,7 @@ class WorkManagerStepwiseRefinementV3(WorkManagerBase):
                 predicted_output[y, x] = color
 
             if False:
-                prediction = DecisionTreeUtil.predict_output(
+                prediction = ModelBeta1.predict_output(
                     work_item.task, 
                     work_item.test_index, 
                     last_predicted_output,
@@ -232,7 +232,7 @@ class WorkManagerStepwiseRefinementV3(WorkManagerBase):
 
                 best_images = [best_image]
                 for j in range(4):
-                    predictionj = DecisionTreeUtil.predict_output(
+                    predictionj = ModelBeta1.predict_output(
                         work_item.task, 
                         work_item.test_index, 
                         last_predicted_output,
@@ -252,7 +252,7 @@ class WorkManagerStepwiseRefinementV3(WorkManagerBase):
                 noise_level = 90
                 the_refinement_index = 1
                 try:
-                    prediction = DecisionTreeUtil.predict_output(
+                    prediction = ModelBeta1.predict_output(
                         work_item.task, 
                         work_item.test_index, 
                         work_item.previous_predicted_output_image,
@@ -299,7 +299,7 @@ class WorkManagerStepwiseRefinementV3(WorkManagerBase):
                 print(f'task {work_item.task.metadata_task_id} test: {work_item.test_index} repaired {count_repair} pixels based on predicted output colorset')
 
             if False:
-                validate_result = DecisionTreeUtil.validate_output(
+                validate_result = ModelBeta1.validate_output(
                     work_item.task, 
                     work_item.test_index, 
                     predicted_output,
