@@ -629,6 +629,23 @@ class DataFromImageBuilder:
                     values.append(-100)
         self.data['image_outline_all8'] = values
 
+    def make_count_same_color_as_center(self, lookaround_size: int):
+        n = lookaround_size
+        for dy in range(-n, n * 2):
+            for dx in range(-n, n * 2):
+                if dx == 0 and dy == 0:
+                    continue
+                values = []
+                image_same = count_same_color_as_center_with_one_neighbor_nowrap(self.image, dx, dy)
+                for y in range(self.height):
+                    for x in range(self.width):
+                        is_same = image_same[y, x] == 1
+                        if is_same:
+                            values.append(100)
+                        else:
+                            values.append(-100)
+                self.data[f'count_same_color_as_center_with_one_neighbor_nowrap_dx{dx}_dy{dy}'] = values
+
 
 class DecisionTreeUtil:
     @classmethod
@@ -674,7 +691,6 @@ class DecisionTreeUtil:
         if DecisionTreeFeature.CENTER in features:
             builder.make_center_xy()
 
-        lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap = 1
         lookaround_size_shape3x3 = 2
 
         if True:
@@ -755,24 +771,11 @@ class DecisionTreeUtil:
         if True:
             builder.make_outline_all8()
 
-        data = builder.data
-
         if True:
-            n = lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap
-            for dy in range(-n, n * 2):
-                for dx in range(-n, n * 2):
-                    if dx == 0 and dy == 0:
-                        continue
-                    values = []
-                    image_same = count_same_color_as_center_with_one_neighbor_nowrap(image, dx, dy)
-                    for y in range(height):
-                        for x in range(width):
-                            is_same = image_same[y, x] == 1
-                            if is_same:
-                                values.append(100)
-                            else:
-                                values.append(-100)
-                    data[f'count_same_color_as_center_with_one_neighbor_nowrap_dx{dx}_dy{dy}'] = values
+            lookaround_size = 1
+            builder.make_count_same_color_as_center(lookaround_size)
+
+        data = builder.data
 
         if DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR in features:
             image_count = count_neighbors_with_same_color_nowrap(image)
