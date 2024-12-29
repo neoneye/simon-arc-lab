@@ -17,7 +17,8 @@ from .work_item_list import WorkItemList
 from .work_item_status import WorkItemStatus
 from .save_arcprize2024_submission_file import *
 from .work_manager_base import WorkManagerBase
-from .panda_util import DecisionTreeUtil, ImageFeature
+from .image_feature import ImageFeature
+from .model_gamma1 import ModelGamma1
 from .track_incorrect_prediction import TrackIncorrectPrediction
 
 # Correct 59, Solves 1 of the hidden ARC tasks
@@ -108,7 +109,7 @@ class WorkManagerStepwiseRefinementV4(WorkManagerBase):
             os.makedirs(save_dir, exist_ok=True)
 
         # Track incorrect predictions
-        incorrect_prediction_metadata = f'run={self.run_id} solver=stepwiserefinement_v3'
+        incorrect_prediction_metadata = f'run={self.run_id} solver=stepwiserefinement_v4'
         incorrect_prediction_dataset_id = self.dataset_id
         if self.incorrect_predictions_jsonl_path is not None:
             track_incorrect_prediction = TrackIncorrectPrediction.load_from_jsonl(self.incorrect_predictions_jsonl_path)
@@ -231,7 +232,7 @@ class WorkManagerStepwiseRefinementV4(WorkManagerBase):
                 predicted_output[y, x] = color
 
             if False:
-                prediction = DecisionTreeUtil.predict_output(
+                prediction = ModelGamma1.predict_output(
                     work_item.task, 
                     work_item.test_index, 
                     last_predicted_output,
@@ -250,7 +251,7 @@ class WorkManagerStepwiseRefinementV4(WorkManagerBase):
 
                 best_images = [best_image]
                 for j in range(4):
-                    predictionj = DecisionTreeUtil.predict_output(
+                    predictionj = ModelGamma1.predict_output(
                         work_item.task, 
                         work_item.test_index, 
                         last_predicted_output,
@@ -270,7 +271,7 @@ class WorkManagerStepwiseRefinementV4(WorkManagerBase):
                 noise_level = 90
                 the_refinement_index = 1
                 try:
-                    prediction = DecisionTreeUtil.predict_output(
+                    prediction = ModelGamma1.predict_output(
                         work_item.task, 
                         work_item.test_index, 
                         work_item.previous_predicted_output_image,
@@ -317,7 +318,7 @@ class WorkManagerStepwiseRefinementV4(WorkManagerBase):
                 print(f'task {work_item.task.metadata_task_id} test: {work_item.test_index} repaired {count_repair} pixels based on predicted output colorset')
 
             if False:
-                validate_result = DecisionTreeUtil.validate_output(
+                validate_result = ModelGamma1.validate_output(
                     work_item.task, 
                     work_item.test_index, 
                     predicted_output,

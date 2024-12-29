@@ -1,3 +1,8 @@
+"""
+Version numbers use greek letters. Where `Gamma` is the 3rd letter in the greek alphabet.
+This is the 3rd approach in this project. And I used decision trees for this approach.
+The class name is `ModelGamma1`, where `Gamma` means the 3rd approach. And `1` means the 1st version.
+"""
 from typing import Optional
 from simon_arc_lab.task import Task
 from simon_arc_lab.image_scale import *
@@ -24,7 +29,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-class DecisionTreePredictOutputResult:
+class ModelGamma1PredictOutputResult:
     def __init__(self, width: int, height: int, probabilities: np.array):
         self.width = width
         self.height = height
@@ -83,7 +88,7 @@ class DecisionTreePredictOutputResult:
         return result_images
 
 
-class DecisionTreeUtil:
+class ModelGamma1:
     @classmethod
     def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[ImageFeature], is_earlier_prediction: bool) -> dict:
         # print(f'xs_for_input_image: pair_id={pair_id} features={features} is_earlier_prediction={is_earlier_prediction}')
@@ -308,7 +313,7 @@ class DecisionTreeUtil:
         return values
 
     @classmethod
-    def predict_output(cls, task: Task, test_index: int, previous_prediction_image: Optional[np.array], previous_prediction_mask: Optional[np.array], refinement_index: int, noise_level: int, features: set[ImageFeature]) -> DecisionTreePredictOutputResult:
+    def predict_output(cls, task: Task, test_index: int, previous_prediction_image: Optional[np.array], previous_prediction_mask: Optional[np.array], refinement_index: int, noise_level: int, features: set[ImageFeature]) -> ModelGamma1PredictOutputResult:
         if task.has_same_input_output_size_for_all_examples() == False:
             raise ValueError('The decisiontree only works for puzzles where input/output have the same size')
         
@@ -489,10 +494,10 @@ class DecisionTreeUtil:
 
         xs_dataframe = pd.DataFrame(xs_image)
         probabilities = clf.predict_proba(xs_dataframe)
-        return DecisionTreePredictOutputResult(width, height, probabilities)
+        return ModelGamma1PredictOutputResult(width, height, probabilities)
 
     @classmethod
-    def validate_output(cls, task: Task, test_index: int, prediction_to_verify: np.array, refinement_index: int, noise_level: int, features: set[ImageFeature]) -> DecisionTreePredictOutputResult:
+    def validate_output(cls, task: Task, test_index: int, prediction_to_verify: np.array, refinement_index: int, noise_level: int, features: set[ImageFeature]) -> ModelGamma1PredictOutputResult:
         xs = []
         ys = []
 
@@ -620,7 +625,7 @@ class DecisionTreeUtil:
                 xs_image[value_list_index].append(predicted_color)
 
         probabilities = clf.predict_proba(xs_image)
-        return DecisionTreePredictOutputResult(width, height, probabilities)
+        return ModelGamma1PredictOutputResult(width, height, probabilities)
 
         result = clf.predict(xs_image)
 
