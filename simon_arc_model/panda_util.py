@@ -617,6 +617,19 @@ class DataFromImageBuilder:
             image_ray = image_raytrace_probecolor_direction(object_ids, outside_object_id, direction)
             self.data[f'probe_objectid_direction{direction}_connectivity{pixel_connectivity}'] = image_ray.flatten().tolist()
 
+    def make_outline_all8(self):
+        the_image_outline_all8 = image_outline_all8(self.image)
+        values = []
+        for y in range(self.height):
+            for x in range(self.width):
+                is_outline = the_image_outline_all8[y, x]
+                if is_outline == 1:
+                    values.append(100)
+                else:
+                    values.append(-100)
+        self.data['image_outline_all8'] = values
+
+
 class DecisionTreeUtil:
     @classmethod
     def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> dict:
@@ -739,20 +752,10 @@ class DecisionTreeUtil:
             for (object_ids, pixel_connectivity) in object_ids_list:
                 builder.make_probe_objectid_for_all_directions(object_ids, pixel_connectivity)
 
-        data = builder.data
-
         if True:
-            the_image_outline_all8 = image_outline_all8(image)
+            builder.make_outline_all8()
 
-            values = []
-            for y in range(height):
-                for x in range(width):
-                    is_outline = the_image_outline_all8[y, x]
-                    if is_outline == 1:
-                        values.append(100)
-                    else:
-                        values.append(-100)
-            data['image_outline_all8'] = values
+        data = builder.data
 
         if True:
             n = lookaround_size_count_same_color_as_center_with_one_neighbor_nowrap
