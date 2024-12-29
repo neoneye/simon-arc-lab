@@ -889,6 +889,48 @@ class DataFromImageBuilder:
                     values.append(int(is_inside))
             self.data[f'bounding_box_of_color{color}'] = values
 
+    def make_bigram_rowcol(self):
+        width = self.width
+        height = self.height
+        bigrams_top_bottom = np.zeros((height-1, width), dtype=np.uint32)
+        bigrams_left_right = np.zeros((height, width-1), dtype=np.uint32)
+        for y in range(height-1):
+            for x in range(width):
+                bigrams_top_bottom[y, x] = self.image[y, x] * 10 + self.image[y+1, x]
+        for y in range(height):
+            for x in range(width-1):
+                bigrams_left_right[y, x] = self.image[y, x] * 10 + self.image[y, x+1]
+
+        values_x = []
+        values_x_minus1 = []
+        for y in range(height):
+            for x in range(width):
+                if x > 0:
+                    values_x_minus1.append(bigrams_left_right[y, x - 1])
+                else:
+                    values_x_minus1.append(256)
+                if x < width - 1:
+                    values_x.append(bigrams_left_right[y, x])
+                else:
+                    values_x.append(257)
+        self.data['bigram_left_right_a'] = values_x
+        self.data['bigram_left_right_b'] = values_x_minus1
+
+        values_y = []
+        values_y_minus1 = []
+        for y in range(height):
+            for x in range(width):
+                if y > 0:
+                    values_y_minus1.append(bigrams_top_bottom[y - 1, x])
+                else:
+                    values_y_minus1.append(256)
+                if y < height - 1:
+                    values_y.append(bigrams_top_bottom[y, x])
+                else:
+                    values_y.append(257)
+        self.data['bigram_top_bottom_a'] = values_y
+        self.data['bigram_top_bottom_b'] = values_y_minus1
+
 
 class DecisionTreeUtil:
     @classmethod
@@ -1088,47 +1130,10 @@ class DecisionTreeUtil:
         if DecisionTreeFeature.BOUNDING_BOXES in features:
             builder.make_bounding_boxes_of_each_color()
 
-        data = builder.data
-
         if DecisionTreeFeature.BIGRAM_ROWCOL in features:
-            bigrams_top_bottom = np.zeros((height-1, width), dtype=np.uint32)
-            bigrams_left_right = np.zeros((height, width-1), dtype=np.uint32)
-            for y in range(height-1):
-                for x in range(width):
-                    bigrams_top_bottom[y, x] = image[y, x] * 10 + image[y+1, x]
-            for y in range(height):
-                for x in range(width-1):
-                    bigrams_left_right[y, x] = image[y, x] * 10 + image[y, x+1]
+            builder.make_bigram_rowcol()
 
-            values_x = []
-            values_x_minus1 = []
-            for y in range(height):
-                for x in range(width):
-                    if x > 0:
-                        values_x_minus1.append(bigrams_left_right[y, x - 1])
-                    else:
-                        values_x_minus1.append(256)
-                    if x < width - 1:
-                        values_x.append(bigrams_left_right[y, x])
-                    else:
-                        values_x.append(257)
-            data['bigram_left_right_a'] = values_x
-            data['bigram_left_right_b'] = values_x_minus1
-
-            values_y = []
-            values_y_minus1 = []
-            for y in range(height):
-                for x in range(width):
-                    if y > 0:
-                        values_y_minus1.append(bigrams_top_bottom[y - 1, x])
-                    else:
-                        values_y_minus1.append(256)
-                    if y < height - 1:
-                        values_y.append(bigrams_top_bottom[y, x])
-                    else:
-                        values_y.append(257)
-            data['bigram_top_bottom_a'] = values_y
-            data['bigram_top_bottom_b'] = values_y_minus1
+        data = builder.data
 
         count_min, count_max = cls.count_values_xs(data)
         if count_min != count_max:
