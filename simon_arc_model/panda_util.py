@@ -11,6 +11,7 @@ from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_similarity import ImageSimilarity, Feature, FeatureType
 from simon_arc_lab.task_similarity import TaskSimilarity
 from simon_arc_lab.show_prediction_result import show_prediction_result
+from simon_arc_lab.dictionary_with_list import DictionaryWithList
 from .data_from_image_builder import DataFromImageBuilder, Shape3x3Operation
 from .image_augmentation_operation import ImageAugmentationOperation
 from .image_feature import ImageFeature
@@ -280,22 +281,12 @@ class DecisionTreeUtil:
 
         data = builder.data
 
-        count_min, count_max = cls.count_values_xs(data)
+        count_min, count_max = DictionaryWithList.length_of_lists(data)
         if count_min != count_max:
             raise ValueError(f'The lists must have the same length. However the lists have different lengths. count_min={count_min} count_max={count_max}')
         # print(f'number of keys: {len(data.keys())}  number of values: {count_min}')
 
         return data
-
-    @classmethod
-    def count_values_xs(cls, xs: dict) -> Tuple[int, int]:
-        count_min = 100000000
-        count_max = 0
-        for key in xs.keys():
-            count = len(xs[key])
-            count_min = min(count_min, count)
-            count_max = max(count_max, count)
-        return count_min, count_max
 
     @classmethod
     def merge_xs_per_pixel(cls, xs0: dict, xs1: dict) -> dict:
@@ -306,11 +297,11 @@ class DecisionTreeUtil:
         # both xs0 and xs1 have the same keys
         assert len(xs0.keys()) == len(xs1.keys())
 
-        xs0_count_min, xs0_count_max = cls.count_values_xs(xs0)
+        xs0_count_min, xs0_count_max = DictionaryWithList.length_of_lists(xs0)
         if xs0_count_min != xs0_count_max:
             raise ValueError(f'Expected same pixel count for lists in xs0 dict, {xs0_count_min} != {xs0_count_max}')
 
-        xs1_count_min, xs1_count_max = cls.count_values_xs(xs1)
+        xs1_count_min, xs1_count_max = DictionaryWithList.length_of_lists(xs1)
         if xs1_count_min != xs1_count_max:
             raise ValueError(f'Expected same pixel count for lists in xs1 dict, {xs1_count_min} != {xs1_count_max}')
 
