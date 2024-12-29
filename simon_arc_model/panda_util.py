@@ -12,6 +12,7 @@ from simon_arc_lab.image_similarity import ImageSimilarity, Feature, FeatureType
 from simon_arc_lab.task_similarity import TaskSimilarity
 from simon_arc_lab.show_prediction_result import show_prediction_result
 from .data_from_image_builder import DataFromImageBuilder, Shape3x3Operation
+from .image_augmentation_operation import ImageAugmentationOperation
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.calibration import CalibratedClassifierCV
@@ -21,60 +22,6 @@ import matplotlib.pyplot as plt
 from enum import Enum
 import pandas as pd
 import numpy as np
-
-class Transformation(Enum):
-    DO_NOTHING = 'do_nothing'
-    ROTATE_CW = 'rotate_cw'
-    ROTATE_CCW = 'rotate_ccw'
-    ROTATE_180 = 'rotate_180'
-    FLIP_X = 'flip_x'
-    FLIP_Y = 'flip_y'
-    FLIP_A = 'flip_a'
-    FLIP_B = 'flip_b'
-    SKEW_UP = 'skew_up'
-    SKEW_DOWN = 'skew_down'
-    SKEW_LEFT = 'skew_left'
-    SKEW_RIGHT = 'skew_right'
-    ROTATE_CW_45 = 'rotate_cw_45'
-    ROTATE_CCW_45 = 'rotate_ccw_45'
-
-    def apply(self, image: np.array) -> np.array:
-        if self == Transformation.DO_NOTHING:
-            return image
-        elif self == Transformation.ROTATE_CW:
-            return image_rotate_cw(image)
-        elif self == Transformation.ROTATE_CCW:
-            return image_rotate_ccw(image)
-        elif self == Transformation.ROTATE_180:
-            return image_rotate_180(image)
-        elif self == Transformation.FLIP_X:
-            return image_flipx(image)
-        elif self == Transformation.FLIP_Y:
-            return image_flipy(image)
-        elif self == Transformation.FLIP_A:
-            return image_flip_diagonal_a(image)
-        elif self == Transformation.FLIP_B:
-            return image_flip_diagonal_b(image)
-        elif self == Transformation.SKEW_UP:
-            fill_color = 10
-            return image_skew(image, fill_color, SkewDirection.UP)
-        elif self == Transformation.SKEW_DOWN:
-            fill_color = 10
-            return image_skew(image, fill_color, SkewDirection.DOWN)
-        elif self == Transformation.SKEW_LEFT:
-            fill_color = 10
-            return image_skew(image, fill_color, SkewDirection.LEFT)
-        elif self == Transformation.SKEW_RIGHT:
-            fill_color = 10
-            return image_skew(image, fill_color, SkewDirection.RIGHT)
-        elif self == Transformation.ROTATE_CW_45:
-            fill_color = 10
-            return image_rotate_cw_45(image, fill_color)
-        elif self == Transformation.ROTATE_CCW_45:
-            fill_color = 10
-            return image_rotate_ccw_45(image, fill_color)
-        else:
-            raise ValueError(f'Unknown transformation_index: {self}')
 
 class DecisionTreeFeature(Enum):
     COMPONENT_NEAREST4 = 'component_nearest4'
@@ -475,22 +422,22 @@ class DecisionTreeUtil:
         current_pair_id = 0
 
         transformation_ids = [
-            Transformation.DO_NOTHING,
-            # Transformation.ROTATE_CW,
-            # Transformation.ROTATE_CCW,
-            # Transformation.ROTATE_180,
-            # Transformation.FLIP_X,
-            # Transformation.FLIP_Y,
-            # Transformation.FLIP_A,
-            # Transformation.FLIP_B,
-            # Transformation.SKEW_UP,
-            # Transformation.SKEW_DOWN,
-            # Transformation.SKEW_LEFT,
-            # Transformation.SKEW_RIGHT,
+            ImageAugmentationOperation.DO_NOTHING,
+            # ImageAugmentationOperation.ROTATE_CW,
+            # ImageAugmentationOperation.ROTATE_CCW,
+            # ImageAugmentationOperation.ROTATE_180,
+            # ImageAugmentationOperation.FLIP_X,
+            # ImageAugmentationOperation.FLIP_Y,
+            # ImageAugmentationOperation.FLIP_A,
+            # ImageAugmentationOperation.FLIP_B,
+            # ImageAugmentationOperation.SKEW_UP,
+            # ImageAugmentationOperation.SKEW_DOWN,
+            # ImageAugmentationOperation.SKEW_LEFT,
+            # ImageAugmentationOperation.SKEW_RIGHT,
         ]
         if DecisionTreeFeature.ROTATE45 in features:
-            transformation_ids.append(Transformation.ROTATE_CW_45)
-            transformation_ids.append(Transformation.ROTATE_CCW_45)
+            transformation_ids.append(ImageAugmentationOperation.ROTATE_CW_45)
+            transformation_ids.append(ImageAugmentationOperation.ROTATE_CCW_45)
 
         for pair_index in range(task.count_examples):
             pair_seed = pair_index * 1000 + refinement_index * 10000
@@ -642,7 +589,7 @@ class DecisionTreeUtil:
         current_pair_id = 0
 
         transformation_ids = [
-            Transformation.DO_NOTHING,
+            ImageAugmentationOperation.DO_NOTHING,
             # Transformation.ROTATE_CW,
             # Transformation.ROTATE_CCW,
             # Transformation.ROTATE_180,
@@ -656,8 +603,8 @@ class DecisionTreeUtil:
             # Transformation.SKEW_RIGHT,
         ]
         if DecisionTreeFeature.ROTATE45 in features:
-            transformation_ids.append(Transformation.ROTATE_CW_45)
-            transformation_ids.append(Transformation.ROTATE_CCW_45)
+            transformation_ids.append(ImageAugmentationOperation.ROTATE_CW_45)
+            transformation_ids.append(ImageAugmentationOperation.ROTATE_CCW_45)
 
         for pair_index in range(task.count_examples):
             pair_seed = pair_index * 1000 + refinement_index * 10000
