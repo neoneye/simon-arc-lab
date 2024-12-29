@@ -88,7 +88,6 @@ class Transformation(Enum):
         else:
             raise ValueError(f'Unknown transformation_index: {self}')
 
-
 class DecisionTreeFeature(Enum):
     COMPONENT_NEAREST4 = 'component_nearest4'
     COMPONENT_ALL8 = 'component_all8'
@@ -200,6 +199,14 @@ class DecisionTreePredictOutputResult:
 
         return result_images
 
+
+
+class Shape3x3Operation(Enum):
+    NUMBER_OF_UNIQUE_COLORS_ALL9 = 'number_of_unique_colors_all9'
+    NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER = 'number_of_unique_colors_around_center'
+    NUMBER_OF_UNIQUE_COLORS_IN_CORNERS = 'number_of_unique_colors_in_corners'
+    NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4 = 'number_of_unique_colors_in_diamond4'
+    NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5 = 'number_of_unique_colors_in_diamond5'
 
 class DataFromImageBuilder:
     def __init__(self, image: np.array):
@@ -788,6 +795,47 @@ class DataFromImageBuilder:
             erosion_image = image_erosion_multicolor(self.image, pixel_connectivity)
             self.data[f'image_erosion_multicolor_connectivity{pixel_connectivity}'] = erosion_image.flatten().tolist()
 
+    def make_shape3x3_operations(self, shape3x3_operations: list[Shape3x3Operation], lookaround_size: int):
+        image_operation_list = []
+        for operation in shape3x3_operations:
+            if operation == Shape3x3Operation.NUMBER_OF_UNIQUE_COLORS_ALL9:
+                image2 = ImageShape3x3Histogram.number_of_unique_colors_all9(self.image)
+                image_operation_list.append((image2, operation))
+            elif operation == Shape3x3Operation.NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER:
+                image2 = ImageShape3x3Histogram.number_of_unique_colors_around_center(self.image)
+                image_operation_list.append((image2, operation))
+            elif operation == Shape3x3Operation.NUMBER_OF_UNIQUE_COLORS_IN_CORNERS:
+                image2 = ImageShape3x3Histogram.number_of_unique_colors_in_corners(self.image)
+                image_operation_list.append((image2, operation))
+            elif operation == Shape3x3Operation.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4:
+                image2 = ImageShape3x3Histogram.number_of_unique_colors_in_diamond4(self.image)
+                image_operation_list.append((image2, operation))
+            elif operation == Shape3x3Operation.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5:
+                image2 = ImageShape3x3Histogram.number_of_unique_colors_in_diamond5(self.image)
+                image_operation_list.append((image2, operation))
+            else:
+                raise ValueError(f'Unknown shape3x3 operation: {operation}')
+
+        for (image_shape3x3, operation) in image_operation_list:
+            assert image_shape3x3.shape == self.image.shape
+
+        for (image_shape3x3, operation) in image_operation_list:
+            k = lookaround_size
+            n = k * 2 + 1
+            for ry in range(n):
+                for rx in range(n):
+                    values = []
+                    for y in range(self.height):
+                        for x in range(self.width):
+                            xx = x + rx - k
+                            yy = y + ry - k
+                            if xx < 0 or xx >= self.width or yy < 0 or yy >= self.height:
+                                values.append(0)
+                            else:
+                                values.append(image_shape3x3[yy, xx] + 100)
+                    self.data[f'image_shape3x3_{operation}_x{rx}_y{ry}'] = values
+
+
 class DecisionTreeUtil:
     @classmethod
     def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> dict:
@@ -831,8 +879,6 @@ class DecisionTreeUtil:
 
         if DecisionTreeFeature.CENTER in features:
             builder.make_center_xy()
-
-        lookaround_size_shape3x3 = 2
 
         if True:
             suppress_center_pixel_lookaround = DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND in features
@@ -963,44 +1009,21 @@ class DecisionTreeUtil:
             erosion_pixel_connectivity_list.append(PixelConnectivity.TRBL2)
         builder.make_erosion(erosion_pixel_connectivity_list)
 
-        data = builder.data
-
-        shape3x3_images = []
+        shape3x3_operations = []
         if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_ALL9 in features:
-            image_number_of_unique_colors_all9 = ImageShape3x3Histogram.number_of_unique_colors_all9(image)
-            shape3x3_images.append((image_number_of_unique_colors_all9, 'number_of_unique_colors_all9'))
-
+            shape3x3_operations.append(Shape3x3Operation.NUMBER_OF_UNIQUE_COLORS_ALL9)
         if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER in features:
-            image_number_of_unique_colors_around_center = ImageShape3x3Histogram.number_of_unique_colors_around_center(image)
-            shape3x3_images.append((image_number_of_unique_colors_around_center, 'number_of_unique_colors_around_center'))
-
+            shape3x3_operations.append(Shape3x3Operation.NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER)
         if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_CORNERS in features:
-            image_number_of_unique_colors_in_corners = ImageShape3x3Histogram.number_of_unique_colors_in_corners(image)
-            shape3x3_images.append((image_number_of_unique_colors_in_corners, 'number_of_unique_colors_in_corners'))
-        
+            shape3x3_operations.append(Shape3x3Operation.NUMBER_OF_UNIQUE_COLORS_IN_CORNERS)
         if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4 in features:
-            image_number_of_unique_colors_in_diamond4 = ImageShape3x3Histogram.number_of_unique_colors_in_diamond4(image)
-            shape3x3_images.append((image_number_of_unique_colors_in_diamond4, 'number_of_unique_colors_in_diamond4'))
-        
+            shape3x3_operations.append(Shape3x3Operation.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4)
         if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5 in features:
-            image_number_of_unique_colors_in_diamond5 = ImageShape3x3Histogram.number_of_unique_colors_in_diamond5(image)
-            shape3x3_images.append((image_number_of_unique_colors_in_diamond5, 'number_of_unique_colors_in_diamond5'))
+            shape3x3_operations.append(Shape3x3Operation.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5)
+        lookaround_size_shape3x3 = 2
+        builder.make_shape3x3_operations(shape3x3_operations, lookaround_size_shape3x3)
 
-        for (image_shape3x3, transformation_name) in shape3x3_images:
-            k = lookaround_size_shape3x3
-            n = k * 2 + 1
-            for ry in range(n):
-                for rx in range(n):
-                    values = []
-                    for y in range(height):
-                        for x in range(width):
-                            xx = x + rx - k
-                            yy = y + ry - k
-                            if xx < 0 or xx >= width or yy < 0 or yy >= height:
-                                values.append(0)
-                            else:
-                                values.append(image_shape3x3[yy, xx] + 100)
-                    data[f'image_shape3x3_{transformation_name}_x{rx}_y{ry}'] = values
+        data = builder.data
 
         mass_compare_adjacent_rows = None
         mass_compare_adjacent_rows_height = 0
