@@ -13,7 +13,7 @@ class DictionaryWithList:
         return min(lengths), max(lengths)
 
     @staticmethod
-    def merge_two_dictionaries_with_suffix(dict0: dict, dict1: dict) -> dict:
+    def merge_two_dictionaries_with_suffix(dict0: dict[list], dict1: dict[list]) -> dict[list]:
         """
         Merge two dictionaries with lists as values. The keys must be the same.
         """
