@@ -106,7 +106,7 @@ class WorkManagerDecisionTree(WorkManagerBase):
         noise_levels = [100]
         number_of_refinements = len(noise_levels)
 
-        features = set(FEATURES_2)
+        features = set(FEATURES_1)
 
         # Track incorrect predictions
         features_pretty = DecisionTreeFeature.names_joined_with_comma(features)
