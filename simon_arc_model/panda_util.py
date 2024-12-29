@@ -13,68 +13,15 @@ from simon_arc_lab.task_similarity import TaskSimilarity
 from simon_arc_lab.show_prediction_result import show_prediction_result
 from .data_from_image_builder import DataFromImageBuilder, Shape3x3Operation
 from .image_augmentation_operation import ImageAugmentationOperation
+from .image_feature import ImageFeature
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn import tree
 from scipy.stats import entropy
 import matplotlib.pyplot as plt
-from enum import Enum
 import pandas as pd
 import numpy as np
-
-class DecisionTreeFeature(Enum):
-    COMPONENT_NEAREST4 = 'component_nearest4'
-    COMPONENT_ALL8 = 'component_all8'
-    COMPONENT_CORNER4 = 'component_corner4'
-    SUPPRESS_CENTER_PIXEL_ONCE = 'suppress_center_pixel_once'
-    SUPPRESS_CENTER_PIXEL_LOOKAROUND = 'suppress_center_pixel_lookaround'
-    HISTOGRAM_DIAGONAL = 'histogram_diagonal'
-    HISTOGRAM_ROWCOL = 'histogram_rowcol'
-    HISTOGRAM_VALUE = 'histogram_value'
-    IMAGE_MASS_COMPARE_ADJACENT_ROWCOL = 'image_mass_compare_adjacent_rowcol'
-    IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2 = 'image_mass_compare_adjacent_rowcol2'
-    NUMBER_OF_UNIQUE_COLORS_ALL9 = 'number_of_unique_colors_all9'
-    NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER = 'number_of_unique_colors_around_center'
-    NUMBER_OF_UNIQUE_COLORS_IN_CORNERS = 'number_of_unique_colors_in_corners'
-    NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4 = 'number_of_unique_colors_in_diamond4'
-    NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5 = 'number_of_unique_colors_in_diamond5'
-    ROTATE45 = 'image_rotate45'
-    COUNT_NEIGHBORS_WITH_SAME_COLOR = 'count_neighbors_with_same_color'
-    EROSION_ALL8 = 'erosion_all8'
-    EROSION_NEAREST4 = 'erosion_nearest4'
-    EROSION_CORNER4 = 'erosion_corner4'
-    EROSION_ROWCOL = 'erosion_rowcol'
-    EROSION_DIAGONAL = 'erosion_diagonal'
-    ANY_CORNER = 'any_corner'
-    CORNER = 'corner'
-    ANY_EDGE = 'any_edge'
-    CENTER = 'center'
-    BOUNDING_BOXES = 'bounding_boxes'
-    DISTANCE_INSIDE_OBJECT = 'distance_inside_object'
-    GRAVITY_DRAW_TOP_TO_BOTTOM = 'gravity_draw_top_to_bottom'
-    GRAVITY_DRAW_BOTTOM_TO_TOP = 'gravity_draw_bottom_to_top'
-    GRAVITY_DRAW_LEFT_TO_RIGHT = 'gravity_draw_left_to_right'
-    GRAVITY_DRAW_RIGHT_TO_LEFT = 'gravity_draw_right_to_left'
-    GRAVITY_DRAW_TOPLEFT_TO_BOTTOMRIGHT = 'gravity_draw_topleft_to_bottomright'
-    GRAVITY_DRAW_BOTTOMRIGHT_TO_TOPLEFT = 'gravity_draw_bottomright_to_topleft'
-    GRAVITY_DRAW_TOPRIGHT_TO_BOTTOMLEFT = 'gravity_draw_topright_to_bottomleft'
-    GRAVITY_DRAW_BOTTOMLEFT_TO_TOPRIGHT = 'gravity_draw_bottomleft_to_topright'
-    POSITION_XY0 = 'position_xy0'
-    POSITION_XY4 = 'position_xy4'
-    OBJECT_ID_RAY_LIST = 'object_id_ray_list'
-    IDENTIFY_OBJECT_SHAPE = 'identify_object_shape'
-    BIGRAM_ROWCOL = 'bigram_rowcol'
-    COLOR_POPULARITY = 'color_popularity'
-
-    @classmethod
-    def names_joined_with_comma(cls, features: set['DecisionTreeFeature']) -> str:
-        """
-        Human readable compact representation of multiple features.
-        """
-        names_unordered = [feature.name for feature in features]
-        names_sorted = sorted(names_unordered)
-        return ','.join(names_sorted)
 
 class DecisionTreePredictOutputResult:
     def __init__(self, width: int, height: int, probabilities: np.array):
@@ -137,7 +84,7 @@ class DecisionTreePredictOutputResult:
 
 class DecisionTreeUtil:
     @classmethod
-    def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> dict:
+    def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[ImageFeature], is_earlier_prediction: bool) -> dict:
         # print(f'xs_for_input_image: pair_id={pair_id} features={features} is_earlier_prediction={is_earlier_prediction}')
         builder = DataFromImageBuilder(image)
 
@@ -145,46 +92,46 @@ class DecisionTreeUtil:
         builder.make_is_earlier_prediction(is_earlier_prediction)
 
         # Column "center_pixel"
-        if DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE not in features:
+        if ImageFeature.SUPPRESS_CENTER_PIXEL_ONCE not in features:
             builder.make_center_pixel()
 
         # Columns "color_popularity"
-        if DecisionTreeFeature.COLOR_POPULARITY in features:
+        if ImageFeature.COLOR_POPULARITY in features:
             builder.make_color_popularity(1)
 
         # Position related columns
-        if DecisionTreeFeature.POSITION_XY0 in features:
+        if ImageFeature.POSITION_XY0 in features:
             builder.make_position_xy()
 
-        if DecisionTreeFeature.POSITION_XY4 in features:
+        if ImageFeature.POSITION_XY4 in features:
             builder.make_position_xy_lookaround(4)
 
-        if DecisionTreeFeature.ANY_EDGE in features:
+        if ImageFeature.ANY_EDGE in features:
             builder.make_any_edge()
 
-        if DecisionTreeFeature.ANY_CORNER in features:
+        if ImageFeature.ANY_CORNER in features:
             builder.make_any_corner()
 
         if True:
             builder.make_diagonal_distance()
 
-        if DecisionTreeFeature.CORNER in features:
+        if ImageFeature.CORNER in features:
             builder.make_corner()
 
-        if DecisionTreeFeature.CENTER in features:
+        if ImageFeature.CENTER in features:
             builder.make_center_xy()
 
         if True:
-            suppress_center_pixel_lookaround = DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND in features
+            suppress_center_pixel_lookaround = ImageFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND in features
             lookaround_size_image_pixel = 1
             builder.make_image_pixel_color(lookaround_size_image_pixel, suppress_center_pixel_lookaround)
     
         component_pixel_connectivity_list = []
-        if DecisionTreeFeature.COMPONENT_NEAREST4 in features:
+        if ImageFeature.COMPONENT_NEAREST4 in features:
             component_pixel_connectivity_list.append(PixelConnectivity.NEAREST4)
-        if DecisionTreeFeature.COMPONENT_ALL8 in features:
+        if ImageFeature.COMPONENT_ALL8 in features:
             component_pixel_connectivity_list.append(PixelConnectivity.ALL8)
-        if DecisionTreeFeature.COMPONENT_CORNER4 in features:
+        if ImageFeature.COMPONENT_CORNER4 in features:
             component_pixel_connectivity_list.append(PixelConnectivity.CORNER4)
 
         # Connected components
@@ -192,7 +139,7 @@ class DecisionTreeUtil:
             builder.components(component_pixel_connectivity)
 
         # Column with shape info
-        if DecisionTreeFeature.IDENTIFY_OBJECT_SHAPE in features:
+        if ImageFeature.IDENTIFY_OBJECT_SHAPE in features:
             lookaround_size_shape = 0
             for component_pixel_connectivity in component_pixel_connectivity_list:
                 builder.make_object_shape(component_pixel_connectivity, lookaround_size_shape)
@@ -230,7 +177,7 @@ class DecisionTreeUtil:
             lookaround_size = 0
             builder.make_object_mass(component_pixel_connectivity, lookaround_size)
 
-        if DecisionTreeFeature.DISTANCE_INSIDE_OBJECT in features:
+        if ImageFeature.DISTANCE_INSIDE_OBJECT in features:
             for pixel_connectivity in component_pixel_connectivity_list:
                 builder.make_distance_inside_object(pixel_connectivity)
 
@@ -245,7 +192,7 @@ class DecisionTreeUtil:
         if True:
             builder.make_probe_color_for_all_directions()
 
-        if DecisionTreeFeature.OBJECT_ID_RAY_LIST in features:
+        if ImageFeature.OBJECT_ID_RAY_LIST in features:
             for (object_ids, pixel_connectivity) in object_ids_list:
                 builder.make_probe_objectid_for_all_directions(object_ids, pixel_connectivity)
 
@@ -256,79 +203,79 @@ class DecisionTreeUtil:
             lookaround_size = 1
             builder.make_count_same_color_as_center(lookaround_size)
 
-        if DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR in features:
+        if ImageFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR in features:
             builder.make_count_neighbors_with_same_color()
 
-        enable_count_with_minus1 = DecisionTreeFeature.HISTOGRAM_VALUE in features
+        enable_count_with_minus1 = ImageFeature.HISTOGRAM_VALUE in features
 
-        if DecisionTreeFeature.HISTOGRAM_ROWCOL in features:
+        if ImageFeature.HISTOGRAM_ROWCOL in features:
             builder.make_histogram_row(enable_count_with_minus1)
             builder.make_histogram_column(enable_count_with_minus1)
 
-        if DecisionTreeFeature.HISTOGRAM_DIAGONAL in features:
+        if ImageFeature.HISTOGRAM_DIAGONAL in features:
             builder.make_histogram_tlbr(enable_count_with_minus1)
             builder.make_histogram_trbl(enable_count_with_minus1)
 
         gravity_draw_directions = []
-        if DecisionTreeFeature.GRAVITY_DRAW_TOP_TO_BOTTOM in features:
+        if ImageFeature.GRAVITY_DRAW_TOP_TO_BOTTOM in features:
             gravity_draw_directions.append(GravityDrawDirection.TOP_TO_BOTTOM)
-        if DecisionTreeFeature.GRAVITY_DRAW_BOTTOM_TO_TOP in features:
+        if ImageFeature.GRAVITY_DRAW_BOTTOM_TO_TOP in features:
             gravity_draw_directions.append(GravityDrawDirection.TOP_TO_BOTTOM)
-        if DecisionTreeFeature.GRAVITY_DRAW_LEFT_TO_RIGHT in features:
+        if ImageFeature.GRAVITY_DRAW_LEFT_TO_RIGHT in features:
             gravity_draw_directions.append(GravityDrawDirection.LEFT_TO_RIGHT)
-        if DecisionTreeFeature.GRAVITY_DRAW_RIGHT_TO_LEFT in features:
+        if ImageFeature.GRAVITY_DRAW_RIGHT_TO_LEFT in features:
             gravity_draw_directions.append(GravityDrawDirection.RIGHT_TO_LEFT)
-        if DecisionTreeFeature.GRAVITY_DRAW_TOPLEFT_TO_BOTTOMRIGHT in features:
+        if ImageFeature.GRAVITY_DRAW_TOPLEFT_TO_BOTTOMRIGHT in features:
             gravity_draw_directions.append(GravityDrawDirection.TOPLEFT_TO_BOTTOMRIGHT)
-        if DecisionTreeFeature.GRAVITY_DRAW_TOPRIGHT_TO_BOTTOMLEFT in features:
+        if ImageFeature.GRAVITY_DRAW_TOPRIGHT_TO_BOTTOMLEFT in features:
             gravity_draw_directions.append(GravityDrawDirection.TOPRIGHT_TO_BOTTOMLEFT)
-        if DecisionTreeFeature.GRAVITY_DRAW_BOTTOMLEFT_TO_TOPRIGHT in features:
+        if ImageFeature.GRAVITY_DRAW_BOTTOMLEFT_TO_TOPRIGHT in features:
             gravity_draw_directions.append(GravityDrawDirection.BOTTOMLEFT_TO_TOPRIGHT)
-        if DecisionTreeFeature.GRAVITY_DRAW_BOTTOMRIGHT_TO_TOPLEFT in features:
+        if ImageFeature.GRAVITY_DRAW_BOTTOMRIGHT_TO_TOPLEFT in features:
             gravity_draw_directions.append(GravityDrawDirection.BOTTOMRIGHT_TO_TOPLEFT)
         builder.make_gravity_draw(gravity_draw_directions)
 
         erosion_pixel_connectivity_list = []
-        if DecisionTreeFeature.EROSION_ALL8 in features:
+        if ImageFeature.EROSION_ALL8 in features:
             erosion_pixel_connectivity_list.append(PixelConnectivity.ALL8)
-        if DecisionTreeFeature.EROSION_NEAREST4 in features:
+        if ImageFeature.EROSION_NEAREST4 in features:
             erosion_pixel_connectivity_list.append(PixelConnectivity.NEAREST4)
-        if DecisionTreeFeature.EROSION_CORNER4 in features:
+        if ImageFeature.EROSION_CORNER4 in features:
             erosion_pixel_connectivity_list.append(PixelConnectivity.CORNER4)
-        if DecisionTreeFeature.EROSION_ROWCOL in features:
+        if ImageFeature.EROSION_ROWCOL in features:
             erosion_pixel_connectivity_list.append(PixelConnectivity.LR2)
             erosion_pixel_connectivity_list.append(PixelConnectivity.TB2)
-        if DecisionTreeFeature.EROSION_DIAGONAL in features:
+        if ImageFeature.EROSION_DIAGONAL in features:
             erosion_pixel_connectivity_list.append(PixelConnectivity.TLBR2)
             erosion_pixel_connectivity_list.append(PixelConnectivity.TRBL2)
         builder.make_erosion(erosion_pixel_connectivity_list)
 
         shape3x3_operations = []
-        if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_ALL9 in features:
+        if ImageFeature.NUMBER_OF_UNIQUE_COLORS_ALL9 in features:
             shape3x3_operations.append(Shape3x3Operation.NUMBER_OF_UNIQUE_COLORS_ALL9)
-        if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER in features:
+        if ImageFeature.NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER in features:
             shape3x3_operations.append(Shape3x3Operation.NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER)
-        if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_CORNERS in features:
+        if ImageFeature.NUMBER_OF_UNIQUE_COLORS_IN_CORNERS in features:
             shape3x3_operations.append(Shape3x3Operation.NUMBER_OF_UNIQUE_COLORS_IN_CORNERS)
-        if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4 in features:
+        if ImageFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4 in features:
             shape3x3_operations.append(Shape3x3Operation.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4)
-        if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5 in features:
+        if ImageFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5 in features:
             shape3x3_operations.append(Shape3x3Operation.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5)
         lookaround_size_shape3x3 = 2
         builder.make_shape3x3_operations(shape3x3_operations, lookaround_size_shape3x3)
 
-        if (DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL in features) or (DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2 in features):
+        if (ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL in features) or (ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2 in features):
             steps = []
-            if DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL in features:
+            if ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL in features:
                 steps.append(1)
-            if DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2 in features:
+            if ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2 in features:
                 steps.append(2)
             builder.make_mass_compare_adjacent_rowcol(steps)
 
-        if DecisionTreeFeature.BOUNDING_BOXES in features:
+        if ImageFeature.BOUNDING_BOXES in features:
             builder.make_bounding_boxes_of_each_color()
 
-        if DecisionTreeFeature.BIGRAM_ROWCOL in features:
+        if ImageFeature.BIGRAM_ROWCOL in features:
             builder.make_bigram_rowcol()
 
         data = builder.data
@@ -379,7 +326,7 @@ class DecisionTreeUtil:
         return xs
     
     @classmethod
-    def xs_for_input_noise_images(cls, refinement_index: int, input_image: np.array, noise_image: np.array, pair_id: int, features: set[DecisionTreeFeature]) -> dict:
+    def xs_for_input_noise_images(cls, refinement_index: int, input_image: np.array, noise_image: np.array, pair_id: int, features: set[ImageFeature]) -> dict:
         if refinement_index == 0:
             xs = cls.xs_for_input_image(input_image, pair_id, features, False)
         else:
@@ -398,7 +345,7 @@ class DecisionTreeUtil:
         return values
 
     @classmethod
-    def predict_output(cls, task: Task, test_index: int, previous_prediction_image: Optional[np.array], previous_prediction_mask: Optional[np.array], refinement_index: int, noise_level: int, features: set[DecisionTreeFeature]) -> DecisionTreePredictOutputResult:
+    def predict_output(cls, task: Task, test_index: int, previous_prediction_image: Optional[np.array], previous_prediction_mask: Optional[np.array], refinement_index: int, noise_level: int, features: set[ImageFeature]) -> DecisionTreePredictOutputResult:
         if task.has_same_input_output_size_for_all_examples() == False:
             raise ValueError('The decisiontree only works for puzzles where input/output have the same size')
         
@@ -435,7 +382,7 @@ class DecisionTreeUtil:
             # ImageAugmentationOperation.SKEW_LEFT,
             # ImageAugmentationOperation.SKEW_RIGHT,
         ]
-        if DecisionTreeFeature.ROTATE45 in features:
+        if ImageFeature.ROTATE45 in features:
             transformation_ids.append(ImageAugmentationOperation.ROTATE_CW_45)
             transformation_ids.append(ImageAugmentationOperation.ROTATE_CCW_45)
 
@@ -582,7 +529,7 @@ class DecisionTreeUtil:
         return DecisionTreePredictOutputResult(width, height, probabilities)
 
     @classmethod
-    def validate_output(cls, task: Task, test_index: int, prediction_to_verify: np.array, refinement_index: int, noise_level: int, features: set[DecisionTreeFeature]) -> DecisionTreePredictOutputResult:
+    def validate_output(cls, task: Task, test_index: int, prediction_to_verify: np.array, refinement_index: int, noise_level: int, features: set[ImageFeature]) -> DecisionTreePredictOutputResult:
         xs = []
         ys = []
 
@@ -602,7 +549,7 @@ class DecisionTreeUtil:
             # Transformation.SKEW_LEFT,
             # Transformation.SKEW_RIGHT,
         ]
-        if DecisionTreeFeature.ROTATE45 in features:
+        if ImageFeature.ROTATE45 in features:
             transformation_ids.append(ImageAugmentationOperation.ROTATE_CW_45)
             transformation_ids.append(ImageAugmentationOperation.ROTATE_CCW_45)
 

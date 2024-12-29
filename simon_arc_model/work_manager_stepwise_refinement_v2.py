@@ -17,49 +17,49 @@ from .work_item_list import WorkItemList
 from .work_item_status import WorkItemStatus
 from .save_arcprize2024_submission_file import *
 from .work_manager_base import WorkManagerBase
-from .decision_tree_util import DecisionTreeUtil, DecisionTreeFeature
+from .decision_tree_util import DecisionTreeUtil, ImageFeature
 
 # Correct 59, Solves 1 of the hidden ARC tasks
 # ARC-AGI training=41, evaluation=17
 FEATURES_1 = [
-    DecisionTreeFeature.COMPONENT_NEAREST4,
-    DecisionTreeFeature.HISTOGRAM_DIAGONAL,
-    DecisionTreeFeature.HISTOGRAM_ROWCOL,
-    DecisionTreeFeature.HISTOGRAM_VALUE,
-    DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL,
-    DecisionTreeFeature.BOUNDING_BOXES,
+    ImageFeature.COMPONENT_NEAREST4,
+    ImageFeature.HISTOGRAM_DIAGONAL,
+    ImageFeature.HISTOGRAM_ROWCOL,
+    ImageFeature.HISTOGRAM_VALUE,
+    ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL,
+    ImageFeature.BOUNDING_BOXES,
 ]
 
 # Correct 59, Solves 1 of the hidden ARC tasks
 # ARC-AGI training=39, evaluation=20
 FEATURES_2 = [
-    DecisionTreeFeature.BOUNDING_BOXES,
-    DecisionTreeFeature.COMPONENT_NEAREST4,
-    DecisionTreeFeature.EROSION_ALL8,
-    DecisionTreeFeature.HISTOGRAM_ROWCOL,
+    ImageFeature.BOUNDING_BOXES,
+    ImageFeature.COMPONENT_NEAREST4,
+    ImageFeature.EROSION_ALL8,
+    ImageFeature.HISTOGRAM_ROWCOL,
 ]
 
 FEATURES_3 = [
-    DecisionTreeFeature.COMPONENT_ALL8,
-    DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2,
-    DecisionTreeFeature.OBJECT_ID_RAY_LIST,
+    ImageFeature.COMPONENT_ALL8,
+    ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2,
+    ImageFeature.OBJECT_ID_RAY_LIST,
 ]
 
 # Correct 47
 FEATURES_4 = [
-    DecisionTreeFeature.COMPONENT_NEAREST4, 
-    DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR, 
-    DecisionTreeFeature.EROSION_CORNER4, 
-    DecisionTreeFeature.EROSION_ROWCOL,
+    ImageFeature.COMPONENT_NEAREST4, 
+    ImageFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR, 
+    ImageFeature.EROSION_CORNER4, 
+    ImageFeature.EROSION_ROWCOL,
 ]
 
 # Correct 48
 FEATURES_5 = [
-    DecisionTreeFeature.CENTER, 
-    DecisionTreeFeature.COMPONENT_NEAREST4, 
-    DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR, 
-    DecisionTreeFeature.EROSION_NEAREST4, 
-    DecisionTreeFeature.HISTOGRAM_ROWCOL,
+    ImageFeature.CENTER, 
+    ImageFeature.COMPONENT_NEAREST4, 
+    ImageFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR, 
+    ImageFeature.EROSION_NEAREST4, 
+    ImageFeature.HISTOGRAM_ROWCOL,
 ]
 
 class WorkManagerStepwiseRefinementV2(WorkManagerBase):

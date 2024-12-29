@@ -17,68 +17,68 @@ from .work_item_list import WorkItemList
 from .work_item_status import WorkItemStatus
 from .save_arcprize2024_submission_file import *
 from .work_manager_base import WorkManagerBase
-from .panda_util import DecisionTreeUtil, DecisionTreeFeature
+from .panda_util import DecisionTreeUtil, ImageFeature
 from .track_incorrect_prediction import TrackIncorrectPrediction
 
 # Correct 59, Solves 1 of the hidden ARC tasks
 # ARC-AGI training=41, evaluation=17
 FEATURES_1 = [
-    DecisionTreeFeature.COMPONENT_NEAREST4,
-    DecisionTreeFeature.HISTOGRAM_DIAGONAL,
-    DecisionTreeFeature.HISTOGRAM_ROWCOL,
-    DecisionTreeFeature.HISTOGRAM_VALUE,
-    DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL,
-    DecisionTreeFeature.BOUNDING_BOXES,
+    ImageFeature.COMPONENT_NEAREST4,
+    ImageFeature.HISTOGRAM_DIAGONAL,
+    ImageFeature.HISTOGRAM_ROWCOL,
+    ImageFeature.HISTOGRAM_VALUE,
+    ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL,
+    ImageFeature.BOUNDING_BOXES,
 ]
 
 # Correct 59, Solves 1 of the hidden ARC tasks
 # ARC-AGI training=39, evaluation=20
 FEATURES_2 = [
-    DecisionTreeFeature.BOUNDING_BOXES,
-    DecisionTreeFeature.COMPONENT_NEAREST4,
-    DecisionTreeFeature.EROSION_ALL8,
-    DecisionTreeFeature.HISTOGRAM_ROWCOL,
+    ImageFeature.BOUNDING_BOXES,
+    ImageFeature.COMPONENT_NEAREST4,
+    ImageFeature.EROSION_ALL8,
+    ImageFeature.HISTOGRAM_ROWCOL,
 ]
 
 FEATURES_3 = [
-    DecisionTreeFeature.COMPONENT_ALL8,
-    DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2,
-    DecisionTreeFeature.OBJECT_ID_RAY_LIST,
+    ImageFeature.COMPONENT_ALL8,
+    ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2,
+    ImageFeature.OBJECT_ID_RAY_LIST,
 ]
 
 # Correct 47
 FEATURES_4 = [
-    DecisionTreeFeature.COMPONENT_NEAREST4, 
-    DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR, 
-    DecisionTreeFeature.EROSION_CORNER4, 
-    DecisionTreeFeature.EROSION_ROWCOL,
+    ImageFeature.COMPONENT_NEAREST4, 
+    ImageFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR, 
+    ImageFeature.EROSION_CORNER4, 
+    ImageFeature.EROSION_ROWCOL,
 ]
 
 # Correct 48
 FEATURES_5 = [
-    DecisionTreeFeature.CENTER, 
-    DecisionTreeFeature.COMPONENT_NEAREST4, 
-    DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR, 
-    DecisionTreeFeature.EROSION_NEAREST4, 
-    DecisionTreeFeature.HISTOGRAM_ROWCOL,
+    ImageFeature.CENTER, 
+    ImageFeature.COMPONENT_NEAREST4, 
+    ImageFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR, 
+    ImageFeature.EROSION_NEAREST4, 
+    ImageFeature.HISTOGRAM_ROWCOL,
 ]
 
 # Solves "1c02dbbe"
 FEATURES_6 = [
-    DecisionTreeFeature.BOUNDING_BOXES,
-    DecisionTreeFeature.COMPONENT_ALL8,
-    DecisionTreeFeature.GRAVITY_DRAW_TOP_TO_BOTTOM,
-    DecisionTreeFeature.GRAVITY_DRAW_TOPLEFT_TO_BOTTOMRIGHT,
+    ImageFeature.BOUNDING_BOXES,
+    ImageFeature.COMPONENT_ALL8,
+    ImageFeature.GRAVITY_DRAW_TOP_TO_BOTTOM,
+    ImageFeature.GRAVITY_DRAW_TOPLEFT_TO_BOTTOMRIGHT,
 ]
 
 # Makes nice stepwise improvements to the puzzle "3f23242b"
 FEATURES_7 = [
-    DecisionTreeFeature.BOUNDING_BOXES,
-    DecisionTreeFeature.COMPONENT_ALL8,
-    DecisionTreeFeature.GRAVITY_DRAW_TOP_TO_BOTTOM,
-    DecisionTreeFeature.GRAVITY_DRAW_TOPLEFT_TO_BOTTOMRIGHT,
-    DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_ALL9,
-    DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4,
+    ImageFeature.BOUNDING_BOXES,
+    ImageFeature.COMPONENT_ALL8,
+    ImageFeature.GRAVITY_DRAW_TOP_TO_BOTTOM,
+    ImageFeature.GRAVITY_DRAW_TOPLEFT_TO_BOTTOMRIGHT,
+    ImageFeature.NUMBER_OF_UNIQUE_COLORS_ALL9,
+    ImageFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4,
 ]
 
 class WorkManagerStepwiseRefinementV4(WorkManagerBase):

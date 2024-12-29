@@ -20,7 +20,7 @@ from random import sample
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.image_pixel_similarity import image_pixel_similarity_overall
 from simon_arc_model.model import Model
-from simon_arc_model.decision_tree_util import DecisionTreeUtil, DecisionTreeFeature
+from simon_arc_model.decision_tree_util import DecisionTreeUtil, ImageFeature
 
 def featureset_id(features: set):
     names = sorted([feature.name for feature in features])
@@ -64,7 +64,7 @@ for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
 
-available_features = list(DecisionTreeFeature)
+available_features = list(ImageFeature)
 print(f"Number of features: {len(available_features)}")
 
 available_feature_names = [feature.name for feature in available_features]
@@ -81,12 +81,12 @@ if False:
 
 if False:
     features = set()
-    features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
-    features.add(DecisionTreeFeature.HISTOGRAM_DIAGONAL)
-    features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
-    features.add(DecisionTreeFeature.HISTOGRAM_VALUE)
-    features.add(DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL)
-    features.add(DecisionTreeFeature.BOUNDING_BOXES)
+    features.add(ImageFeature.COMPONENT_NEAREST4)
+    features.add(ImageFeature.HISTOGRAM_DIAGONAL)
+    features.add(ImageFeature.HISTOGRAM_ROWCOL)
+    features.add(ImageFeature.HISTOGRAM_VALUE)
+    features.add(ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL)
+    features.add(ImageFeature.BOUNDING_BOXES)
     fid = featureset_id(features)
     already_seen_featureids.add(fid)
     featurecomboitem = FeatureComboItem(2, features)
@@ -94,13 +94,13 @@ if False:
 
 if False:
     features = set()
-    features.add(DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND)
-    features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
-    features.add(DecisionTreeFeature.HISTOGRAM_DIAGONAL)
-    features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
-    features.add(DecisionTreeFeature.HISTOGRAM_VALUE)
-    features.add(DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL)
-    features.add(DecisionTreeFeature.BOUNDING_BOXES)
+    features.add(ImageFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND)
+    features.add(ImageFeature.COMPONENT_NEAREST4)
+    features.add(ImageFeature.HISTOGRAM_DIAGONAL)
+    features.add(ImageFeature.HISTOGRAM_ROWCOL)
+    features.add(ImageFeature.HISTOGRAM_VALUE)
+    features.add(ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL)
+    features.add(ImageFeature.BOUNDING_BOXES)
     fid = featureset_id(features)
     already_seen_featureids.add(fid)
     featurecomboitem = FeatureComboItem(1, features)
@@ -108,14 +108,14 @@ if False:
 
 if False:
     features = set()
-    features.add(DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND)
-    features.add(DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE)
-    features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
-    features.add(DecisionTreeFeature.HISTOGRAM_DIAGONAL)
-    features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
-    features.add(DecisionTreeFeature.HISTOGRAM_VALUE)
-    features.add(DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL)
-    features.add(DecisionTreeFeature.BOUNDING_BOXES)
+    features.add(ImageFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND)
+    features.add(ImageFeature.SUPPRESS_CENTER_PIXEL_ONCE)
+    features.add(ImageFeature.COMPONENT_NEAREST4)
+    features.add(ImageFeature.HISTOGRAM_DIAGONAL)
+    features.add(ImageFeature.HISTOGRAM_ROWCOL)
+    features.add(ImageFeature.HISTOGRAM_VALUE)
+    features.add(ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL)
+    features.add(ImageFeature.BOUNDING_BOXES)
     fid = featureset_id(features)
     already_seen_featureids.add(fid)
     featurecomboitem = FeatureComboItem(2, features)
@@ -123,13 +123,13 @@ if False:
 
 if False:
     features = set()
-    features.add(DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE)
-    features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
-    features.add(DecisionTreeFeature.HISTOGRAM_DIAGONAL)
-    features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
-    features.add(DecisionTreeFeature.HISTOGRAM_VALUE)
-    features.add(DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL)
-    features.add(DecisionTreeFeature.BOUNDING_BOXES)
+    features.add(ImageFeature.SUPPRESS_CENTER_PIXEL_ONCE)
+    features.add(ImageFeature.COMPONENT_NEAREST4)
+    features.add(ImageFeature.HISTOGRAM_DIAGONAL)
+    features.add(ImageFeature.HISTOGRAM_ROWCOL)
+    features.add(ImageFeature.HISTOGRAM_VALUE)
+    features.add(ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL)
+    features.add(ImageFeature.BOUNDING_BOXES)
     fid = featureset_id(features)
     already_seen_featureids.add(fid)
     featurecomboitem = FeatureComboItem(3, features)
@@ -137,12 +137,12 @@ if False:
 
 if False:
     features = set()
-    features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
-    features.add(DecisionTreeFeature.CORNER)
-    features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
-    features.add(DecisionTreeFeature.HISTOGRAM_VALUE)
-    features.add(DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL)
-    features.add(DecisionTreeFeature.ROTATE45)
+    features.add(ImageFeature.COMPONENT_NEAREST4)
+    features.add(ImageFeature.CORNER)
+    features.add(ImageFeature.HISTOGRAM_ROWCOL)
+    features.add(ImageFeature.HISTOGRAM_VALUE)
+    features.add(ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL)
+    features.add(ImageFeature.ROTATE45)
     fid = featureset_id(features)
     already_seen_featureids.add(fid)
     featurecomboitem = FeatureComboItem(1, features)
@@ -150,11 +150,11 @@ if False:
 
 if False:
     features = set()
-    features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
-    features.add(DecisionTreeFeature.EROSION_ALL8)
-    features.add(DecisionTreeFeature.HISTOGRAM_DIAGONAL)
-    features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4)
-    features.add(DecisionTreeFeature.ROTATE45)
+    features.add(ImageFeature.COMPONENT_NEAREST4)
+    features.add(ImageFeature.EROSION_ALL8)
+    features.add(ImageFeature.HISTOGRAM_DIAGONAL)
+    features.add(ImageFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4)
+    features.add(ImageFeature.ROTATE45)
     fid = featureset_id(features)
     already_seen_featureids.add(fid)
     featurecomboitem = FeatureComboItem(2, features)
@@ -162,12 +162,12 @@ if False:
 
 if False:
     features = set()
-    features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
-    features.add(DecisionTreeFeature.BOUNDING_BOXES)
-    features.add(DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR)
-    features.add(DecisionTreeFeature.EROSION_DIAGONAL)
-    features.add(DecisionTreeFeature.HISTOGRAM_VALUE)
-    features.add(DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND)
+    features.add(ImageFeature.COMPONENT_NEAREST4)
+    features.add(ImageFeature.BOUNDING_BOXES)
+    features.add(ImageFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR)
+    features.add(ImageFeature.EROSION_DIAGONAL)
+    features.add(ImageFeature.HISTOGRAM_VALUE)
+    features.add(ImageFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND)
     fid = featureset_id(features)
     already_seen_featureids.add(fid)
     featurecomboitem = FeatureComboItem(1, features)
@@ -175,12 +175,12 @@ if False:
 
 if False:
     features = set()
-    features.add(DecisionTreeFeature.BOUNDING_BOXES)
-    features.add(DecisionTreeFeature.COMPONENT_NEAREST4)
-    features.add(DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR)
-    features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_ALL9)
-    features.add(DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND)
-    features.add(DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE)
+    features.add(ImageFeature.BOUNDING_BOXES)
+    features.add(ImageFeature.COMPONENT_NEAREST4)
+    features.add(ImageFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR)
+    features.add(ImageFeature.NUMBER_OF_UNIQUE_COLORS_ALL9)
+    features.add(ImageFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND)
+    features.add(ImageFeature.SUPPRESS_CENTER_PIXEL_ONCE)
     fid = featureset_id(features)
     already_seen_featureids.add(fid)
     featurecomboitem = FeatureComboItem(1, features)
@@ -188,10 +188,10 @@ if False:
 
 if False:
     features = set()
-    features.add(DecisionTreeFeature.EROSION_ROWCOL)
-    features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
-    features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_ALL9)
-    features.add(DecisionTreeFeature.SUPPRESS_CENTER_PIXEL_ONCE)
+    features.add(ImageFeature.EROSION_ROWCOL)
+    features.add(ImageFeature.HISTOGRAM_ROWCOL)
+    features.add(ImageFeature.NUMBER_OF_UNIQUE_COLORS_ALL9)
+    features.add(ImageFeature.SUPPRESS_CENTER_PIXEL_ONCE)
     fid = featureset_id(features)
     already_seen_featureids.add(fid)
     featurecomboitem = FeatureComboItem(2, features)
@@ -199,10 +199,10 @@ if False:
 
 if False:
     features = set()
-    features.add(DecisionTreeFeature.CORNER)
-    features.add(DecisionTreeFeature.HISTOGRAM_ROWCOL)
-    features.add(DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4)
-    features.add(DecisionTreeFeature.ROTATE45)
+    features.add(ImageFeature.CORNER)
+    features.add(ImageFeature.HISTOGRAM_ROWCOL)
+    features.add(ImageFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4)
+    features.add(ImageFeature.ROTATE45)
     fid = featureset_id(features)
     already_seen_featureids.add(fid)
     featurecomboitem = FeatureComboItem(3, features)

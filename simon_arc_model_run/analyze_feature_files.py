@@ -16,7 +16,7 @@ import time
 import random
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.image_pixel_similarity import image_pixel_similarity_overall
-from simon_arc_model.decision_tree_util import DecisionTreeUtil, DecisionTreeFeature
+from simon_arc_model.decision_tree_util import DecisionTreeUtil, ImageFeature
 
 def load_summaryjson_files(directory):
     paths = []
