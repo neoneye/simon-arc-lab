@@ -835,6 +835,46 @@ class DataFromImageBuilder:
                                 values.append(image_shape3x3[yy, xx] + 100)
                     self.data[f'image_shape3x3_{operation}_x{rx}_y{ry}'] = values
 
+    def make_mass_compare_adjacent_rowcol(self, steps: list[int]):
+        if self.width < 2 or self.height < 2:
+            raise ValueError('IMAGE_MASS_COMPARE_ADJACENT_ROWCOL+IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2 requires at least 2x2 image. Soft-error.')
+        mass_compare_adjacent_rows = image_mass_compare_adjacent_rows(self.image, 0, 1, 2)
+        mass_compare_adjacent_rows_height = mass_compare_adjacent_rows.shape[0]
+        mass_compare_adjacent_columns = image_mass_compare_adjacent_columns(self.image, 0, 1, 2)
+        mass_compare_adjacent_columns_width = mass_compare_adjacent_columns.shape[1]
+
+        for step in steps:
+            values_rows_a = []
+            values_rows_b = []
+            values_columns_a = []
+            values_columns_b = []
+            for y in range(self.height):
+                for x in range(self.width):
+                    if y >= step:
+                        comp = mass_compare_adjacent_rows[y - step, x]
+                    else:
+                        comp = 4
+                    values_rows_a.append(comp)
+                    if x >= step:
+                        comp = mass_compare_adjacent_columns[y, x - step]
+                    else:
+                        comp = 4
+                    values_columns_a.append(comp)
+                    if y < mass_compare_adjacent_rows_height - step:
+                        comp = mass_compare_adjacent_rows[y + step, x]
+                    else:
+                        comp = 5
+                    values_rows_b.append(comp)
+                    if x < mass_compare_adjacent_columns_width - step:
+                        comp = mass_compare_adjacent_columns[y, x + step]
+                    else:
+                        comp = 5
+                    values_columns_b.append(comp)
+            self.data[f'mass_compare_adjacent_rows_a_step{step}'] = values_rows_a
+            self.data[f'mass_compare_adjacent_rows_b_step{step}'] = values_rows_b
+            self.data[f'mass_compare_adjacent_columns_a_step{step}'] = values_columns_a
+            self.data[f'mass_compare_adjacent_columns_b_step{step}'] = values_columns_b
+
 
 class DecisionTreeUtil:
     @classmethod
@@ -1025,55 +1065,13 @@ class DecisionTreeUtil:
 
         data = builder.data
 
-        mass_compare_adjacent_rows = None
-        mass_compare_adjacent_rows_height = 0
-        mass_compare_adjacent_columns = None
-        mass_compare_adjacent_columns_width = 0
         if (DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL in features) or (DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2 in features):
-            if width < 2 or height < 2:
-                raise ValueError('IMAGE_MASS_COMPARE_ADJACENT_ROWCOL+IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2 requires at least 2x2 image. Soft-error.')
-            mass_compare_adjacent_rows = image_mass_compare_adjacent_rows(image, 0, 1, 2)
-            mass_compare_adjacent_rows_height = mass_compare_adjacent_rows.shape[0]
-            mass_compare_adjacent_columns = image_mass_compare_adjacent_columns(image, 0, 1, 2)
-            mass_compare_adjacent_columns_width = mass_compare_adjacent_columns.shape[1]
-
             steps = []
             if DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL in features:
                 steps.append(1)
             if DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2 in features:
                 steps.append(2)
-            
-            for step in steps:
-                values_rows_a = []
-                values_rows_b = []
-                values_columns_a = []
-                values_columns_b = []
-                for y in range(height):
-                    for x in range(width):
-                        if y >= step:
-                            comp = mass_compare_adjacent_rows[y - step, x]
-                        else:
-                            comp = 4
-                        values_rows_a.append(comp)
-                        if x >= step:
-                            comp = mass_compare_adjacent_columns[y, x - step]
-                        else:
-                            comp = 4
-                        values_columns_a.append(comp)
-                        if y < mass_compare_adjacent_rows_height - step:
-                            comp = mass_compare_adjacent_rows[y + step, x]
-                        else:
-                            comp = 5
-                        values_rows_b.append(comp)
-                        if x < mass_compare_adjacent_columns_width - step:
-                            comp = mass_compare_adjacent_columns[y, x + step]
-                        else:
-                            comp = 5
-                        values_columns_b.append(comp)
-                data[f'image_mass_compare_adjacent_rows_a_step{step}'] = values_rows_a
-                data[f'image_mass_compare_adjacent_rows_b_step{step}'] = values_rows_b
-                data[f'image_mass_compare_adjacent_columns_a_step{step}'] = values_columns_a
-                data[f'image_mass_compare_adjacent_columns_b_step{step}'] = values_columns_b
+            builder.make_mass_compare_adjacent_rowcol(steps)
 
         if DecisionTreeFeature.BOUNDING_BOXES in features:
             for color in range(10):
