@@ -19,7 +19,6 @@ import random
 from random import sample
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.image_pixel_similarity import image_pixel_similarity_overall
-from simon_arc_model.model import Model
 from simon_arc_model.model_beta1 import ModelBeta1, ImageFeature
 
 def featureset_id(features: set):

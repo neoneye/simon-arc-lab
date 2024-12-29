@@ -10,7 +10,7 @@ from simon_arc_lab.task import Task
 from simon_arc_lab.task_mutator import *
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.show_prediction_result import show_prediction_result
-from .model import Model, ModelProcessMode
+from .model_alpha1 import ModelAlpha1, ModelAlpha1ProcessMode
 from .predict_output_v2 import *
 from .work_item_with_predictor import WorkItemWithPredictor
 from .work_item_list import WorkItemList
@@ -19,7 +19,7 @@ from .save_arcprize2024_submission_file import *
 from .work_manager_base import WorkManagerBase
 
 class WorkManagerStepwiseRefinementV1(WorkManagerBase):
-    def __init__(self, model: Model, taskset: TaskSet):
+    def __init__(self, model: ModelAlpha1, taskset: TaskSet):
         self.model = model
         self.taskset = taskset
         self.work_items = WorkManagerStepwiseRefinementV1.create_work_items(taskset)
@@ -63,12 +63,12 @@ class WorkManagerStepwiseRefinementV1(WorkManagerBase):
             os.makedirs(save_dir, exist_ok=True)
 
         refinement_mode_list = [
-            ModelProcessMode.TEMPERATURE_LAB1,
+            ModelAlpha1ProcessMode.TEMPERATURE_LAB1,
             # ModelProcessMode.TEMPERATURE_HIGH,
             # ModelProcessMode.TEMPERATURE_MEDIUM,
-            ModelProcessMode.TEMPERATURE_LAB1,
-            ModelProcessMode.TEMPERATURE_LAB1,
-            ModelProcessMode.TEMPERATURE_LAB1,
+            ModelAlpha1ProcessMode.TEMPERATURE_LAB1,
+            ModelAlpha1ProcessMode.TEMPERATURE_LAB1,
+            ModelAlpha1ProcessMode.TEMPERATURE_LAB1,
             # ModelProcessMode.TEMPERATURE_LAB1,
             # ModelProcessMode.TEMPERATURE_LAB1,
             # ModelProcessMode.TEMPERATURE_LAB1,

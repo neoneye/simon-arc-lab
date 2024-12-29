@@ -1,7 +1,7 @@
 """
-Version numbers using greek letters 
-Since this is the 1st model in this project. And I used LLM for this approach.
-The class name should be `ModelAlpha1`, where `Alpha` means the 1st approach. And `1` means the 1st version.
+Version numbers use greek letters. Where `Alpha` is the 1st letter in the greek alphabet.
+This is the 1st approach in this project. Here I used an LLM with a CodeT5 model.
+The class name is `ModelAlpha1`, where `Alpha` means the 1st approach. And `1` means the 1st version.
 
 When I'm using MPS on a M1 Mac, then inference is painfully slow. Around 40 minutes.
 When I'm using CPU on a M1 Mac, then inference is fast. Around 20 minutes.
@@ -12,14 +12,14 @@ import torch
 from safetensors.torch import load_file
 from enum import Enum
 
-class ModelProcessMode(Enum):
+class ModelAlpha1ProcessMode(Enum):
     TEMPERATURE_ZERO_BEAM5 = 'temperature_zero_beam5'
     TEMPERATURE_LOW = 'temperature_low'
     TEMPERATURE_MEDIUM = 'temperature_medium'
     TEMPERATURE_HIGH = 'temperature_high'
     TEMPERATURE_LAB1 = 'temperature_lab1'
 
-class Model:
+class ModelAlpha1:
     def __init__(self, pretrained_model_name_or_path: str, input_max_length: int):
         good_input_max_length = input_max_length in {256, 512, 1024}
         if not good_input_max_length:
@@ -64,11 +64,11 @@ class Model:
         """
         return T5ForConditionalGeneration.from_pretrained(pretrained_model_name_or_path)
     
-    def process(self, prompt: str, mode: ModelProcessMode) -> str:
+    def process(self, prompt: str, mode: ModelAlpha1ProcessMode) -> str:
         responses = self.process_multiple(prompt, mode, num_return_sequences=1)
         return responses[0]
     
-    def process_multiple(self, prompt: str, mode: ModelProcessMode, num_return_sequences: int) -> list[str]:
+    def process_multiple(self, prompt: str, mode: ModelAlpha1ProcessMode, num_return_sequences: int) -> list[str]:
         input_ids = self.tokenizer(
             prompt, 
             return_tensors='pt',
@@ -84,33 +84,33 @@ class Model:
             torch.cuda.manual_seed_all(seed)
 
         generate_options = {}
-        if mode == ModelProcessMode.TEMPERATURE_ZERO_BEAM5:
+        if mode == ModelAlpha1ProcessMode.TEMPERATURE_ZERO_BEAM5:
             generate_options = {
                 'num_beams': 5,
                 'early_stopping': True
             }
-        elif mode == ModelProcessMode.TEMPERATURE_LOW:
+        elif mode == ModelAlpha1ProcessMode.TEMPERATURE_LOW:
             generate_options = {
                 'temperature': 0.1,
                 'num_beams': 5,
                 'do_sample': True,
                 'early_stopping': True
             }
-        elif mode == ModelProcessMode.TEMPERATURE_MEDIUM:
+        elif mode == ModelAlpha1ProcessMode.TEMPERATURE_MEDIUM:
             generate_options = {
                 'temperature': 0.7,
                 'num_beams': 3,
                 'do_sample': True,
                 'early_stopping': True
             }
-        elif mode == ModelProcessMode.TEMPERATURE_HIGH:
+        elif mode == ModelAlpha1ProcessMode.TEMPERATURE_HIGH:
             generate_options = {
                 'temperature': 4.4,
                 'num_beams': 3,
                 'do_sample': True,
                 'early_stopping': True
             }
-        elif mode == ModelProcessMode.TEMPERATURE_LAB1:
+        elif mode == ModelAlpha1ProcessMode.TEMPERATURE_LAB1:
             generate_options = {
                 'temperature': 0.7,
                 'num_beams': 3,

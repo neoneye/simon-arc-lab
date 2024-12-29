@@ -4,7 +4,7 @@ from typing import Optional
 from simon_arc_lab.rle.deserialize import DeserializeError
 from simon_arc_lab.task_mutator import *
 from simon_arc_lab.taskset import TaskSet
-from .model import Model
+from .model_alpha1 import ModelAlpha1
 from .predict_output_v1 import *
 from .predict_output_v3 import *
 from .work_item_with_predictor import WorkItemWithPredictor
@@ -15,7 +15,7 @@ from .work_manager_base import WorkManagerBase
 from .track_incorrect_prediction import TrackIncorrectPrediction
 
 class WorkManagerSimple(WorkManagerBase):
-    def __init__(self, run_id: str, dataset_id: str, model: Model, taskset: TaskSet, model_name: str, predictor_id: str, incorrect_predictions_jsonl_path: Optional[str] = None):
+    def __init__(self, run_id: str, dataset_id: str, model: ModelAlpha1, taskset: TaskSet, model_name: str, predictor_id: str, incorrect_predictions_jsonl_path: Optional[str] = None):
         self.run_id = run_id
         self.dataset_id = dataset_id
         self.model = model

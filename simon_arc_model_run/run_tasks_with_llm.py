@@ -7,7 +7,7 @@ sys.path.insert(0, PROJECT_ROOT)
 
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.gallery_generator import gallery_generator_run
-from simon_arc_model.model import Model
+from simon_arc_model.model_alpha1 import ModelAlpha1
 from simon_arc_model.work_manager_simple import WorkManagerSimple
 
 # A power of 2 value, and the max length of the input prompt
@@ -51,7 +51,7 @@ context_length, max_prompt_length = CONTEXT_SIZE_LIMIT
 print(f"context length: {context_length}, max prompt length: {max_prompt_length}")
 
 # Load model
-model = Model(model_directory, context_length)
+model = ModelAlpha1(model_directory, context_length)
 
 # The goal is to solve puzzles that have never been solved before.
 # Tasks that have previously been solved fine, are not interesting to solve again.

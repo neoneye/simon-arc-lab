@@ -4,7 +4,7 @@ from simon_arc_lab.task_mutator import *
 from simon_arc_lab.image_distort import *
 from simon_arc_lab.image_noise import *
 from simon_arc_lab.rle.deserialize import *
-from simon_arc_model.model import Model, ModelProcessMode
+from simon_arc_model.model_alpha1 import ModelAlpha1, ModelAlpha1ProcessMode
 from .predict_output_base import PredictOutputBase
 
 class PredictOutputV2(PredictOutputBase):
@@ -58,7 +58,7 @@ class PredictOutputV2(PredictOutputBase):
         if model is None:
             raise ValueError("Model not found in context.")
 
-        mode = context.get('mode', ModelProcessMode.TEMPERATURE_ZERO_BEAM5)
+        mode = context.get('mode', ModelAlpha1ProcessMode.TEMPERATURE_ZERO_BEAM5)
         # IDEA: Save multiple responses. Currently only saves 1 response.
         response = model.process(prompt, mode)
         self.cached_response = response
