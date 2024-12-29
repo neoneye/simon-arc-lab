@@ -783,6 +783,11 @@ class DataFromImageBuilder:
                 gd_image = image_gravity_draw(self.image, color, direction)
                 self.data[f'gravity_draw_direction{direction}_color{color}'] = gd_image.flatten().tolist()
 
+    def make_erosion(self, pixel_connectivity_list: list[PixelConnectivity]):
+        for pixel_connectivity in pixel_connectivity_list:
+            erosion_image = image_erosion_multicolor(self.image, pixel_connectivity)
+            self.data[f'image_erosion_multicolor_connectivity{pixel_connectivity}'] = erosion_image.flatten().tolist()
+
 class DecisionTreeUtil:
     @classmethod
     def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[DecisionTreeFeature], is_earlier_prediction: bool) -> dict:
@@ -943,8 +948,6 @@ class DecisionTreeUtil:
             gravity_draw_directions.append(GravityDrawDirection.BOTTOMRIGHT_TO_TOPLEFT)
         builder.make_gravity_draw(gravity_draw_directions)
 
-        data = builder.data
-
         erosion_pixel_connectivity_list = []
         if DecisionTreeFeature.EROSION_ALL8 in features:
             erosion_pixel_connectivity_list.append(PixelConnectivity.ALL8)
@@ -958,9 +961,9 @@ class DecisionTreeUtil:
         if DecisionTreeFeature.EROSION_DIAGONAL in features:
             erosion_pixel_connectivity_list.append(PixelConnectivity.TLBR2)
             erosion_pixel_connectivity_list.append(PixelConnectivity.TRBL2)
-        for erosion_connectivity in erosion_pixel_connectivity_list:
-            erosion_image = image_erosion_multicolor(image, erosion_connectivity)
-            data[f'image_erosion_multicolor_connectivity{erosion_connectivity}'] = erosion_image.flatten().tolist()
+        builder.make_erosion(erosion_pixel_connectivity_list)
+
+        data = builder.data
 
         shape3x3_images = []
         if DecisionTreeFeature.NUMBER_OF_UNIQUE_COLORS_ALL9 in features:
