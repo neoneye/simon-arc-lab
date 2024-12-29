@@ -1,6 +1,12 @@
-# When I'm using MPS on a M1 Mac, then inference is painfully slow. Around 40 minutes.
-# When I'm using CPU on a M1 Mac, then inference is fast. Around 20 minutes.
-# The difference is a factor of 2. I'm not sure why the difference is so large.
+"""
+Version numbers using greek letters 
+Since this is the 1st model in this project. And I used LLM for this approach.
+The class name should be `ModelAlpha1`, where `Alpha` means the 1st approach. And `1` means the 1st version.
+
+When I'm using MPS on a M1 Mac, then inference is painfully slow. Around 40 minutes.
+When I'm using CPU on a M1 Mac, then inference is fast. Around 20 minutes.
+The difference is a factor of 2. I'm not sure why the difference is so large.
+"""
 from transformers import T5ForConditionalGeneration, RobertaTokenizer
 import torch
 from safetensors.torch import load_file

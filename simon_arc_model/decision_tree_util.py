@@ -1,3 +1,8 @@
+"""
+Version numbers using greek letters 
+Since this is the 2nd model in this project. And I used decision trees for this approach.
+The class name should be `ModelBeta1`, where `Beta` means the 2nd approach. And `1` means the 1st version.
+"""
 from typing import Optional
 from simon_arc_lab.task import Task
 from simon_arc_lab.image_scale import *
