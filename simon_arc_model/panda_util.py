@@ -585,6 +585,37 @@ class DataFromImageBuilder:
                     values.append((image_shape3x3_center[y, x] >> i) & 1)
             self.data[f'shape3x3_center_bit{i}'] = values
 
+    def make_probe_color_for_all_directions(self):
+        outside_color = 10
+        ray_directions = [
+            ImageRaytraceProbeColorDirection.TOP,
+            ImageRaytraceProbeColorDirection.BOTTOM,
+            ImageRaytraceProbeColorDirection.LEFT,
+            ImageRaytraceProbeColorDirection.RIGHT,
+            ImageRaytraceProbeColorDirection.TOPLEFT,
+            ImageRaytraceProbeColorDirection.TOPRIGHT,
+            ImageRaytraceProbeColorDirection.BOTTOMLEFT,
+            ImageRaytraceProbeColorDirection.BOTTOMRIGHT,
+        ]
+        for direction in ray_directions:
+            image_ray = image_raytrace_probecolor_direction(self.image, outside_color, direction)
+            self.data[f'probe_color_direction{direction}'] = image_ray.flatten().tolist()
+
+    def make_probe_objectid_for_all_directions(self, object_ids: np.array, pixel_connectivity: PixelConnectivity):
+        outside_object_id = 0
+        ray_directions = [
+            ImageRaytraceProbeColorDirection.TOP,
+            ImageRaytraceProbeColorDirection.BOTTOM,
+            ImageRaytraceProbeColorDirection.LEFT,
+            ImageRaytraceProbeColorDirection.RIGHT,
+            ImageRaytraceProbeColorDirection.TOPLEFT,
+            ImageRaytraceProbeColorDirection.TOPRIGHT,
+            ImageRaytraceProbeColorDirection.BOTTOMLEFT,
+            ImageRaytraceProbeColorDirection.BOTTOMRIGHT,
+        ]
+        for direction in ray_directions:
+            image_ray = image_raytrace_probecolor_direction(object_ids, outside_object_id, direction)
+            self.data[f'probe_objectid_direction{direction}_connectivity{pixel_connectivity}'] = image_ray.flatten().tolist()
 
 class DecisionTreeUtil:
     @classmethod
@@ -701,28 +732,14 @@ class DecisionTreeUtil:
             lookaround_size = 0
             builder.make_shape3x3_center(lookaround_size)
 
-        data = builder.data
-
-        ray_directions = [
-            ImageRaytraceProbeColorDirection.TOP,
-            ImageRaytraceProbeColorDirection.BOTTOM,
-            ImageRaytraceProbeColorDirection.LEFT,
-            ImageRaytraceProbeColorDirection.RIGHT,
-            ImageRaytraceProbeColorDirection.TOPLEFT,
-            ImageRaytraceProbeColorDirection.TOPRIGHT,
-            ImageRaytraceProbeColorDirection.BOTTOMLEFT,
-            ImageRaytraceProbeColorDirection.BOTTOMRIGHT,
-        ]
-        for direction in ray_directions:
-            image_ray = image_raytrace_probecolor_direction(image, outside_color, direction)
-            data[f'raytrace_probecolor_direction{direction}_color'] = image_ray.flatten().tolist()
+        if True:
+            builder.make_probe_color_for_all_directions()
 
         if DecisionTreeFeature.OBJECT_ID_RAY_LIST in features:
-            for (object_ids, component_pixel_connectivity) in object_ids_list:
-                for direction in ray_directions:
-                    object_id_outside_color = 0
-                    object_id_ray = image_raytrace_probecolor_direction(object_ids, object_id_outside_color, direction)
-                    data[f'raytrace_probecolor_direction{direction}_objectid_connectivity{component_pixel_connectivity}'] = object_id_ray.flatten().tolist()
+            for (object_ids, pixel_connectivity) in object_ids_list:
+                builder.make_probe_objectid_for_all_directions(object_ids, pixel_connectivity)
+
+        data = builder.data
 
         if True:
             the_image_outline_all8 = image_outline_all8(image)
