@@ -650,6 +650,47 @@ class DataFromImageBuilder:
         image_count = count_neighbors_with_same_color_nowrap(self.image)
         self.data['count_neighbors_with_same_color'] = image_count.flatten().tolist()
 
+    def assign_data_with_unique_colors(self, histogram_per_pixel: list[Histogram], data_name: str):
+        values_color_is_present = []
+        for _ in range(10):
+            values_color_is_present.append([])
+
+        values_count = []
+        for y in range(self.height):
+            for x in range(self.width):
+                histogram = histogram_per_pixel[y * self.width + x]
+                unique_color_set = histogram.unique_colors_set()
+                number_of_unique_colors = len(unique_color_set)
+                values_count.append(number_of_unique_colors)
+
+                for color in range(10):
+                    is_present = color in unique_color_set
+                    values_color_is_present[color].append(int(is_present))
+
+        self.data[f'unique_color_count_{data_name}'] = values_count
+        for color in range(10):
+            self.data[f'unique_color_present_{data_name}_color{color}'] = values_color_is_present[color]
+
+    def assign_data_with_count_of_each_color(self, histogram_per_pixel: list[Histogram], enable_count_with_minus1: bool, data_name: str):
+        for color in range(10):
+            values_count = []
+            values_count_with_minus1 = []
+            for y in range(self.height):
+                for x in range(self.width):
+                    histogram = histogram_per_pixel[y * self.width + x]
+
+                    count = histogram.get_count_for_color(color)
+                    values_count.append(count)
+
+                    if count > 0:
+                        values_count_with_minus1.append(color)
+                    else:
+                        values_count_with_minus1.append(-1)
+            self.data[f'histogram_{data_name}_color{color}_count'] = values_count
+
+            if enable_count_with_minus1:
+                self.data[f'histogram_{data_name}_color{color}_count_with_minus1'] = values_count_with_minus1
+
 
 class DecisionTreeUtil:
     @classmethod
@@ -779,51 +820,10 @@ class DecisionTreeUtil:
             lookaround_size = 1
             builder.make_count_same_color_as_center(lookaround_size)
 
-        data = builder.data
-
         if DecisionTreeFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR in features:
             builder.make_count_neighbors_with_same_color()
 
-        def data_with_unique_colors(histogram_per_pixel: list[Histogram], data_name: str):
-            values_color_is_present = []
-            for _ in range(10):
-                values_color_is_present.append([])
-
-            values_count = []
-            for y in range(height):
-                for x in range(width):
-                    histogram = histogram_per_pixel[y * width + x]
-                    unique_color_set = histogram.unique_colors_set()
-                    number_of_unique_colors = len(unique_color_set)
-                    values_count.append(number_of_unique_colors)
-
-                    for color in range(10):
-                        is_present = color in unique_color_set
-                        values_color_is_present[color].append(int(is_present))
-
-            data[f'unique_color_count_{data_name}'] = values_count
-            for color in range(10):
-                data[f'unique_color_present_{data_name}_color{color}'] = values_color_is_present[color]
-
-        def data_with_count_of_each_color(histogram_per_pixel: list[Histogram], data_name: str):
-            for color in range(10):
-                values_count = []
-                values_count_with_minus1 = []
-                for y in range(height):
-                    for x in range(width):
-                        histogram = histogram_per_pixel[y * width + x]
-
-                        count = histogram.get_count_for_color(color)
-                        values_count.append(count)
-
-                        if count > 0:
-                            values_count_with_minus1.append(i)
-                        else:
-                            values_count_with_minus1.append(-1)
-                data[f'histogram_{data_name}_color{color}_count'] = values_count
-    
-                if DecisionTreeFeature.HISTOGRAM_VALUE in features:
-                    data[f'histogram_{data_name}_color{color}_count_with_minus1'] = values_count_with_minus1
+        enable_count_with_minus1 = DecisionTreeFeature.HISTOGRAM_VALUE in features
 
         if DecisionTreeFeature.HISTOGRAM_ROWCOL in features:
             # A histogram per row
@@ -839,8 +839,8 @@ class DecisionTreeUtil:
             for y in range(height):
                 for x in range(width):
                     row_histogram_per_pixel.append(row_histograms[y])
-            data_with_unique_colors(row_histogram_per_pixel, 'row')
-            data_with_count_of_each_color(row_histogram_per_pixel, 'row')
+            builder.assign_data_with_unique_colors(row_histogram_per_pixel, 'row')
+            builder.assign_data_with_count_of_each_color(row_histogram_per_pixel, enable_count_with_minus1, 'row')
 
             # A histogram per column
             column_histogram = []
@@ -855,8 +855,8 @@ class DecisionTreeUtil:
             for y in range(height):
                 for x in range(width):
                     column_histogram_per_pixel.append(column_histogram[x])
-            data_with_unique_colors(column_histogram_per_pixel, 'column')
-            data_with_count_of_each_color(column_histogram_per_pixel, 'column')
+            builder.assign_data_with_unique_colors(column_histogram_per_pixel, 'column')
+            builder.assign_data_with_count_of_each_color(column_histogram_per_pixel, enable_count_with_minus1, 'column')
 
         if DecisionTreeFeature.HISTOGRAM_DIAGONAL in features:
             # A histogram on the diagonal from top-left to bottom-right
@@ -876,8 +876,8 @@ class DecisionTreeUtil:
             for y in range(height):
                 for x in range(width):
                     tlbr_histogram_per_pixel.append(tlbr_histograms[x + y])
-            data_with_unique_colors(tlbr_histogram_per_pixel, 'tlbr')
-            data_with_count_of_each_color(tlbr_histogram_per_pixel, 'tlbr')
+            builder.assign_data_with_unique_colors(tlbr_histogram_per_pixel, 'tlbr')
+            builder.assign_data_with_count_of_each_color(tlbr_histogram_per_pixel, enable_count_with_minus1, 'tlbr')
         
             # A histogram on the diagonal from top-right to bottom-left
             trbl_histograms = []
@@ -896,8 +896,10 @@ class DecisionTreeUtil:
             for y in range(height):
                 for x in range(width):
                     trbl_histogram_per_pixel.append(trbl_histograms[width - 1 - x + y])
-            data_with_unique_colors(trbl_histogram_per_pixel, 'trbl')
-            data_with_count_of_each_color(trbl_histogram_per_pixel, 'trbl')
+            builder.assign_data_with_unique_colors(trbl_histogram_per_pixel, 'trbl')
+            builder.assign_data_with_count_of_each_color(trbl_histogram_per_pixel, enable_count_with_minus1, 'trbl')
+
+        data = builder.data
 
         gravity_draw_directions = []
         if DecisionTreeFeature.GRAVITY_DRAW_TOP_TO_BOTTOM in features:
