@@ -90,6 +90,7 @@ FEATURES_8 = [
     ImageFeature.COMPONENT_ALL8,
     ImageFeature.GRAVITY_DRAW_TOP_TO_BOTTOM,
     ImageFeature.GRAVITY_DRAW_TOPLEFT_TO_BOTTOMRIGHT,
+    # ImageFeature.SHAPE_ALL8,
 ]
 
 class WorkManagerStepwiseRefinementV4(WorkManagerBase):

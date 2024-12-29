@@ -144,6 +144,9 @@ class ModelGamma1:
         for component_pixel_connectivity in component_pixel_connectivity_list:
             builder.components(component_pixel_connectivity)
 
+        if ImageFeature.SHAPE_ALL8 in features:
+            builder.make_shape(PixelConnectivity.ALL8)
+
         # Column with shape info
         if ImageFeature.IDENTIFY_OBJECT_SHAPE in features:
             lookaround_size_shape = 0

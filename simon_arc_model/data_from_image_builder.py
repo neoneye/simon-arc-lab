@@ -16,6 +16,7 @@ from simon_arc_lab.image_rotate45 import *
 from simon_arc_lab.pixel_connectivity import PixelConnectivity
 from simon_arc_lab.connected_component import *
 from simon_arc_lab.find_bounding_box import *
+from simon_arc_lab.shape import *
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.show_prediction_result import show_prediction_result
 from enum import Enum
@@ -234,6 +235,45 @@ class DataFromImageBuilder:
         self.cache_connected_component_item_list[pixel_connectivity] = connected_component_item_list
         return connected_component_item_list
     
+    def make_shape(self, pixel_connectivity: PixelConnectivity):
+        components = self.components(pixel_connectivity)
+
+        shape_catalog_indexes = np.zeros((self.height, self.width), dtype=np.uint32)
+        shape_scale_x = np.zeros((self.height, self.width), dtype=np.uint8)
+        shape_scale_y = np.zeros((self.height, self.width), dtype=np.uint8)
+        for component in components:
+            shape = image_find_shape(component.mask, verbose=False)
+            if shape is None:
+                continue
+
+            if isinstance(shape, SolidRectangleShape):
+                rect = shape.rectangle
+                for rel_y in range(rect.height):
+                    for rel_x in range(rect.width):
+                        x = rect.x + rel_x
+                        y = rect.y + rel_y
+                        shape_catalog_indexes[y, x] = 99
+                        shape_scale_x[y, x] = rect.width
+                        shape_scale_y[y, x] = rect.height
+
+            if isinstance(shape, SimpleShape):
+                rect = shape.rectangle
+                for rel_y in range(rect.height):
+                    for rel_x in range(rect.width):
+                        x = rect.x + rel_x
+                        y = rect.y + rel_y
+                        mask_value = component.mask[y, x]
+                        if mask_value == 1:
+                            shape_catalog_indexes[y, x] = shape.shape_catalog_index + 100
+                            if shape.scale_x is not None:
+                                shape_scale_x[y, x] = shape.scale_x
+                            if shape.scale_y is not None:
+                                shape_scale_y[y, x] = shape.scale_y
+
+        self.data[f'shape_catalog_indexes'] = shape_catalog_indexes.flatten().tolist()
+        self.data[f'shape_scale_x'] = shape_scale_x.flatten().tolist()
+        self.data[f'shape_scale_y'] = shape_scale_y.flatten().tolist()
+
     def object_ids(self, pixel_connectivity: PixelConnectivity, object_id_start: int) -> np.array:
         cache_key = (pixel_connectivity, object_id_start)
         object_ids_image = self.cache_object_ids.get(cache_key)
