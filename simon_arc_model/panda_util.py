@@ -875,6 +875,20 @@ class DataFromImageBuilder:
             self.data[f'mass_compare_adjacent_columns_a_step{step}'] = values_columns_a
             self.data[f'mass_compare_adjacent_columns_b_step{step}'] = values_columns_b
 
+    def make_bounding_boxes_of_each_color(self):
+        for color in range(10):
+            ignore_colors = []
+            for ignore_color in range(10):
+                if ignore_color != color:
+                    ignore_colors.append(ignore_color)
+            rect = find_bounding_box_multiple_ignore_colors(self.image, ignore_colors)
+            values = []
+            for y in range(self.height):
+                for x in range(self.width):
+                    is_inside = x >= rect.x and x < rect.x + rect.width and y >= rect.y and y < rect.y + rect.height
+                    values.append(int(is_inside))
+            self.data[f'bounding_box_of_color{color}'] = values
+
 
 class DecisionTreeUtil:
     @classmethod
@@ -1063,8 +1077,6 @@ class DecisionTreeUtil:
         lookaround_size_shape3x3 = 2
         builder.make_shape3x3_operations(shape3x3_operations, lookaround_size_shape3x3)
 
-        data = builder.data
-
         if (DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL in features) or (DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2 in features):
             steps = []
             if DecisionTreeFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL in features:
@@ -1074,18 +1086,9 @@ class DecisionTreeUtil:
             builder.make_mass_compare_adjacent_rowcol(steps)
 
         if DecisionTreeFeature.BOUNDING_BOXES in features:
-            for color in range(10):
-                ignore_colors = []
-                for ignore_color in range(10):
-                    if ignore_color != color:
-                        ignore_colors.append(ignore_color)
-                rect = find_bounding_box_multiple_ignore_colors(image, ignore_colors)
-                values = []
-                for y in range(height):
-                    for x in range(width):
-                        is_inside = x >= rect.x and x < rect.x + rect.width and y >= rect.y and y < rect.y + rect.height
-                        values.append(int(is_inside))
-                data[f'bounding_box_of_color{color}'] = values
+            builder.make_bounding_boxes_of_each_color()
+
+        data = builder.data
 
         if DecisionTreeFeature.BIGRAM_ROWCOL in features:
             bigrams_top_bottom = np.zeros((height-1, width), dtype=np.uint32)
