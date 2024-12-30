@@ -62,6 +62,17 @@ FEATURES_5 = [
     ImageFeature.HISTOGRAM_ROWCOL,
 ]
 
+# ARC-AGI training=46, evaluation=17
+FEATURES_6 = [
+    ImageFeature.COMPONENT_NEAREST4,
+    ImageFeature.HISTOGRAM_DIAGONAL,
+    ImageFeature.HISTOGRAM_ROWCOL,
+    ImageFeature.HISTOGRAM_VALUE,
+    ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL,
+    ImageFeature.BOUNDING_BOXES,
+    ImageFeature.SHAPE_ALL8,
+]
+
 class WorkManagerWithoutEarlierPredictionGamma1(WorkManagerBase):
     def __init__(self, run_id: str, dataset_id: str, taskset: TaskSet, incorrect_predictions_jsonl_path: Optional[str] = None):
         self.run_id = run_id
