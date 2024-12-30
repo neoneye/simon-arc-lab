@@ -138,7 +138,7 @@ class WorkManagerWithoutEarlierPredictionGamma1(WorkManagerBase):
             print(f'Saving images to directory: {save_dir}')
             os.makedirs(save_dir, exist_ok=True)
 
-        features = set(FEATURES_1)
+        features = set(FEATURES_6)
 
         # Track incorrect predictions
         features_pretty = ImageFeature.names_joined_with_comma(features)
