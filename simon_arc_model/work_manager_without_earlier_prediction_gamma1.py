@@ -38,14 +38,14 @@ FEATURES_2 = [
     ImageFeature.HISTOGRAM_ROWCOL,
 ]
 
-# ARC-AGI training=?, evaluation=?
+# ARC-AGI training=16, evaluation=3
 FEATURES_3 = [
     ImageFeature.COMPONENT_ALL8,
     ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2,
     ImageFeature.OBJECT_ID_RAY_LIST,
 ]
 
-# ARC-AGI training=?, evaluation=?
+# ARC-AGI training=22, evaluation=5
 FEATURES_4 = [
     ImageFeature.COMPONENT_NEAREST4, 
     ImageFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR, 
@@ -53,7 +53,7 @@ FEATURES_4 = [
     ImageFeature.EROSION_ROWCOL,
 ]
 
-# ARC-AGI training=?, evaluation=?
+# ARC-AGI training=28, evaluation=14
 FEATURES_5 = [
     ImageFeature.CENTER, 
     ImageFeature.COMPONENT_NEAREST4, 
@@ -99,13 +99,7 @@ class WorkManagerWithoutEarlierPredictionGamma1(WorkManagerBase):
             print(f'Saving images to directory: {save_dir}')
             os.makedirs(save_dir, exist_ok=True)
 
-        # noise_levels = [95, 90, 85, 80, 75, 70, 65]
-        # noise_levels = [95, 90]
-        # noise_levels = [100, 95, 90]
-        noise_levels = [100]
-        number_of_refinements = len(noise_levels)
-
-        features = set(FEATURES_2)
+        features = set(FEATURES_5)
 
         # Track incorrect predictions
         features_pretty = ImageFeature.names_joined_with_comma(features)
@@ -122,66 +116,50 @@ class WorkManagerWithoutEarlierPredictionGamma1(WorkManagerBase):
         for original_work_item in pbar:
             work_item = original_work_item
 
-            # ts = TaskSimilarity.create_with_task(work_item.task)
-
-            image_and_score = []
-
             last_predicted_output = None
-            for refinement_index in range(number_of_refinements):
-                noise_level = noise_levels[refinement_index]
-                # print(f"Refinement {refinement_index+1}/{number_of_refinements} noise_level={noise_level}")
-                predicted_output = None
-                if predicted_output is None:
-                    previous_prediction_mask = None
-                    try:
-                        predicted_output_result = ModelGamma1.predict_output(
-                            work_item.task, 
-                            work_item.test_index, 
-                            last_predicted_output,
-                            previous_prediction_mask,
-                            refinement_index, 
-                            noise_level,
-                            features
-                        )
-                    except Exception as e:
-                        # if the error text contains Soft-error, then it is a soft error, and we can skip the task
-                        if 'Soft-error' in str(e):
-                            print(f"Soft-error for task {work_item.task.metadata_task_id} test={work_item.test_index}. Error: {e}")
-                            break
-                        raise e
-
-                    predicted_output = predicted_output_result.images(1)[0]
-
-                last_predicted_output = predicted_output
-                # score = ts.measure_test_prediction(predicted_output, work_item.test_index)
-                # print(f"task: {work_item.task.metadata_task_id} score: {score} refinement_index: {refinement_index} noise_level: {noise_level}")
-                # image_and_score.append((predicted_output, score))
-                best_image = predicted_output
-
-                temp_work_item = WorkItemWithRefinementStep(
-                    work_item.task.clone(), 
+            noise_level = 100
+            refinement_index = 0
+            previous_prediction_mask = None
+            try:
+                predicted_output_result = ModelGamma1.predict_output(
+                    work_item.task, 
                     work_item.test_index, 
-                    refinement_index
+                    last_predicted_output,
+                    previous_prediction_mask,
+                    refinement_index, 
+                    noise_level,
+                    features
                 )
-                temp_work_item.predicted_output_image = predicted_output
-                temp_work_item.assign_status()
-                if show:
-                    temp_work_item.show()
-                if save_dir is not None:
-                    temp_work_item.show(save_dir)
+            except Exception as e:
+                # if the error text contains Soft-error, then it is a soft error, and we can skip the task
+                if 'Soft-error' in str(e):
+                    print(f"Soft-error for task {work_item.task.metadata_task_id} test={work_item.test_index}. Error: {e}")
+                    continue
+                raise e
 
-                if track_incorrect_prediction is not None:
-                    track_incorrect_prediction.track_incorrect_prediction_with_workitem(
-                        temp_work_item,
-                        incorrect_prediction_dataset_id, 
-                        predicted_output,
-                        incorrect_prediction_metadata
-                    )
+            predicted_output = predicted_output_result.images(1)[0]
 
-            # best_image, best_score = max(image_and_score, key=lambda x: x[1])
-            # print(f"task: {work_item.task.metadata_task_id} best_score: {best_score}")
+            temp_work_item = WorkItemWithRefinementStep(
+                work_item.task.clone(), 
+                work_item.test_index, 
+                refinement_index
+            )
+            temp_work_item.predicted_output_image = predicted_output
+            temp_work_item.assign_status()
+            if show:
+                temp_work_item.show()
+            if save_dir is not None:
+                temp_work_item.show(save_dir)
 
-            work_item.predicted_output_image = best_image
+            if track_incorrect_prediction is not None:
+                track_incorrect_prediction.track_incorrect_prediction_with_workitem(
+                    temp_work_item,
+                    incorrect_prediction_dataset_id, 
+                    predicted_output,
+                    incorrect_prediction_metadata
+                )
+
+            work_item.predicted_output_image = predicted_output
             work_item.assign_status()
 
             if work_item.status == WorkItemStatus.CORRECT:
