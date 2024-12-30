@@ -73,6 +73,34 @@ FEATURES_6 = [
     ImageFeature.SHAPE_ALL8,
 ]
 
+# ARC-AGI training=39, evaluation=17
+FEATURES_7 = [
+    ImageFeature.BOUNDING_BOXES,
+    ImageFeature.COMPONENT_NEAREST4,
+    ImageFeature.EROSION_ALL8,
+    ImageFeature.HISTOGRAM_ROWCOL,
+    ImageFeature.SHAPE_ALL8,
+]
+
+# ARC-AGI training=37, evaluation=6
+FEATURES_8 = [
+    ImageFeature.COMPONENT_NEAREST4, 
+    ImageFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR, 
+    ImageFeature.EROSION_CORNER4, 
+    ImageFeature.EROSION_ROWCOL,
+    ImageFeature.SHAPE_ALL8,
+]
+
+# ARC-AGI training=39, evaluation=12
+FEATURES_9 = [
+    ImageFeature.CENTER, 
+    ImageFeature.COMPONENT_NEAREST4, 
+    ImageFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR, 
+    ImageFeature.EROSION_NEAREST4, 
+    ImageFeature.HISTOGRAM_ROWCOL,
+    ImageFeature.SHAPE_ALL8,
+]
+
 class WorkManagerWithoutEarlierPredictionGamma1(WorkManagerBase):
     def __init__(self, run_id: str, dataset_id: str, taskset: TaskSet, incorrect_predictions_jsonl_path: Optional[str] = None):
         self.run_id = run_id
