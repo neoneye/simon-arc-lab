@@ -20,7 +20,7 @@ from .model_gamma1 import ModelGamma1
 from .image_feature import ImageFeature
 from .track_incorrect_prediction import TrackIncorrectPrediction
 
-# ARC-AGI training=26, evaluation=12
+# ARC-AGI training=40, evaluation=19
 FEATURES_1 = [
     ImageFeature.COMPONENT_NEAREST4,
     ImageFeature.HISTOGRAM_DIAGONAL,
@@ -30,7 +30,7 @@ FEATURES_1 = [
     ImageFeature.BOUNDING_BOXES,
 ]
 
-# ARC-AGI training=23, evaluation=14
+# ARC-AGI training=36, evaluation=17
 FEATURES_2 = [
     ImageFeature.BOUNDING_BOXES,
     ImageFeature.COMPONENT_NEAREST4,
@@ -38,14 +38,14 @@ FEATURES_2 = [
     ImageFeature.HISTOGRAM_ROWCOL,
 ]
 
-# ARC-AGI training=16, evaluation=3
+# ARC-AGI training=22, evaluation=3
 FEATURES_3 = [
     ImageFeature.COMPONENT_ALL8,
     ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2,
     ImageFeature.OBJECT_ID_RAY_LIST,
 ]
 
-# ARC-AGI training=22, evaluation=5
+# ARC-AGI training=34, evaluation=7
 FEATURES_4 = [
     ImageFeature.COMPONENT_NEAREST4, 
     ImageFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR, 
@@ -53,7 +53,7 @@ FEATURES_4 = [
     ImageFeature.EROSION_ROWCOL,
 ]
 
-# ARC-AGI training=28, evaluation=14
+# ARC-AGI training=36, evaluation=14
 FEATURES_5 = [
     ImageFeature.CENTER, 
     ImageFeature.COMPONENT_NEAREST4, 
@@ -99,7 +99,7 @@ class WorkManagerWithoutEarlierPredictionGamma1(WorkManagerBase):
             print(f'Saving images to directory: {save_dir}')
             os.makedirs(save_dir, exist_ok=True)
 
-        features = set(FEATURES_5)
+        features = set(FEATURES_1)
 
         # Track incorrect predictions
         features_pretty = ImageFeature.names_joined_with_comma(features)

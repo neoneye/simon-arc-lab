@@ -90,12 +90,47 @@ class ModelGamma1PredictOutputResult:
 
 class ModelGamma1:
     @classmethod
-    def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[ImageFeature], is_earlier_prediction: bool) -> dict:
+    def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[ImageFeature], augmentation: ImageAugmentationOperation, is_earlier_prediction: bool) -> dict:
         # print(f'xs_for_input_image: pair_id={pair_id} features={features} is_earlier_prediction={is_earlier_prediction}')
         builder = DataFromImageBuilder(image)
 
-        builder.make_pair_id(pair_id)
-        builder.make_is_earlier_prediction(is_earlier_prediction)
+        builder.make_key_value_int('pair_id', pair_id)
+
+        earlier_prediction_value = 0 if is_earlier_prediction else 1
+        builder.make_key_value_int('earlier_prediction', earlier_prediction_value)
+
+        # Column "augmentation_id"
+        if True:
+            augmentation_id = 0
+            if augmentation == ImageAugmentationOperation.DO_NOTHING:
+                augmentation_id = 0
+            elif augmentation == ImageAugmentationOperation.ROTATE_CW:
+                augmentation_id = 1
+            elif augmentation == ImageAugmentationOperation.ROTATE_CCW:
+                augmentation_id = 2
+            elif augmentation == ImageAugmentationOperation.ROTATE_180:
+                augmentation_id = 3
+            elif augmentation == ImageAugmentationOperation.FLIP_X:
+                augmentation_id = 4
+            elif augmentation == ImageAugmentationOperation.FLIP_Y:
+                augmentation_id = 5
+            elif augmentation == ImageAugmentationOperation.FLIP_A:
+                augmentation_id = 6
+            elif augmentation == ImageAugmentationOperation.FLIP_B:
+                augmentation_id = 7
+            elif augmentation == ImageAugmentationOperation.SKEW_UP:
+                augmentation_id = 8
+            elif augmentation == ImageAugmentationOperation.SKEW_DOWN:
+                augmentation_id = 9
+            elif augmentation == ImageAugmentationOperation.SKEW_LEFT:
+                augmentation_id = 10
+            elif augmentation == ImageAugmentationOperation.SKEW_RIGHT:
+                augmentation_id = 11
+            elif augmentation == ImageAugmentationOperation.ROTATE_CW_45:
+                augmentation_id = 12
+            elif augmentation == ImageAugmentationOperation.ROTATE_CCW_45:
+                augmentation_id = 13
+            builder.make_key_value_int('augmentation_id', augmentation_id)
 
         # Column "center_pixel"
         if ImageFeature.SUPPRESS_CENTER_PIXEL_ONCE not in features:
@@ -297,12 +332,12 @@ class ModelGamma1:
         return data
 
     @classmethod
-    def xs_for_input_noise_images(cls, refinement_index: int, input_image: np.array, noise_image: np.array, pair_id: int, features: set[ImageFeature]) -> dict:
+    def xs_for_input_noise_images(cls, refinement_index: int, input_image: np.array, noise_image: np.array, pair_id: int, features: set[ImageFeature], augmentation: ImageAugmentationOperation) -> dict:
         if refinement_index == 0:
-            xs = cls.xs_for_input_image(input_image, pair_id, features, False)
+            xs = cls.xs_for_input_image(input_image, pair_id, features, augmentation, False)
         else:
-            xs0 = cls.xs_for_input_image(input_image, pair_id, features, False)
-            xs1 = cls.xs_for_input_image(noise_image, pair_id, features, True)
+            xs0 = cls.xs_for_input_image(input_image, pair_id, features, augmentation, False)
+            xs1 = cls.xs_for_input_image(noise_image, pair_id, features, augmentation, True)
             xs = DictionaryWithList.merge_two_dictionaries_with_suffix(xs0, xs1)
         return xs
 
@@ -339,23 +374,23 @@ class ModelGamma1:
 
         current_pair_id = 0
 
-        transformation_ids = [
+        augmentation_list = [
             ImageAugmentationOperation.DO_NOTHING,
-            # ImageAugmentationOperation.ROTATE_CW,
-            # ImageAugmentationOperation.ROTATE_CCW,
-            # ImageAugmentationOperation.ROTATE_180,
-            # ImageAugmentationOperation.FLIP_X,
-            # ImageAugmentationOperation.FLIP_Y,
-            # ImageAugmentationOperation.FLIP_A,
-            # ImageAugmentationOperation.FLIP_B,
-            # ImageAugmentationOperation.SKEW_UP,
-            # ImageAugmentationOperation.SKEW_DOWN,
-            # ImageAugmentationOperation.SKEW_LEFT,
-            # ImageAugmentationOperation.SKEW_RIGHT,
+            ImageAugmentationOperation.ROTATE_CW,
+            ImageAugmentationOperation.ROTATE_CCW,
+            ImageAugmentationOperation.ROTATE_180,
+            ImageAugmentationOperation.FLIP_X,
+            ImageAugmentationOperation.FLIP_Y,
+            ImageAugmentationOperation.FLIP_A,
+            ImageAugmentationOperation.FLIP_B,
+            ImageAugmentationOperation.SKEW_UP,
+            ImageAugmentationOperation.SKEW_DOWN,
+            ImageAugmentationOperation.SKEW_LEFT,
+            ImageAugmentationOperation.SKEW_RIGHT,
         ]
         if ImageFeature.ROTATE45 in features:
-            transformation_ids.append(ImageAugmentationOperation.ROTATE_CW_45)
-            transformation_ids.append(ImageAugmentationOperation.ROTATE_CCW_45)
+            augmentation_list.append(ImageAugmentationOperation.ROTATE_CW_45)
+            augmentation_list.append(ImageAugmentationOperation.ROTATE_CCW_45)
 
         for pair_index in range(task.count_examples):
             pair_seed = pair_index * 1000 + refinement_index * 10000
@@ -383,13 +418,13 @@ class ModelGamma1:
                 noise_image[y, x] = input_image[y, x]
             # noise_image = image_distort(noise_image, 1, 25, pair_seed + 1000)
 
-            input_noise_output = []
-            transformation_ids_randomized = transformation_ids.copy()
-            for transformation in transformation_ids_randomized:
-                input_image_mutated = transformation.apply(input_image)
-                noise_image_mutated = transformation.apply(noise_image)
-                output_image_mutated = transformation.apply(output_image)
-                input_noise_output.append((input_image_mutated, noise_image_mutated, output_image_mutated))
+            augmentation_input_noise_output = []
+            randomized_augmentation_list = augmentation_list.copy()
+            for augmentation in randomized_augmentation_list:
+                input_image_mutated = augmentation.apply(input_image)
+                noise_image_mutated = augmentation.apply(noise_image)
+                output_image_mutated = augmentation.apply(output_image)
+                augmentation_input_noise_output.append((augmentation, input_image_mutated, noise_image_mutated, output_image_mutated))
 
             # Shuffle the colors, so it's not always the same color. So all 10 colors gets used.
             h = Histogram.create_with_image(output_image)
@@ -408,15 +443,15 @@ class ModelGamma1:
                 input_image2 = image_replace_colors(input_image, color_mapping)
                 output_image2 = image_replace_colors(output_image, color_mapping)
                 noise_image2 = image_replace_colors(noise_image, color_mapping)
-                input_noise_output.append((input_image2, noise_image2, output_image2))
+                augmentation_input_noise_output.append((ImageAugmentationOperation.DO_NOTHING, input_image2, noise_image2, output_image2))
 
-            count_mutations = len(input_noise_output)
+            count_mutations = len(augmentation_input_noise_output)
             for i in range(count_mutations):
-                input_image_mutated, noise_image_mutated, output_image_mutated = input_noise_output[i]
+                augmentation, input_image_mutated, noise_image_mutated, output_image_mutated = augmentation_input_noise_output[i]
 
                 pair_id = current_pair_id * count_mutations + i
                 current_pair_id += 1
-                xs_image = cls.xs_for_input_noise_images(refinement_index, input_image_mutated, noise_image_mutated, pair_id, features)
+                xs_image = cls.xs_for_input_noise_images(refinement_index, input_image_mutated, noise_image_mutated, pair_id, features, augmentation)
                 if xs is None:
                     # print(f'iteration 0, setting xs. {type(xs_image)}')
                     xs = xs_image
@@ -485,7 +520,7 @@ class ModelGamma1:
 
         # Picking a pair_id that has already been used, performs better than picking a new unseen pair_id.
         pair_id = random.Random(refinement_index + 42).randint(0, current_pair_id - 1)
-        xs_image = cls.xs_for_input_noise_images(refinement_index, input_image, noise_image_mutated, pair_id, features)
+        xs_image = cls.xs_for_input_noise_images(refinement_index, input_image, noise_image_mutated, pair_id, features, ImageAugmentationOperation.DO_NOTHING)
         if False:
             # Randomize the pair_id for the test image, so it doesn't reference a specific example pair
             for i in range(len(xs_image)):

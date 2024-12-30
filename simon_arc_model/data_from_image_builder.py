@@ -39,12 +39,11 @@ class DataFromImageBuilder:
         self.cache_connected_component_item_list = {}
         self.cache_object_ids = {}
     
-    def make_pair_id(self, pair_id: int):
-        self.data['pair_id'] = [pair_id] * self.pixel_count
-
-    def make_is_earlier_prediction(self, is_earlier_prediction: bool):
-        value = 0 if is_earlier_prediction else 1
-        self.data['is_earlier_prediction'] = [value] * self.pixel_count
+    def make_key_value_int(self, key: str, value: int):
+        """
+        Assign the same integer value to all pixels, so the pixel data belongs to the same group.
+        """
+        self.data[key] = [value] * self.pixel_count
 
     def make_center_pixel(self):
         self.data['center_pixel'] = self.image.flatten().tolist()
