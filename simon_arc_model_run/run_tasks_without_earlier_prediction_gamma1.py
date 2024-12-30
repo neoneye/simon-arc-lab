@@ -31,24 +31,8 @@ for dataset_id, groupname, path_to_task_dir in datasetid_groupname_pathtotaskdir
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
 
-# The goal is to solve puzzles that have never been solved before.
-# Tasks that have previously been solved fine, are not interesting to solve again.
-# the csv is a list of task ids that have a score of 100, there are no other columns in the file, so it can be split by \n
-csv_file = 'finetune/taskids_with_score100.csv'
-taskids_to_ignore = set()
-if os.path.isfile(csv_file):
-    with open(csv_file, 'r') as f:
-        taskids = f.read().split('\n')
-        taskids_to_ignore = set(taskids)
-print(f"Number of task ids to ignore: {len(taskids_to_ignore)}")
-
-cache_dir = 'run_tasks_result/cache_decisiontree'
-os.makedirs(cache_dir, exist_ok=True)
-cache_dir = None
-
-#incorrect_predictions_jsonl_path = 'run_tasks_result/incorrect_prediction.jsonl'
-#incorrect_predictions_jsonl_path = '/Users/neoneye/nobackup/git/arc-bad-prediction/data.jsonl'
-incorrect_predictions_jsonl_path = None
+incorrect_predictions_jsonl_path = '/Users/neoneye/nobackup/git/arc-bad-prediction/data.jsonl'
+# incorrect_predictions_jsonl_path = None
 
 number_of_items_in_list = len(datasetid_groupname_pathtotaskdir_list)
 for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_groupname_pathtotaskdir_list):
@@ -56,9 +40,8 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
     print(f"Processing {index+1} of {number_of_items_in_list}. Group name '{groupname}'. Results will be saved to '{save_dir}'")
 
     taskset = TaskSet.load_directory(path_to_task_dir)
-    # taskset.remove_tasks_by_id(taskids_to_ignore, verbose=False)
 
-    wm = WorkManagerWithoutEarlierPredictionGamma1(run_id, dataset_id, taskset, cache_dir, incorrect_predictions_jsonl_path)
+    wm = WorkManagerWithoutEarlierPredictionGamma1(run_id, dataset_id, taskset, incorrect_predictions_jsonl_path)
     # wm.truncate_work_items(20)
     # wm.process_all_work_items()
     wm.process_all_work_items(save_dir=save_dir)

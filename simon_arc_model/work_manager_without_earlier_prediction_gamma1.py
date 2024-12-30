@@ -20,8 +20,7 @@ from .model_gamma1 import ModelGamma1
 from .image_feature import ImageFeature
 from .track_incorrect_prediction import TrackIncorrectPrediction
 
-# Correct 59, Solves 1 of the hidden ARC tasks
-# ARC-AGI training=41, evaluation=17
+# ARC-AGI training=26, evaluation=12
 FEATURES_1 = [
     ImageFeature.COMPONENT_NEAREST4,
     ImageFeature.HISTOGRAM_DIAGONAL,
@@ -31,8 +30,7 @@ FEATURES_1 = [
     ImageFeature.BOUNDING_BOXES,
 ]
 
-# Correct 59, Solves 1 of the hidden ARC tasks
-# ARC-AGI training=39, evaluation=20
+# ARC-AGI training=23, evaluation=14
 FEATURES_2 = [
     ImageFeature.BOUNDING_BOXES,
     ImageFeature.COMPONENT_NEAREST4,
@@ -40,13 +38,14 @@ FEATURES_2 = [
     ImageFeature.HISTOGRAM_ROWCOL,
 ]
 
+# ARC-AGI training=?, evaluation=?
 FEATURES_3 = [
     ImageFeature.COMPONENT_ALL8,
     ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2,
     ImageFeature.OBJECT_ID_RAY_LIST,
 ]
 
-# Correct 47
+# ARC-AGI training=?, evaluation=?
 FEATURES_4 = [
     ImageFeature.COMPONENT_NEAREST4, 
     ImageFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR, 
@@ -54,7 +53,7 @@ FEATURES_4 = [
     ImageFeature.EROSION_ROWCOL,
 ]
 
-# Correct 48
+# ARC-AGI training=?, evaluation=?
 FEATURES_5 = [
     ImageFeature.CENTER, 
     ImageFeature.COMPONENT_NEAREST4, 
@@ -64,12 +63,11 @@ FEATURES_5 = [
 ]
 
 class WorkManagerWithoutEarlierPredictionGamma1(WorkManagerBase):
-    def __init__(self, run_id: str, dataset_id: str, taskset: TaskSet, cache_dir: Optional[str] = None, incorrect_predictions_jsonl_path: Optional[str] = None):
+    def __init__(self, run_id: str, dataset_id: str, taskset: TaskSet, incorrect_predictions_jsonl_path: Optional[str] = None):
         self.run_id = run_id
         self.dataset_id = dataset_id
         self.taskset = taskset
         self.work_items = WorkManagerWithoutEarlierPredictionGamma1.create_work_items(taskset)
-        self.cache_dir = cache_dir
         self.incorrect_predictions_jsonl_path = incorrect_predictions_jsonl_path
 
     @classmethod
@@ -107,7 +105,7 @@ class WorkManagerWithoutEarlierPredictionGamma1(WorkManagerBase):
         noise_levels = [100]
         number_of_refinements = len(noise_levels)
 
-        features = set(FEATURES_1)
+        features = set(FEATURES_2)
 
         # Track incorrect predictions
         features_pretty = ImageFeature.names_joined_with_comma(features)
@@ -133,13 +131,6 @@ class WorkManagerWithoutEarlierPredictionGamma1(WorkManagerBase):
                 noise_level = noise_levels[refinement_index]
                 # print(f"Refinement {refinement_index+1}/{number_of_refinements} noise_level={noise_level}")
                 predicted_output = None
-                cache_file = None
-                if self.cache_dir is not None:
-                    if refinement_index == 0:
-                        cache_file = os.path.join(self.cache_dir, f'{work_item.task.metadata_task_id}_{work_item.test_index}.npy')
-                        if os.path.isfile(cache_file):
-                            predicted_output = np.load(cache_file)
-                            # print(f"Loaded from cache: {cache_file}")
                 if predicted_output is None:
                     previous_prediction_mask = None
                     try:
@@ -160,8 +151,6 @@ class WorkManagerWithoutEarlierPredictionGamma1(WorkManagerBase):
                         raise e
 
                     predicted_output = predicted_output_result.images(1)[0]
-                    if cache_file is not None:
-                        np.save(cache_file, predicted_output)
 
                 last_predicted_output = predicted_output
                 # score = ts.measure_test_prediction(predicted_output, work_item.test_index)
