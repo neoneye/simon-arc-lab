@@ -128,6 +128,16 @@ class ShapeCatalog:
             [1, 1, 1],
             [1, 0, 1]])
 
+        # Tetris shape
+        # https://en.wikipedia.org/wiki/Tetromino
+        self.add('skew tetromino', '▀█▄', [
+            [1, 1, 0],
+            [0, 1, 1]])
+
+        self.add('T shape', 'T', [
+            [1, 1, 1],
+            [0, 1, 0]])
+
 class Shape(ABC):
     @abstractmethod
     def shape_type(self) -> str:

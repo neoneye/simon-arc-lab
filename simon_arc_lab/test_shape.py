@@ -349,3 +349,35 @@ class TestShapeName(unittest.TestCase):
         self.assertEqual(actual.shape.long_name, 'h shape')
         self.assertEqual(actual.transformation_string(), 'none')
         self.assertEqual(actual.scale_mode(), '1')
+
+    def test_100001_tetris_skew_tetromino(self):
+        # Arrange
+        image = np.array([
+            [1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1],
+            [0, 1, 1, 1, 1],
+            [0, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0]], dtype=np.uint8)
+        # Act
+        actual = process(image)
+        # Assert
+        self.assertIsInstance(actual, SimpleShape)
+        self.assertEqual(actual.rectangle, Rectangle(0, 0, 5, 4))
+        self.assertEqual(actual.shape.long_name, 'skew tetromino')
+        self.assertEqual(actual.transformation_string(), 'none')
+        self.assertEqual(actual.scale_mode(), 'none')
+
+    def test_110000_t_shape(self):
+        # Arrange
+        image = np.array([
+            [1, 1, 1, 1],
+            [0, 0, 1, 0],
+            [0, 0, 1, 0]], dtype=np.uint8)
+        # Act
+        actual = process(image)
+        # Assert
+        self.assertIsInstance(actual, SimpleShape)
+        self.assertEqual(actual.rectangle, Rectangle(0, 0, 4, 3))
+        self.assertEqual(actual.shape.long_name, 'T shape')
+        self.assertEqual(actual.transformation_string(), 'none')
+        self.assertEqual(actual.scale_mode(), 'none')
