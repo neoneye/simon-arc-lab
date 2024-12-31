@@ -62,11 +62,12 @@ FEATURES_5 = [
     ImageFeature.HISTOGRAM_ROWCOL,
 ]
 
-# ARC-AGI training=47, evaluation=18
+# ARC-AGI training=50, evaluation=19
 FEATURES_6 = [
     ImageFeature.COMPONENT_NEAREST4,
     ImageFeature.HISTOGRAM_DIAGONAL,
     ImageFeature.HISTOGRAM_ROWCOL,
+    ImageFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5,
     ImageFeature.HISTOGRAM_VALUE,
     ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL,
     ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2,

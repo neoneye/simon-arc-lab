@@ -138,6 +138,35 @@ class ShapeCatalog:
             [1, 1, 1],
             [0, 1, 0]])
 
+        self.add('X shape', 'X', [
+            [1, 0, 1],
+            [0, 1, 0],
+            [1, 0, 1]])
+
+        self.add('y shape', 'y', [
+            [1, 0, 1],
+            [0, 1, 0],
+            [1, 0, 0]])
+
+        self.add('1left-3-1right shape', '1L-3-1R', [
+            [1, 0, 0],
+            [1, 1, 1],
+            [0, 0, 1]])
+
+        self.add('open-box-a', 'open-box-a', [
+            [1, 1, 0, 1, 1],
+            [1, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1]])
+
+        self.add('open-box-b', 'open-box-b', [
+            [1, 1, 0, 1],
+            [1, 0, 0, 1],
+            [1, 1, 1, 1]])
+
+        self.add('E shape', 'E', [
+            [1, 0, 1, 0, 1],
+            [1, 1, 1, 1, 1]])
+
 class Shape(ABC):
     @abstractmethod
     def shape_type(self) -> str:
