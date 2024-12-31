@@ -133,9 +133,9 @@ class ModelGamma1:
                 augmentation_id = 12
             elif augmentation == ImageAugmentationOperation.ROTATE_CCW_45:
                 augmentation_id = 13
-            # builder.make_key_value_int('augmentation_id', augmentation_id)
-            for i in range(14):
-                builder.make_key_value_int(f'augmentation_id_{i}', 1 if i == augmentation_id else 0)
+            builder.make_key_value_int('augmentation_id', augmentation_id)
+            # for i in range(14):
+            #     builder.make_key_value_int(f'augmentation_id_{i}', 1 if i == augmentation_id else 0)
 
         # Column "center_pixel"
         if ImageFeature.SUPPRESS_CENTER_PIXEL_ONCE not in features:
@@ -231,11 +231,11 @@ class ModelGamma1:
                 builder.make_distance_inside_object(pixel_connectivity)
 
         if True:
-            lookaround_size = 0
+            lookaround_size = 1
             builder.make_shape3x3_opposite(lookaround_size)
 
         if True:
-            lookaround_size = 0
+            lookaround_size = 1
             builder.make_shape3x3_center(lookaround_size)
 
         if True:

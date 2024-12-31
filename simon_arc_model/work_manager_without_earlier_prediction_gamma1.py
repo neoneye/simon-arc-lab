@@ -62,13 +62,14 @@ FEATURES_5 = [
     ImageFeature.HISTOGRAM_ROWCOL,
 ]
 
-# ARC-AGI training=46, evaluation=17
+# ARC-AGI training=47, evaluation=18
 FEATURES_6 = [
     ImageFeature.COMPONENT_NEAREST4,
     ImageFeature.HISTOGRAM_DIAGONAL,
     ImageFeature.HISTOGRAM_ROWCOL,
     ImageFeature.HISTOGRAM_VALUE,
     ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL,
+    ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2,
     ImageFeature.BOUNDING_BOXES,
     ImageFeature.SHAPE_ALL8,
 ]
