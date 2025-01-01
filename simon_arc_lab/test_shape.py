@@ -381,3 +381,106 @@ class TestShapeName(unittest.TestCase):
         self.assertEqual(actual.shape.long_name, 'T shape')
         self.assertEqual(actual.transformation_string(), 'none')
         self.assertEqual(actual.scale_mode(), 'none')
+
+    def test_120000_x_shape(self):
+        # Arrange
+        image = np.array([
+            [1, 1, 0, 1, 1],
+            [1, 1, 0, 1, 1],
+            [0, 0, 1, 0, 0],
+            [1, 1, 0, 1, 1]], dtype=np.uint8)
+        # Act
+        actual = process(image)
+        # Assert
+        self.assertIsInstance(actual, SimpleShape)
+        self.assertEqual(actual.rectangle, Rectangle(0, 0, 5, 4))
+        self.assertEqual(actual.shape.long_name, 'X shape')
+        self.assertEqual(actual.transformation_string(), 'flip_x')
+        self.assertEqual(actual.scale_mode(), 'none')
+
+    def test_130000_y_shape(self):
+        # Arrange
+        image = np.array([
+            [1, 1, 0, 0, 0],
+            [1, 1, 0, 0, 0],
+            [0, 0, 1, 0, 0],
+            [1, 1, 0, 1, 1],
+            [1, 1, 0, 1, 1]], dtype=np.uint8)
+        # Act
+        actual = process(image)
+        # Assert
+        self.assertIsInstance(actual, SimpleShape)
+        self.assertEqual(actual.rectangle, Rectangle(0, 0, 5, 5))
+        self.assertEqual(actual.shape.long_name, 'y shape')
+        self.assertEqual(actual.transformation_string(), 'flip_b')
+        self.assertEqual(actual.scale_mode(), 'none')
+
+    def test_140000_y_shape(self):
+        # Arrange
+        image = np.array([
+            [1, 1, 0, 0, 0],
+            [1, 1, 0, 0, 0],
+            [1, 1, 1, 1, 1],
+            [0, 0, 0, 1, 1],
+            [0, 0, 0, 1, 1]], dtype=np.uint8)
+        # Act
+        actual = process(image)
+        # Assert
+        self.assertIsInstance(actual, SimpleShape)
+        self.assertEqual(actual.rectangle, Rectangle(0, 0, 5, 5))
+        self.assertEqual(actual.shape.long_name, '1left-3-1right shape')
+        self.assertEqual(actual.transformation_string(), 'rotate_180')
+        self.assertEqual(actual.scale_mode(), 'none')
+
+    def test_150000_openboxa_shape(self):
+        # Arrange
+        image = np.array([
+            [0, 0, 0, 0, 0],
+            [1, 1, 0, 1, 1],
+            [1, 1, 0, 1, 1],
+            [1, 0, 0, 0, 1],
+            [1, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1]], dtype=np.uint8)
+        # Act
+        actual = process(image)
+        # Assert
+        self.assertIsInstance(actual, SimpleShape)
+        self.assertEqual(actual.rectangle, Rectangle(0, 1, 5, 5))
+        self.assertEqual(actual.shape.long_name, 'open-box-a')
+        self.assertEqual(actual.transformation_string(), 'flip_x')
+        self.assertEqual(actual.scale_mode(), 'none')
+
+    def test_160000_openboxb_shape(self):
+        # Arrange
+        image = np.array([
+            [0, 0, 0, 0, 0],
+            [1, 1, 1, 0, 1],
+            [1, 1, 1, 0, 1],
+            [1, 0, 0, 0, 1],
+            [1, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1]], dtype=np.uint8)
+        # Act
+        actual = process(image)
+        # Assert
+        self.assertIsInstance(actual, SimpleShape)
+        self.assertEqual(actual.rectangle, Rectangle(0, 1, 5, 5))
+        self.assertEqual(actual.shape.long_name, 'open-box-b')
+        self.assertEqual(actual.transformation_string(), 'none')
+        self.assertEqual(actual.scale_mode(), 'none')
+
+    def test_170000_e_shape(self):
+        # Arrange
+        image = np.array([
+            [1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0],
+            [1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0],
+            [1, 1, 1, 1, 1]], dtype=np.uint8)
+        # Act
+        actual = process(image)
+        # Assert
+        self.assertIsInstance(actual, SimpleShape)
+        self.assertEqual(actual.rectangle, Rectangle(0, 0, 5, 5))
+        self.assertEqual(actual.shape.long_name, 'E shape')
+        self.assertEqual(actual.transformation_string(), 'flip_y')
+        self.assertEqual(actual.scale_mode(), 'none')
