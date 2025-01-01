@@ -47,10 +47,6 @@ if os.path.isfile(csv_file):
         taskids_to_ignore = set(taskids)
 print(f"Number of task ids to ignore: {len(taskids_to_ignore)}")
 
-cache_dir = 'run_tasks_result/cache_decisiontree'
-os.makedirs(cache_dir, exist_ok=True)
-cache_dir = None
-
 arc_bad_prediction_file = '/Users/neoneye/nobackup/git/arc-bad-prediction/data.jsonl'
 arc_bad_prediction_dataset = ARCBadPredictionDataset.load(arc_bad_prediction_file)
 # arc_bad_prediction_dataset.display_sample_records()
@@ -145,7 +141,7 @@ for index, (dataset_id, groupname, path_to_task_dir) in enumerate(datasetid_grou
 
     print(f"Number of work items: {len(work_items)}")
 
-    wm = WorkManagerStepwiseRefinementV4(run_id, dataset_id, taskset, work_items, cache_dir, incorrect_predictions_jsonl_path)
+    wm = WorkManagerStepwiseRefinementV4(run_id, dataset_id, taskset, work_items, incorrect_predictions_jsonl_path)
     # wm.truncate_work_items(40)
     # wm.process_all_work_items()
     wm.process_all_work_items(save_dir=save_dir)

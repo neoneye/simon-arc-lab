@@ -94,12 +94,11 @@ FEATURES_8 = [
 ]
 
 class WorkManagerStepwiseRefinementV4(WorkManagerBase):
-    def __init__(self, run_id: str, dataset_id: str, taskset: TaskSet, work_items: list[WorkItemWithPreviousPrediction], cache_dir: Optional[str] = None, incorrect_predictions_jsonl_path: Optional[str] = None):
+    def __init__(self, run_id: str, dataset_id: str, taskset: TaskSet, work_items: list[WorkItemWithPreviousPrediction], incorrect_predictions_jsonl_path: Optional[str] = None):
         self.run_id = run_id
         self.dataset_id = dataset_id
         self.taskset = taskset
         self.work_items = work_items
-        self.cache_dir = cache_dir
         self.incorrect_predictions_jsonl_path = incorrect_predictions_jsonl_path
 
     def truncate_work_items(self, max_count: int):
