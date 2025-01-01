@@ -1,5 +1,4 @@
 """
-IDEA: Normal or Transpose so it's using the smallest RLE compressed representation
 IDEA: Scale up by 2, 3
 IDEA: Denoise
 """
@@ -7,6 +6,7 @@ from enum import Enum
 from simon_arc_lab.image_util import *
 from simon_arc_lab.image_rotate45 import *
 from simon_arc_lab.image_skew import *
+# from simon_arc_lab.rle.serialize import *
 
 class ImageAugmentationOperation(Enum):
     DO_NOTHING = 'do_nothing'
@@ -23,6 +23,7 @@ class ImageAugmentationOperation(Enum):
     SKEW_RIGHT = 'skew_right'
     ROTATE_CW_45 = 'rotate_cw_45'
     ROTATE_CCW_45 = 'rotate_ccw_45'
+    # SHORTEST_RLE_ORIENTATION = 'shortest_rle_orientation' # I explored this approach, hoping it would make the predictions better, but it made it worse.
 
     def apply(self, image: np.array) -> np.array:
         if self == ImageAugmentationOperation.DO_NOTHING:
@@ -59,5 +60,13 @@ class ImageAugmentationOperation(Enum):
         elif self == ImageAugmentationOperation.ROTATE_CCW_45:
             fill_color = 10
             return image_rotate_ccw_45(image, fill_color)
+        # elif self == ImageAugmentationOperation.SHORTEST_RLE_ORIENTATION:
+        #     s0 = serialize(image)
+        #     image_transposed = image.transpose()
+        #     s1 = serialize(image_transposed)
+        #     if len(s0) <= len(s1):
+        #         return image
+        #     else:
+        #         return image_transposed
         else:
             raise ValueError(f'Unknown ImageAugmentationOperation: {self}')
