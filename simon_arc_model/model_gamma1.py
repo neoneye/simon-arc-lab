@@ -335,12 +335,18 @@ class ModelGamma1:
 
     @classmethod
     def xs_for_input_noise_images(cls, refinement_index: int, input_image: np.array, noise_image: np.array, pair_id: int, features: set[ImageFeature], augmentation: ImageAugmentationOperation) -> dict:
+        print(f'!!!!!!!!!! refinement_index={refinement_index} pair_id={pair_id}')
         if refinement_index == 0:
             xs = cls.xs_for_input_image(input_image, pair_id, features, augmentation, False)
         else:
             xs0 = cls.xs_for_input_image(input_image, pair_id, features, augmentation, False)
             xs1 = cls.xs_for_input_image(noise_image, pair_id, features, augmentation, True)
             xs = DictionaryWithList.merge_two_dictionaries_with_suffix(xs0, xs1)
+
+            # for key in xs.keys():
+                # print(f'key={key} type={type(xs[key])}')
+                # xs[key].extend(xs1[key])
+
         return xs
 
     @classmethod
@@ -451,7 +457,8 @@ class ModelGamma1:
             for i in range(count_mutations):
                 augmentation, input_image_mutated, noise_image_mutated, output_image_mutated = augmentation_input_noise_output[i]
 
-                pair_id = current_pair_id * count_mutations + i
+                # pair_id = current_pair_id #* count_mutations + i
+                pair_id = pair_index
                 current_pair_id += 1
                 xs_image = cls.xs_for_input_noise_images(refinement_index, input_image_mutated, noise_image_mutated, pair_id, features, augmentation)
                 if xs is None:
