@@ -23,7 +23,6 @@ class ImageAugmentationOperation(Enum):
     SKEW_RIGHT = 'skew_right'
     ROTATE_CW_45 = 'rotate_cw_45'
     ROTATE_CCW_45 = 'rotate_ccw_45'
-    TRANSPOSE = 'transpose'
 
     def apply(self, image: np.array) -> np.array:
         if self == ImageAugmentationOperation.DO_NOTHING:
@@ -60,7 +59,5 @@ class ImageAugmentationOperation(Enum):
         elif self == ImageAugmentationOperation.ROTATE_CCW_45:
             fill_color = 10
             return image_rotate_ccw_45(image, fill_color)
-        elif self == ImageAugmentationOperation.TRANSPOSE:
-            return image.transpose()
         else:
             raise ValueError(f'Unknown ImageAugmentationOperation: {self}')

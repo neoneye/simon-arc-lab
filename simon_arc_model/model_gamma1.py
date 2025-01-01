@@ -130,10 +130,8 @@ class ModelGamma1:
                 augmentation_id = 12
             elif augmentation == ImageAugmentationOperation.ROTATE_CCW_45:
                 augmentation_id = 13
-            elif augmentation == ImageAugmentationOperation.TRANSPOSE:
-                augmentation_id = 14
             builder.make_key_value_int('augmentation_id', augmentation_id)
-            # for i in range(15):
+            # for i in range(14):
             #     builder.make_key_value_int(f'augmentation_id_{i}', 1 if i == augmentation_id else 0)
 
         # Column "center_pixel"
@@ -391,7 +389,6 @@ class ModelGamma1:
             ImageAugmentationOperation.SKEW_DOWN,
             ImageAugmentationOperation.SKEW_LEFT,
             ImageAugmentationOperation.SKEW_RIGHT,
-            # ImageAugmentationOperation.TRANSPOSE,
         ]
         if ImageFeature.ROTATE45 in features:
             augmentation_list.append(ImageAugmentationOperation.ROTATE_CW_45)
