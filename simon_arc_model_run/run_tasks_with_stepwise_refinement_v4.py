@@ -77,14 +77,15 @@ task_ids_of_interest_list = [
     # '40f6cd08',
     # '3f23242b',
     # '5b526a93',
-    'fcc82909',
-    'f8c80d96',
     'ecdecbb3',
     'db93a21d',
     'd06dbe63',
     '928ad970',
     '7df24a62',
     '673ef223',
+    'e619ca6e',
+    '58e15b12_v3',
+    'da515329',
 ]
 task_ids_of_interest = set(task_ids_of_interest_list)
 
