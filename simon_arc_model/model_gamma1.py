@@ -23,9 +23,6 @@ from .image_feature import ImageFeature
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.calibration import CalibratedClassifierCV
-from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.metrics import accuracy_score
 from sklearn import tree
 from scipy.stats import entropy
 import matplotlib.pyplot as plt
@@ -484,23 +481,8 @@ class ModelGamma1:
         clf = None
         try:
             clf_inner = DecisionTreeClassifier(random_state=42)
-            # param_grid = {
-            #     # 'learning_rate': [0.1, 0.01, 0.001],
-            #     # 'n_estimators': [1, 2, 4, 8],
-            #     'max_features': [1, 2, 4, 8],
-            #     'max_depth': [1, 2, 4, 8],
-            # }
-            # current_clf = GridSearchCV(estimator=clf_inner, param_grid=param_grid)
-            # current_clf = AdaBoostClassifier(estimator=clf_inner, n_estimators=50, learning_rate=1)
-            # param_grid = {
-            #     'learning_rate': [0.1, 0.01, 0.001],
-            #     'n_estimators': [1, 2, 4, 8],
-            # }
-            # clf_inner2 = AdaBoostClassifier(estimator=clf_inner, algorithm='SAMME')
-            # current_clf = GridSearchCV(estimator=clf_inner2, param_grid=param_grid)
             current_clf = CalibratedClassifierCV(clf_inner, method='isotonic', cv=5)
             current_clf.fit(xs_dataframe, ys)
-            # print(f'task: {task.metadata_task_id} Best parameters: {current_clf.best_params_}')
             clf = current_clf
         except Exception as e:
             print(f'Error: {e}')
@@ -554,12 +536,7 @@ class ModelGamma1:
         # plt.show()
 
         xs_dataframe = pd.DataFrame(xs_image)
-
         probabilities = clf.predict_proba(xs_dataframe)
-
-        # ys_predicted = clf.predict(xs_dataframe)
-        # score = accuracy_score(xs_dataframe, np.argmax(ys_predicted, axis=1))
-        # print(f"task: {task.metadata_task_id} accuracy: {score:.2f}")
         return ModelGamma1PredictOutputResult(width, height, probabilities)
 
     @classmethod
