@@ -278,7 +278,11 @@ class WorkManagerStepwiseRefinementV4(WorkManagerBase):
 
             if True:
                 last_predicted_correctness = np.zeros_like(work_item.previous_predicted_output_image, dtype=np.uint8)
-                noise_level = 90
+                # noise_level = 100 # The model takes hints from previous predictions. Lack of creativity. Predicts an empty image if it's unsure about the prediction.
+                # noise_level = 40 # somewhat ok, more creative. 
+                noise_level = 30 # somewhat bad
+                # noise_level = 20 # bad. Mostly noise from the previous prediction.
+                # noise_level = 5 # bad
                 the_refinement_index = 1
                 try:
                     prediction = ModelGamma1.predict_output(
