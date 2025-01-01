@@ -90,7 +90,7 @@ class ModelGamma1PredictOutputResult:
 
 class ModelGamma1:
     @classmethod
-    def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[ImageFeature], augmentation: ImageAugmentationOperation, is_earlier_prediction: bool) -> dict:
+    def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[ImageFeature], augmentation: ImageAugmentationOperation, augmentation_group_id: int, is_earlier_prediction: bool) -> dict:
         # print(f'xs_for_input_image: pair_id={pair_id} features={features} is_earlier_prediction={is_earlier_prediction}')
         builder = DataFromImageBuilder(image)
 
@@ -98,6 +98,8 @@ class ModelGamma1:
 
         earlier_prediction_value = 0 if is_earlier_prediction else 1
         builder.make_key_value_int('earlier_prediction', earlier_prediction_value)
+
+        builder.make_key_value_int('augmentation_group_id', augmentation_group_id)
 
         # Column "augmentation_id"
         if True:
@@ -334,13 +336,13 @@ class ModelGamma1:
         return data
 
     @classmethod
-    def xs_for_input_noise_images(cls, refinement_index: int, input_image: np.array, noise_image: np.array, pair_id: int, features: set[ImageFeature], augmentation: ImageAugmentationOperation) -> dict:
-        print(f'!!!!!!!!!! refinement_index={refinement_index} pair_id={pair_id}')
+    def xs_for_input_noise_images(cls, refinement_index: int, input_image: np.array, noise_image: np.array, pair_id: int, features: set[ImageFeature], augmentation: ImageAugmentationOperation, augmentation_group_id: int) -> dict:
+        print(f'!!!!!!!!!! refinement_index={refinement_index} pair_id={pair_id} augmentation_group_id={augmentation_group_id}')
         if refinement_index == 0:
-            xs = cls.xs_for_input_image(input_image, pair_id, features, augmentation, False)
+            xs = cls.xs_for_input_image(input_image, pair_id, features, augmentation, augmentation_group_id, False)
         else:
-            xs0 = cls.xs_for_input_image(input_image, pair_id, features, augmentation, False)
-            xs1 = cls.xs_for_input_image(noise_image, pair_id, features, augmentation, True)
+            xs0 = cls.xs_for_input_image(input_image, pair_id, features, augmentation, augmentation_group_id, False)
+            xs1 = cls.xs_for_input_image(noise_image, pair_id, features, augmentation, augmentation_group_id, True)
             xs = DictionaryWithList.merge_two_dictionaries_with_suffix(xs0, xs1)
 
             # for key in xs.keys():
@@ -458,9 +460,10 @@ class ModelGamma1:
                 augmentation, input_image_mutated, noise_image_mutated, output_image_mutated = augmentation_input_noise_output[i]
 
                 # pair_id = current_pair_id #* count_mutations + i
+                augmentation_id = current_pair_id * count_mutations + i + 1
                 pair_id = pair_index
                 current_pair_id += 1
-                xs_image = cls.xs_for_input_noise_images(refinement_index, input_image_mutated, noise_image_mutated, pair_id, features, augmentation)
+                xs_image = cls.xs_for_input_noise_images(refinement_index, input_image_mutated, noise_image_mutated, pair_id, features, augmentation, augmentation_id)
                 if xs is None:
                     # print(f'iteration 0, setting xs. {type(xs_image)}')
                     xs = xs_image
@@ -529,7 +532,7 @@ class ModelGamma1:
 
         # Picking a pair_id that has already been used, performs better than picking a new unseen pair_id.
         pair_id = random.Random(refinement_index + 42).randint(0, current_pair_id - 1)
-        xs_image = cls.xs_for_input_noise_images(refinement_index, input_image, noise_image_mutated, pair_id, features, ImageAugmentationOperation.DO_NOTHING)
+        xs_image = cls.xs_for_input_noise_images(refinement_index, input_image, noise_image_mutated, pair_id, features, ImageAugmentationOperation.DO_NOTHING, 0)
         if False:
             # Randomize the pair_id for the test image, so it doesn't reference a specific example pair
             for i in range(len(xs_image)):
