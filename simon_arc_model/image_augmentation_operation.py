@@ -1,5 +1,4 @@
 """
-IDEA: Transpose
 IDEA: Normal or Transpose so it's using the smallest RLE compressed representation
 IDEA: Scale up by 2, 3
 IDEA: Denoise
