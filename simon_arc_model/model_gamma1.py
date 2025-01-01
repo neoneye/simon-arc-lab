@@ -459,9 +459,10 @@ class ModelGamma1:
             for i in range(count_mutations):
                 augmentation, input_image_mutated, noise_image_mutated, output_image_mutated = augmentation_input_noise_output[i]
 
-                # pair_id = current_pair_id #* count_mutations + i
-                augmentation_id = current_pair_id * count_mutations + i + 1
-                pair_id = pair_index
+                pair_id = current_pair_id * count_mutations + i
+                # augmentation_id = current_pair_id * count_mutations + i + 1
+                augmentation_id = 0
+                # pair_id = pair_index
                 current_pair_id += 1
                 xs_image = cls.xs_for_input_noise_images(refinement_index, input_image_mutated, noise_image_mutated, pair_id, features, augmentation, augmentation_id)
                 if xs is None:
