@@ -22,6 +22,7 @@ from .image_augmentation_operation import ImageAugmentationOperation
 from .image_feature import ImageFeature
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn import tree
 from scipy.stats import entropy
@@ -488,6 +489,8 @@ class ModelGamma1:
 
         clf = None
         try:
+            # current_clf = HistGradientBoostingClassifier(random_state=42)
+            # current_clf = DecisionTreeClassifier(random_state=42, ccp_alpha=0.001)
             clf_inner = DecisionTreeClassifier(random_state=42)
             current_clf = CalibratedClassifierCV(clf_inner, method='isotonic', cv=5)
             current_clf.fit(xs_dataframe, ys)
