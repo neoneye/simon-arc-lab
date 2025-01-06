@@ -7,7 +7,10 @@ This model is the most unusual model I have created so far.
 - In very rare cases, the predicted output is not identical to any of the example outputs, and it actually attempts to make a prediction about the test output.
 
 IDEA: Do a cross over between random sampling and the ModelGamma1 decision tree model. That way it will hopefully yield
-better results than just picking one of the example outputs.
+better results than just picking one of the example outputs. 
+
+IDEA: Change the `xs_ys_from_input_target_pairs` from returning lists, to instead return a dict.
+This dict can be put into a pandas DataFrame, and then the crossover between ModelGamma1 and random sampling can easier be done.
 """
 from datetime import datetime
 import os
