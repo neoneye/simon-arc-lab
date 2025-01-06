@@ -1,3 +1,13 @@
+"""
+For better results, use version 8.
+
+When I compare the output of this version 5 with version 8,
+I can see that version 5 appears as a noisy subset of version 8.
+The pixels that version 5 was unable to resolve, version 8 are able to resolve.
+
+Version 5 has more novel solutions than doing a full copy/paste of one of the example outputs.
+Finding novel solutions may be a good thing.
+"""
 from datetime import datetime
 import os
 import sys

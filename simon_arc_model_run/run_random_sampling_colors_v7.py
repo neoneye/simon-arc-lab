@@ -1,3 +1,8 @@
+"""
+For better results use version 8, or version 6.
+
+Version 7 makes bad predictions.
+"""
 from datetime import datetime
 import os
 import sys

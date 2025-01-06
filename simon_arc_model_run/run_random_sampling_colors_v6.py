@@ -1,3 +1,10 @@
+"""
+For better results, use version 8.
+
+When I compare the output of this version 6 with version 8,
+I can see that version 6 appears as a noisy subset of version 8.
+The pixels that version 6 was unable to resolve, version 8 are able to resolve.
+"""
 from datetime import datetime
 import os
 import sys

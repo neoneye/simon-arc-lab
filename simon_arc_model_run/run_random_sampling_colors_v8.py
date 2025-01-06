@@ -1,3 +1,14 @@
+"""
+This model is the most unusual model I have created so far.
+
+- Most of the predicted outputs correspond to one of the example outputs.
+- Nearly always the predicted output corresponds to the output from the example pair index with highest index.
+- In rare cases, the predicted output is identical to one of the other example outputs.
+- In very rare cases, the predicted output is not identical to any of the example outputs, and it actually attempts to make a prediction about the test output.
+
+IDEA: Do a cross over between random sampling and the ModelGamma1 decision tree model. That way it will hopefully yield
+better results than just picking one of the example outputs.
+"""
 from datetime import datetime
 import os
 import sys
