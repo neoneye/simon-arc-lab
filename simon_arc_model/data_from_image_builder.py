@@ -206,22 +206,21 @@ class DataFromImageBuilder:
         self.data['center_y'] = values_center_y
 
     def make_image_pixel_color(self, lookaround_size: int, suppress_center: bool):
-        k = lookaround_size
-        n = k * 2 + 1
-        for ry in range(n):
-            for rx in range(n):
-                if suppress_center and rx == k and ry == k:
+        n = lookaround_size
+        for dy in range(-n, n * 2):
+            for dx in range(-n, n * 2):
+                if suppress_center and dx == 0 and dy == 0:
                     continue
                 values = []
                 for y in range(self.height):
                     for x in range(self.width):
-                        xx = x + rx - k
-                        yy = y + ry - k
+                        xx = x + dx
+                        yy = y + dy
                         if xx < 0 or xx >= self.width or yy < 0 or yy >= self.height:
                             values.append(self.outside_color)
                         else:
                             values.append(self.image[yy, xx])
-                self.data[f'lookaround_image_pixel_x{rx}_y{ry}'] = values
+                self.data[f'lookaround_image_pixel_x{dx}_y{dy}'] = values
     
     def components(self, pixel_connectivity: PixelConnectivity) -> list[ConnectedComponentItem]:
         connected_component_item_list = self.cache_connected_component_item_list.get(pixel_connectivity)
