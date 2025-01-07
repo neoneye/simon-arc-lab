@@ -123,6 +123,19 @@ FEATURES_10 = [
     ImageFeature.GRAVITY_DRAW_TOP_TO_BOTTOM,
 ]
 
+# ARC-AGI training=?, evaluation=8
+FEATURES_11 = [
+    ImageFeature.NUMBER_OF_UNIQUE_COLORS_ALL9,
+    ImageFeature.BOUNDING_BOXES,
+]
+
+# ARC-AGI training=?, evaluation=12
+FEATURES_6 = [
+    ImageFeature.LONELY_PIXELS,
+    ImageFeature.HISTOGRAM_DIAGONAL,
+    ImageFeature.HISTOGRAM_ROWCOL,
+]
+
 class WorkManagerWithoutEarlierPredictionGamma1(WorkManagerBase):
     def __init__(self, run_id: str, dataset_id: str, taskset: TaskSet, incorrect_predictions_jsonl_path: Optional[str] = None):
         self.run_id = run_id
