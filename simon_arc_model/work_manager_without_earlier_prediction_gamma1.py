@@ -75,6 +75,20 @@ FEATURES_6 = [
     ImageFeature.SHAPE_ALL8,
 ]
 
+# ARC-AGI training=50, evaluation=19
+FEATURES_6_B = [
+    ImageFeature.COMPONENT_NEAREST4,
+    ImageFeature.HISTOGRAM_DIAGONAL,
+    ImageFeature.HISTOGRAM_ROWCOL,
+    ImageFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5,
+    ImageFeature.HISTOGRAM_VALUE,
+    ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL,
+    ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2,
+    ImageFeature.BOUNDING_BOXES,
+    ImageFeature.SHAPE_ALL8,
+    ImageFeature.LONELY_PIXELS,
+]
+
 # ARC-AGI training=39, evaluation=17
 FEATURES_7 = [
     ImageFeature.BOUNDING_BOXES,

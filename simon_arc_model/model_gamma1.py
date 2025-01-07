@@ -142,6 +142,9 @@ class ModelGamma1:
         if ImageFeature.COLOR_POPULARITY in features:
             builder.make_color_popularity(1)
 
+        if ImageFeature.LONELY_PIXELS in features:
+            builder.make_lonely_pixels()
+
         # Position related columns
         if ImageFeature.POSITION_XY0 in features:
             builder.make_position_xy()

@@ -15,6 +15,7 @@ from simon_arc_lab.image_mass_compare import *
 from simon_arc_lab.image_rotate45 import *
 from simon_arc_lab.pixel_connectivity import PixelConnectivity
 from simon_arc_lab.connected_component import *
+from simon_arc_lab.find_lonely_pixels import *
 from simon_arc_lab.find_bounding_box import *
 from simon_arc_lab.shape import *
 from simon_arc_lab.histogram import Histogram
@@ -534,6 +535,10 @@ class DataFromImageBuilder:
                 else:
                     values.append(-100)
         self.data['image_outline_all8'] = values
+
+    def make_lonely_pixels(self):
+        mask = find_lonely_pixels(self.image)
+        self.data['lonely_pixels'] = mask.flatten().tolist()
 
     def make_count_same_color_as_center(self, lookaround_size: int):
         n = lookaround_size

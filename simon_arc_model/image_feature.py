@@ -44,6 +44,7 @@ class ImageFeature(Enum):
     BIGRAM_ROWCOL = 'bigram_rowcol'
     COLOR_POPULARITY = 'color_popularity'
     SHAPE_ALL8 = 'shape_all8'
+    LONELY_PIXELS = 'lonely_pixels'
 
     @classmethod
     def names_joined_with_comma(cls, features: set['ImageFeature']) -> str:
