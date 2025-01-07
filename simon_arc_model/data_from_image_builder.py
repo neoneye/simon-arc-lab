@@ -471,20 +471,19 @@ class DataFromImageBuilder:
 
     def make_shape3x3_center(self, lookaround_size: int):
         image_shape3x3_center = ImageShape3x3Center.apply(self.image)
-        k = lookaround_size
-        n = k * 2 + 1
-        for ry in range(n):
-            for rx in range(n):
+        n = lookaround_size
+        for dy in range(-n, n * 2):
+            for dx in range(-n, n * 2):
                 values = []
                 for y in range(self.height):
                     for x in range(self.width):
-                        xx = x + rx - k
-                        yy = y + ry - k
+                        xx = x + dx
+                        yy = y + dy
                         if xx < 0 or xx >= self.width or yy < 0 or yy >= self.height:
                             values.append(0)
                         else:
                             values.append(image_shape3x3_center[yy, xx])
-                self.data[f'shape3x3_center_x{rx}_y{ry}'] = values
+                self.data[f'shape3x3_center_x{dx}_y{dy}'] = values
 
         for i in range(8):
             values = []
@@ -730,21 +729,20 @@ class DataFromImageBuilder:
         for (image_shape3x3, operation) in image_operation_list:
             assert image_shape3x3.shape == self.image.shape
 
+        n = lookaround_size
         for (image_shape3x3, operation) in image_operation_list:
-            k = lookaround_size
-            n = k * 2 + 1
-            for ry in range(n):
-                for rx in range(n):
+            for dy in range(-n, n * 2):
+                for dx in range(-n, n * 2):
                     values = []
                     for y in range(self.height):
                         for x in range(self.width):
-                            xx = x + rx - k
-                            yy = y + ry - k
+                            xx = x + dx
+                            yy = y + dy
                             if xx < 0 or xx >= self.width or yy < 0 or yy >= self.height:
                                 values.append(0)
                             else:
                                 values.append(image_shape3x3[yy, xx] + 100)
-                    self.data[f'image_shape3x3_{operation}_x{rx}_y{ry}'] = values
+                    self.data[f'image_shape3x3_{operation}_x{dx}_y{dy}'] = values
 
     def make_mass_compare_adjacent_rowcol(self, steps: list[int]):
         if self.width < 2 or self.height < 2:
