@@ -5,9 +5,9 @@ def find_lonely_pixels(image: np.array) -> np.array:
     Find the isolated pixels, this often occur in patterns where two colors alternate, such as checkerboards.
 
     :param image: The image to analyze
-    :return: An image where the isolated pixels are marked with 2. 
-    Ambiguous lonely pixels are marked with 1.
-    Pixels that belong to a bigger object are marked with 0.
+    :return: An image where the isolated pixels are marked with 2, strong confidence. 
+    Ambiguous lonely pixels are marked with 1, weak confidence.
+    Pixels that belong to a bigger object are marked with 0, strong confidence.
     """
 
     height, width = image.shape
