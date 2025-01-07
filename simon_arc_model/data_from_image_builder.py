@@ -538,8 +538,7 @@ class DataFromImageBuilder:
 
     def make_lonely_pixels(self):
         image_with_lonely_pixels = find_lonely_pixels(self.image)
-        normalized_image = image_with_lonely_pixels * 0.5
-        self.data['lonely_pixels'] = normalized_image.flatten().tolist()
+        self.data['lonely_pixels'] = image_with_lonely_pixels.flatten().tolist()
 
     def make_count_same_color_as_center(self, lookaround_size: int):
         n = lookaround_size
