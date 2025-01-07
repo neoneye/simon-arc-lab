@@ -130,10 +130,22 @@ FEATURES_11 = [
 ]
 
 # ARC-AGI training=?, evaluation=12
-FEATURES_6 = [
+FEATURES_12 = [
     ImageFeature.LONELY_PIXELS,
     ImageFeature.HISTOGRAM_DIAGONAL,
     ImageFeature.HISTOGRAM_ROWCOL,
+]
+
+# ARC-AGI training=?, evaluation=12
+FEATURES_13 = [
+    ImageFeature.LONELY_PIXELS,
+    ImageFeature.HISTOGRAM_VALUE,
+]
+
+# ARC-AGI training=?, evaluation=9
+FEATURES_14 = [
+    ImageFeature.COMPONENT_NEAREST4,
+    ImageFeature.DISTANCE_INSIDE_OBJECT,
 ]
 
 class WorkManagerWithoutEarlierPredictionGamma1(WorkManagerBase):
