@@ -61,9 +61,9 @@ class TestFindLonelyPixels(unittest.TestCase):
         # Assert
         expected = np.array([
             [0, 0, 0, 0],
-            [0, 1, 1, 0],
-            [0, 1, 1, 0],
-            [0, 1, 1, 0],
+            [0, 2, 2, 0],
+            [0, 2, 2, 0],
+            [0, 2, 2, 0],
             [0, 0, 0, 0]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
 
@@ -103,15 +103,55 @@ class TestFindLonelyPixels(unittest.TestCase):
         # Assert
         expected = np.array([
             [0, 0, 1, 0, 0],
-            [0, 0, 1, 0, 0],
-            [0, 0, 1, 1, 1],
-            [0, 0, 0, 0, 1],
-            [0, 1, 1, 1, 1],
-            [0, 1, 0, 0, 0],
+            [0, 0, 2, 0, 0],
+            [0, 0, 1, 2, 1],
+            [0, 0, 0, 0, 2],
+            [0, 1, 2, 2, 1],
+            [0, 2, 0, 0, 0],
             [0, 1, 0, 0, 0]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
 
-    def test_20000_no_alternating_spiral(self):
+    def test_10006_its_ambiguous_with_a_solid_diagonal(self):
+        # Arrange
+        image = np.array([
+            [5, 3, 3, 3, 3],
+            [3, 5, 3, 3, 3],
+            [3, 3, 5, 3, 3],
+            [3, 3, 3, 5, 3],
+            [3, 3, 5, 3, 3],
+            [3, 5, 3, 3, 3]], dtype=np.uint8)
+        # Act
+        actual = find_lonely_pixels(image)
+        # Assert
+        expected = np.array([
+            [2, 0, 0, 0, 0],
+            [0, 2, 0, 0, 0],
+            [0, 0, 2, 0, 0],
+            [0, 0, 0, 2, 0],
+            [0, 0, 2, 0, 0],
+            [0, 2, 0, 0, 0]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_10007_ambiguous_if_diagonal_lines_are_isolated_pixels(self):
+        # Arrange
+        image = np.array([
+            [1, 2, 3, 1, 2],
+            [2, 3, 1, 2, 3],
+            [3, 1, 2, 3, 1],
+            [1, 2, 3, 1, 2],
+            [2, 3, 1, 2, 3]], dtype=np.uint8)
+        # Act
+        actual = find_lonely_pixels(image)
+        # Assert
+        expected = np.array([
+            [1, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 1]], dtype=np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_20000_no_isolated_pixels(self):
         # Arrange
         image = np.array([
             [3, 3, 3, 3, 3],
@@ -129,29 +169,3 @@ class TestFindLonelyPixels(unittest.TestCase):
             [0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0]], dtype=np.uint8)
         np.testing.assert_array_equal(actual, expected)
-
-    # Diagonal lines are recognized as isolated pixels.
-    # I don't want this behavior. Only isolated pixels should be recognized.
-    # However when there are a snake of alternating colors, then there will be
-    # two same colored pixels that are diagonally adjacent.
-    # def xtest_20001_not_alternating_along_solid_diagonal(self):
-    #     # Arrange
-    #     image = np.array([
-    #         [5, 3, 3, 3, 3],
-    #         [3, 5, 3, 3, 3],
-    #         [3, 3, 5, 3, 3],
-    #         [3, 3, 3, 5, 3],
-    #         [3, 3, 5, 3, 3],
-    #         [3, 5, 3, 3, 3]], dtype=np.uint8)
-    #     # Act
-    #     actual = find_lonely_pixels(image)
-    #     # Assert
-    #     expected = np.array([
-    #         [0, 0, 0, 0, 0],
-    #         [0, 0, 0, 0, 0],
-    #         [0, 0, 0, 0, 0],
-    #         [0, 0, 0, 0, 0],
-    #         [0, 0, 0, 0, 0],
-    #         [0, 0, 0, 0, 0]], dtype=np.uint8)
-    #     np.testing.assert_array_equal(actual, expected)
-
