@@ -36,7 +36,8 @@ def find_lonely_pixels(image: np.array) -> np.array:
     # Do a second pass to identify the ambiguous pixels
     # The diagonals are harder to check. 
     # It's ambiguous if it's a lonely pixel or part of a longer solid diagonal line.
-    # These are marked with 2, since it may be a false positive.
+    # The ambiguous are marked with 1, since it may be a false positive. Weak confidence.
+    # The unambiguous pixels are marked with 2, for indicating stronger confidence.
     result_image = np.zeros_like(image, dtype=np.uint8)
     for y in range(height):
         for x in range(width):
