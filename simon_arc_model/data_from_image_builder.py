@@ -53,17 +53,16 @@ class DataFromImageBuilder:
         most_popular_color_set = set(full_histogram.most_popular_color_list())
         least_popular_color_set = set(full_histogram.least_popular_color_list())
 
-        k = lookaround_size
-        n = k * 2 + 1
-        for ry in range(n):
-            for rx in range(n):
+        n = lookaround_size
+        for dy in range(-n, n * 2):
+            for dx in range(-n, n * 2):
                 values_most_popular = []
                 values_least_popular = []
                 values_medium_popular = []
                 for y in range(self.height):
                     for x in range(self.width):
-                        xx = x + rx - k
-                        yy = y + ry - k
+                        xx = x + dx
+                        yy = y + dy
                         if xx < 0 or xx >= self.width or yy < 0 or yy >= self.height:
                             values_most_popular.append(0)
                             values_least_popular.append(0)
@@ -76,9 +75,9 @@ class DataFromImageBuilder:
                             values_least_popular.append(int(is_least_popular))
                             is_medium_popular = is_most_popular == False and is_least_popular == False
                             values_medium_popular.append(int(is_medium_popular))
-                self.data[f'color_popularity_is_most_popular_x{rx}_y{ry}'] = values_most_popular
-                self.data[f'color_popularity_is_least_popular_x{rx}_y{ry}'] = values_least_popular
-                self.data[f'color_popularity_is_medium_popular_x{rx}_y{ry}'] = values_medium_popular
+                self.data[f'color_popularity_is_most_popular_x{dx}_y{dy}'] = values_most_popular
+                self.data[f'color_popularity_is_least_popular_x{dx}_y{dy}'] = values_least_popular
+                self.data[f'color_popularity_is_medium_popular_x{dx}_y{dy}'] = values_medium_popular
 
     def make_position_xy(self):
         values_x = []
