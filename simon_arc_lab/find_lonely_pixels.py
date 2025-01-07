@@ -5,8 +5,8 @@ def find_lonely_pixels(image: np.array) -> np.array:
     Find the isolated pixels, this often occur in patterns where two colors alternate, such as checkerboards.
 
     :param image: The image to analyze
-    :return: An image where the isolated pixels are marked with 1. 
-    Ambiguous lonely pixels are marked with 2.
+    :return: An image where the isolated pixels are marked with 2. 
+    Ambiguous lonely pixels are marked with 1.
     Pixels that belong to a bigger object are marked with 0.
     """
 
@@ -37,7 +37,7 @@ def find_lonely_pixels(image: np.array) -> np.array:
     # The diagonals are harder to check. 
     # It's ambiguous if it's a lonely pixel or part of a longer solid diagonal line.
     # These are marked with 2, since it may be a false positive.
-    result_image = mask_of_lonely_pixels.copy()
+    result_image = np.zeros_like(image, dtype=np.uint8)
     for y in range(height):
         for x in range(width):
             if mask_of_lonely_pixels[y, x] == 0:
@@ -58,7 +58,7 @@ def find_lonely_pixels(image: np.array) -> np.array:
                     if image[ny, nx] == center_color:
                         same_color_in_diagonal = True
                         break
-            if same_color_in_diagonal:
-                result_image[y, x] = 2
+            value = 1 if same_color_in_diagonal else 2
+            result_image[y, x] = value
             
     return result_image
