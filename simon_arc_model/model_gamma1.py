@@ -269,7 +269,7 @@ class ModelGamma1:
         if ImageFeature.GRAVITY_DRAW_TOP_TO_BOTTOM in features:
             gravity_draw_directions.append(GravityDrawDirection.TOP_TO_BOTTOM)
         if ImageFeature.GRAVITY_DRAW_BOTTOM_TO_TOP in features:
-            gravity_draw_directions.append(GravityDrawDirection.TOP_TO_BOTTOM)
+            gravity_draw_directions.append(GravityDrawDirection.BOTTOM_TO_TOP)
         if ImageFeature.GRAVITY_DRAW_LEFT_TO_RIGHT in features:
             gravity_draw_directions.append(GravityDrawDirection.LEFT_TO_RIGHT)
         if ImageFeature.GRAVITY_DRAW_RIGHT_TO_LEFT in features:
