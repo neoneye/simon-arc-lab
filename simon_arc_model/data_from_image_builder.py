@@ -10,6 +10,7 @@ from simon_arc_lab.image_erosion_multicolor import image_erosion_multicolor
 from simon_arc_lab.image_raytrace_probecolor import *
 from simon_arc_lab.image_outline import *
 from simon_arc_lab.image_gravity_draw import *
+from simon_arc_lab.image_gravity_move import *
 from simon_arc_lab.image_skew import *
 from simon_arc_lab.image_mass_compare import *
 from simon_arc_lab.image_rotate45 import *
@@ -691,8 +692,14 @@ class DataFromImageBuilder:
     def make_gravity_draw(self, gravity_draw_directions: list[GravityDrawDirection]):
         for direction in gravity_draw_directions:
             for color in range(10):
-                gd_image = image_gravity_draw(self.image, color, direction)
-                self.data[f'gravity_draw_direction{direction}_color{color}'] = gd_image.flatten().tolist()
+                gravity_image = image_gravity_draw(self.image, color, direction)
+                self.data[f'gravity_draw_direction{direction}_color{color}'] = gravity_image.flatten().tolist()
+
+    def make_gravity_move(self, gravity_move_directions: list[GravityMoveDirection]):
+        for direction in gravity_move_directions:
+            for color in range(10):
+                gravity_image = image_gravity_move(self.image, color, direction)
+                self.data[f'gravity_move_direction{direction}_color{color}'] = gravity_image.flatten().tolist()
 
     def make_erosion(self, pixel_connectivity_list: list[PixelConnectivity]):
         for pixel_connectivity in pixel_connectivity_list:

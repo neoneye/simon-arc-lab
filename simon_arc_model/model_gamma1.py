@@ -12,6 +12,7 @@ from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_create_random_advanced import image_create_random_advanced
 from simon_arc_lab.pixel_connectivity import PixelConnectivity
 from simon_arc_lab.image_gravity_draw import GravityDrawDirection
+from simon_arc_lab.image_gravity_move import GravityMoveDirection
 from simon_arc_lab.histogram import Histogram
 from simon_arc_lab.image_similarity import ImageSimilarity, Feature, FeatureType
 from simon_arc_lab.task_similarity import TaskSimilarity
@@ -283,6 +284,25 @@ class ModelGamma1:
         if ImageFeature.GRAVITY_DRAW_BOTTOMRIGHT_TO_TOPLEFT in features:
             gravity_draw_directions.append(GravityDrawDirection.BOTTOMRIGHT_TO_TOPLEFT)
         builder.make_gravity_draw(gravity_draw_directions)
+
+        gravity_move_directions = []
+        if ImageFeature.GRAVITY_MOVE_TOP_TO_BOTTOM in features:
+            gravity_move_directions.append(GravityMoveDirection.TOP_TO_BOTTOM)
+        if ImageFeature.GRAVITY_MOVE_BOTTOM_TO_TOP in features:
+            gravity_move_directions.append(GravityMoveDirection.BOTTOM_TO_TOP)
+        if ImageFeature.GRAVITY_MOVE_LEFT_TO_RIGHT in features:
+            gravity_move_directions.append(GravityMoveDirection.LEFT_TO_RIGHT)
+        if ImageFeature.GRAVITY_MOVE_RIGHT_TO_LEFT in features:
+            gravity_move_directions.append(GravityMoveDirection.RIGHT_TO_LEFT)
+        if ImageFeature.GRAVITY_MOVE_TOPLEFT_TO_BOTTOMRIGHT in features:
+            gravity_move_directions.append(GravityMoveDirection.TOPLEFT_TO_BOTTOMRIGHT)
+        if ImageFeature.GRAVITY_MOVE_BOTTOMRIGHT_TO_TOPLEFT in features:
+            gravity_move_directions.append(GravityMoveDirection.BOTTOMRIGHT_TO_TOPLEFT)
+        if ImageFeature.GRAVITY_MOVE_TOPRIGHT_TO_BOTTOMLEFT in features:
+            gravity_move_directions.append(GravityMoveDirection.TOPRIGHT_TO_BOTTOMLEFT)
+        if ImageFeature.GRAVITY_MOVE_BOTTOMLEFT_TO_TOPRIGHT in features:
+            gravity_move_directions.append(GravityMoveDirection.BOTTOMLEFT_TO_TOPRIGHT)
+        builder.make_gravity_move(gravity_move_directions)
 
         erosion_pixel_connectivity_list = []
         if ImageFeature.EROSION_ALL8 in features:

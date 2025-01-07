@@ -117,6 +117,12 @@ FEATURES_9 = [
     ImageFeature.SHAPE_ALL8,
 ]
 
+# ARC-AGI training=28, evaluation=4, solves many different puzzles
+FEATURES_10 = [
+    ImageFeature.GRAVITY_MOVE_TOP_TO_BOTTOM,
+    ImageFeature.GRAVITY_DRAW_TOP_TO_BOTTOM,
+]
+
 class WorkManagerWithoutEarlierPredictionGamma1(WorkManagerBase):
     def __init__(self, run_id: str, dataset_id: str, taskset: TaskSet, incorrect_predictions_jsonl_path: Optional[str] = None):
         self.run_id = run_id
