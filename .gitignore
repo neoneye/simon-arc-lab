@@ -7,5 +7,5 @@ run_tasks_result/**/*.png
 run_tasks_result/**/*.html
 run_tasks_result/**/*.md
 run_tasks_result/**/*.jsonl
-run_tasks_result/measure_decisiontree_features/
+run_tasks_result/measure_feature_combinations/
 run_tasks_result/cache_decisiontree/

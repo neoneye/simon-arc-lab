@@ -1,8 +1,10 @@
-# Measure the performance of a decision tree model with different feature sets.
-# It's not possible to test all feature combos, so a few random combinations are selected.
-# It takes around 30m-2h to process all 800 puzzles in the ARC-AGI dataset.
-# Puzzles that have previously never been solved are especially interesting.
-# Puzzles that have been solved with a score of 100 are not interesting to solve again.
+"""
+Measure the performance of a decision tree model with different feature sets.
+It's not possible to test all feature combos, so a few random combinations are selected.
+It takes around 30m-2h to process all 800 puzzles in the ARC-AGI dataset.
+Puzzles that have previously never been solved are especially interesting.
+Puzzles that have been solved with a score of 100 are not interesting to solve again.
+"""
 import os
 import sys
 
@@ -19,11 +21,11 @@ import random
 from random import sample
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.image_pixel_similarity import image_pixel_similarity_overall
-from simon_arc_model.model_beta1 import ModelBeta1, ImageFeature
+from simon_arc_model.image_feature import ImageFeature
+from simon_arc_model.model_beta1 import ModelBeta1
 
 def featureset_id(features: set):
-    names = sorted([feature.name for feature in features])
-    return '_'.join(names)
+    return ImageFeature.names_sorted_and_joined(features, separator='_')
 
 class FeatureComboItem:
     def __init__(self, run_index: int, features: set):
@@ -275,7 +277,7 @@ for (groupname, path_to_task_dir) in groupname_pathtotaskdir_list:
 
 for combo_index, combo in enumerate(featurecomboitem_list):
     print(f"Feature combo {combo_index+1} of {len(featurecomboitem_list)}, features: {combo.feature_names_sorted()}")
-    save_dir = f'run_tasks_result/measure_decisiontree_features/{combo.run_index}'
+    save_dir = f'run_tasks_result/measure_feature_combinations/{combo.run_index}'
     jsonl_filepath = f'{save_dir}/results.jsonl'
     summary_filepath = f'{save_dir}/summary.json'
 
@@ -302,14 +304,16 @@ for combo_index, combo in enumerate(featurecomboitem_list):
                 
                 start_time = time.perf_counter()
 
-                predicted_output = ModelBeta1.predict_output(
+                predicted_output_result = ModelBeta1.predict_output(
                     task, 
                     test_index, 
                     previous_prediction_image=None,
+                    previous_prediction_mask=None,
                     refinement_index=0, 
                     noise_level=100,
                     features=combo.features,
                 )
+                predicted_output = predicted_output_result.images(1)[0]
 
                 end_time = time.perf_counter()
                 elapsed_float = end_time - start_time
@@ -367,7 +371,7 @@ for combo_index, combo in enumerate(featurecomboitem_list):
                     "input": input_image.tolist(), # Convert numpy arrays to lists
                     "expected_output": expected_output_image.tolist(), # Convert numpy arrays to lists
                     "predicted_output": predicted_output.tolist(), # Convert numpy arrays to lists
-                    "version": "simon_arc_lab measure_decisiontree_features 2024-oct-17"
+                    "version": "simon_arc_lab measure_feature_combinations 2025-jan-08"
                 }
 
                 # Save the result to a jsonl file
