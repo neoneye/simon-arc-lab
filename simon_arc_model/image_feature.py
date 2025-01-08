@@ -55,10 +55,10 @@ class ImageFeature(Enum):
     LONELY_PIXELS = 'lonely_pixels'
 
     @classmethod
-    def names_joined_with_comma(cls, features: set['ImageFeature']) -> str:
+    def names_sorted_and_joined(cls, features: set['ImageFeature'], separator: str) -> str:
         """
-        Human readable compact representation of multiple features.
+        String representation of multiple features.
         """
         names_unordered = [feature.name for feature in features]
         names_sorted = sorted(names_unordered)
-        return ','.join(names_sorted)
+        return separator.join(names_sorted)

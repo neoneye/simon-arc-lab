@@ -188,7 +188,7 @@ class WorkManagerWithoutEarlierPredictionGamma1(WorkManagerBase):
         features = set(FEATURES_6)
 
         # Track incorrect predictions
-        features_pretty = ImageFeature.names_joined_with_comma(features)
+        features_pretty = ImageFeature.names_sorted_and_joined(features, separator=',')
         incorrect_prediction_metadata = f'run={self.run_id} solver=gamma1 features={features_pretty}'
         incorrect_prediction_dataset_id = self.dataset_id
         if self.incorrect_predictions_jsonl_path is not None:
