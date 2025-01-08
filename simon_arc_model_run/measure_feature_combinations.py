@@ -77,11 +77,13 @@ for dataset_id, groupname, path_to_task_dir in datasetid_groupname_pathtotaskdir
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
 
-available_features = list(ImageFeature)
-print(f"Number of features: {len(available_features)}")
+print(f"Number of all features: {len(list(ImageFeature))}")
 
-available_feature_names = [feature.name for feature in available_features]
-print(f"Feature names: {sorted(available_feature_names)}")
+available_features = list(ModelBeta1.supported_features())
+print(f"Number of features supported by this model: {len(available_features)}")
+
+available_feature_names_str = ImageFeature.names_sorted_and_joined(available_features, separator=', ')
+print(f"Feature names: {available_feature_names_str}")
 
 already_seen_featureids = set()
 featurecomboitem_list = []

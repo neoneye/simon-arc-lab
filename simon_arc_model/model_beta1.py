@@ -100,6 +100,60 @@ class ModelBeta1PredictOutputResult:
 
 class ModelBeta1:
     @classmethod
+    def supported_features(cls) -> set[ImageFeature]:
+        """
+        Features that can be turned on/off for this model.
+        """
+        return {
+            ImageFeature.ANY_CORNER,
+            ImageFeature.ANY_EDGE,
+            ImageFeature.BIGRAM_ROWCOL,
+            ImageFeature.BOUNDING_BOXES,
+            ImageFeature.BOUNDING_BOXES,
+            ImageFeature.CENTER,
+            ImageFeature.COLOR_POPULARITY,
+            ImageFeature.COMPONENT_ALL8,
+            ImageFeature.COMPONENT_CORNER4,
+            ImageFeature.COMPONENT_NEAREST4,
+            ImageFeature.CORNER,
+            ImageFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR,
+            ImageFeature.COUNT_NEIGHBORS_WITH_SAME_COLOR,
+            ImageFeature.DISTANCE_INSIDE_OBJECT,
+            ImageFeature.EROSION_ALL8,
+            ImageFeature.EROSION_CORNER4,
+            ImageFeature.EROSION_DIAGONAL,
+            ImageFeature.EROSION_NEAREST4,
+            ImageFeature.EROSION_ROWCOL,
+            ImageFeature.GRAVITY_DRAW_BOTTOM_TO_TOP,
+            ImageFeature.GRAVITY_DRAW_BOTTOMLEFT_TO_TOPRIGHT,
+            ImageFeature.GRAVITY_DRAW_BOTTOMRIGHT_TO_TOPLEFT,
+            ImageFeature.GRAVITY_DRAW_LEFT_TO_RIGHT,
+            ImageFeature.GRAVITY_DRAW_RIGHT_TO_LEFT,
+            ImageFeature.GRAVITY_DRAW_TOP_TO_BOTTOM,
+            ImageFeature.GRAVITY_DRAW_TOPLEFT_TO_BOTTOMRIGHT,
+            ImageFeature.GRAVITY_DRAW_TOPRIGHT_TO_BOTTOMLEFT,
+            ImageFeature.HISTOGRAM_DIAGONAL,
+            ImageFeature.HISTOGRAM_DIAGONAL,
+            ImageFeature.HISTOGRAM_ROWCOL,
+            ImageFeature.HISTOGRAM_ROWCOL,
+            ImageFeature.HISTOGRAM_VALUE,
+            ImageFeature.IDENTIFY_OBJECT_SHAPE,
+            ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL,
+            ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2,
+            ImageFeature.IMAGE_MASS_COMPARE_ADJACENT_ROWCOL2,
+            ImageFeature.NUMBER_OF_UNIQUE_COLORS_ALL9,
+            ImageFeature.NUMBER_OF_UNIQUE_COLORS_AROUND_CENTER,
+            ImageFeature.NUMBER_OF_UNIQUE_COLORS_IN_CORNERS,
+            ImageFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND4,
+            ImageFeature.NUMBER_OF_UNIQUE_COLORS_IN_DIAMOND5,
+            ImageFeature.OBJECT_ID_RAY_LIST,
+            ImageFeature.POSITION_XY0,
+            ImageFeature.POSITION_XY4,
+            ImageFeature.SUPPRESS_CENTER_PIXEL_LOOKAROUND,
+            ImageFeature.SUPPRESS_CENTER_PIXEL_ONCE
+        }
+    
+    @classmethod
     def xs_for_input_image(cls, image: np.array, pair_id: int, features: set[ImageFeature], is_earlier_prediction: bool) -> list:
         # print(f'xs_for_input_image: pair_id={pair_id} features={features} is_earlier_prediction={is_earlier_prediction}')
         height, width = image.shape
