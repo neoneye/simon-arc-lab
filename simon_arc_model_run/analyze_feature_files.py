@@ -170,7 +170,7 @@ def identify_filenames_with_maximum_coverage(paths: list, minimum_score: int, nu
             f.write(f"{filename}\n")
     print(f"Saved '{save_csv_file}' with {len(sorted_filenames)} rows")
 
-analyze_dir = f'run_tasks_result/measure_decisiontree_features/202410182042_version2'
+analyze_dir = f'run_tasks_result/measure_feature_combinations'
 paths = find_resultsjsonl_files(analyze_dir)
 analyze_with_limit(paths, 100, 'Solution must be perfect')
 analyze_with_limit(paths, 95, 'Allow near perfect solutions')
