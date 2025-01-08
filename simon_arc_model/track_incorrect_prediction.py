@@ -93,7 +93,17 @@ class TrackIncorrectPrediction:
             metadata
         )
 
-    def track_incorrect_prediction_with_raw_data(self, dataset_id: str, task_id: str, test_index: int, test_input: np.array, test_output: np.array, predicted_output: Optional[np.array], metadata: str) -> None:
+    def track_incorrect_prediction_with_raw_data(
+        self, 
+        dataset_id: str, 
+        task_id: str, 
+        test_index: int, 
+        test_input: np.array, 
+        test_output: np.array, 
+        predicted_output: Optional[np.array], 
+        metadata: str,
+        verbose: bool = True
+    ) -> None:
         """
         Track incorrect predictions and save them to a JSONL file.
 
@@ -116,7 +126,8 @@ class TrackIncorrectPrediction:
         if (task_id, test_index, predicted_output_key) in self.taskid_testindex_predictedoutput_set:
             # print(f"Skipping duplicate incorrect prediction. {task_id} {test_index}")
             return
-        print(f"Added prediction. {task_id} {test_index}")
+        if verbose:
+            print(f"Added prediction. {task_id} {test_index}")
         self.save_incorrect_prediction(
             self.jsonl_path,
             dataset_id,

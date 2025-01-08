@@ -92,7 +92,7 @@ class FeatureComboItem:
     def feature_names_sorted(self):
         return sorted([feature.name for feature in self.features])
 
-seed = 56
+seed = 57
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -107,7 +107,7 @@ if not os.path.isdir(path_to_arc_dataset_collection_dataset):
     sys.exit(1)
 
 datasetid_groupname_pathtotaskdir_list = [
-    ('ARC-AGI', 'arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
+    # ('ARC-AGI', 'arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
     ('ARC-AGI', 'arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
     # ('arc-dataset-tama', 'tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
     # ('Mini-ARC', 'miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
@@ -411,7 +411,8 @@ for combo_index, combo in enumerate(featurecomboitem_list):
                             test_input=input_image, 
                             test_output=expected_output_image, 
                             predicted_output=predicted_output, 
-                            metadata=metadata
+                            metadata=metadata,
+                            verbose=False
                         )
 
                 count_good, count_total = image_pixel_similarity_overall(predicted_output, expected_output_image)
