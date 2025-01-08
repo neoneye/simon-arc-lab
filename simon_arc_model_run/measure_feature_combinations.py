@@ -15,7 +15,7 @@ from tqdm import tqdm
 import json
 from math import ceil
 import numpy as np
-import datetime
+from datetime import datetime
 import time
 import random
 from random import sample
@@ -36,6 +36,9 @@ class FeatureComboItem:
         return sorted([feature.name for feature in self.features])
 
 seed = 54
+
+run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+print(f"Run id: {run_id}")
 
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
 if not os.path.isdir(path_to_arc_dataset_collection_dataset):
@@ -277,7 +280,7 @@ for (groupname, path_to_task_dir) in groupname_pathtotaskdir_list:
 
 for combo_index, combo in enumerate(featurecomboitem_list):
     print(f"Feature combo {combo_index+1} of {len(featurecomboitem_list)}, features: {combo.feature_names_sorted()}")
-    save_dir = f'run_tasks_result/measure_feature_combinations/{combo.run_index}'
+    save_dir = f'run_tasks_result/measure_feature_combinations/{run_id}/{combo.run_index}'
     jsonl_filepath = f'{save_dir}/results.jsonl'
     summary_filepath = f'{save_dir}/summary.json'
 
@@ -300,7 +303,7 @@ for combo_index, combo in enumerate(featurecomboitem_list):
             pbar.set_description(desc)
 
             for test_index in range(task.count_tests):
-                current_datetime = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+                current_datetime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
                 
                 start_time = time.perf_counter()
 
