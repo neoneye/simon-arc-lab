@@ -22,6 +22,7 @@ from random import sample
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.image_pixel_similarity import image_pixel_similarity_overall
 from simon_arc_model.image_feature import ImageFeature
+from simon_arc_model.track_incorrect_prediction import TrackIncorrectPrediction
 from simon_arc_model.model_beta1 import ModelBeta1
 
 def featureset_id(features: set):
@@ -35,7 +36,7 @@ class FeatureComboItem:
     def feature_names_sorted(self):
         return sorted([feature.name for feature in self.features])
 
-seed = 54
+seed = 55
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
@@ -45,15 +46,23 @@ if not os.path.isdir(path_to_arc_dataset_collection_dataset):
     print(f"ARC dataset collection directory '{path_to_arc_dataset_collection_dataset}' does not exist.")
     sys.exit(1)
 
-groupname_pathtotaskdir_list = [
-    ('arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
-    ('arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
-    # ('tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
-    # ('tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data/symmetry_rect_input_image_and_extract_a_particular_tile')),
-    # ('miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
-    # ('conceptarc', os.path.join(path_to_arc_dataset_collection_dataset, 'ConceptARC/data')),
-    # ('testdata', os.path.join(PROJECT_ROOT, 'testdata', 'ARC-AGI/data')),
+datasetid_groupname_pathtotaskdir_list = [
+    ('ARC-AGI', 'arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
+    ('ARC-AGI', 'arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
+    # ('arc-dataset-tama', 'tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
+    # ('Mini-ARC', 'miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
+    # ('ConceptARC', 'conceptarc', os.path.join(path_to_arc_dataset_collection_dataset, 'ConceptARC/data')),
+    # ('ARC-AGI', 'testdata', os.path.join(PROJECT_ROOT, 'testdata', 'ARC-AGI/data')),
 ]
+
+incorrect_predictions_jsonl_path = '/Users/neoneye/nobackup/git/arc-bad-prediction/data.jsonl'
+# incorrect_predictions_jsonl_path = None
+
+if incorrect_predictions_jsonl_path is not None:
+    track_incorrect_prediction = TrackIncorrectPrediction.load_from_jsonl(incorrect_predictions_jsonl_path)
+else:
+    track_incorrect_prediction = None
+
 
 def append_to_jsonl_file(filepath, jsondata):
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
@@ -63,7 +72,7 @@ def append_to_jsonl_file(filepath, jsondata):
         f.flush()  # Force writing to disk immediately
 
 
-for groupname, path_to_task_dir in groupname_pathtotaskdir_list:
+for dataset_id, groupname, path_to_task_dir in datasetid_groupname_pathtotaskdir_list:
     if not os.path.isdir(path_to_task_dir):
         print(f"path_to_task_dir directory '{path_to_task_dir}' does not exist.")
         sys.exit(1)
@@ -250,8 +259,8 @@ if os.path.isfile(csv_file):
         taskids_to_ignore = set(taskids)
 print(f"Number of task ids to ignore: {len(taskids_to_ignore)}")
 
-groupname_task_list = []
-for (groupname, path_to_task_dir) in groupname_pathtotaskdir_list:
+datasetid_groupname_task_list = []
+for (dataset_id, groupname, path_to_task_dir) in datasetid_groupname_pathtotaskdir_list:
     taskset_all = TaskSet.load_directory(path_to_task_dir)
     new_tasks = []
     for task in taskset_all.tasks:
@@ -276,7 +285,7 @@ for (groupname, path_to_task_dir) in groupname_pathtotaskdir_list:
     # print(f"Number of tasks with different input/output size: {number_of_tasks_with_different_input_output_size}")
     # print(f"Number of tasks with same input/output size: {len(pending_tasks)}")
     print(f"After filtering, number of tasks in group '{groupname}': {len(pending_tasks)}")
-    groupname_task_list.append((groupname, pending_tasks))
+    datasetid_groupname_task_list.append((dataset_id, groupname, pending_tasks))
 
 for combo_index, combo in enumerate(featurecomboitem_list):
     print(f"Feature combo {combo_index+1} of {len(featurecomboitem_list)}, features: {combo.feature_names_sorted()}")
@@ -285,9 +294,9 @@ for combo_index, combo in enumerate(featurecomboitem_list):
     summary_filepath = f'{save_dir}/summary.json'
 
     job_list = []
-    for (groupname, tasks) in groupname_task_list:
+    for (dataset_id, groupname, tasks) in datasetid_groupname_task_list:
         for task in tasks:
-            job_list.append((groupname, task))
+            job_list.append((dataset_id, groupname, task))
 
     feature_name_list = combo.feature_names_sorted()
 
@@ -296,7 +305,9 @@ for combo_index, combo in enumerate(featurecomboitem_list):
     count_score9599 = 0
     count_score9094 = 0
     with tqdm(job_list, desc="Processing tasks", leave=False, position=0) as pbar:
-        for (groupname, task) in pbar:
+        for (dataset_id, groupname, task) in pbar:
+            print(f"Processing task {task.metadata_task_id}, dataset '{dataset_id}', group '{groupname}'")
+
             desc = task.metadata_task_id
             # truncate string to 20 characters, if it's longer add ...
             desc = (desc[:20] + '...') if len(desc) > 20 else desc
@@ -330,6 +341,20 @@ for combo_index, combo in enumerate(featurecomboitem_list):
                 if is_correct:
                     correct_count += 1
                 pbar.set_postfix({'correct': correct_count})
+
+                if is_correct == False:
+                    if track_incorrect_prediction is not None:
+                        features_str = ImageFeature.names_sorted_and_joined(combo.features, separator=',')
+                        metadata = f'run={run_id} measure_feature_combinations solver=beta1 features={features_str}'
+                        track_incorrect_prediction.track_incorrect_prediction_with_raw_data(
+                            dataset_id=dataset_id, 
+                            task_id=task.metadata_task_id, 
+                            test_index=test_index, 
+                            test_input=input_image, 
+                            test_output=expected_output_image, 
+                            predicted_output=predicted_output, 
+                            metadata=metadata
+                        )
 
                 count_good, count_total = image_pixel_similarity_overall(predicted_output, expected_output_image)
                 count_bad = count_total - count_good
