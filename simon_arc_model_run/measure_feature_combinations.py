@@ -26,6 +26,7 @@ from simon_arc_lab.image_pixel_similarity import image_pixel_similarity_overall
 from simon_arc_model.image_feature import ImageFeature
 from simon_arc_model.track_incorrect_prediction import TrackIncorrectPrediction
 from simon_arc_model.model_beta1 import ModelBeta1
+from simon_arc_model.model_gamma1 import ModelGamma1
 
 class MeasureFeatureCombinationModel(ABC):
     @abstractmethod
@@ -60,6 +61,26 @@ class MeasureFeatureCombinationModelBeta1(MeasureFeatureCombinationModel):
         predicted_output = predict_output_result.images(1)[0]
         return predicted_output
 
+class MeasureFeatureCombinationModelGamma1(MeasureFeatureCombinationModel):
+    def model_name(self) -> str:
+        return 'ModelGamma1'
+    
+    def supported_features(self) -> set[ImageFeature]:
+        return ModelGamma1.supported_features()
+
+    def solve(self, task: Task, test_index: int, features: set[ImageFeature]) -> np.array:
+        predict_output_result = ModelGamma1.predict_output(
+            task, 
+            test_index, 
+            previous_prediction_image=None,
+            previous_prediction_mask=None,
+            refinement_index=0, 
+            noise_level=100,
+            features=features,
+        )
+        predicted_output = predict_output_result.images(1)[0]
+        return predicted_output
+
 def featureset_id(features: set):
     return ImageFeature.names_sorted_and_joined(features, separator='_')
 
@@ -71,12 +92,13 @@ class FeatureComboItem:
     def feature_names_sorted(self):
         return sorted([feature.name for feature in self.features])
 
-seed = 55
+seed = 56
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
 
-model: MeasureFeatureCombinationModel = MeasureFeatureCombinationModelBeta1()
+# model: MeasureFeatureCombinationModel = MeasureFeatureCombinationModelBeta1()
+model: MeasureFeatureCombinationModel = MeasureFeatureCombinationModelGamma1()
 print(f"Model: {model.model_name()}")
 
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
@@ -346,7 +368,7 @@ for combo_index, combo in enumerate(featurecomboitem_list):
     count_score9094 = 0
     with tqdm(job_list, desc="Processing tasks", leave=False, position=0) as pbar:
         for (dataset_id, groupname, task) in pbar:
-            print(f"Processing task {task.metadata_task_id}, dataset '{dataset_id}', group '{groupname}'")
+            # print(f"Processing task {task.metadata_task_id}, dataset '{dataset_id}', group '{groupname}'")
 
             desc = task.metadata_task_id
             # truncate string to 20 characters, if it's longer add ...
