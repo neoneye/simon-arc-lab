@@ -18,12 +18,47 @@ import numpy as np
 from datetime import datetime
 import time
 import random
+from abc import ABC, abstractmethod
 from random import sample
+from simon_arc_lab.task import Task
 from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.image_pixel_similarity import image_pixel_similarity_overall
 from simon_arc_model.image_feature import ImageFeature
 from simon_arc_model.track_incorrect_prediction import TrackIncorrectPrediction
 from simon_arc_model.model_beta1 import ModelBeta1
+
+class MeasureFeatureCombinationModel(ABC):
+    @abstractmethod
+    def model_name(self) -> str:
+        pass
+
+    @abstractmethod
+    def supported_features(self) -> set[ImageFeature]:
+        pass
+
+    @abstractmethod
+    def solve(self, task: Task, test_index: int, features: set[ImageFeature]) -> np.array:
+        pass
+
+class MeasureFeatureCombinationModelBeta1(MeasureFeatureCombinationModel):
+    def model_name(self) -> str:
+        return 'ModelBeta1'
+    
+    def supported_features(self) -> set[ImageFeature]:
+        return ModelBeta1.supported_features()
+
+    def solve(self, task: Task, test_index: int, features: set[ImageFeature]) -> np.array:
+        predict_output_result = ModelBeta1.predict_output(
+            task, 
+            test_index, 
+            previous_prediction_image=None,
+            previous_prediction_mask=None,
+            refinement_index=0, 
+            noise_level=100,
+            features=features,
+        )
+        predicted_output = predict_output_result.images(1)[0]
+        return predicted_output
 
 def featureset_id(features: set):
     return ImageFeature.names_sorted_and_joined(features, separator='_')
@@ -40,6 +75,9 @@ seed = 55
 
 run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 print(f"Run id: {run_id}")
+
+model: MeasureFeatureCombinationModel = MeasureFeatureCombinationModelBeta1()
+print(f"Model: {model.model_name()}")
 
 path_to_arc_dataset_collection_dataset = '/Users/neoneye/git/arc-dataset-collection/dataset'
 if not os.path.isdir(path_to_arc_dataset_collection_dataset):
@@ -79,8 +117,8 @@ for dataset_id, groupname, path_to_task_dir in datasetid_groupname_pathtotaskdir
 
 print(f"Number of all features: {len(list(ImageFeature))}")
 
-available_features = list(ModelBeta1.supported_features())
-print(f"Number of features supported by this model: {len(available_features)}")
+available_features = list(model.supported_features())
+print(f"Number of features supported by {model.model_name()} model: {len(available_features)}")
 
 available_feature_names_str = ImageFeature.names_sorted_and_joined(available_features, separator=', ')
 print(f"Feature names: {available_feature_names_str}")
@@ -320,16 +358,11 @@ for combo_index, combo in enumerate(featurecomboitem_list):
                 
                 start_time = time.perf_counter()
 
-                predicted_output_result = ModelBeta1.predict_output(
+                predicted_output = model.solve(
                     task, 
                     test_index, 
-                    previous_prediction_image=None,
-                    previous_prediction_mask=None,
-                    refinement_index=0, 
-                    noise_level=100,
                     features=combo.features,
                 )
-                predicted_output = predicted_output_result.images(1)[0]
 
                 end_time = time.perf_counter()
                 elapsed_float = end_time - start_time
@@ -347,7 +380,8 @@ for combo_index, combo in enumerate(featurecomboitem_list):
                 if is_correct == False:
                     if track_incorrect_prediction is not None:
                         features_str = ImageFeature.names_sorted_and_joined(combo.features, separator=',')
-                        metadata = f'run={run_id} measure_feature_combinations solver=beta1 features={features_str}'
+                        model_name = model.model_name()
+                        metadata = f'run={run_id} measure_feature_combinations model={model_name} features={features_str}'
                         track_incorrect_prediction.track_incorrect_prediction_with_raw_data(
                             dataset_id=dataset_id, 
                             task_id=task.metadata_task_id, 
@@ -385,10 +419,12 @@ for combo_index, combo in enumerate(featurecomboitem_list):
                 jsondata = {
                     "correct": is_correct,
                     "score": score,
+                    "dataset_id": dataset_id,
                     "task_id": task.metadata_task_id,
                     "path": task.metadata_path,
                     "date": current_datetime,
                     "elapsed_seconds": elapsed_seconds,
+                    "model": model.model_name(),
                     "features": feature_name_list,
                     "test_index": test_index,
                     "issues": jsonissues,
@@ -419,6 +455,8 @@ for combo_index, combo in enumerate(featurecomboitem_list):
         "elapsed_total": total_elapsed_str,
         "elapsed_average": average_elapsed_str,
         "task_count": len(job_list),
+        "run_id": run_id,
+        "model": model.model_name(),
         "features": feature_name_list,
     }
     os.makedirs(save_dir, exist_ok=True)
