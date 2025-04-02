@@ -18,12 +18,14 @@ if not os.path.isdir(path_to_arc_dataset_collection_dataset):
     sys.exit(1)
 
 datasetid_groupname_pathtotaskdir_list = [
-    ('ARC-AGI', 'arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/training')),
-    # ('ARC-AGI', 'arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
+    ('ARC-AGI-2', 'arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC-AGI-2/data/training')),
+    # ('ARC-AGI-2', 'arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC-AGI-2/data/evaluation')),
+    # ('ARC-AGI-1', 'arcagi_training', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC-AGI-1/data/training')),
+    # ('ARC-AGI-1', 'arcagi_evaluation', os.path.join(path_to_arc_dataset_collection_dataset, 'ARC/data/evaluation')),
     # ('arc-dataset-tama', 'tama', os.path.join(path_to_arc_dataset_collection_dataset, 'arc-dataset-tama/data')),
     # ('Mini-ARC', 'miniarc', os.path.join(path_to_arc_dataset_collection_dataset, 'Mini-ARC/data')),
     # ('ConceptARC', 'conceptarc', os.path.join(path_to_arc_dataset_collection_dataset, 'ConceptARC/data')),
-    # ('ARC-AGI', 'testdata', os.path.join(PROJECT_ROOT, 'testdata', 'ARC-AGI/data')),
+    # ('ARC-AGI-1', 'testdata', os.path.join(PROJECT_ROOT, 'testdata', 'ARC-AGI/data')),
 ]
 
 for dataset_id, groupname, path_to_task_dir in datasetid_groupname_pathtotaskdir_list:
@@ -40,6 +42,7 @@ if os.path.isfile(csv_file):
     with open(csv_file, 'r') as f:
         taskids = f.read().split('\n')
         taskids_to_ignore = set(taskids)
+taskids_to_ignore = set()
 print(f"Number of task ids to ignore: {len(taskids_to_ignore)}")
 
 cache_dir = 'run_tasks_result/cache_decisiontree'
