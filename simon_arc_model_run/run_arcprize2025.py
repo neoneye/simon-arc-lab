@@ -17,6 +17,9 @@ def create_run_id() -> str:
     return datetime.now().strftime("%Y%m%d_%H%M%S")
 
 def run1(production: bool, run_id: str, input_challenges_path: str, save_debug_dir: str, output_submission_path: str):
+    # Environment
+    print(f"CWD: {os.getcwd()}")
+
     # print the parameters
     mode_name = 'production' if production else 'developer'
     print(f"Mode: {mode_name}")
