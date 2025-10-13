@@ -13,7 +13,7 @@ from simon_arc_lab.taskset import TaskSet
 from simon_arc_lab.gallery_generator import gallery_generator_run
 from simon_arc_model.work_manager_decision_tree import WorkManagerDecisionTree
 
-def run1(production: bool=False):
+def run1(input_challenges_path: str, production: bool=False):
     mode_name = 'production' if production else 'developer'
     print(f"Mode: {mode_name}")
 
@@ -26,7 +26,7 @@ def run1(production: bool=False):
     save_dir = f'run_tasks_result/{run_id}/{groupname}'
     print(f"Group name '{groupname}'. Results will be saved to '{save_dir}'")
 
-    taskset = TaskSet.load_kaggle_arcprize2024_json('testdata/kaggle-arc-prize-2025/arc-agi_test_challenges.json')
+    taskset = TaskSet.load_kaggle_arcprize2024_json(input_challenges_path)
     if not production:
         taskset.keep_tasks_with_id(set(['00576224', '009d5c81', '00d62c1b']), verbose=False)
 
@@ -44,4 +44,7 @@ def run1(production: bool=False):
     # wm.save_arcprize2024_submission_file('submission.json')
 
 if __name__ == '__main__':
-    run1(production=False)
+    run1(
+        input_challenges_path='testdata/kaggle-arc-prize-2025/arc-agi_test_challenges.json', 
+        production=False
+    )
