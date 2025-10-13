@@ -16,7 +16,7 @@ from simon_arc_model.work_manager_decision_tree import WorkManagerDecisionTree
 def create_run_id() -> str:
     return datetime.now().strftime("%Y%m%d_%H%M%S")
 
-def run1(production: bool, run_id: str, input_challenges_path: str, save_debug_dir: str, output_submission_path: str, gallery_title: str):
+def run1(production: bool, run_id: str, input_challenges_path: str, save_debug_dir: str, output_submission_path: str):
     # print the parameters
     mode_name = 'production' if production else 'developer'
     print(f"Mode: {mode_name}")
@@ -39,6 +39,7 @@ def run1(production: bool, run_id: str, input_challenges_path: str, save_debug_d
     wm.discard_items_where_predicted_output_is_identical_to_the_input()
     wm.summary()
 
+    gallery_title=f"arcprize2025-test, {run_id}"
     gallery_generator_run(save_debug_dir, title=gallery_title)
 
     # Save the submission
@@ -51,6 +52,5 @@ if __name__ == '__main__':
         run_id=run_id,
         input_challenges_path='testdata/kaggle-arc-prize-2025/arc-agi_test_challenges.json', 
         save_debug_dir=f'run_tasks_result/{run_id}',
-        output_submission_path=f'run_tasks_result/{run_id}/submission.json',
-        gallery_title=f"arcprize2025-test, {run_id}"
+        output_submission_path=f'run_tasks_result/{run_id}/submission.json'
     )
