@@ -1,5 +1,6 @@
 import json
 import random
+from typing import Optional
 from .task import Task
 from .load_tasks_from_directory import load_tasks_from_directory
 
@@ -80,3 +81,9 @@ class TaskSet:
         random_tasks = random.Random(seed).sample(self.tasks, count)
         for task in random_tasks:
             task.show(show_grid=False)
+
+    def find_task_by_id(self, task_id: str) -> Optional[Task]:
+        for task in self.tasks:
+            if task.metadata_task_id == task_id:
+                return task
+        return None
