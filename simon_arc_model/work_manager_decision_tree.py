@@ -19,8 +19,8 @@ from .work_manager_base import WorkManagerBase
 from .model_beta1 import ModelBeta1, ImageFeature
 from .track_incorrect_prediction import TrackIncorrectPrediction
 
-# Correct 59, Solves 1 of the hidden ARC tasks
-# ARC-AGI training=41, evaluation=17
+# Correct 59, Solves 0 of the hidden ARC-AGI-2 tasks in ARC Prize 2025
+# ARC-AGI-2 training=59, evaluation=0
 FEATURES_1 = [
     ImageFeature.COMPONENT_NEAREST4,
     ImageFeature.HISTOGRAM_DIAGONAL,
